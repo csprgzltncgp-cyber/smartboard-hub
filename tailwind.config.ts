@@ -57,6 +57,18 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // CGP Custom Colors
+        cgp: {
+          teal: "hsl(var(--cgp-teal))",
+          "teal-foreground": "hsl(var(--cgp-teal-foreground))",
+          "form-bg": "hsl(var(--cgp-form-bg))",
+          "input-placeholder": "hsl(var(--cgp-input-placeholder))",
+          error: "hsl(var(--cgp-error))",
+          "error-foreground": "hsl(var(--cgp-error-foreground))",
+        },
+      },
+      fontFamily: {
+        calibri: ['Calibri', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",

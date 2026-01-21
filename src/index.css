@@ -2,12 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* CGP Dashboard Design System
+   All colors MUST be HSL.
+   Primary brand color: Teal #00575f = hsl(185, 100%, 19%)
 */
+
+/* Font Faces */
+@font-face {
+  font-family: 'Calibri';
+  font-weight: 700;
+  src: url('/fonts/CALIBRIB.TTF') format('truetype');
+}
+
+@font-face {
+  font-family: 'Calibri';
+  font-weight: 300;
+  src: url('/fonts/CALIBRIL.TTF') format('truetype');
+}
 
 @layer base {
   :root {
+    /* CGP Brand Colors */
+    --cgp-teal: 185 100% 19%;           /* #00575f - Primary brand teal */
+    --cgp-teal-foreground: 0 0% 100%;   /* White text on teal */
+    
+    /* Form Colors */
+    --cgp-form-bg: 0 0% 95%;            /* #f2f2f2 - Form background */
+    --cgp-input-placeholder: 0 0% 75%;  /* #c0bfbf - Placeholder text */
+    
+    /* Error Colors */
+    --cgp-error: 355 91% 45%;           /* rgb(219, 11, 32) - Error red */
+    --cgp-error-foreground: 0 0% 100%;
+    
+    /* Base semantic tokens */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -17,8 +44,8 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 185 100% 19%;            /* CGP Teal as primary */
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -29,29 +56,22 @@ All colors MUST be HSL.
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 355 91% 45%;
+    --destructive-foreground: 0 0% 100%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 185 100% 19%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;                 /* 10px - Button border radius */
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -65,8 +85,8 @@ All colors MUST be HSL.
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 185 100% 25%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -101,5 +121,19 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Calibri', sans-serif;
+  }
+}
+
+/* CGP Typography Utilities */
+@layer utilities {
+  .font-calibri-bold {
+    font-family: 'Calibri', sans-serif;
+    font-weight: 700;
+  }
+  
+  .font-calibri-light {
+    font-family: 'Calibri', sans-serif;
+    font-weight: 300;
   }
 }
