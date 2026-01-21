@@ -34,8 +34,14 @@ Ez a dokumentum tartalmazza a Dashboard újrafejlesztése során kialakított fr
 | `--cgp-badge-lastday` | `21 82% 55%` | `#eb7e30` | "Utolsó nap" badge (narancs) |
 | `--cgp-badge-overdue` | `355 91% 45%` | `#db0b20` | "Határidőn túl" badge (piros) |
 
+### Link Színek (Laravel eredeti)
+| Token | HSL Érték | Hex | Használat |
+|-------|-----------|-----|-----------|
+| `--cgp-link` | `211 100% 50%` | `#007bff` | Kék link szín (Bootstrap primary) |
+| `--cgp-link-hover` | `211 100% 35%` | `#0056b3` | Link hover állapot (sötétebb kék) |
+
 ### Szemantikus Tokenek
-- `--primary`: CGP teal (gombok, linkek, kiemelt elemek)
+- `--primary`: CGP teal (gombok, kiemelt elemek)
 - `--destructive`: Hibaüzenetek
 - `--background`: Oldal háttér (fehér)
 - `--foreground`: Alapértelmezett szövegszín
@@ -87,12 +93,12 @@ className="font-calibri"       // Calibri (default)
 ## 4. Oldalszintű Layout
 
 ### Oldalcím + "Új ... létrehozása" link
-Az új elem létrehozása link mindig egyszerű kék link, aláhúzással hover-re. A cím alatt jelenik meg.
+Az új elem létrehozása link mindig egyszerű kék link (#007bff), aláhúzással hover-re. A cím alatt jelenik meg.
 ```tsx
 <h1 className="text-3xl font-calibri-bold mb-2">Felhasználók</h1>
 <a 
   href="#" 
-  className="text-primary hover:underline mb-6 block"
+  className="text-cgp-link hover:text-cgp-link-hover hover:underline mb-6 block"
   onClick={(e) => {
     e.preventDefault();
     navigate("/dashboard/users/new");
@@ -407,3 +413,4 @@ A Dashboard magyar és angol nyelvű. Szövegek jelenleg hardcode-olva, később
 | 2025-01-21 | Login oldal | Brand színek, tipográfia, form stílusok, logók |
 | 2025-01-21 | TODO Dashboard | Task szekció színek, headline stílusok, task kártya layout, gombok, badge-ek |
 | 2025-01-21 | Felhasználók | Táblázat stílusok, form layout, accordion, keresőmező, oldalcím + akciógomb header, törlés megerősítés dialog, badge variánsok, összegzés panel |
+| 2025-01-21 | Link színek | Kék link szín (#007bff) és hover állapot (#0056b3) tokenek hozzáadása |
