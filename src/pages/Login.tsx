@@ -34,13 +34,13 @@ const Login = () => {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="flex justify-center pt-4">
-        <div className="flex items-start gap-2">
+        <div className="flex items-end gap-1">
           <img 
             src={cgpLogo} 
             alt="Chestnut Global Partners" 
             className="w-20 h-20"
           />
-          <p className="text-primary uppercase text-lg font-calibri-light -mt-1">
+          <p className="text-primary uppercase text-lg font-calibri-bold mb-6">
             Admin Dashboard
           </p>
         </div>
