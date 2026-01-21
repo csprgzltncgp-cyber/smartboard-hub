@@ -57,7 +57,7 @@ const TaskCard = ({
       )}
 
       {isLastDay && (
-        <span className="bg-cgp-task-badge-overdue text-white px-3 py-2 flex items-center gap-1 text-sm font-calibri-bold">
+        <span className="bg-cgp-teal-light text-white px-3 py-2 flex items-center gap-1 text-sm font-calibri-bold">
           <Clock className="w-4 h-4" />
           Utolsó nap
         </span>
