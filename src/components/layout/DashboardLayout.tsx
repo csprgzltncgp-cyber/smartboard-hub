@@ -51,11 +51,11 @@ const DashboardLayout = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="w-full bg-background pt-2 px-4 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <header className="w-full bg-background pt-2">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between">
             <div 
-              className="flex items-center gap-2 cursor-pointer"
+              className="cursor-pointer"
               onClick={() => navigate("/dashboard")}
             >
               <img 
@@ -63,9 +63,6 @@ const DashboardLayout = () => {
                 alt="Chestnut Global Partners" 
                 className="w-20 h-20"
               />
-              <span className="text-primary uppercase text-lg font-calibri-bold -mt-1">
-                Admin Dashboard
-              </span>
             </div>
 
             {/* Mobile Menu Button */}

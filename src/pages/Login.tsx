@@ -36,16 +36,11 @@ const Login = () => {
       <div className="w-full max-w-[458px] px-4 flex flex-col flex-1">
         {/* Header - aligned to form left edge */}
         <header className="pt-8 mb-8">
-          <div className="flex items-start gap-2">
-            <img 
-              src={cgpLogo} 
-              alt="Chestnut Global Partners" 
-              className="w-20 h-20"
-            />
-            <p className="text-primary uppercase text-lg font-calibri-bold mt-0">
-              Admin Dashboard
-            </p>
-          </div>
+          <img 
+            src={cgpLogo} 
+            alt="Chestnut Global Partners" 
+            className="w-20 h-20"
+          />
         </header>
 
         {/* Main Content */}
