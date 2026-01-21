@@ -20,12 +20,19 @@ Ez a dokumentum tartalmazza a Dashboard újrafejlesztése során kialakított fr
 ### Task Szekció Színek
 | Token | HSL Érték | Hex | Használat |
 |-------|-----------|-----|-----------|
-| `--cgp-task-overdue` | `306 50% 39%` | `#a33095` | Határidőn túli feladatok (magenta) |
-| `--cgp-task-today` | `176 47% 50%` | `#59c6c6` | Mai napi feladatok (teal) |
-| `--cgp-task-week` | `176 47% 50% / 0.4` | - | Következő heti feladatok |
-| `--cgp-task-upcoming` | `176 47% 50% / 0.2` | - | Jövőbeli feladatok |
-| `--cgp-task-completed` | `176 47% 50% / 0.1` | - | Befejezett feladatok |
-| `--cgp-task-badge-overdue` | `21 82% 55%` | `#eb7e30` | Határidő túllépés badge (narancssárga) |
+| `--cgp-task-overdue` | `306 50% 39%` | `#a33095` | Határidőn túli feladatok szekció (magenta) |
+| `--cgp-task-today` | `176 47% 50%` | `#59c6c6` | Mai napi feladatok szekció (teal) |
+| `--cgp-task-week` | `176 47% 50% / 0.4` | - | Következő heti feladatok szekció |
+| `--cgp-task-upcoming` | `176 47% 50% / 0.2` | - | Jövőbeli feladatok szekció |
+| `--cgp-task-completed` | `176 47% 50% / 0.1` | - | Befejezett feladatok szekció |
+| `--cgp-task-completed-purple` | `306 33% 36%` | `#7f4074` | Befejezett task sor háttere |
+
+### Badge Színek (Laravel eredeti)
+| Token | HSL Érték | Hex | Használat |
+|-------|-----------|-----|-----------|
+| `--cgp-badge-new` | `90 38% 52%` | `#91b752` | "Új" badge (zöld) |
+| `--cgp-badge-lastday` | `21 82% 55%` | `#eb7e30` | "Utolsó nap" badge (narancs) |
+| `--cgp-badge-overdue` | `355 91% 45%` | `#db0b20` | "Határidőn túl" badge (piros) |
 
 ### Szemantikus Tokenek
 - `--primary`: CGP teal (gombok, linkek, kiemelt elemek)
