@@ -61,10 +61,16 @@ export default {
         cgp: {
           teal: "hsl(var(--cgp-teal))",
           "teal-foreground": "hsl(var(--cgp-teal-foreground))",
+          "teal-light": "hsl(var(--cgp-teal-light))",
+          "teal-hover": "hsl(var(--cgp-teal-hover))",
           "form-bg": "hsl(var(--cgp-form-bg))",
           "input-placeholder": "hsl(var(--cgp-input-placeholder))",
           error: "hsl(var(--cgp-error))",
           "error-foreground": "hsl(var(--cgp-error-foreground))",
+          "task-overdue": "hsl(var(--cgp-task-overdue))",
+          "task-today": "hsl(var(--cgp-task-today))",
+          "task-badge-overdue": "hsl(var(--cgp-task-badge-overdue))",
+          "task-completed-purple": "hsl(var(--cgp-task-completed-purple))",
         },
       },
       fontFamily: {

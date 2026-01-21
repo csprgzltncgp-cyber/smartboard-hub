@@ -34,6 +34,16 @@
     --cgp-error: 355 91% 45%;           /* rgb(219, 11, 32) - Error red */
     --cgp-error-foreground: 0 0% 100%;
     
+    /* Secondary Teal */
+    --cgp-teal-light: 176 47% 50%;      /* #59c6c6 - Secondary teal */
+    --cgp-teal-hover: 185 100% 19%;     /* Active button state */
+    
+    /* Task Section Colors */
+    --cgp-task-overdue: 306 50% 39%;    /* #a33095 - Magenta for overdue */
+    --cgp-task-today: 176 47% 50%;      /* #59c6c6 - Teal for today */
+    --cgp-task-badge-overdue: 21 82% 55%; /* #eb7e30 - Orange badge */
+    --cgp-task-completed-purple: 306 33% 36%; /* #7f4074 - Completed task purple */
+    
     /* Base semantic tokens */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;

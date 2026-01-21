@@ -11,9 +11,21 @@ Ez a dokumentum tartalmazza a Dashboard újrafejlesztése során kialakított fr
 |-------|-----------|-----|-----------|
 | `--cgp-teal` | `185 100% 19%` | `#00575f` | Elsődleges brand szín, gombok, címek |
 | `--cgp-teal-foreground` | `0 0% 100%` | `#ffffff` | Szöveg teal háttéren |
+| `--cgp-teal-light` | `176 47% 50%` | `#59c6c6` | Másodlagos teal (gombok, kiemelések) |
+| `--cgp-teal-hover` | `185 100% 19%` | `#00575f` | Aktív gomb állapot |
 | `--cgp-form-bg` | `0 0% 95%` | `#f2f2f2` | Form és kártya háttér |
 | `--cgp-input-placeholder` | `0 0% 75%` | `#c0bfbf` | Input placeholder szín |
 | `--cgp-error` | `355 91% 45%` | `#db0b20` | Hibaüzenetek háttere |
+
+### Task Szekció Színek
+| Token | HSL Érték | Hex | Használat |
+|-------|-----------|-----|-----------|
+| `--cgp-task-overdue` | `306 50% 39%` | `#a33095` | Határidőn túli feladatok (magenta) |
+| `--cgp-task-today` | `176 47% 50%` | `#59c6c6` | Mai napi feladatok (teal) |
+| `--cgp-task-week` | `176 47% 50% / 0.4` | - | Következő heti feladatok |
+| `--cgp-task-upcoming` | `176 47% 50% / 0.2` | - | Jövőbeli feladatok |
+| `--cgp-task-completed` | `176 47% 50% / 0.1` | - | Befejezett feladatok |
+| `--cgp-task-badge-overdue` | `21 82% 55%` | `#eb7e30` | Határidő túllépés badge (narancssárga) |
 
 ### Szemantikus Tokenek
 - `--primary`: CGP teal (gombok, linkek, kiemelt elemek)
@@ -70,6 +82,45 @@ className="flex items-start gap-2"
 
 // Dashboard cím
 className="text-primary uppercase text-lg font-calibri-light -mt-1"
+```
+
+### Dashboard Header (Bejelentkezés után)
+```tsx
+// Container
+className="w-full bg-background pt-2"
+
+// Logo + cím
+className="flex items-center gap-2"
+<img src={cgpLogo} className="w-20 h-20" />
+<span className="text-primary uppercase text-lg font-calibri-bold">Admin Dashboard</span>
+```
+
+### TODO Szekció Gombok
+```tsx
+// Alap gomb stílus
+className="bg-cgp-teal-light text-white px-5 py-3 rounded-xl flex items-center gap-2"
+
+// Aktív gomb
+className="bg-primary text-white"
+
+// Szűrés gomb (jobb oldalt)
+className="bg-cgp-teal-light text-white px-5 py-3 rounded-xl"
+```
+
+### Task Kártyák
+```tsx
+// Szekció headline
+className="text-white uppercase text-3xl px-8 py-5 rounded-t-[25px]"
+// Háttér dinamikus: bg-cgp-task-overdue, bg-cgp-task-today, etc.
+
+// Task sor
+className="flex items-center gap-4 bg-white/70 rounded-xl p-4 mb-3"
+
+// Kiválaszt gomb
+className="bg-cgp-teal-light text-white px-4 py-2 rounded-xl flex items-center gap-2"
+
+// Határidő badge
+className="bg-cgp-task-badge-overdue text-white px-3 py-1 rounded-xl flex items-center gap-1 text-sm"
 ```
 
 ---
@@ -156,3 +207,4 @@ Footer: "Az Ön programszolgáltatója..."
 | Dátum | Menüpont | Hozzáadott szabályok |
 |-------|----------|---------------------|
 | 2025-01-21 | Login oldal | Brand színek, tipográfia, form stílusok, logók |
+| 2025-01-21 | TODO Dashboard | Task szekció színek, headline stílusok, task kártya layout, gombok, badge-ek |
