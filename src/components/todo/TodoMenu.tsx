@@ -17,18 +17,6 @@ const TodoMenu = () => {
 
   return (
     <div className="mb-8">
-      {/* Create Task Link */}
-      <a 
-        href="#" 
-        className="text-blue-500 hover:underline mb-4 block"
-        onClick={(e) => {
-          e.preventDefault();
-          navigate("/dashboard/todo/create");
-        }}
-      >
-        Új feladat létrehozása
-      </a>
-
       {/* Menu Buttons */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap gap-3">
