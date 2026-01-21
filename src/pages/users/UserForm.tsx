@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createUser } from "@/stores/userStore";
-import { UserFormData, COUNTRIES, LANGUAGES } from "@/types/user";
+import { UserFormData, LANGUAGES } from "@/types/user";
 import { toast } from "sonner";
 
 const UserForm = () => {
@@ -22,7 +22,6 @@ const UserForm = () => {
     email: "",
     username: "",
     phone: "",
-    countryId: "",
     languageId: "hu",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof UserFormData, string>>>({});
@@ -138,30 +137,6 @@ const UserForm = () => {
                 onChange={(e) => handleChange("phone", e.target.value)}
                 placeholder="+36 XX XXX XXXX"
               />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl border p-6 space-y-4">
-            <h2 className="text-lg font-semibold mb-4">Beállítások</h2>
-
-            {/* Country */}
-            <div className="space-y-2">
-              <Label htmlFor="country">Ország</Label>
-              <Select
-                value={formData.countryId}
-                onValueChange={(value) => handleChange("countryId", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Válassz országot..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {COUNTRIES.map((country) => (
-                    <SelectItem key={country.id} value={country.id}>
-                      {country.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             {/* Language */}
