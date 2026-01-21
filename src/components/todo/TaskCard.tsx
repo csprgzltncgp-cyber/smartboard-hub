@@ -48,22 +48,24 @@ const TaskCard = ({
       </button>
 
       {/* Status Badges */}
+      {/* Status Badges - NO radius, always with icon */}
       {isNew && (
-        <span className="bg-cgp-teal-light text-white px-3 py-2 rounded-xl text-sm font-calibri-bold">
+        <span className="bg-cgp-teal-light text-white px-3 py-2 flex items-center gap-1 text-sm font-calibri-bold">
+          <AlertTriangle className="w-4 h-4" />
           Új
         </span>
       )}
 
       {isLastDay && (
-        <span className="bg-cgp-task-badge-overdue text-white px-3 py-2 rounded-xl flex items-center gap-1 text-sm font-calibri-bold">
+        <span className="bg-cgp-task-badge-overdue text-white px-3 py-2 flex items-center gap-1 text-sm font-calibri-bold">
           <Clock className="w-4 h-4" />
           Utolsó nap
         </span>
       )}
 
-      {/* Overdue Badge */}
+      {/* Overdue Badge - NO radius, with icon */}
       {overdueDays && overdueDays > 0 && (
-        <span className="bg-cgp-task-badge-overdue text-white px-3 py-2 rounded-xl flex items-center gap-1 text-sm font-calibri-bold">
+        <span className="bg-cgp-task-badge-overdue text-white px-3 py-2 flex items-center gap-1 text-sm font-calibri-bold">
           <AlertTriangle className="w-4 h-4" />
           Határidőn túl : {overdueDays} nap!
         </span>
