@@ -1,6 +1,5 @@
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import TodoMenu from "@/components/todo/TodoMenu";
 import TaskSection from "@/components/todo/TaskSection";
 
@@ -42,17 +41,20 @@ const Dashboard = () => {
 
   return (
     <div>
-      {/* Page Header - Unified style */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-calibri-bold">TODO</h1>
-        <Button 
-          onClick={() => navigate("/dashboard/todo/create")}
-          className="bg-primary hover:bg-primary/90"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Új feladat
-        </Button>
-      </div>
+      {/* Page Title */}
+      <h1 className="text-3xl font-calibri-bold mb-2">TODO</h1>
+      
+      {/* Create New Link - Simple underlined blue link */}
+      <a 
+        href="#" 
+        className="text-primary hover:underline mb-6 block"
+        onClick={(e) => {
+          e.preventDefault();
+          navigate("/dashboard/todo/create");
+        }}
+      >
+        Új feladat létrehozása
+      </a>
 
       {/* TODO Menu */}
       <TodoMenu />
