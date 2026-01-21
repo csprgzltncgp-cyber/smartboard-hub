@@ -48,6 +48,10 @@
     --cgp-badge-overdue: 355 91% 45%;   /* #db0b20 - Red for "Határidőn túl" */
     --cgp-task-completed-purple: 306 33% 36%; /* #7f4074 - Completed task purple */
     
+    /* Link Colors (from Laravel) */
+    --cgp-link: 211 100% 50%;           /* #007bff - Bootstrap primary blue */
+    --cgp-link-hover: 211 100% 35%;     /* #0056b3 - Darker blue on hover */
+    
     /* Base semantic tokens */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;

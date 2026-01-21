@@ -73,6 +73,8 @@ export default {
           "badge-lastday": "hsl(var(--cgp-badge-lastday))",
           "badge-overdue": "hsl(var(--cgp-badge-overdue))",
           "task-completed-purple": "hsl(var(--cgp-task-completed-purple))",
+          "link": "hsl(var(--cgp-link))",
+          "link-hover": "hsl(var(--cgp-link-hover))",
         },
       },
       fontFamily: {

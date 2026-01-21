@@ -44,10 +44,10 @@ const Dashboard = () => {
       {/* Page Title */}
       <h1 className="text-3xl font-calibri-bold mb-2">TODO</h1>
       
-      {/* Create New Link - Simple underlined blue link */}
+      {/* Create New Link - Simple underlined blue link (#007bff) */}
       <a 
         href="#" 
-        className="text-primary hover:underline mb-6 block"
+        className="text-cgp-link hover:text-cgp-link-hover hover:underline mb-6 block"
         onClick={(e) => {
           e.preventDefault();
           navigate("/dashboard/todo/create");
