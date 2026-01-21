@@ -13,7 +13,8 @@ import {
   Calendar,
   Search,
   Menu,
-  X
+  X,
+  UserCog
 } from "lucide-react";
 import cgpLogo from "@/assets/cgp_logo_green.svg";
 
@@ -26,6 +27,8 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
+  { label: "TODO", icon: ClipboardList, path: "/dashboard", badge: 5, badgeColor: "bg-green-500" },
+  { label: "Felhasználók", icon: UserCog, path: "/dashboard/users" },
   { label: "Lezárt esetek", icon: FileText, path: "/dashboard/cases/closed" },
   { label: "Folyamatban lévő esetek", icon: ClipboardList, path: "/dashboard/cases/in-progress" },
   { label: "Digital", icon: Monitor, path: "/dashboard/digital" },
@@ -37,7 +40,6 @@ const menuItems: MenuItem[] = [
   { label: "Eszközök", icon: FolderOpen, path: "/dashboard/assets" },
   { label: "Tevékenység terv", icon: Calendar, path: "/dashboard/activity-plan" },
   { label: "Feedback", icon: FileText, path: "/dashboard/feedback", badge: 3, badgeColor: "bg-orange-500" },
-  { label: "TODO", icon: ClipboardList, path: "/dashboard", badge: 5, badgeColor: "bg-green-500" },
   { label: "Partner keresés", icon: Search, path: "/dashboard/affiliate-search" },
 ];
 

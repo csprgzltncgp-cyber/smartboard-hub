@@ -7,6 +7,9 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import NotFound from "./pages/NotFound";
+import UserList from "./pages/users/UserList";
+import UserForm from "./pages/users/UserForm";
+import UserPermissions from "./pages/users/UserPermissions";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +23,9 @@ const App = () => (
           <Route path="/" element={<Login />} />
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Dashboard />} />
+            <Route path="users" element={<UserList />} />
+            <Route path="users/new" element={<UserForm />} />
+            <Route path="users/:userId/permissions" element={<UserPermissions />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
