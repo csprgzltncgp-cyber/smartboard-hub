@@ -47,17 +47,16 @@ const TaskCard = ({
         KIVÁLASZT
       </button>
 
-      {/* Status Badges */}
-      {/* Status Badges - NO radius, always with icon */}
+      {/* Status Badges - NO radius, always with icon (Laravel colors) */}
       {isNew && (
-        <span className="bg-cgp-teal-light text-white px-3 py-2 flex items-center gap-1 text-sm font-calibri-bold">
+        <span className="bg-cgp-badge-new text-white px-3 py-2 flex items-center gap-1 text-sm font-calibri-bold">
           <AlertTriangle className="w-4 h-4" />
           Új
         </span>
       )}
 
       {isLastDay && (
-        <span className="bg-cgp-teal-light text-white px-3 py-2 flex items-center gap-1 text-sm font-calibri-bold">
+        <span className="bg-cgp-badge-lastday text-white px-3 py-2 flex items-center gap-1 text-sm font-calibri-bold">
           <Clock className="w-4 h-4" />
           Utolsó nap
         </span>
@@ -65,7 +64,7 @@ const TaskCard = ({
 
       {/* Overdue Badge - NO radius, with icon */}
       {overdueDays && overdueDays > 0 && (
-        <span className="bg-cgp-task-badge-overdue text-white px-3 py-2 flex items-center gap-1 text-sm font-calibri-bold">
+        <span className="bg-cgp-badge-overdue text-white px-3 py-2 flex items-center gap-1 text-sm font-calibri-bold">
           <AlertTriangle className="w-4 h-4" />
           Határidőn túl : {overdueDays} nap!
         </span>
