@@ -86,12 +86,23 @@ className="font-calibri"       // Calibri (default)
 
 ## 4. Oldalszintű Layout
 
-### Oldalcím (H1)
+### Oldalcím + "Új ... létrehozása" link
+Az új elem létrehozása link mindig egyszerű kék link, aláhúzással hover-re. A cím alatt jelenik meg.
 ```tsx
-<h1 className="text-3xl font-calibri-bold mb-6">Felhasználók</h1>
+<h1 className="text-3xl font-calibri-bold mb-2">Felhasználók</h1>
+<a 
+  href="#" 
+  className="text-primary hover:underline mb-6 block"
+  onClick={(e) => {
+    e.preventDefault();
+    navigate("/dashboard/users/new");
+  }}
+>
+  Új felhasználó hozzáadása
+</a>
 ```
 
-### Oldalcím + Akciógomb (Header)
+### Oldalcím + Akciógomb (Header) - ritkán használt
 ```tsx
 <div className="flex items-center justify-between mb-6">
   <h1 className="text-3xl font-calibri-bold">Felhasználók</h1>

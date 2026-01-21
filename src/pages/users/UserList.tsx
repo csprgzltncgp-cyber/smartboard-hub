@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Settings, Trash2, Power, Search } from "lucide-react";
+import { Settings, Trash2, Power, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -76,16 +76,20 @@ const UserList = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-calibri-bold">Felhasználók</h1>
-        <Button 
-          onClick={() => navigate("/dashboard/users/new")}
-          className="bg-primary hover:bg-primary/90"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Új felhasználó
-        </Button>
-      </div>
+      {/* Page Title */}
+      <h1 className="text-3xl font-calibri-bold mb-2">Felhasználók</h1>
+      
+      {/* Create New Link - Simple underlined blue link (same style as Laravel) */}
+      <a 
+        href="#" 
+        className="text-primary hover:underline mb-6 block"
+        onClick={(e) => {
+          e.preventDefault();
+          navigate("/dashboard/users/new");
+        }}
+      >
+        Új felhasználó hozzáadása
+      </a>
 
       {/* Search */}
       <div className="relative mb-6">
