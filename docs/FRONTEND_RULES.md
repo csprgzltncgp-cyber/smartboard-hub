@@ -56,7 +56,26 @@ className="font-calibri"       // Calibri (default)
 
 ---
 
-## 3. Komponens Stílusok
+## 3. Grafikai Alapszabályok
+
+### Gombok
+- **Mindig rádiuszos** (rounded-xl vagy rounded-[10px])
+- **Mindig van ikon** a gomb szövege előtt
+- Példa: `<MousePointer2 /> KIVÁLASZT`
+
+### Értesítések / Badge-ek
+- **Soha nincs rádiusz** (rounded-none vagy nincs rounded class)
+- **Mindig van ikon** az értesítés szövege előtt
+- Példa: `<AlertTriangle /> Határidőn túl : 3 nap!`
+
+### Almenüpontok
+- **Soha nincs rádiusz**
+- **Soha nincs ikon**
+- Csak szöveges linkek
+
+---
+
+## 4. Komponens Stílusok
 
 ### Login Form
 ```tsx
