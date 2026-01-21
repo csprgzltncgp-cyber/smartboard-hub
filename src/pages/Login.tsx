@@ -56,7 +56,7 @@ const Login = () => {
           {/* Login Form */}
           <form 
             onSubmit={handleSubmit}
-            className="bg-[hsl(var(--cgp-form-bg))] px-10 pt-20 pb-16 w-full"
+            className="bg-[#f2f2f2] px-10 pt-12 pb-10 w-full shadow-sm"
           >
             <input
               type="text"
@@ -65,7 +65,7 @@ const Login = () => {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Username"
               required
-              className="w-full h-11 px-4 mb-3 border-0 outline-none font-calibri-light text-sm placeholder:text-[hsl(var(--cgp-input-placeholder))]"
+              className="w-full h-11 px-4 mb-3 bg-white border-b border-[#e0e0e0] outline-none font-calibri-light text-sm placeholder:text-[#c0bfbf]"
             />
             <input
               type="password"
@@ -74,14 +74,14 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
-              className="w-full h-11 px-4 border-0 outline-none font-calibri-light text-sm placeholder:text-[hsl(var(--cgp-input-placeholder))]"
+              className="w-full h-11 px-4 bg-white border-b border-[#e0e0e0] outline-none font-calibri-light text-sm placeholder:text-[#c0bfbf]"
             />
             
-            <div className="flex justify-center mt-16">
+            <div className="flex justify-center mt-10">
               <button
                 type="submit"
                 disabled={isLoading}
-                className="bg-primary text-primary-foreground font-calibri-bold text-base uppercase px-8 h-11 rounded-[10px] flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
+                className="bg-[#00575f] text-white font-calibri-bold text-base uppercase px-8 h-11 rounded-[10px] flex items-center gap-2 hover:bg-[#004a52] transition-colors disabled:opacity-50"
               >
                 <LogIn className="w-5 h-5" />
                 <span>Login</span>
