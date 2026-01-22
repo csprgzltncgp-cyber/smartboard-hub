@@ -245,13 +245,24 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
     setActiveForm(null);
   };
 
+  // Map lead status to meeting status
+  const getDefaultMeetingStatus = (): 'cancelled' | 'scheduled' | 'completed' | 'thumbs_up' | undefined => {
+    switch (lead.status) {
+      case 'lead': return 'cancelled';
+      case 'offer': return 'scheduled';
+      case 'deal': return 'completed';
+      case 'signed': return 'thumbs_up';
+      default: return 'cancelled';
+    }
+  };
+
   // Handle opening the meeting form for new entries
   const handleOpenMeetingForm = () => {
     if (activeForm === 'meeting') {
       resetMeetingForm();
     } else {
       setEditingMeetingId(null);
-      setMeetingForm({ date: '', time: '', contactName: '', address: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined, status: undefined, hasNotification: false, note: '' });
+      setMeetingForm({ date: '', time: '', contactName: '', address: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined, status: getDefaultMeetingStatus(), hasNotification: false, note: '' });
       setActiveForm('meeting');
     }
   };
