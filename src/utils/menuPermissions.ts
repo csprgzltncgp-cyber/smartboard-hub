@@ -107,10 +107,14 @@ export const isMenuAccessible = (path: string, user: User | null): boolean => {
   if (path === "/dashboard") return true;
   
   // If no user, no access
-  if (!user) return false;
+  if (!user) {
+    console.log(`[Menu] No user for path: ${path}`);
+    return false;
+  }
   
   // Check if user has admin - admin sees everything
-  const hasAdmin = user.smartboardPermissions.some(p => p.smartboardId === "admin");
+  const hasAdmin = user.smartboardPermissions?.some(p => p.smartboardId === "admin");
+  console.log(`[Menu] User: ${user.username}, hasAdmin: ${hasAdmin}, permissions:`, user.smartboardPermissions);
   if (hasAdmin) return true;
   
   // Get the required menu item IDs for this path
