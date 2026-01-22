@@ -29,12 +29,16 @@ import {
   Contact,
   Send,
   LogOut,
-  User
+  User,
+  Filter,
+  MessageCircle
 } from "lucide-react";
 import { SMARTBOARDS } from "@/config/smartboards";
 import cgpLogo from "@/assets/cgp_logo_green.svg";
 import { useAuth } from "@/contexts/AuthContext";
 import { filterMenuItems } from "@/utils/menuPermissions";
+import SearchFilterModal from "@/components/modals/SearchFilterModal";
+import ChatModal from "@/components/modals/ChatModal";
 
 interface MenuItem {
   label: string;
@@ -82,7 +86,12 @@ const DashboardLayout = () => {
   const { currentUser, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSmartboardMenuOpen, setIsSmartboardMenuOpen] = useState(false);
+  const [isSearchFilterOpen, setIsSearchFilterOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const smartboardMenuRef = useRef<HTMLDivElement>(null);
+  
+  // Mock unread chat count - in production this would come from real-time data
+  const unreadChatCount = 3;
 
   // Guard: if not authenticated, redirect to login
   useEffect(() => {
@@ -213,14 +222,33 @@ const DashboardLayout = () => {
               />
             </div>
 
-            {/* Mobile Menu Button */}
-            <button 
-              onClick={toggleMenu}
-              className="lg:hidden bg-cgp-teal-light text-white px-4 py-3 rounded-xl flex items-center gap-2"
-            >
-              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              MENÜ
-            </button>
+            {/* Mobile Menu Buttons */}
+            <div className="lg:hidden flex gap-2">
+              <button 
+                onClick={toggleMenu}
+                className="bg-cgp-teal-light text-white px-4 py-3 rounded-xl flex items-center gap-2"
+              >
+                {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                MENÜ
+              </button>
+              <button 
+                onClick={() => setIsSearchFilterOpen(true)}
+                className="bg-cgp-teal text-white p-3 rounded-xl"
+              >
+                <Filter className="w-5 h-5" />
+              </button>
+              <button 
+                onClick={() => setIsChatOpen(true)}
+                className="bg-cgp-teal text-white p-3 rounded-xl relative"
+              >
+                <MessageCircle className="w-5 h-5" />
+                {unreadChatCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-destructive text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                    {unreadChatCount}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -275,13 +303,37 @@ const DashboardLayout = () => {
 
       {/* Desktop Menu Button (shown on desktop) */}
       <div className="hidden lg:block max-w-7xl mx-auto px-4 lg:px-8 mt-4">
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          {/* MENÜ Button */}
           <button 
             onClick={toggleMenu}
             className="bg-cgp-teal-light text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase hover:bg-primary transition-colors"
           >
             <Menu className="w-5 h-5" />
             MENÜ
+          </button>
+          
+          {/* Keresés/Szűrés Button */}
+          <button 
+            onClick={() => setIsSearchFilterOpen(true)}
+            className="bg-cgp-teal text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase hover:bg-cgp-teal/90 transition-colors"
+          >
+            <Filter className="w-5 h-5" />
+            KERESÉS/SZŰRÉS
+          </button>
+          
+          {/* Chat Button with badge */}
+          <button 
+            onClick={() => setIsChatOpen(true)}
+            className="bg-cgp-teal text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase hover:bg-cgp-teal/90 transition-colors relative"
+          >
+            <MessageCircle className="w-5 h-5" />
+            CHAT
+            {unreadChatCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-destructive text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">
+                {unreadChatCount}
+              </span>
+            )}
           </button>
         </div>
 
@@ -384,6 +436,18 @@ const DashboardLayout = () => {
       <main className="max-w-7xl mx-auto px-4 lg:px-8 pb-24">
         <Outlet />
       </main>
+
+      {/* Search/Filter Modal */}
+      <SearchFilterModal 
+        isOpen={isSearchFilterOpen} 
+        onClose={() => setIsSearchFilterOpen(false)} 
+      />
+
+      {/* Chat Modal */}
+      <ChatModal 
+        isOpen={isChatOpen} 
+        onClose={() => setIsChatOpen(false)} 
+      />
     </div>
   );
 };
