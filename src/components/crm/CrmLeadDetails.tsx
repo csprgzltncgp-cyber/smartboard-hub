@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 interface CrmLeadDetailsProps {
   lead: CrmLead;
   onUpdate?: (lead: CrmLead) => void;
+  onChangeStatus?: (leadId: string, newStatus: LeadStatus) => void;
 }
 
 const getContactTypeIcon = (type: CrmMeeting['contactType']) => {
@@ -58,7 +59,7 @@ const moodIcons: { mood: MeetingMood; icon: React.ReactNode; color: string }[] =
   { mood: 'negative', icon: <Frown className="w-4 h-4" />, color: 'bg-red-100 text-red-600' },
 ];
 
-const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
+const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps) => {
   const [activeForm, setActiveForm] = useState<'meeting' | 'contact' | 'details' | 'note' | null>(null);
   const [editingMeetingId, setEditingMeetingId] = useState<string | null>(null);
   
@@ -96,6 +97,11 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
 
   // Handle lead status change (moves lead to different tab)
   const handleStatusChange = (newStatus: LeadStatus) => {
+    if (onChangeStatus) {
+      onChangeStatus(lead.id, newStatus);
+      return;
+    }
+
     const updatedLead = {
       ...lead,
       status: newStatus,
@@ -106,6 +112,11 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
 
   // Handle sending to Companies (Incoming company)
   const handleSendToCompanies = () => {
+    if (onChangeStatus) {
+      onChangeStatus(lead.id, 'incoming_company' as LeadStatus);
+      return;
+    }
+
     const updatedLead = {
       ...lead,
       status: 'incoming_company' as LeadStatus,

@@ -16,7 +16,7 @@ const CrmPage = () => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [selectedColleague, setSelectedColleague] = useState<string | null>(null);
   
-  const { leadsList, offersList, dealsList, signedList, addLead, updateLead, deleteLead } = useCrmLeads();
+  const { leadsList, offersList, dealsList, signedList, addLead, updateLead, changeLeadStatus, deleteLead } = useCrmLeads();
 
   // Get colleague name for header
   const colleagueName = selectedColleague 
@@ -26,15 +26,15 @@ const CrmPage = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'leads':
-        return <LeadsTab leads={leadsList} onAddLead={addLead} onUpdateLead={updateLead} onDeleteLead={deleteLead} />;
+        return <LeadsTab leads={leadsList} onAddLead={addLead} onUpdateLead={updateLead} onChangeLeadStatus={changeLeadStatus} onDeleteLead={deleteLead} />;
       case 'offers':
-        return <OffersTab offers={offersList} onUpdateLead={updateLead} onDeleteLead={deleteLead} />;
+        return <OffersTab offers={offersList} onUpdateLead={updateLead} onChangeLeadStatus={changeLeadStatus} onDeleteLead={deleteLead} />;
       case 'deals':
-        return <DealsTab deals={dealsList} onUpdateLead={updateLead} onDeleteLead={deleteLead} />;
+        return <DealsTab deals={dealsList} onUpdateLead={updateLead} onChangeLeadStatus={changeLeadStatus} onDeleteLead={deleteLead} />;
       case 'todolist':
         return <TodoListTab items={mockTodoItems} />;
       case 'signed':
-        return <SignedTab signedLeads={signedList} onUpdateLead={updateLead} onDeleteLead={deleteLead} />;
+        return <SignedTab signedLeads={signedList} onUpdateLead={updateLead} onChangeLeadStatus={changeLeadStatus} onDeleteLead={deleteLead} />;
       case 'reports':
         return <ReportsTab />;
       default:
