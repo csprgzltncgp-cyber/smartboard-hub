@@ -118,7 +118,7 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
   };
 
   return (
-    <div className="bg-background border rounded-xl shadow-lg z-50 overflow-hidden w-full max-w-2xl">
+    <div className="bg-background border rounded-xl shadow-lg z-50 overflow-hidden w-full max-w-4xl">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b bg-cgp-teal/5">
         <h3 className="font-calibri-bold flex items-center gap-2">
