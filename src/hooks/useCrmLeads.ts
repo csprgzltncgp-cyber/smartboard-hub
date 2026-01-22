@@ -1,3 +1,5 @@
+/* @refresh reset */
+
 import { useState, useMemo, useCallback } from "react";
 import { CrmLead, LeadStatus } from "@/types/crm";
 import { mockLeads, mockOffers, mockDeals } from "@/data/crmMockData";
