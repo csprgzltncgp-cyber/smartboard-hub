@@ -47,7 +47,7 @@ const CrmLeadCard = ({ lead, onUpdate }: CrmLeadCardProps) => {
       </div>
 
       {/* Expanded Content */}
-      {isExpanded && <CrmLeadDetails lead={lead} />}
+      {isExpanded && <CrmLeadDetails lead={lead} onUpdate={onUpdate} />}
     </div>
   );
 };

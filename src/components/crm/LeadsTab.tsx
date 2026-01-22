@@ -3,7 +3,7 @@ import { CrmLead } from "@/types/crm";
 import CrmLeadCard from "./CrmLeadCard";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import NewLeadModal from "./NewLeadModal";
+import { mockColleagues } from "@/data/crmMockData";
 
 interface LeadsTabProps {
   leads: CrmLead[];
@@ -12,10 +12,31 @@ interface LeadsTabProps {
 }
 
 const LeadsTab = ({ leads, onAddLead, onUpdateLead }: LeadsTabProps) => {
-  const [showNewLeadModal, setShowNewLeadModal] = useState(false);
-
-  const handleAddLead = (lead: CrmLead) => {
-    onAddLead?.(lead);
+  const handleNewLead = () => {
+    const newLead: CrmLead = {
+      id: `lead-${Date.now()}`,
+      companyName: 'New Company',
+      assignedTo: mockColleagues[0]?.name || 'Unassigned',
+      assignedToId: mockColleagues[0]?.id || '',
+      status: 'lead',
+      progress: 0,
+      contacts: [],
+      meetings: [],
+      details: {
+        name: 'New Company',
+        city: '',
+        country: 'Hungary',
+        industry: '',
+        headcount: 0,
+        service: '3 PILL/4 SESS',
+      },
+      customDetails: [],
+      notes: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    
+    onAddLead?.(newLead);
   };
 
   return (
@@ -23,7 +44,7 @@ const LeadsTab = ({ leads, onAddLead, onUpdateLead }: LeadsTabProps) => {
       {/* Action Bar */}
       <div className="flex gap-2 mb-4">
         <Button 
-          onClick={() => setShowNewLeadModal(true)}
+          onClick={handleNewLead}
           className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-none"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -43,14 +64,6 @@ const LeadsTab = ({ leads, onAddLead, onUpdateLead }: LeadsTabProps) => {
           ))
         )}
       </div>
-
-      {/* New Lead Modal */}
-      <NewLeadModal
-        open={showNewLeadModal}
-        onOpenChange={setShowNewLeadModal}
-        onSubmit={handleAddLead}
-        mode="create"
-      />
     </div>
   );
 };
