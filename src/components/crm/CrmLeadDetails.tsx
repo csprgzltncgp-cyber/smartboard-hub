@@ -46,6 +46,36 @@ const getStatusIcon = (status?: CrmMeeting['status']) => {
   }
 };
 
+type MeetingStageStatus = 'cancelled' | 'scheduled' | 'completed' | 'thumbs_up';
+
+const leadStatusToMeetingStatus = (status: CrmLead['status']): MeetingStageStatus => {
+  switch (status) {
+    case 'lead':
+      return 'cancelled';
+    case 'offer':
+      return 'scheduled';
+    case 'deal':
+      return 'completed';
+    case 'signed':
+      return 'thumbs_up';
+    default:
+      return 'cancelled';
+  }
+};
+
+const meetingStatusToLeadStatus = (status: MeetingStageStatus): CrmLead['status'] => {
+  switch (status) {
+    case 'cancelled':
+      return 'lead';
+    case 'scheduled':
+      return 'offer';
+    case 'completed':
+      return 'deal';
+    case 'thumbs_up':
+      return 'signed';
+  }
+};
+
 const contactTypes: { type: ContactType; icon: React.ReactNode; label: string }[] = [
   { type: 'email', icon: <Mail className="w-4 h-4" />, label: 'Email' },
   { type: 'video', icon: <Video className="w-4 h-4" />, label: 'Video' },
@@ -109,7 +139,9 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
       pillars: meeting.pillars,
       sessions: meeting.sessions,
       mood: meeting.mood,
-      status: meeting.status,
+      // IMPORTANT: a csík tab-helyzete a lead státuszától függ, amit a meeting űrlapon választunk.
+      // Edit módban is a lead aktuális státuszát mutatjuk, ne a régi meeting státuszát.
+      status: leadStatusToMeetingStatus(lead.status),
       hasNotification: meeting.hasNotification || false,
       note: meeting.note || '',
     });
@@ -129,11 +161,16 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
   // Save meeting (add or update)
   const handleSaveMeeting = () => {
     if (!meetingForm.date || !meetingForm.contactName) return;
+
+    // A meeting űrlapon kiválasztott ikon mozgatja a leadet a megfelelő tab alá
+    const selectedMeetingStatus = (meetingForm.status ?? leadStatusToMeetingStatus(lead.status)) as MeetingStageStatus;
+    const nextLeadStatus = meetingStatusToLeadStatus(selectedMeetingStatus);
     
     if (editingMeetingId) {
       // Update existing meeting
       const updatedLead = {
         ...lead,
+        status: nextLeadStatus,
         meetings: lead.meetings.map(m => 
           m.id === editingMeetingId 
             ? {
@@ -146,7 +183,7 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
                 pillars: meetingForm.pillars,
                 sessions: meetingForm.sessions,
                 mood: meetingForm.mood,
-                status: meetingForm.status,
+                status: selectedMeetingStatus,
                 hasNotification: meetingForm.hasNotification,
                 note: meetingForm.note,
               }
@@ -168,13 +205,14 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
         pillars: meetingForm.pillars,
         sessions: meetingForm.sessions,
         mood: meetingForm.mood,
-        status: meetingForm.status,
+        status: selectedMeetingStatus,
         hasNotification: meetingForm.hasNotification,
         note: meetingForm.note,
       };
       
       const updatedLead = {
         ...lead,
+        status: nextLeadStatus,
         meetings: [...lead.meetings, newMeeting],
         updatedAt: new Date().toISOString(),
       };
@@ -245,24 +283,13 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
     setActiveForm(null);
   };
 
-  // Map lead status to meeting status
-  const getDefaultMeetingStatus = (): 'cancelled' | 'scheduled' | 'completed' | 'thumbs_up' | undefined => {
-    switch (lead.status) {
-      case 'lead': return 'cancelled';
-      case 'offer': return 'scheduled';
-      case 'deal': return 'completed';
-      case 'signed': return 'thumbs_up';
-      default: return 'cancelled';
-    }
-  };
-
   // Handle opening the meeting form for new entries
   const handleOpenMeetingForm = () => {
     if (activeForm === 'meeting') {
       resetMeetingForm();
     } else {
       setEditingMeetingId(null);
-      setMeetingForm({ date: '', time: '', contactName: '', address: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined, status: getDefaultMeetingStatus(), hasNotification: false, note: '' });
+      setMeetingForm({ date: '', time: '', contactName: '', address: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined, status: leadStatusToMeetingStatus(lead.status), hasNotification: false, note: '' });
       setActiveForm('meeting');
     }
   };
