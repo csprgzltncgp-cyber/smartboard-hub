@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -28,8 +28,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
+import { getUsers } from "@/stores/userStore";
+import { getOperators } from "@/stores/operatorStore";
 
-// Import avatar images
+// Import avatar images for fallback/demo
 import avatarBarbara from "@/assets/avatars/avatar-barbara.jpg";
 import avatarAnna from "@/assets/avatars/avatar-anna.jpg";
 import avatarJanos from "@/assets/avatars/avatar-janos.jpg";
@@ -58,14 +60,56 @@ interface Message {
   isOwn: boolean;
 }
 
-// Mock users for demo with avatars
-const mockUsers: ChatUser[] = [
-  { id: "1", name: "Kiss Barbara", role: "operator", isOnline: true, lastMessage: "Rendben, köszönöm!", unreadCount: 2, avatarUrl: avatarBarbara },
-  { id: "2", name: "Nagy Anna", role: "operator", isOnline: true, lastMessage: "Az eset továbbítva.", avatarUrl: avatarAnna },
-  { id: "3", name: "Dr. Szabó János", role: "expert", isOnline: false, lastMessage: "Holnap visszahívom.", avatarUrl: avatarJanos },
-  { id: "4", name: "Kovács Péter", role: "staff", isOnline: true, lastMessage: "Megkaptam a dokumentumot.", avatarUrl: avatarPeter },
-  { id: "5", name: "Tóth Éva", role: "staff", isOnline: false, lastMessage: "Jó reggelt!", avatarUrl: avatarEva },
-];
+// Default avatars for demo users without custom avatar
+const defaultAvatars: Record<string, string> = {
+  "avatar-barbara": avatarBarbara,
+  "avatar-anna": avatarAnna,
+  "avatar-janos": avatarJanos,
+  "avatar-peter": avatarPeter,
+  "avatar-eva": avatarEva,
+};
+
+// Build chat users from registered users and operators
+const buildChatUsers = (currentUserId: string | undefined): ChatUser[] => {
+  const users = getUsers();
+  const operators = getOperators();
+  
+  const chatUsers: ChatUser[] = [];
+  
+  // Add users (as staff by default, could be enhanced with role detection)
+  users.forEach(user => {
+    // Skip current logged-in user
+    if (user.id === currentUserId) return;
+    // Only active users
+    if (!user.active) return;
+    
+    chatUsers.push({
+      id: `user-${user.id}`,
+      name: user.name,
+      role: "staff",
+      isOnline: Math.random() > 0.5, // Random online status for demo
+      avatarUrl: user.avatarUrl,
+    });
+  });
+  
+  // Add operators
+  operators.forEach(op => {
+    // Skip current logged-in user
+    if (op.id === currentUserId) return;
+    // Only active operators
+    if (!op.active) return;
+    
+    chatUsers.push({
+      id: `operator-${op.id}`,
+      name: op.name,
+      role: "operator",
+      isOnline: Math.random() > 0.3, // Operators more likely online
+      avatarUrl: op.avatarUrl,
+    });
+  });
+  
+  return chatUsers;
+};
 
 // Mock messages generator per user - in production this would come from API
 const generateMockMessagesForUser = (currentUserId: string, chatPartnerId: string): Message[] => {
@@ -122,6 +166,9 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
   const { currentUser } = useAuth();
   const currentUserId = currentUser?.id || "guest";
   
+  // Build chat users from registered users/operators (memoized)
+  const chatUsers = useMemo(() => buildChatUsers(currentUserId), [currentUserId]);
+  
   // User-specific localStorage keys
   const getStorageKey = (key: string) => `cgpchat-${currentUserId}-${key}`;
   
@@ -130,7 +177,8 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
     // Restore selected user from localStorage (user-specific)
     const savedUserId = localStorage.getItem(getStorageKey("selected-user"));
     if (savedUserId) {
-      return mockUsers.find(u => u.id === savedUserId) || null;
+      const users = buildChatUsers(currentUserId);
+      return users.find(u => u.id === savedUserId) || null;
     }
     return null;
   });
@@ -177,13 +225,13 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
   useEffect(() => {
     const savedUserId = localStorage.getItem(getStorageKey("selected-user"));
     if (savedUserId) {
-      const user = mockUsers.find(u => u.id === savedUserId);
+      const user = chatUsers.find(u => u.id === savedUserId);
       setSelectedUser(user || null);
     } else {
       setSelectedUser(null);
       setMessages([]);
     }
-  }, [currentUserId]);
+  }, [currentUserId, chatUsers]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -195,7 +243,7 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
     }
   }, [messages, selectedUser]);
 
-  const filteredUsers = mockUsers.filter(user => {
+  const filteredUsers = chatUsers.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = filterRole === "all" || user.role === filterRole;
     const notDeleted = !deletedConversations.includes(user.id);
