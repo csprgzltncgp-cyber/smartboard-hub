@@ -18,8 +18,8 @@ const CrmFilterBar = ({
   return (
     <div className="flex gap-4 mb-6">
       <Select value={selectedCountry || "all"} onValueChange={(v) => onCountryChange(v === "all" ? null : v)}>
-        <SelectTrigger className="w-[200px] bg-primary text-primary-foreground border-0 rounded-none hover:bg-primary/90">
-          <SelectValue placeholder="Choose country" />
+        <SelectTrigger className="w-[200px] bg-background border border-border rounded-xl hover:bg-muted">
+          <SelectValue placeholder="Válassz országot" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All countries</SelectItem>
@@ -32,8 +32,8 @@ const CrmFilterBar = ({
       </Select>
 
       <Select value={selectedColleague || "all"} onValueChange={(v) => onColleagueChange(v === "all" ? null : v)}>
-        <SelectTrigger className="w-[200px] bg-primary text-primary-foreground border-0 rounded-none hover:bg-primary/90">
-          <SelectValue placeholder="Choose a colleague" />
+        <SelectTrigger className="w-[200px] bg-background border border-border rounded-xl hover:bg-muted">
+          <SelectValue placeholder="Válassz kollégát" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All colleagues</SelectItem>
