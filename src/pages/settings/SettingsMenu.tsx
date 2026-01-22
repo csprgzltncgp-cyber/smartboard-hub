@@ -21,11 +21,11 @@ const settingsMenuItems: SettingsMenuItem[] = [
   { label: "Cégek", path: "/dashboard/settings/companies", icon: Building2 },
   { label: "Országok", path: "/dashboard/settings/countries", icon: Globe },
   { label: "Városok", path: "/dashboard/settings/cities", icon: MapPin },
-  { label: "Cég jogosultságok", path: "/dashboard/settings/permissions", icon: Shield },
+  { label: "Jogosultságok", path: "/dashboard/settings/permissions", icon: Shield },
   { label: "Felhasználók", path: "/dashboard/users", icon: UserCog },
   { label: "Szakértők", path: "/dashboard/settings/experts", icon: Users },
   { label: "Operátorok", path: "/dashboard/settings/operators", icon: Headphones },
-  { label: "Operátor dokumentumok", path: "/dashboard/settings/documents", icon: FileText },
+  { label: "Dokumentumok", path: "/dashboard/settings/documents", icon: FileText },
   { label: "Training Dashboard", path: "/dashboard/settings/training", icon: GraduationCap },
 ];
 
