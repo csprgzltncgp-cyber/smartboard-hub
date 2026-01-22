@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CrmLead, CrmMeeting, CrmContact, ContactType, MeetingMood } from "@/types/crm";
+import { CrmLead, CrmMeeting, CrmContact, ContactType, MeetingMood, LeadStatus } from "@/types/crm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,45 +36,13 @@ const getMoodIcon = (mood?: CrmMeeting['mood']) => {
   }
 };
 
-const getStatusIcon = (status?: CrmMeeting['status']) => {
-  switch (status) {
-    case 'cancelled': return Hourglass;
-    case 'scheduled': return Calculator;
-    case 'completed': return Handshake;
-    case 'thumbs_up': return FileSignature;
-    default: return null;
-  }
-};
-
-type MeetingStageStatus = 'cancelled' | 'scheduled' | 'completed' | 'thumbs_up';
-
-const leadStatusToMeetingStatus = (status: CrmLead['status']): MeetingStageStatus => {
-  switch (status) {
-    case 'lead':
-      return 'cancelled';
-    case 'offer':
-      return 'scheduled';
-    case 'deal':
-      return 'completed';
-    case 'signed':
-      return 'thumbs_up';
-    default:
-      return 'cancelled';
-  }
-};
-
-const meetingStatusToLeadStatus = (status: MeetingStageStatus): CrmLead['status'] => {
-  switch (status) {
-    case 'cancelled':
-      return 'lead';
-    case 'scheduled':
-      return 'offer';
-    case 'completed':
-      return 'deal';
-    case 'thumbs_up':
-      return 'signed';
-  }
-};
+// Lead status icons and colors for the status selector
+const leadStatusConfig: { status: LeadStatus; icon: React.ReactNode; label: string; activeClass: string }[] = [
+  { status: 'lead', icon: <Hourglass className="w-4 h-4" />, label: 'Lead', activeClass: 'bg-blue-500 text-white' },
+  { status: 'offer', icon: <Calculator className="w-4 h-4" />, label: 'Offer', activeClass: 'bg-amber-500 text-white' },
+  { status: 'deal', icon: <Handshake className="w-4 h-4" />, label: 'Deal', activeClass: 'bg-green-500 text-white' },
+  { status: 'signed', icon: <FileSignature className="w-4 h-4" />, label: 'Signed', activeClass: 'bg-primary text-primary-foreground' },
+];
 
 const contactTypes: { type: ContactType; icon: React.ReactNode; label: string }[] = [
   { type: 'email', icon: <Mail className="w-4 h-4" />, label: 'Email' },
@@ -94,12 +62,11 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
   const [activeForm, setActiveForm] = useState<'meeting' | 'contact' | 'details' | 'note' | null>(null);
   const [editingMeetingId, setEditingMeetingId] = useState<string | null>(null);
   
-  // Form states
+  // Form states (status removed - now at lead level)
   const [meetingForm, setMeetingForm] = useState({
     date: '', time: '', contactName: '', address: '',
     contactType: 'email' as ContactType, pillars: 3, sessions: 4,
     mood: undefined as MeetingMood | undefined,
-    status: undefined as 'cancelled' | 'scheduled' | 'completed' | 'thumbs_up' | undefined,
     hasNotification: false,
     note: '',
   });
@@ -122,9 +89,19 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
 
   // Reset meeting form
   const resetMeetingForm = () => {
-    setMeetingForm({ date: '', time: '', contactName: '', address: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined, status: undefined, hasNotification: false, note: '' });
+    setMeetingForm({ date: '', time: '', contactName: '', address: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined, hasNotification: false, note: '' });
     setEditingMeetingId(null);
     setActiveForm(null);
+  };
+
+  // Handle lead status change (moves lead to different tab)
+  const handleStatusChange = (newStatus: LeadStatus) => {
+    const updatedLead = {
+      ...lead,
+      status: newStatus,
+      updatedAt: new Date().toISOString(),
+    };
+    onUpdate?.(updatedLead);
   };
 
   // Start editing a meeting
@@ -139,9 +116,6 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
       pillars: meeting.pillars,
       sessions: meeting.sessions,
       mood: meeting.mood,
-      // IMPORTANT: a csík tab-helyzete a lead státuszától függ, amit a meeting űrlapon választunk.
-      // Edit módban is a lead aktuális státuszát mutatjuk, ne a régi meeting státuszát.
-      status: leadStatusToMeetingStatus(lead.status),
       hasNotification: meeting.hasNotification || false,
       note: meeting.note || '',
     });
@@ -158,19 +132,14 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
     onUpdate?.(updatedLead);
   };
 
-  // Save meeting (add or update)
+  // Save meeting (add or update) - status no longer set here, it's at lead level
   const handleSaveMeeting = () => {
     if (!meetingForm.date || !meetingForm.contactName) return;
-
-    // A meeting űrlapon kiválasztott ikon mozgatja a leadet a megfelelő tab alá
-    const selectedMeetingStatus = (meetingForm.status ?? leadStatusToMeetingStatus(lead.status)) as MeetingStageStatus;
-    const nextLeadStatus = meetingStatusToLeadStatus(selectedMeetingStatus);
     
     if (editingMeetingId) {
       // Update existing meeting
       const updatedLead = {
         ...lead,
-        status: nextLeadStatus,
         meetings: lead.meetings.map(m => 
           m.id === editingMeetingId 
             ? {
@@ -183,7 +152,6 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
                 pillars: meetingForm.pillars,
                 sessions: meetingForm.sessions,
                 mood: meetingForm.mood,
-                status: selectedMeetingStatus,
                 hasNotification: meetingForm.hasNotification,
                 note: meetingForm.note,
               }
@@ -205,14 +173,12 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
         pillars: meetingForm.pillars,
         sessions: meetingForm.sessions,
         mood: meetingForm.mood,
-        status: selectedMeetingStatus,
         hasNotification: meetingForm.hasNotification,
         note: meetingForm.note,
       };
       
       const updatedLead = {
         ...lead,
-        status: nextLeadStatus,
         meetings: [...lead.meetings, newMeeting],
         updatedAt: new Date().toISOString(),
       };
@@ -289,13 +255,34 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
       resetMeetingForm();
     } else {
       setEditingMeetingId(null);
-      setMeetingForm({ date: '', time: '', contactName: '', address: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined, status: leadStatusToMeetingStatus(lead.status), hasNotification: false, note: '' });
+      setMeetingForm({ date: '', time: '', contactName: '', address: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined, hasNotification: false, note: '' });
       setActiveForm('meeting');
     }
   };
 
   return (
     <div className="bg-background p-4 space-y-4 border-t border-border">
+      {/* Lead Status Selector Row */}
+      <div className="flex items-center gap-2 pb-3 border-b border-border">
+        <span className="text-sm font-medium text-muted-foreground mr-2">Status:</span>
+        <div className="flex gap-1">
+          {leadStatusConfig.map(({ status, icon, label, activeClass }) => (
+            <button
+              key={status}
+              onClick={() => handleStatusChange(status)}
+              className={cn(
+                "p-2 rounded flex items-center gap-1.5 text-sm transition-colors",
+                lead.status === status ? activeClass : "bg-muted hover:bg-muted/80"
+              )}
+              title={label}
+            >
+              {icon}
+              <span className="hidden sm:inline">{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Action Buttons Row */}
       <div className="flex gap-2 flex-wrap">
         <Button 
@@ -395,33 +382,6 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
                       {icon}
                     </button>
                   ))}
-                </div>
-              </div>
-
-              {/* Status */}
-              <div className="flex items-center border-b border-border pb-2">
-                <span className="w-28 text-sm font-medium">Status</span>
-                <div className="flex gap-1 flex-1">
-                  <button onClick={() => setMeetingForm(p => ({ ...p, status: 'cancelled' }))}
-                    className={cn("p-2 rounded", meetingForm.status === 'cancelled' ? "bg-blue-500 text-white" : "bg-muted")}
-                    title="Lead">
-                    <Hourglass className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => setMeetingForm(p => ({ ...p, status: 'scheduled' }))}
-                    className={cn("p-2 rounded", meetingForm.status === 'scheduled' ? "bg-amber-500 text-white" : "bg-muted")}
-                    title="Offer">
-                    <Calculator className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => setMeetingForm(p => ({ ...p, status: 'completed' }))}
-                    className={cn("p-2 rounded", meetingForm.status === 'completed' ? "bg-green-500 text-white" : "bg-muted")}
-                    title="Deal">
-                    <Handshake className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => setMeetingForm(p => ({ ...p, status: 'thumbs_up' }))}
-                    className={cn("p-2 rounded", meetingForm.status === 'thumbs_up' ? "bg-primary text-primary-foreground" : "bg-muted")}
-                    title="Signed">
-                    <FileSignature className="w-4 h-4" />
-                  </button>
                 </div>
               </div>
 
@@ -579,7 +539,6 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
           {lead.meetings.map((meeting, index) => {
             const ContactIcon = getContactTypeIcon(meeting.contactType);
             const MoodIcon = getMoodIcon(meeting.mood);
-            const StatusIcon = getStatusIcon(meeting.status);
             return (
               <div key={meeting.id} className={cn("flex items-center gap-3 p-3 rounded-sm", index === 0 ? "bg-primary/10" : "bg-muted/30")}>
                 <button 
@@ -593,11 +552,6 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
                 <ContactIcon className="w-4 h-4 text-primary" />
                 <span className="text-sm text-muted-foreground">{meeting.contactName}</span>
                 <span className="text-sm text-muted-foreground">{meeting.pillars} PILL/{meeting.sessions} SESS</span>
-                {StatusIcon && (
-                  <div className="p-1 rounded-sm bg-muted">
-                    <StatusIcon className="w-4 h-4" />
-                  </div>
-                )}
                 {MoodIcon && <div className={cn("p-1 rounded-sm", meeting.mood === 'happy' ? "bg-green-100" : "bg-muted")}><MoodIcon className="w-4 h-4" /></div>}
                 <button 
                   onClick={() => handleDeleteMeeting(meeting.id)}
