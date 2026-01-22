@@ -23,29 +23,29 @@ interface TaskSectionProps {
 
 const variantStyles = {
   overdue: {
-    bg: "bg-cgp-task-overdue",
+    bg: "bg-cgp-task-overdue/20",
     headline: "bg-cgp-task-overdue",
     textColor: "text-white",
   },
   today: {
-    bg: "bg-cgp-task-today",
+    bg: "bg-cgp-task-today/20",
     headline: "bg-cgp-task-today",
     textColor: "text-white",
   },
   week: {
-    bg: "bg-cgp-task-today/40",
+    bg: "bg-cgp-task-today/15",
+    headline: "bg-cgp-task-today/60",
+    textColor: "text-white",
+  },
+  upcoming: {
+    bg: "bg-cgp-task-today/10",
     headline: "bg-cgp-task-today/40",
     textColor: "text-black",
   },
-  upcoming: {
-    bg: "bg-cgp-task-today/20",
-    headline: "bg-cgp-task-today/20",
-    textColor: "text-black",
-  },
   completed: {
-    bg: "bg-cgp-task-today/10",
-    headline: "bg-cgp-task-today/10",
-    textColor: "text-black",
+    bg: "bg-cgp-task-completed-purple/20",
+    headline: "bg-cgp-task-completed-purple",
+    textColor: "text-white",
   },
 };
 
