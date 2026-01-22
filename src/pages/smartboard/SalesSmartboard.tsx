@@ -5,6 +5,7 @@ import CrmSummaryPanel from "@/components/smartboard/CrmSummaryPanel";
 import UpcomingMeetingsPanel from "@/components/smartboard/UpcomingMeetingsPanel";
 import TodayTasksPanel from "@/components/smartboard/TodayTasksPanel";
 import { useMemo } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Mock today's tasks - in production this would come from the TODO system
 const mockTodayTasks = [
@@ -13,11 +14,35 @@ const mockTodayTasks = [
   { id: 3191, date: "2026-01-22", author: "Kiss Barbara", title: "Audi meeting összefoglaló" },
 ];
 
+// Get first name or nickname from full name
+const getGreetingName = (fullName: string): string => {
+  const firstName = fullName.split(" ").pop() || fullName; // Get last part (first name in Hungarian)
+  // Common Hungarian nickname mappings
+  const nicknames: Record<string, string> = {
+    "Barbara": "Barbi",
+    "Katalin": "Kati",
+    "Erzsébet": "Erzsi",
+    "Zsuzsanna": "Zsuzsi",
+    "Margit": "Manci",
+    "János": "Jani",
+    "István": "Pisti",
+    "Ferenc": "Feri",
+    "József": "Józsi",
+    "László": "Laci",
+    "Péter": "Peti",
+  };
+  return nicknames[firstName] || firstName;
+};
+
 const SalesSmartboard = () => {
+  const { currentUser } = useAuth();
   const { leadsList, offersList, dealsList, signedList, leads } = useCrmLeads();
   
   // Get expiring contracts (within 30 days)
   const expiringContracts = getExpiringContracts(30);
+
+  // Get greeting name
+  const greetingName = currentUser ? getGreetingName(currentUser.name) : "Kolléga";
 
   // Collect all upcoming meetings from all leads
   const upcomingMeetings = useMemo(() => {
@@ -36,7 +61,7 @@ const SalesSmartboard = () => {
   return (
     <div>
       {/* Page Title */}
-      <h1 className="text-3xl font-calibri-bold mb-2">Sales SmartBoard</h1>
+      <h1 className="text-3xl font-calibri-bold mb-2">Szia {greetingName}!</h1>
       <p className="text-muted-foreground mb-6">
         Értékesítési műszerfal - áttekintés és gyors műveletek
       </p>
