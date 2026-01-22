@@ -5,8 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { getOperatorById, updateOperatorSmartboardPermissions } from "@/stores/operatorStore";
-import { getSmartboardById, SMARTBOARDS } from "@/config/smartboards";
+import { getSmartboardById } from "@/config/smartboards";
 import { User, UserSmartboardPermission } from "@/types/user";
 import { toast } from "sonner";
 
@@ -14,10 +20,12 @@ const OperatorPermissions = () => {
   const navigate = useNavigate();
   const { operatorId } = useParams<{ operatorId: string }>();
   const [operator, setOperator] = useState<User | null>(null);
-  const [enabledMenuItems, setEnabledMenuItems] = useState<string[]>([]);
+  const [operatorMenuItems, setOperatorMenuItems] = useState<string[]>([]);
+  const [searchMenuItems, setSearchMenuItems] = useState<string[]>([]);
 
-  // Get operator smartboard config
+  // Get smartboard configs
   const operatorSmartboard = getSmartboardById("operator");
+  const searchSmartboard = getSmartboardById("search");
 
   useEffect(() => {
     if (operatorId) {
@@ -28,7 +36,13 @@ const OperatorPermissions = () => {
         const operatorPermission = foundOperator.smartboardPermissions.find(
           p => p.smartboardId === "operator"
         );
-        setEnabledMenuItems(operatorPermission?.enabledMenuItems || []);
+        setOperatorMenuItems(operatorPermission?.enabledMenuItems || []);
+        
+        // Get current enabled menu items for search interface
+        const searchPermission = foundOperator.smartboardPermissions.find(
+          p => p.smartboardId === "search"
+        );
+        setSearchMenuItems(searchPermission?.enabledMenuItems || (searchSmartboard?.menuItems.map(m => m.id) || []));
       } else {
         toast.error("Operátor nem található");
         navigate("/dashboard/settings/operators");
@@ -36,8 +50,8 @@ const OperatorPermissions = () => {
     }
   }, [operatorId, navigate]);
 
-  const toggleMenuItem = (menuItemId: string) => {
-    setEnabledMenuItems(prev => {
+  const toggleOperatorMenuItem = (menuItemId: string) => {
+    setOperatorMenuItems(prev => {
       if (prev.includes(menuItemId)) {
         return prev.filter(id => id !== menuItemId);
       } else {
@@ -46,10 +60,28 @@ const OperatorPermissions = () => {
     });
   };
 
-  const toggleAllMenuItems = (enable: boolean) => {
+  const toggleSearchMenuItem = (menuItemId: string) => {
+    setSearchMenuItems(prev => {
+      if (prev.includes(menuItemId)) {
+        return prev.filter(id => id !== menuItemId);
+      } else {
+        return [...prev, menuItemId];
+      }
+    });
+  };
+
+  const toggleAllOperatorMenuItems = (enable: boolean) => {
     if (operatorSmartboard) {
-      setEnabledMenuItems(
+      setOperatorMenuItems(
         enable ? operatorSmartboard.menuItems.map(m => m.id) : []
+      );
+    }
+  };
+
+  const toggleAllSearchMenuItems = (enable: boolean) => {
+    if (searchSmartboard) {
+      setSearchMenuItems(
+        enable ? searchSmartboard.menuItems.map(m => m.id) : []
       );
     }
   };
@@ -60,7 +92,12 @@ const OperatorPermissions = () => {
         {
           smartboardId: "operator",
           isDefault: true,
-          enabledMenuItems: enabledMenuItems,
+          enabledMenuItems: operatorMenuItems,
+        },
+        {
+          smartboardId: "search",
+          isDefault: false,
+          enabledMenuItems: searchMenuItems,
         },
       ];
       updateOperatorSmartboardPermissions(operatorId, permissions);
@@ -69,7 +106,7 @@ const OperatorPermissions = () => {
     }
   };
 
-  if (!operator || !operatorSmartboard) {
+  if (!operator || !operatorSmartboard || !searchSmartboard) {
     return <div>Betöltés...</div>;
   }
 
@@ -92,82 +129,167 @@ const OperatorPermissions = () => {
       {/* Instructions */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
         <p className="text-sm text-blue-800">
-          <strong>Útmutató:</strong> Az operátor automatikusan az Operátor interfészhez van rendelve. 
-          Itt beállíthatod, mely menüpontokhoz férhet hozzá az interfészen belül.
+          <strong>Útmutató:</strong> Az operátor automatikusan az Operátor és Keresés/Szűrés interfészekhez van rendelve. 
+          Itt beállíthatod, mely menüpontokhoz férhet hozzá az interfészeken belül.
         </p>
       </div>
 
-      {/* Operator Interface Card */}
-      <div className="bg-white border rounded-xl overflow-hidden mb-6">
-        <div className="flex items-center gap-4 px-4 py-3 bg-primary/10 border-b">
-          <Badge variant="default" className="bg-primary">
-            Operátor interfész
-          </Badge>
-          <span className="text-sm text-muted-foreground">
-            {operatorSmartboard.description}
-          </span>
-          <Badge variant="secondary" className="ml-auto">
-            {enabledMenuItems.length} / {operatorSmartboard.menuItems.length} menüpont
-          </Badge>
-        </div>
-        
-        <div className="p-4">
-          {/* Quick actions */}
-          <div className="flex gap-2 mb-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => toggleAllMenuItems(true)}
-            >
-              <Check className="w-3 h-3 mr-1" />
-              Mind bekapcsol
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => toggleAllMenuItems(false)}
-            >
-              Mind kikapcsol
-            </Button>
+      {/* SmartBoard Interfaces */}
+      <Accordion type="multiple" defaultValue={["operator", "search"]} className="space-y-4 mb-6">
+        {/* Operator Interface Card */}
+        <AccordionItem value="operator" className="bg-white border rounded-xl overflow-hidden border-primary/50">
+          <div className="flex items-center gap-4 px-4 py-2">
+            <Checkbox checked disabled className="opacity-50" />
+            <AccordionTrigger className="flex-1 hover:no-underline py-2">
+              <div className="flex items-center gap-3">
+                <Badge variant="default" className="bg-primary">
+                  Operátor interfész (nyitóoldal)
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  {operatorSmartboard.description}
+                </span>
+                <Badge variant="secondary" className="ml-2">
+                  {operatorMenuItems.length} / {operatorSmartboard.menuItems.length} menüpont
+                </Badge>
+              </div>
+            </AccordionTrigger>
           </div>
           
-          {/* Menu items */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {operatorSmartboard.menuItems.map((menuItem) => {
-              const isMenuEnabled = enabledMenuItems.includes(menuItem.id);
-              return (
-                <div
-                  key={menuItem.id}
-                  className={`flex items-center gap-3 p-3 rounded-lg border ${
-                    isMenuEnabled ? "bg-primary/5 border-primary/20" : "bg-muted/30"
-                  }`}
+          <AccordionContent className="px-4 pb-4">
+            <div className="pt-2 border-t">
+              {/* Quick actions */}
+              <div className="flex gap-2 mb-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toggleAllOperatorMenuItems(true)}
                 >
-                  <Checkbox
-                    id={`menu-${menuItem.id}`}
-                    checked={isMenuEnabled}
-                    onCheckedChange={() => toggleMenuItem(menuItem.id)}
-                  />
-                  <Label
-                    htmlFor={`menu-${menuItem.id}`}
-                    className={`cursor-pointer flex-1 ${
-                      !isMenuEnabled ? "text-muted-foreground" : ""
-                    }`}
-                  >
-                    {menuItem.label}
-                  </Label>
-                </div>
-              );
-            })}
+                  <Check className="w-3 h-3 mr-1" />
+                  Mind bekapcsol
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toggleAllOperatorMenuItems(false)}
+                >
+                  Mind kikapcsol
+                </Button>
+              </div>
+              
+              {/* Menu items */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {operatorSmartboard.menuItems.map((menuItem) => {
+                  const isMenuEnabled = operatorMenuItems.includes(menuItem.id);
+                  return (
+                    <div
+                      key={menuItem.id}
+                      className={`flex items-center gap-3 p-3 rounded-lg border ${
+                        isMenuEnabled ? "bg-primary/5 border-primary/20" : "bg-muted/30"
+                      }`}
+                    >
+                      <Checkbox
+                        id={`opr-menu-${menuItem.id}`}
+                        checked={isMenuEnabled}
+                        onCheckedChange={() => toggleOperatorMenuItem(menuItem.id)}
+                      />
+                      <Label
+                        htmlFor={`opr-menu-${menuItem.id}`}
+                        className={`cursor-pointer flex-1 ${
+                          !isMenuEnabled ? "text-muted-foreground" : ""
+                        }`}
+                      >
+                        {menuItem.label}
+                      </Label>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Search/Filter Interface Card */}
+        <AccordionItem value="search" className="bg-white border rounded-xl overflow-hidden border-primary/50">
+          <div className="flex items-center gap-4 px-4 py-2">
+            <Checkbox checked disabled className="opacity-50" />
+            <AccordionTrigger className="flex-1 hover:no-underline py-2">
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary">
+                  Keresés/Szűrés interfész
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  {searchSmartboard.description}
+                </span>
+                <Badge variant="secondary" className="ml-2">
+                  {searchMenuItems.length} / {searchSmartboard.menuItems.length} menüpont
+                </Badge>
+              </div>
+            </AccordionTrigger>
           </div>
-        </div>
-      </div>
+          
+          <AccordionContent className="px-4 pb-4">
+            <div className="pt-2 border-t">
+              {/* Quick actions */}
+              <div className="flex gap-2 mb-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toggleAllSearchMenuItems(true)}
+                >
+                  <Check className="w-3 h-3 mr-1" />
+                  Mind bekapcsol
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toggleAllSearchMenuItems(false)}
+                >
+                  Mind kikapcsol
+                </Button>
+              </div>
+              
+              {/* Menu items */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {searchSmartboard.menuItems.map((menuItem) => {
+                  const isMenuEnabled = searchMenuItems.includes(menuItem.id);
+                  return (
+                    <div
+                      key={menuItem.id}
+                      className={`flex items-center gap-3 p-3 rounded-lg border ${
+                        isMenuEnabled ? "bg-primary/5 border-primary/20" : "bg-muted/30"
+                      }`}
+                    >
+                      <Checkbox
+                        id={`search-menu-${menuItem.id}`}
+                        checked={isMenuEnabled}
+                        onCheckedChange={() => toggleSearchMenuItem(menuItem.id)}
+                      />
+                      <Label
+                        htmlFor={`search-menu-${menuItem.id}`}
+                        className={`cursor-pointer flex-1 ${
+                          !isMenuEnabled ? "text-muted-foreground" : ""
+                        }`}
+                      >
+                        {menuItem.label}
+                      </Label>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {/* Summary */}
       <div className="bg-white rounded-xl border p-4 mb-6">
         <h3 className="font-semibold mb-2">Összegzés</h3>
         <div className="flex flex-wrap gap-2">
           <Badge variant="default" className="bg-primary">
-            Operátor interfész (nyitóoldal) - {enabledMenuItems.length} menüpont
+            Operátor interfész (nyitóoldal) - {operatorMenuItems.length} menüpont
+          </Badge>
+          <Badge variant="secondary">
+            Keresés/Szűrés - {searchMenuItems.length} menüpont
           </Badge>
         </div>
       </div>

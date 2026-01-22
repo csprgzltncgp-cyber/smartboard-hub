@@ -2,8 +2,19 @@
 // In production, this would be replaced with API calls to the Laravel backend
 
 import { User, UserFormData, UserSmartboardPermission } from "@/types/user";
+import { getSmartboardById } from "@/config/smartboards";
 
-// Mock operators data - operators only have "operator" interface
+// Get default search smartboard permissions
+const getSearchPermissions = (): UserSmartboardPermission => {
+  const searchSmartboard = getSmartboardById("search");
+  return {
+    smartboardId: "search",
+    isDefault: false,
+    enabledMenuItems: searchSmartboard?.menuItems.map(m => m.id) || [],
+  };
+};
+
+// Mock operators data - operators have "operator" and "search" interfaces
 let operators: User[] = [
   {
     id: "op1",
@@ -22,6 +33,7 @@ let operators: User[] = [
         isDefault: true,
         enabledMenuItems: ["opr_dispatch", "opr_chat", "opr_eap_messages", "opr_qa"],
       },
+      getSearchPermissions(),
     ],
   },
   {
@@ -41,6 +53,7 @@ let operators: User[] = [
         isDefault: true,
         enabledMenuItems: ["opr_dispatch", "opr_chat"],
       },
+      getSearchPermissions(),
     ],
   },
   {
@@ -59,6 +72,7 @@ let operators: User[] = [
         isDefault: true,
         enabledMenuItems: ["opr_dispatch"],
       },
+      getSearchPermissions(),
     ],
   },
 ];
@@ -73,7 +87,7 @@ export const getOperatorById = (id: string): User | undefined => {
   return operators.find(u => u.id === id);
 };
 
-// Create new operator - automatically adds operator smartboard
+// Create new operator - automatically adds operator and search smartboards
 export const createOperator = (data: UserFormData): User => {
   const newOperator: User = {
     id: `op${Date.now()}`,
@@ -87,6 +101,7 @@ export const createOperator = (data: UserFormData): User => {
         isDefault: true,
         enabledMenuItems: ["opr_dispatch", "opr_chat", "opr_eap_messages", "opr_qa"],
       },
+      getSearchPermissions(),
     ],
   };
   operators.push(newOperator);
@@ -119,7 +134,7 @@ export const toggleOperatorActive = (id: string): User | undefined => {
   return operators[index];
 };
 
-// Update operator smartboard permissions (only operator interface)
+// Update operator smartboard permissions (operator and search interfaces)
 export const updateOperatorSmartboardPermissions = (
   id: string, 
   permissions: UserSmartboardPermission[]
@@ -127,8 +142,8 @@ export const updateOperatorSmartboardPermissions = (
   const index = operators.findIndex(u => u.id === id);
   if (index === -1) return undefined;
   
-  // Filter to only allow operator smartboard
-  const filteredPermissions = permissions.filter(p => p.smartboardId === "operator");
+  // Filter to only allow operator and search smartboards
+  const filteredPermissions = permissions.filter(p => p.smartboardId === "operator" || p.smartboardId === "search");
   
   operators[index] = {
     ...operators[index],
