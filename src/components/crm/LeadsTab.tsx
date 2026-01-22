@@ -15,7 +15,7 @@ const LeadsTab = ({ leads, onAddLead, onUpdateLead }: LeadsTabProps) => {
   const handleNewLead = () => {
     const newLead: CrmLead = {
       id: `lead-${Date.now()}`,
-      companyName: 'New Company',
+      companyName: '',
       assignedTo: mockColleagues[0]?.name || 'Unassigned',
       assignedToId: mockColleagues[0]?.id || '',
       status: 'lead',
@@ -23,13 +23,13 @@ const LeadsTab = ({ leads, onAddLead, onUpdateLead }: LeadsTabProps) => {
       contacts: [],
       meetings: [],
       details: {
-        name: 'New Company',
+        name: '',
         city: '',
-        country: 'Hungary',
+        country: '',
         industry: '',
         headcount: 0,
-        pillars: 3,
-        sessions: 4,
+        pillars: 0,
+        sessions: 0,
       },
       customDetails: [],
       notes: [],
