@@ -16,7 +16,7 @@ interface DigitalMenuItem {
 
 const digitalMenuItems: DigitalMenuItem[] = [
   { label: "Business Breakfast", path: "/dashboard/digital/business-breakfast", icon: Coffee },
-  { label: "Company Website", path: "/dashboard/digital/company-website", icon: Globe },
+  { label: "Blog", path: "/dashboard/digital/blog", icon: Globe },
   { label: "EAP online", path: "/dashboard/digital/eap-online", icon: Monitor },
   { label: "Prize game", path: "/dashboard/digital/prize-game", icon: Gift },
   { label: "Psychosocial risk assessment", path: "/dashboard/digital/psychosocial-risk-assessment", icon: Brain },
