@@ -92,7 +92,7 @@ const DashboardLayout = () => {
   const smartboardMenuRef = useRef<HTMLDivElement>(null);
   
   // Mock unread chat count - in production this would come from real-time data
-  const unreadChatCount = 3;
+  const unreadChatCount = 2;
 
   // Guard: if not authenticated, redirect to login
   useEffect(() => {
