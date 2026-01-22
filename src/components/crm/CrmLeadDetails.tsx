@@ -390,7 +390,7 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
             </div>
             <div className="flex items-center border-b border-border pb-2">
               <span className="w-24 text-sm font-medium">Headcount:</span>
-              <Input type="number" value={detailsForm.headcount} onChange={(e) => setDetailsForm(p => ({ ...p, headcount: parseInt(e.target.value) || 0 }))} className="flex-1 border-0 shadow-none" placeholder="Headcount" />
+              <Input type="number" value={detailsForm.headcount || ''} onChange={(e) => setDetailsForm(p => ({ ...p, headcount: parseInt(e.target.value) || 0 }))} className="flex-1 border-0 shadow-none" placeholder="Headcount" />
             </div>
             <div className="flex items-center border-b border-border pb-2">
               <span className="w-24 text-sm font-medium">Service:</span>
