@@ -27,7 +27,8 @@ import {
   Database,
   ListChecks,
   Contact,
-  Send
+  Send,
+  LogOut
 } from "lucide-react";
 import { SMARTBOARDS } from "@/config/smartboards";
 import cgpLogo from "@/assets/cgp_logo_green.svg";
@@ -220,6 +221,20 @@ const DashboardLayout = () => {
                 )}
               </button>
             ))}
+            {/* Kijelentkezés - always visible */}
+            <div className="border-t mt-2 pt-2">
+              <button
+                onClick={() => {
+                  // TODO: Implement logout logic
+                  navigate("/");
+                  setIsMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-destructive hover:bg-destructive/10 transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                <span>Kijelentkezés</span>
+              </button>
+            </div>
           </nav>
         </div>
       )}
@@ -264,6 +279,20 @@ const DashboardLayout = () => {
                   )}
                 </button>
               ))}
+              {/* Kijelentkezés - always visible */}
+              <div className="border-t mt-2">
+                <button
+                  onClick={() => {
+                    // TODO: Implement logout logic
+                    navigate("/");
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-destructive hover:bg-destructive/10 transition-colors"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span>Kijelentkezés</span>
+                </button>
+              </div>
             </nav>
           </div>
         )}
