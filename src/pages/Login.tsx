@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { LogIn, AlertTriangle } from "lucide-react";
 import cgpLogo from "@/assets/cgp_logo_green.svg";
 import whiteLogo from "@/assets/white_logo.svg";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -16,15 +18,22 @@ const Login = () => {
     setError(null);
     setIsLoading(true);
 
-    // TODO: Implement actual authentication
-    // For now, simulate a login attempt
     setTimeout(() => {
       setIsLoading(false);
-      // Demo: accept any username with password "smartboard"
-      if (!username || password !== "smartboard") {
+      
+      // Check password
+      if (password !== "smartboard") {
         setError("Hibás felhasználónév vagy jelszó.");
         return;
       }
+      
+      // Try to login with username
+      const user = login(username);
+      if (!user) {
+        setError("Hibás felhasználónév vagy jelszó.");
+        return;
+      }
+      
       // Navigate to dashboard on success
       navigate("/dashboard");
     }, 500);
@@ -88,6 +97,18 @@ const Login = () => {
               </button>
             </div>
           </form>
+
+          {/* Demo users hint */}
+          <div className="mt-4 p-4 bg-muted rounded-lg text-sm">
+            <p className="font-calibri-bold mb-2">Demo felhasználók:</p>
+            <ul className="space-y-1 text-muted-foreground">
+              <li><strong>tompa.anita</strong> - Account + Operatív</li>
+              <li><strong>kiss.barbara</strong> - Sales (CRM)</li>
+              <li><strong>janky.peter</strong> - Pénzügyi + Account</li>
+              <li><strong>kovacs.anna</strong> - Operátor</li>
+            </ul>
+            <p className="mt-2 text-xs">Jelszó: <strong>smartboard</strong></p>
+          </div>
 
           {/* Footer Branding */}
           <div className="flex items-center gap-2 mt-5 w-full">

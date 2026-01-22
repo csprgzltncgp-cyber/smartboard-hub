@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import { 
   ClipboardList, 
@@ -28,10 +28,13 @@ import {
   ListChecks,
   Contact,
   Send,
-  LogOut
+  LogOut,
+  User
 } from "lucide-react";
 import { SMARTBOARDS } from "@/config/smartboards";
 import cgpLogo from "@/assets/cgp_logo_green.svg";
+import { useAuth } from "@/contexts/AuthContext";
+import { filterMenuItems } from "@/utils/menuPermissions";
 
 interface MenuItem {
   label: string;
@@ -41,7 +44,7 @@ interface MenuItem {
   badgeColor?: string;
 }
 
-const menuItems: MenuItem[] = [
+const allMenuItems: MenuItem[] = [
   { label: "Adatok", icon: Database, path: "/dashboard/digital/data" },
   { label: "Blog", icon: Globe, path: "/dashboard/digital/blog" },
   { label: "Business Breakfast", icon: Coffee, path: "/dashboard/digital/business-breakfast" },
@@ -76,11 +79,23 @@ const menuItems: MenuItem[] = [
 const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { currentUser, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSmartboardMenuOpen, setIsSmartboardMenuOpen] = useState(false);
   const smartboardMenuRef = useRef<HTMLDivElement>(null);
 
+  // Filter menu items based on user permissions
+  const menuItems = useMemo(() => {
+    return filterMenuItems(allMenuItems, currentUser);
+  }, [currentUser]);
+
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+    setIsMenuOpen(false);
+  };
 
   // Close smartboard menu when clicking outside
   useEffect(() => {
@@ -223,12 +238,14 @@ const DashboardLayout = () => {
             ))}
             {/* Kijelentkezés - always visible */}
             <div className="border-t mt-2 pt-2">
+              {currentUser && (
+                <div className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground mb-2">
+                  <User className="w-4 h-4" />
+                  <span>{currentUser.name}</span>
+                </div>
+              )}
               <button
-                onClick={() => {
-                  // TODO: Implement logout logic
-                  navigate("/");
-                  setIsMenuOpen(false);
-                }}
+                onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-destructive hover:bg-destructive/10 transition-colors"
               >
                 <LogOut className="w-5 h-5" />
@@ -281,12 +298,14 @@ const DashboardLayout = () => {
               ))}
               {/* Kijelentkezés - always visible */}
               <div className="border-t mt-2">
+                {currentUser && (
+                  <div className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground">
+                    <User className="w-4 h-4" />
+                    <span>{currentUser.name}</span>
+                  </div>
+                )}
                 <button
-                  onClick={() => {
-                    // TODO: Implement logout logic
-                    navigate("/");
-                    setIsMenuOpen(false);
-                  }}
+                  onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-4 py-3 text-destructive hover:bg-destructive/10 transition-colors"
                 >
                   <LogOut className="w-5 h-5" />
