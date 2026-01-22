@@ -29,9 +29,9 @@ const getLeadStatusIcon = (status: LeadStatus) => {
 
 const getLeadStatusColor = (status: LeadStatus) => {
   switch (status) {
-    case 'lead': return 'bg-blue-500 text-white';
-    case 'offer': return 'bg-amber-500 text-white';
-    case 'deal': return 'bg-green-500 text-white';
+    case 'lead': return 'bg-cgp-teal-light text-white';
+    case 'offer': return 'bg-cgp-badge-new text-white';
+    case 'deal': return 'bg-cgp-badge-lastday text-white';
     case 'signed': return 'bg-cgp-task-completed-purple text-white';
     case 'incoming_company': return 'bg-cgp-teal text-white';
     default: return 'bg-muted text-muted-foreground';

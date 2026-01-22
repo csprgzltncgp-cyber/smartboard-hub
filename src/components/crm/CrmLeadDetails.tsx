@@ -39,9 +39,9 @@ const getMoodIcon = (mood?: CrmMeeting['mood']) => {
 
 // Lead status icons and colors for the status selector
 const leadStatusConfig: { status: LeadStatus; icon: React.ReactNode; label: string; activeClass: string }[] = [
-  { status: 'lead', icon: <Hourglass className="w-4 h-4" />, label: 'Lead', activeClass: 'bg-blue-500 text-white' },
-  { status: 'offer', icon: <Calculator className="w-4 h-4" />, label: 'Offer', activeClass: 'bg-amber-500 text-white' },
-  { status: 'deal', icon: <Handshake className="w-4 h-4" />, label: 'Deal', activeClass: 'bg-green-500 text-white' },
+  { status: 'lead', icon: <Hourglass className="w-4 h-4" />, label: 'Lead', activeClass: 'bg-cgp-teal-light text-white' },
+  { status: 'offer', icon: <Calculator className="w-4 h-4" />, label: 'Offer', activeClass: 'bg-cgp-badge-new text-white' },
+  { status: 'deal', icon: <Handshake className="w-4 h-4" />, label: 'Deal', activeClass: 'bg-cgp-badge-lastday text-white' },
   { status: 'signed', icon: <FileSignature className="w-4 h-4" />, label: 'Signed', activeClass: 'bg-cgp-task-completed-purple text-white' },
 ];
 
