@@ -62,9 +62,13 @@ const pathToSmartboardMenuMap: Record<string, string[]> = {
   "/dashboard/eap-messages": ["opr_eap_messages"],
   "/dashboard/qa": ["opr_qa"],
   
+  // Admin only menük
+  "/dashboard/users": ["admin_all"],
+  "/dashboard/settings/documents": ["admin_all"],
+  "/dashboard/feedback": ["admin_all"],
+  
   // Always visible
   "/dashboard": [], // TODO page - always visible
-  "/dashboard/users": ["admin_all"], // Admin only
 };
 
 // Get all enabled menu item IDs for a user
