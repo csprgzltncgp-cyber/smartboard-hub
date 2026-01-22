@@ -38,10 +38,10 @@ const getMoodIcon = (mood?: CrmMeeting['mood']) => {
 
 const getStatusIcon = (status?: CrmMeeting['status']) => {
   switch (status) {
-    case 'cancelled': return Hourglass; // Lead
-    case 'scheduled': return Calculator; // Offer
-    case 'completed': return Handshake; // Deal
-    case 'thumbs_up': return FileSignature; // Signed
+    case 'cancelled': return Hourglass;
+    case 'scheduled': return Calculator;
+    case 'completed': return Handshake;
+    case 'thumbs_up': return FileSignature;
     default: return null;
   }
 };
@@ -62,6 +62,7 @@ const moodIcons: { mood: MeetingMood; icon: React.ReactNode; color: string }[] =
 
 const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
   const [activeForm, setActiveForm] = useState<'meeting' | 'contact' | 'details' | 'note' | null>(null);
+  const [editingMeetingId, setEditingMeetingId] = useState<string | null>(null);
   
   // Form states
   const [meetingForm, setMeetingForm] = useState({
@@ -82,7 +83,6 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
     city: lead.details.city, 
     country: lead.details.country,
     industry: lead.details.industry, 
-    // Treat 0 as “no data” and store missing numeric values as NaN so inputs can be empty
     headcount: lead.details.headcount > 0 ? lead.details.headcount : Number.NaN,
     pillars: lead.details.pillars > 0 ? lead.details.pillars : Number.NaN,
     sessions: lead.details.sessions > 0 ? lead.details.sessions : Number.NaN,
@@ -90,34 +90,98 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
   
   const [noteForm, setNoteForm] = useState('');
 
-  const handleAddMeeting = () => {
-    if (!meetingForm.date || !meetingForm.contactName) return;
-    
-    const newMeeting: CrmMeeting = {
-      id: `m-${Date.now()}`,
-      date: meetingForm.date,
-      time: meetingForm.time,
-      contactId: '',
-      contactName: meetingForm.contactName,
-      contactTitle: meetingForm.address, // address used as contactTitle for location
-      contactType: meetingForm.contactType,
-      pillars: meetingForm.pillars,
-      sessions: meetingForm.sessions,
-      mood: meetingForm.mood,
-      status: meetingForm.status,
-      hasNotification: meetingForm.hasNotification,
-      note: meetingForm.note,
-    };
-    
+  // Reset meeting form
+  const resetMeetingForm = () => {
+    setMeetingForm({ date: '', time: '', contactName: '', address: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined, status: undefined, hasNotification: false, note: '' });
+    setEditingMeetingId(null);
+    setActiveForm(null);
+  };
+
+  // Start editing a meeting
+  const handleEditMeeting = (meeting: CrmMeeting) => {
+    setEditingMeetingId(meeting.id);
+    setMeetingForm({
+      date: meeting.date,
+      time: meeting.time,
+      contactName: meeting.contactName,
+      address: meeting.contactTitle || '',
+      contactType: meeting.contactType,
+      pillars: meeting.pillars,
+      sessions: meeting.sessions,
+      mood: meeting.mood,
+      status: meeting.status,
+      hasNotification: meeting.hasNotification || false,
+      note: meeting.note || '',
+    });
+    setActiveForm('meeting');
+  };
+
+  // Delete a meeting
+  const handleDeleteMeeting = (meetingId: string) => {
     const updatedLead = {
       ...lead,
-      meetings: [...lead.meetings, newMeeting],
+      meetings: lead.meetings.filter(m => m.id !== meetingId),
       updatedAt: new Date().toISOString(),
     };
-    
     onUpdate?.(updatedLead);
-    setMeetingForm({ date: '', time: '', contactName: '', address: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined, status: undefined, hasNotification: false, note: '' });
-    setActiveForm(null);
+  };
+
+  // Save meeting (add or update)
+  const handleSaveMeeting = () => {
+    if (!meetingForm.date || !meetingForm.contactName) return;
+    
+    if (editingMeetingId) {
+      // Update existing meeting
+      const updatedLead = {
+        ...lead,
+        meetings: lead.meetings.map(m => 
+          m.id === editingMeetingId 
+            ? {
+                ...m,
+                date: meetingForm.date,
+                time: meetingForm.time,
+                contactName: meetingForm.contactName,
+                contactTitle: meetingForm.address,
+                contactType: meetingForm.contactType,
+                pillars: meetingForm.pillars,
+                sessions: meetingForm.sessions,
+                mood: meetingForm.mood,
+                status: meetingForm.status,
+                hasNotification: meetingForm.hasNotification,
+                note: meetingForm.note,
+              }
+            : m
+        ),
+        updatedAt: new Date().toISOString(),
+      };
+      onUpdate?.(updatedLead);
+    } else {
+      // Add new meeting
+      const newMeeting: CrmMeeting = {
+        id: `m-${Date.now()}`,
+        date: meetingForm.date,
+        time: meetingForm.time,
+        contactId: '',
+        contactName: meetingForm.contactName,
+        contactTitle: meetingForm.address,
+        contactType: meetingForm.contactType,
+        pillars: meetingForm.pillars,
+        sessions: meetingForm.sessions,
+        mood: meetingForm.mood,
+        status: meetingForm.status,
+        hasNotification: meetingForm.hasNotification,
+        note: meetingForm.note,
+      };
+      
+      const updatedLead = {
+        ...lead,
+        meetings: [...lead.meetings, newMeeting],
+        updatedAt: new Date().toISOString(),
+      };
+      onUpdate?.(updatedLead);
+    }
+    
+    resetMeetingForm();
   };
 
   const handleAddContact = () => {
@@ -181,12 +245,23 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
     setActiveForm(null);
   };
 
+  // Handle opening the meeting form for new entries
+  const handleOpenMeetingForm = () => {
+    if (activeForm === 'meeting') {
+      resetMeetingForm();
+    } else {
+      setEditingMeetingId(null);
+      setMeetingForm({ date: '', time: '', contactName: '', address: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined, status: undefined, hasNotification: false, note: '' });
+      setActiveForm('meeting');
+    }
+  };
+
   return (
     <div className="bg-background p-4 space-y-4 border-t border-border">
       {/* Action Buttons Row */}
       <div className="flex gap-2 flex-wrap">
         <Button 
-          onClick={() => setActiveForm(activeForm === 'meeting' ? null : 'meeting')}
+          onClick={handleOpenMeetingForm}
           variant={activeForm === 'meeting' ? 'default' : 'outline'}
           className="rounded-none"
         >
@@ -223,8 +298,8 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
       {activeForm === 'meeting' && (
         <div className="p-4 bg-muted/30 rounded-sm space-y-4">
           <div className="flex justify-between items-center">
-            <h4 className="font-calibri-bold">Edit meeting</h4>
-            <button onClick={() => setActiveForm(null)}><X className="w-4 h-4" /></button>
+            <h4 className="font-calibri-bold">{editingMeetingId ? 'Edit meeting' : 'New meeting'}</h4>
+            <button onClick={resetMeetingForm}><X className="w-4 h-4" /></button>
           </div>
           
           <div className="grid grid-cols-2 gap-6">
@@ -342,7 +417,7 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
             </div>
           </div>
 
-          <Button onClick={handleAddMeeting} className="bg-primary w-full"><Save className="w-4 h-4 mr-2" /> Save</Button>
+          <Button onClick={handleSaveMeeting} className="bg-primary w-full"><Save className="w-4 h-4 mr-2" /> {editingMeetingId ? 'Update' : 'Save'}</Button>
         </div>
       )}
 
@@ -466,14 +541,33 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
           {lead.meetings.map((meeting, index) => {
             const ContactIcon = getContactTypeIcon(meeting.contactType);
             const MoodIcon = getMoodIcon(meeting.mood);
+            const StatusIcon = getStatusIcon(meeting.status);
             return (
               <div key={meeting.id} className={cn("flex items-center gap-3 p-3 rounded-sm", index === 0 ? "bg-primary/10" : "bg-muted/30")}>
-                <div className="bg-primary p-2 rounded-sm"><Edit className="w-4 h-4 text-primary-foreground" /></div>
+                <button 
+                  onClick={() => handleEditMeeting(meeting)}
+                  className="bg-primary p-2 rounded-sm hover:bg-primary/80 transition-colors"
+                  title="Edit meeting"
+                >
+                  <Edit className="w-4 h-4 text-primary-foreground" />
+                </button>
                 <span className="text-sm">{meeting.date} {meeting.time && `- ${meeting.time}`}</span>
                 <ContactIcon className="w-4 h-4 text-primary" />
                 <span className="text-sm text-muted-foreground">{meeting.contactName}</span>
                 <span className="text-sm text-muted-foreground">{meeting.pillars} PILL/{meeting.sessions} SESS</span>
+                {StatusIcon && (
+                  <div className="p-1 rounded-sm bg-muted">
+                    <StatusIcon className="w-4 h-4" />
+                  </div>
+                )}
                 {MoodIcon && <div className={cn("p-1 rounded-sm", meeting.mood === 'happy' ? "bg-green-100" : "bg-muted")}><MoodIcon className="w-4 h-4" /></div>}
+                <button 
+                  onClick={() => handleDeleteMeeting(meeting.id)}
+                  className="ml-auto p-1 hover:bg-destructive/20 rounded text-muted-foreground hover:text-destructive transition-colors"
+                  title="Delete meeting"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             );
           })}
