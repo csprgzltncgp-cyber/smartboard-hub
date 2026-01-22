@@ -65,9 +65,12 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
   
   // Form states
   const [meetingForm, setMeetingForm] = useState({
-    date: '', time: '', contactName: '', contactTitle: '',
+    date: '', time: '', title: '', contactName: '', contactTitle: '',
     contactType: 'email' as ContactType, pillars: 3, sessions: 4,
     mood: undefined as MeetingMood | undefined,
+    status: undefined as 'cancelled' | 'scheduled' | 'completed' | 'thumbs_up' | undefined,
+    hasNotification: false,
+    note: '',
   });
   
   const [contactForm, setContactForm] = useState({
@@ -102,7 +105,7 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
     };
     
     onUpdate?.(updatedLead);
-    setMeetingForm({ date: '', time: '', contactName: '', contactTitle: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined });
+    setMeetingForm({ date: '', time: '', title: '', contactName: '', contactTitle: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined, status: undefined, hasNotification: false, note: '' });
     setActiveForm(null);
   };
 
@@ -207,34 +210,124 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
 
       {/* Meeting Form */}
       {activeForm === 'meeting' && (
-        <div className="p-4 bg-muted/30 rounded-sm space-y-3">
+        <div className="p-4 bg-muted/30 rounded-sm space-y-4">
           <div className="flex justify-between items-center">
-            <h4 className="font-calibri-bold">New Meeting</h4>
+            <h4 className="font-calibri-bold">Edit meeting</h4>
             <button onClick={() => setActiveForm(null)}><X className="w-4 h-4" /></button>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Input type="date" value={meetingForm.date} onChange={(e) => setMeetingForm(p => ({ ...p, date: e.target.value }))} placeholder="Date" />
-            <Input type="time" value={meetingForm.time} onChange={(e) => setMeetingForm(p => ({ ...p, time: e.target.value }))} placeholder="Time" />
-            <Input value={meetingForm.contactName} onChange={(e) => setMeetingForm(p => ({ ...p, contactName: e.target.value }))} placeholder="Contact name" />
-            <Input value={meetingForm.contactTitle} onChange={(e) => setMeetingForm(p => ({ ...p, contactTitle: e.target.value }))} placeholder="Title" />
+          
+          <div className="grid grid-cols-2 gap-6">
+            {/* Left Column */}
+            <div className="space-y-3">
+              {/* Date/Time */}
+              <div className="flex items-center border-b border-border pb-2">
+                <div className="flex gap-2 flex-1">
+                  <Input type="date" value={meetingForm.date} onChange={(e) => setMeetingForm(p => ({ ...p, date: e.target.value }))} className="flex-1 border-0 shadow-none" />
+                  <span className="text-muted-foreground">-</span>
+                  <Input type="time" value={meetingForm.time} onChange={(e) => setMeetingForm(p => ({ ...p, time: e.target.value }))} className="flex-1 border-0 shadow-none" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <div className="flex items-center border-b border-border pb-2">
+                <Input value={meetingForm.title} onChange={(e) => setMeetingForm(p => ({ ...p, title: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Meeting title" />
+              </div>
+              
+              {/* Contact Name */}
+              <div className="flex items-center border-b border-border pb-2">
+                <Input value={meetingForm.contactName} onChange={(e) => setMeetingForm(p => ({ ...p, contactName: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Contact name" />
+              </div>
+
+              {/* Contact Type */}
+              <div className="flex items-center border-b border-border pb-2">
+                <span className="w-28 text-sm font-medium">Contact type</span>
+                <div className="flex gap-1 flex-1">
+                  {contactTypes.map(({ type, icon }) => (
+                    <button key={type} onClick={() => setMeetingForm(p => ({ ...p, contactType: type }))}
+                      className={cn("p-2 rounded", meetingForm.contactType === type ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pillars/Sessions */}
+              <div className="flex items-center border-b border-border pb-2">
+                <div className="flex items-center gap-2 flex-1">
+                  <Input type="number" value={meetingForm.pillars} onChange={(e) => setMeetingForm(p => ({ ...p, pillars: parseInt(e.target.value) || 0 }))} className="w-16 border-0 shadow-none" />
+                  <span className="text-sm text-muted-foreground">Pillars /</span>
+                  <Input type="number" value={meetingForm.sessions} onChange={(e) => setMeetingForm(p => ({ ...p, sessions: parseInt(e.target.value) || 0 }))} className="w-16 border-0 shadow-none" />
+                  <span className="text-sm text-muted-foreground">Sessions</span>
+                </div>
+              </div>
+
+              {/* Mood */}
+              <div className="flex items-center border-b border-border pb-2">
+                <span className="w-28 text-sm font-medium">Mood</span>
+                <div className="flex gap-1 flex-1">
+                  {moodIcons.map(({ mood, icon }) => (
+                    <button key={mood} onClick={() => setMeetingForm(p => ({ ...p, mood }))}
+                      className={cn("p-2 rounded", meetingForm.mood === mood ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Status */}
+              <div className="flex items-center border-b border-border pb-2">
+                <span className="w-28 text-sm font-medium">Status</span>
+                <div className="flex gap-1 flex-1">
+                  <button onClick={() => setMeetingForm(p => ({ ...p, status: 'cancelled' }))}
+                    className={cn("p-2 rounded", meetingForm.status === 'cancelled' ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                    <FileX className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setMeetingForm(p => ({ ...p, status: 'scheduled' }))}
+                    className={cn("p-2 rounded", meetingForm.status === 'scheduled' ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                    <Calendar className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setMeetingForm(p => ({ ...p, status: 'completed' }))}
+                    className={cn("p-2 rounded", meetingForm.status === 'completed' ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                    <ThumbsUp className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setMeetingForm(p => ({ ...p, status: 'thumbs_up' }))}
+                    className={cn("p-2 rounded", meetingForm.status === 'thumbs_up' ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                    <ThumbsUp className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Add notification */}
+              <div className="flex items-center border-b border-border pb-2">
+                <span className="w-28 text-sm font-medium">Add notification</span>
+                <button 
+                  onClick={() => setMeetingForm(p => ({ ...p, hasNotification: !p.hasNotification }))}
+                  className={cn("p-2 rounded", meetingForm.hasNotification ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                  <Bell className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column - Note */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Note</span>
+                <div className="flex gap-1">
+                  <button className="p-1 hover:bg-muted rounded"><Plus className="w-4 h-4" /></button>
+                  <button className="p-1 hover:bg-muted rounded"><FileText className="w-4 h-4" /></button>
+                </div>
+              </div>
+              <Textarea 
+                value={meetingForm.note} 
+                onChange={(e) => setMeetingForm(p => ({ ...p, note: e.target.value }))} 
+                placeholder="Add meeting notes..." 
+                rows={8}
+                className="resize-none"
+              />
+            </div>
           </div>
-          <div className="flex gap-2">
-            {contactTypes.map(({ type, icon, label }) => (
-              <button key={type} onClick={() => setMeetingForm(p => ({ ...p, contactType: type }))}
-                className={cn("p-2 rounded flex items-center gap-1 text-sm", meetingForm.contactType === type ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                {icon} {label}
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            {moodIcons.map(({ mood, icon, color }) => (
-              <button key={mood} onClick={() => setMeetingForm(p => ({ ...p, mood }))}
-                className={cn("p-2 rounded", meetingForm.mood === mood ? color : "bg-muted")}>
-                {icon}
-              </button>
-            ))}
-          </div>
-          <Button onClick={handleAddMeeting} className="bg-primary"><Save className="w-4 h-4 mr-2" /> Save</Button>
+
+          <Button onClick={handleAddMeeting} className="bg-primary w-full"><Save className="w-4 h-4 mr-2" /> Save</Button>
         </div>
       )}
 
