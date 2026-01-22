@@ -238,9 +238,9 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
                 <Input value={meetingForm.contactName} onChange={(e) => setMeetingForm(p => ({ ...p, contactName: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Contact name" />
               </div>
 
-              {/* Contact Title */}
+              {/* Address (meeting location) */}
               <div className="flex items-center border-b border-border pb-2">
-                <Input value={meetingForm.contactTitle} onChange={(e) => setMeetingForm(p => ({ ...p, contactTitle: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Title (e.g. HR director)" />
+                <Input value={meetingForm.contactTitle} onChange={(e) => setMeetingForm(p => ({ ...p, contactTitle: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Address (meeting location)" />
               </div>
 
               {/* Contact Type */}
