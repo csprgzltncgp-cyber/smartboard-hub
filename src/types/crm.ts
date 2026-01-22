@@ -7,7 +7,7 @@ export type ContactType = 'email' | 'video' | 'phone' | 'in_person';
 export type MeetingMood = 'happy' | 'neutral' | 'confused' | 'negative';
 
 // Status icons that control which tab the lead appears in
-export type LeadStatus = 'lead' | 'offer' | 'deal' | 'signed' | 'cancelled';
+export type LeadStatus = 'lead' | 'offer' | 'deal' | 'signed' | 'incoming_company' | 'cancelled';
 
 export interface CrmContact {
   id: string;

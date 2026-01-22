@@ -1,5 +1,5 @@
 import { CrmLead, LeadStatus } from "@/types/crm";
-import { ChevronDown, ChevronUp, Trash2, Hourglass, Calculator, Handshake, FileSignature } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2, Hourglass, Calculator, Handshake, FileSignature, Building2 } from "lucide-react";
 import { useState } from "react";
 import CrmLeadDetails from "./CrmLeadDetails";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ const getLeadStatusIcon = (status: LeadStatus) => {
     case 'offer': return Calculator;
     case 'deal': return Handshake;
     case 'signed': return FileSignature;
+    case 'incoming_company': return Building2;
     default: return Hourglass;
   }
 };
@@ -32,6 +33,7 @@ const getLeadStatusColor = (status: LeadStatus) => {
     case 'offer': return 'bg-amber-500 text-white';
     case 'deal': return 'bg-green-500 text-white';
     case 'signed': return 'bg-cgp-task-completed-purple text-white';
+    case 'incoming_company': return 'bg-cgp-teal text-white';
     default: return 'bg-muted text-muted-foreground';
   }
 };

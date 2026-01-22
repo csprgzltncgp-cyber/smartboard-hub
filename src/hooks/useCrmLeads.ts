@@ -45,7 +45,7 @@ export const useCrmLeads = () => {
   const leadsList = useMemo(() => getLeadsByStatus('lead'), [getLeadsByStatus]);
   const offersList = useMemo(() => getLeadsByStatus('offer'), [getLeadsByStatus]);
   const dealsList = useMemo(() => getLeadsByStatus('deal'), [getLeadsByStatus]);
-  const signedList = useMemo(() => getLeadsByStatus('signed'), [getLeadsByStatus]);
+  const signedList = useMemo(() => leads.filter(lead => lead.status === 'signed' || lead.status === 'incoming_company'), [leads]);
 
   return {
     leads,
