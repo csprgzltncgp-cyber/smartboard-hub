@@ -31,7 +31,6 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { label: "TODO", icon: ClipboardList, path: "/dashboard", badge: 5, badgeColor: "bg-green-500" },
-  { label: "Felhasználók", icon: UserCog, path: "/dashboard/users" },
   { label: "Összes eset", icon: FileText, path: "/dashboard/cases/closed" },
   { label: "Folyamatban lévő esetek", icon: ClipboardList, path: "/dashboard/cases/in-progress" },
   { label: "Digital", icon: Monitor, path: "/dashboard/digital" },
