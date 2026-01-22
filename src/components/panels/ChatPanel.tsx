@@ -57,18 +57,31 @@ const mockUsers: ChatUser[] = [
 const generateMockMessagesForUser = (currentUserId: string, chatPartnerId: string): Message[] => {
   // Different conversations for different logged-in users
   const conversationMap: Record<string, Record<string, Message[]>> = {
-    // Admin user's conversations
+    // Admin user's conversations (id: "5")
     "5": {
       "1": [
-        { id: "1", senderId: "1", text: "Admin, kérnék egy jogosultság módosítást.", timestamp: new Date(Date.now() - 7200000), isOwn: false },
-        { id: "2", senderId: "current", text: "Milyen jogosultságra lenne szükséged?", timestamp: new Date(Date.now() - 7100000), isOwn: true },
-        { id: "3", senderId: "1", text: "A pénzügyi modul hozzáférésére.", timestamp: new Date(Date.now() - 7000000), isOwn: false },
+        { id: "1", senderId: "1", text: "Jó reggelt Admin! 🌞 Sürgős kérésem lenne.", timestamp: new Date(Date.now() - 1800000), isOwn: false },
+        { id: "2", senderId: "current", text: "Szia Barbara! Mi a helyzet?", timestamp: new Date(Date.now() - 1700000), isOwn: true },
+        { id: "3", senderId: "1", text: "A pénzügyi modulhoz kellene hozzáférés Szabó Máriának.", timestamp: new Date(Date.now() - 1600000), isOwn: false },
+        { id: "4", senderId: "current", text: "Rendben, beállítom még ma.", timestamp: new Date(Date.now() - 1500000), isOwn: true },
       ],
       "2": [
-        { id: "1", senderId: "2", text: "Jó reggelt! Van egy technikai kérdésem.", timestamp: new Date(Date.now() - 86400000), isOwn: false },
+        { id: "1", senderId: "2", text: "Admin, láttad a heti riportot?", timestamp: new Date(Date.now() - 86400000), isOwn: false },
+        { id: "2", senderId: "current", text: "Igen, minden rendben van vele.", timestamp: new Date(Date.now() - 86300000), isOwn: true },
+      ],
+      "3": [
+        { id: "1", senderId: "3", text: "Tisztelt Admin! A holnapi képzés helyszíne megváltozott.", timestamp: new Date(Date.now() - 172800000), isOwn: false },
+        { id: "2", senderId: "current", text: "Köszönöm az értesítést, frissítem a naptárban.", timestamp: new Date(Date.now() - 172700000), isOwn: true },
+        { id: "3", senderId: "3", text: "Nagyszerű, köszönöm!", timestamp: new Date(Date.now() - 172600000), isOwn: false },
+      ],
+      "4": [
+        { id: "1", senderId: "4", text: "Megkaptam a rendszerfrissítés dokumentációt.", timestamp: new Date(Date.now() - 259200000), isOwn: false },
+      ],
+      "5": [
+        { id: "1", senderId: "5", text: "🎉 Üdvözöllek az Admin chatben!", timestamp: new Date(Date.now() - 3600000), isOwn: false },
       ],
     },
-    // Kiss Barbara's conversations
+    // Kiss Barbara's conversations (id: "2")
     "2": {
       "1": [
         { id: "1", senderId: "1", text: "Szia Barbi! Láttad a mai eseteket?", timestamp: new Date(Date.now() - 3600000), isOwn: false },
