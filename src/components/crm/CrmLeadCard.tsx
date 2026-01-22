@@ -1,5 +1,4 @@
 import { CrmLead } from "@/types/crm";
-import CrmProgressBar from "./CrmProgressBar";
 import { ChevronDown, ChevronUp, Bell, VolumeX } from "lucide-react";
 import { useState } from "react";
 import CrmLeadDetails from "./CrmLeadDetails";
@@ -35,7 +34,7 @@ const CrmLeadCard = ({ lead, onUpdate }: CrmLeadCardProps) => {
           )}
         </div>
 
-        <CrmProgressBar progress={lead.progress} className="w-[300px]" />
+        
 
         <button className="p-1 hover:bg-muted rounded">
           {isExpanded ? (
