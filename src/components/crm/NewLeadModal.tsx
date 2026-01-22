@@ -59,7 +59,8 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
       country: 'Hungary',
       industry: '',
       headcount: 0,
-      service: '3 PILL/4 SESS',
+      pillars: 3,
+      sessions: 4,
     },
     customDetails: [],
     notes: [],
@@ -180,7 +181,8 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
         country: 'Hungary',
         industry: '',
         headcount: 0,
-        service: '3 PILL/4 SESS',
+        pillars: 3,
+        sessions: 4,
       },
       customDetails: formData.customDetails || [],
       notes: formData.notes || [],
@@ -590,14 +592,30 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
 
               <div>
                 <Label className="text-sm mb-1 block">Service</Label>
-                <Input 
-                  value={formData.details?.service}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    details: { ...prev.details!, service: e.target.value } 
-                  }))}
-                  placeholder="e.g. 3 PILL/4 SESS"
-                />
+                <div className="flex items-center gap-2">
+                  <Input 
+                    type="number"
+                    value={formData.details?.pillars || 3}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      details: { ...prev.details!, pillars: parseInt(e.target.value) || 0 } 
+                    }))}
+                    placeholder="Pillars"
+                    className="w-20"
+                  />
+                  <span className="text-muted-foreground">PILL /</span>
+                  <Input 
+                    type="number"
+                    value={formData.details?.sessions || 4}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      details: { ...prev.details!, sessions: parseInt(e.target.value) || 0 } 
+                    }))}
+                    placeholder="Sessions"
+                    className="w-20"
+                  />
+                  <span className="text-muted-foreground">SESS</span>
+                </div>
               </div>
             </div>
           )}

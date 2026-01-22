@@ -48,7 +48,8 @@ export interface CrmCompanyDetails {
   country: string;
   industry: string;
   headcount: number;
-  service: string; // e.g., "3 PILL/4 SESS"
+  pillars: number;
+  sessions: number;
 }
 
 export interface CrmNote {

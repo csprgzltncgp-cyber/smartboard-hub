@@ -75,8 +75,13 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
   });
   
   const [detailsForm, setDetailsForm] = useState({
-    city: lead.details.city, country: lead.details.country,
-    industry: lead.details.industry, headcount: lead.details.headcount,
+    name: lead.companyName,
+    city: lead.details.city, 
+    country: lead.details.country,
+    industry: lead.details.industry, 
+    headcount: lead.details.headcount,
+    pillars: lead.details.pillars || 0,
+    sessions: lead.details.sessions || 0,
   });
   
   const [noteForm, setNoteForm] = useState('');
@@ -124,7 +129,16 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
   const handleUpdateDetails = () => {
     const updatedLead = {
       ...lead,
-      details: { ...lead.details, ...detailsForm },
+      companyName: detailsForm.name,
+      details: { 
+        ...lead.details, 
+        city: detailsForm.city,
+        country: detailsForm.country,
+        industry: detailsForm.industry,
+        headcount: detailsForm.headcount,
+        pillars: detailsForm.pillars,
+        sessions: detailsForm.sessions,
+      },
       updatedAt: new Date().toISOString(),
     };
     
@@ -251,16 +265,41 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
       {activeForm === 'details' && (
         <div className="p-4 bg-muted/30 rounded-sm space-y-3">
           <div className="flex justify-between items-center">
-            <h4 className="font-calibri-bold">Company Details</h4>
+            <h4 className="font-calibri-bold">Details</h4>
             <button onClick={() => setActiveForm(null)}><X className="w-4 h-4" /></button>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Input value={detailsForm.city} onChange={(e) => setDetailsForm(p => ({ ...p, city: e.target.value }))} placeholder="City" />
-            <Input value={detailsForm.country} onChange={(e) => setDetailsForm(p => ({ ...p, country: e.target.value }))} placeholder="Country" />
-            <Input value={detailsForm.industry} onChange={(e) => setDetailsForm(p => ({ ...p, industry: e.target.value }))} placeholder="Industry" />
-            <Input type="number" value={detailsForm.headcount} onChange={(e) => setDetailsForm(p => ({ ...p, headcount: parseInt(e.target.value) || 0 }))} placeholder="Headcount" />
+          <div className="space-y-2">
+            <div className="flex items-center border-b border-border pb-2">
+              <span className="w-24 text-sm font-medium">Name:</span>
+              <Input value={detailsForm.name} onChange={(e) => setDetailsForm(p => ({ ...p, name: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Company name" />
+            </div>
+            <div className="flex items-center border-b border-border pb-2">
+              <span className="w-24 text-sm font-medium">City:</span>
+              <Input value={detailsForm.city} onChange={(e) => setDetailsForm(p => ({ ...p, city: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="City" />
+            </div>
+            <div className="flex items-center border-b border-border pb-2">
+              <span className="w-24 text-sm font-medium">Country:</span>
+              <Input value={detailsForm.country} onChange={(e) => setDetailsForm(p => ({ ...p, country: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Country" />
+            </div>
+            <div className="flex items-center border-b border-border pb-2">
+              <span className="w-24 text-sm font-medium">Industry:</span>
+              <Input value={detailsForm.industry} onChange={(e) => setDetailsForm(p => ({ ...p, industry: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Industry" />
+            </div>
+            <div className="flex items-center border-b border-border pb-2">
+              <span className="w-24 text-sm font-medium">Headcount:</span>
+              <Input type="number" value={detailsForm.headcount} onChange={(e) => setDetailsForm(p => ({ ...p, headcount: parseInt(e.target.value) || 0 }))} className="flex-1 border-0 shadow-none" placeholder="Headcount" />
+            </div>
+            <div className="flex items-center border-b border-border pb-2">
+              <span className="w-24 text-sm font-medium">Service:</span>
+              <div className="flex-1 flex items-center gap-2">
+                <Input type="number" value={detailsForm.pillars} onChange={(e) => setDetailsForm(p => ({ ...p, pillars: parseInt(e.target.value) || 0 }))} className="w-16 border-0 shadow-none" placeholder="0" />
+                <span className="text-sm text-muted-foreground">Piller /</span>
+                <Input type="number" value={detailsForm.sessions} onChange={(e) => setDetailsForm(p => ({ ...p, sessions: parseInt(e.target.value) || 0 }))} className="w-16 border-0 shadow-none" placeholder="0" />
+                <span className="text-sm text-muted-foreground">Sessions</span>
+              </div>
+            </div>
           </div>
-          <Button onClick={handleUpdateDetails} className="bg-primary"><Save className="w-4 h-4 mr-2" /> Save</Button>
+          <Button onClick={handleUpdateDetails} className="bg-primary w-full"><Save className="w-4 h-4 mr-2" /> Save</Button>
         </div>
       )}
 
@@ -313,14 +352,18 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
       )}
 
       {/* Company Details Display */}
-      {(lead.details.city || lead.details.industry || lead.details.headcount > 0) && (
+      {(lead.details.city || lead.details.industry || lead.details.headcount > 0 || lead.details.pillars || lead.details.sessions) && (
         <div className="space-y-2">
           <h4 className="font-calibri-bold text-sm text-muted-foreground">Details</h4>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            {lead.details.city && <div className="p-2 bg-muted/30 rounded-sm">City: {lead.details.city}</div>}
-            {lead.details.country && <div className="p-2 bg-muted/30 rounded-sm">Country: {lead.details.country}</div>}
-            {lead.details.industry && <div className="p-2 bg-muted/30 rounded-sm">Industry: {lead.details.industry}</div>}
-            {lead.details.headcount > 0 && <div className="p-2 bg-muted/30 rounded-sm">Headcount: {lead.details.headcount}</div>}
+          <div className="space-y-1 text-sm bg-muted/30 p-3 rounded-sm">
+            {lead.companyName && <div className="border-b border-border pb-1">Name: {lead.companyName}</div>}
+            {lead.details.city && <div className="border-b border-border pb-1">City: {lead.details.city}</div>}
+            {lead.details.country && <div className="border-b border-border pb-1">Country: {lead.details.country}</div>}
+            {lead.details.industry && <div className="border-b border-border pb-1">Industry: {lead.details.industry}</div>}
+            {lead.details.headcount > 0 && <div className="border-b border-border pb-1">Headcount: {lead.details.headcount}</div>}
+            {(lead.details.pillars || lead.details.sessions) && (
+              <div>Service: {lead.details.pillars || 0} Piller / {lead.details.sessions || 0} Sessions</div>
+            )}
           </div>
         </div>
       )}

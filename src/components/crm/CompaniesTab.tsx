@@ -48,7 +48,7 @@ const CompaniesTab = ({ deals, signedCompanies }: CompaniesTabProps) => {
             >
               <span className="flex-1 text-sm">Company: {deal.companyName}</span>
               <span className="text-sm text-muted-foreground">CGP: {deal.assignedTo}</span>
-              <span className="text-sm text-muted-foreground">{deal.details.service}</span>
+              <span className="text-sm text-muted-foreground">{deal.details.pillars} PILL/{deal.details.sessions} SESS</span>
               
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-primary" />
@@ -91,7 +91,7 @@ const CompaniesTab = ({ deals, signedCompanies }: CompaniesTabProps) => {
                   
                   <span className="flex-1 text-sm">Company: {company.companyName}</span>
                   <span className="text-sm text-muted-foreground">CGP: {company.assignedTo}</span>
-                  <span className="text-sm text-muted-foreground">{company.details.service}</span>
+                  <span className="text-sm text-muted-foreground">{company.details.pillars} PILL/{company.details.sessions} SESS</span>
                   
                   <div className="flex items-center gap-2">
                     <Mail className="w-4 h-4 text-primary" />
@@ -141,7 +141,7 @@ const CompanyExpandedDetails = ({ company }: { company: CrmSignedCompany }) => {
               Headcount: {company.details.headcount}
             </div>
             <div className="p-3 bg-muted/30 rounded-sm text-sm">
-              Service: {company.details.service}
+              Service: {company.details.pillars} PILL/{company.details.sessions} SESS
             </div>
             <div className="p-3 bg-muted/30 rounded-sm text-sm">
               CGP responsible: {company.cgpResponsible}
