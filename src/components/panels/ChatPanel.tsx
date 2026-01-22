@@ -13,6 +13,7 @@ import {
   Circle,
   X
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Import avatar images
 import avatarBarbara from "@/assets/avatars/avatar-barbara.jpg";
@@ -52,34 +53,103 @@ const mockUsers: ChatUser[] = [
   { id: "5", name: "Tóth Éva", role: "staff", isOnline: false, lastMessage: "Jó reggelt!", avatarUrl: avatarEva },
 ];
 
-// Mock messages for demo
-const mockMessages: Message[] = [
-  { id: "1", senderId: "1", text: "Szia! Van egy sürgős esetem, tudsz segíteni?", timestamp: new Date(Date.now() - 3600000), isOwn: false },
-  { id: "2", senderId: "current", text: "Igen, küldöm az adatokat.", timestamp: new Date(Date.now() - 3500000), isOwn: true },
-  { id: "3", senderId: "1", text: "Rendben, köszönöm!", timestamp: new Date(Date.now() - 3400000), isOwn: false },
-];
+// Mock messages generator per user - in production this would come from API
+const generateMockMessagesForUser = (currentUserId: string, chatPartnerId: string): Message[] => {
+  // Different conversations for different logged-in users
+  const conversationMap: Record<string, Record<string, Message[]>> = {
+    // Admin user's conversations
+    "5": {
+      "1": [
+        { id: "1", senderId: "1", text: "Admin, kérnék egy jogosultság módosítást.", timestamp: new Date(Date.now() - 7200000), isOwn: false },
+        { id: "2", senderId: "current", text: "Milyen jogosultságra lenne szükséged?", timestamp: new Date(Date.now() - 7100000), isOwn: true },
+        { id: "3", senderId: "1", text: "A pénzügyi modul hozzáférésére.", timestamp: new Date(Date.now() - 7000000), isOwn: false },
+      ],
+      "2": [
+        { id: "1", senderId: "2", text: "Jó reggelt! Van egy technikai kérdésem.", timestamp: new Date(Date.now() - 86400000), isOwn: false },
+      ],
+    },
+    // Kiss Barbara's conversations
+    "2": {
+      "1": [
+        { id: "1", senderId: "1", text: "Szia Barbi! Láttad a mai eseteket?", timestamp: new Date(Date.now() - 3600000), isOwn: false },
+        { id: "2", senderId: "current", text: "Igen, már foglalkozom velük!", timestamp: new Date(Date.now() - 3500000), isOwn: true },
+      ],
+      "3": [
+        { id: "1", senderId: "3", text: "Barbara, a holnapi workshop részletei?", timestamp: new Date(Date.now() - 172800000), isOwn: false },
+        { id: "2", senderId: "current", text: "10 órától a nagy tárgyalóban.", timestamp: new Date(Date.now() - 172700000), isOwn: true },
+      ],
+    },
+  };
+
+  // Default conversation for any other user
+  const defaultMessages: Message[] = [
+    { id: "1", senderId: chatPartnerId, text: "Szia! Van egy sürgős esetem, tudsz segíteni?", timestamp: new Date(Date.now() - 3600000), isOwn: false },
+    { id: "2", senderId: "current", text: "Igen, küldöm az adatokat.", timestamp: new Date(Date.now() - 3500000), isOwn: true },
+    { id: "3", senderId: chatPartnerId, text: "Rendben, köszönöm!", timestamp: new Date(Date.now() - 3400000), isOwn: false },
+  ];
+
+  return conversationMap[currentUserId]?.[chatPartnerId] || defaultMessages;
+};
 
 const ChatPanel = ({ onClose }: ChatPanelProps) => {
+  const { currentUser } = useAuth();
+  const currentUserId = currentUser?.id || "guest";
+  
+  // User-specific localStorage keys
+  const getStorageKey = (key: string) => `cgpchat-${currentUserId}-${key}`;
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(() => {
-    // Restore selected user from localStorage
-    const savedUserId = localStorage.getItem("cgpchat-selected-user");
+    // Restore selected user from localStorage (user-specific)
+    const savedUserId = localStorage.getItem(getStorageKey("selected-user"));
     if (savedUserId) {
       return mockUsers.find(u => u.id === savedUserId) || null;
     }
     return null;
   });
-  const [messages, setMessages] = useState<Message[]>(mockMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [filterRole, setFilterRole] = useState<"all" | "operator" | "expert" | "staff">("all");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Save selected user to localStorage when it changes
+  // Load messages when selected user changes (user-specific)
   useEffect(() => {
     if (selectedUser) {
-      localStorage.setItem("cgpchat-selected-user", selectedUser.id);
+      // Try to load from localStorage first
+      const savedMessages = localStorage.getItem(getStorageKey(`messages-${selectedUser.id}`));
+      if (savedMessages) {
+        const parsed = JSON.parse(savedMessages);
+        // Convert timestamp strings back to Date objects
+        setMessages(parsed.map((m: Message & { timestamp: string }) => ({
+          ...m,
+          timestamp: new Date(m.timestamp)
+        })));
+      } else {
+        // Use mock messages for this user combination
+        setMessages(generateMockMessagesForUser(currentUserId, selectedUser.id));
+      }
+      localStorage.setItem(getStorageKey("selected-user"), selectedUser.id);
     }
-  }, [selectedUser]);
+  }, [selectedUser, currentUserId]);
+
+  // Save messages to localStorage when they change
+  useEffect(() => {
+    if (selectedUser && messages.length > 0) {
+      localStorage.setItem(getStorageKey(`messages-${selectedUser.id}`), JSON.stringify(messages));
+    }
+  }, [messages, selectedUser, currentUserId]);
+
+  // Reset state when user changes
+  useEffect(() => {
+    const savedUserId = localStorage.getItem(getStorageKey("selected-user"));
+    if (savedUserId) {
+      const user = mockUsers.find(u => u.id === savedUserId);
+      setSelectedUser(user || null);
+    } else {
+      setSelectedUser(null);
+      setMessages([]);
+    }
+  }, [currentUserId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
