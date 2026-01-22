@@ -36,7 +36,6 @@ const pathToSmartboardMenuMap: Record<string, string[]> = {
   
   // Sales menük
   "/dashboard/crm": ["sales_crm"],
-  "/dashboard/crm?tab=signed": ["sales_signed"],
   
   // Pénzügyi menük
   "/dashboard/invoices": ["fin_invoices"],
