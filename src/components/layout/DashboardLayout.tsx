@@ -142,6 +142,15 @@ const DashboardLayout = () => {
       "/dashboard/settings/operators/new": { label: "Új operátor regisztrálása", parentPath: "/dashboard/settings/operators", parentLabel: "Operátorok" },
     };
 
+    // Check for user edit route pattern
+    const editMatch = path.match(/^\/dashboard\/users\/([^/]+)\/edit$/);
+    if (editMatch) {
+      return [
+        { label: "Felhasználók", path: "/dashboard/users" },
+        { label: "Szerkesztés", path: path },
+      ];
+    }
+
     // Check for user permissions route pattern
     const permissionsMatch = path.match(/^\/dashboard\/users\/(\d+)\/permissions$/);
     if (permissionsMatch) {

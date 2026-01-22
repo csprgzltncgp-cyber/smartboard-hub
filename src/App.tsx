@@ -34,6 +34,7 @@ const App = () => (
               <Route index element={<Dashboard />} />
               <Route path="users" element={<UserList />} />
               <Route path="users/new" element={<UserForm />} />
+              <Route path="users/:userId/edit" element={<UserForm />} />
               <Route path="users/:userId/permissions" element={<UserPermissions />} />
               <Route path="settings/operators" element={<OperatorList />} />
               <Route path="settings/operators/new" element={<OperatorForm />} />
