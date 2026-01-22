@@ -1,5 +1,5 @@
 import { CrmLead, LeadStatus } from "@/types/crm";
-import { ChevronDown, ChevronUp, Bell, VolumeX, Trash2, Hourglass, Calculator, Handshake, FileSignature } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2, Hourglass, Calculator, Handshake, FileSignature } from "lucide-react";
 import { useState } from "react";
 import CrmLeadDetails from "./CrmLeadDetails";
 import { cn } from "@/lib/utils";
@@ -72,14 +72,6 @@ const CrmLeadCard = ({ lead, onUpdate, onDelete }: CrmLeadCardProps) => {
           </span>
           <span className="text-muted-foreground">-</span>
           <span className="text-muted-foreground">{lead.assignedTo}</span>
-          
-          {/* Alert Icons */}
-          {lead.isMuted && (
-            <VolumeX className="w-4 h-4 text-muted-foreground" />
-          )}
-          {lead.hasAlert && (
-            <Bell className="w-4 h-4 text-destructive" />
-          )}
         </div>
 
         <AlertDialog>
