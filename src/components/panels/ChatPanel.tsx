@@ -12,7 +12,9 @@ import {
   Headphones,
   Circle,
   X,
-  Trash2
+  Trash2,
+  CheckSquare,
+  Square
 } from "lucide-react";
 import {
   AlertDialog,
@@ -23,8 +25,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 
 // Import avatar images
@@ -139,6 +141,9 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
     const saved = localStorage.getItem(getStorageKey("deleted-conversations"));
     return saved ? JSON.parse(saved) : [];
   });
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedForDelete, setSelectedForDelete] = useState<string[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load messages when selected user changes (user-specific)
@@ -212,6 +217,28 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
       setMessages([]);
       localStorage.removeItem(getStorageKey("selected-user"));
     }
+  };
+
+  const handleDeleteSelected = () => {
+    selectedForDelete.forEach(userId => {
+      handleDeleteConversation(userId);
+    });
+    setSelectedForDelete([]);
+    setIsSelectMode(false);
+    setShowDeleteConfirm(false);
+  };
+
+  const toggleSelectForDelete = (userId: string) => {
+    setSelectedForDelete(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const handleExitSelectMode = () => {
+    setIsSelectMode(false);
+    setSelectedForDelete([]);
   };
 
   const handleRestoreAllConversations = () => {
@@ -290,44 +317,97 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
             </div>
           </div>
 
-          {/* Role filters */}
-          <div className="p-1.5 flex flex-wrap gap-1 border-b">
-            {[
-              { id: "all", label: "Mind" },
-              { id: "operator", label: "Op." },
-              { id: "expert", label: "Szak." },
-              { id: "staff", label: "Munk." },
-            ].map((role) => (
+          {/* Role filters + Select mode toggle */}
+          <div className="p-1.5 flex flex-wrap gap-1 border-b items-center justify-between">
+            <div className="flex flex-wrap gap-1">
+              {[
+                { id: "all", label: "Mind" },
+                { id: "operator", label: "Op." },
+                { id: "expert", label: "Szak." },
+                { id: "staff", label: "Munk." },
+              ].map((role) => (
+                <button
+                  key={role.id}
+                  onClick={() => setFilterRole(role.id as typeof filterRole)}
+                  className={`px-2 py-1 text-xs rounded-full transition-colors ${
+                    filterRole === role.id
+                      ? "bg-cgp-teal text-white"
+                      : "bg-muted hover:bg-muted/80"
+                  }`}
+                >
+                  {role.label}
+                </button>
+              ))}
+            </div>
+            {!isSelectMode ? (
               <button
-                key={role.id}
-                onClick={() => setFilterRole(role.id as typeof filterRole)}
-                className={`px-2 py-1 text-xs rounded-full transition-colors ${
-                  filterRole === role.id
-                    ? "bg-cgp-teal text-white"
-                    : "bg-muted hover:bg-muted/80"
-                }`}
+                onClick={() => setIsSelectMode(true)}
+                className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-colors"
+                title="Beszélgetések kijelölése"
               >
-                {role.label}
+                <CheckSquare className="w-4 h-4" />
               </button>
-            ))}
+            ) : (
+              <button
+                onClick={handleExitSelectMode}
+                className="px-2 py-1 text-xs bg-muted hover:bg-muted/80 rounded-full transition-colors"
+              >
+                Mégse
+              </button>
+            )}
           </div>
+
+          {/* Select mode action bar */}
+          {isSelectMode && (
+            <div className="p-1.5 border-b bg-destructive/5 flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                {selectedForDelete.length} kijelölve
+              </span>
+              <Button
+                size="sm"
+                variant="destructive"
+                className="h-6 text-xs rounded-xl"
+                disabled={selectedForDelete.length === 0}
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash2 className="w-3 h-3 mr-1" />
+                Törlés
+              </Button>
+            </div>
+          )}
 
           {/* Users list */}
           <ScrollArea className="flex-1">
             <div className="p-1.5 space-y-1">
               {filteredUsers.map((user) => {
                 const RoleIcon = getRoleIcon(user.role);
+                const isSelectedForDelete = selectedForDelete.includes(user.id);
                 return (
                   <div
                     key={user.id}
-                    className={`w-full p-2 rounded-lg flex items-start gap-2 transition-colors text-left group ${
-                      selectedUser?.id === user.id
+                    className={`w-full p-2 rounded-lg flex items-start gap-2 transition-all text-left ${
+                      selectedUser?.id === user.id && !isSelectMode
                         ? "bg-cgp-teal/10 border border-cgp-teal"
+                        : isSelectedForDelete
+                        ? "bg-destructive/10 border border-destructive/30"
                         : "hover:bg-muted"
                     }`}
                   >
+                    {/* Checkbox for select mode */}
+                    <div 
+                      className={`flex items-center justify-center transition-all duration-200 overflow-hidden ${
+                        isSelectMode ? "w-6 opacity-100" : "w-0 opacity-0"
+                      }`}
+                    >
+                      <Checkbox
+                        checked={isSelectedForDelete}
+                        onCheckedChange={() => toggleSelectForDelete(user.id)}
+                        className="data-[state=checked]:bg-destructive data-[state=checked]:border-destructive"
+                      />
+                    </div>
+                    
                     <button
-                      onClick={() => setSelectedUser(user)}
+                      onClick={() => isSelectMode ? toggleSelectForDelete(user.id) : setSelectedUser(user)}
                       className="flex items-start gap-2 flex-1 min-w-0"
                     >
                       <div className="relative flex-shrink-0">
@@ -346,7 +426,7 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium truncate">{user.name}</span>
-                          {user.unreadCount && (
+                          {user.unreadCount && !isSelectMode && (
                             <span className="bg-destructive text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
                               {user.unreadCount}
                             </span>
@@ -358,33 +438,6 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
                         </div>
                       </div>
                     </button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <button
-                          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/10 rounded transition-opacity"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                        </button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Beszélgetés törlése</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Biztosan törlöd a beszélgetést {user.name} felhasználóval? Ez a művelet nem vonható vissza.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Mégse</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeleteConversation(user.id)}
-                            className="bg-destructive hover:bg-destructive/90"
-                          >
-                            Törlés
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
                   </div>
                 );
               })}
@@ -474,6 +527,27 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
           )}
         </div>
       </div>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Beszélgetések törlése</AlertDialogTitle>
+            <AlertDialogDescription>
+              Biztosan törlöd a kijelölt {selectedForDelete.length} beszélgetést? Ez a művelet nem vonható vissza.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Mégse</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteSelected}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Törlés
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
