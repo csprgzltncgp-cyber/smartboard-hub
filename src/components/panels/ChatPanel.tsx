@@ -123,7 +123,7 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
       <div className="flex items-center justify-between px-4 py-3 border-b bg-cgp-teal/5">
         <h3 className="font-calibri-bold flex items-center gap-2">
           <MessageCircle className="w-5 h-5 text-cgp-teal" />
-          Belső Chat
+          CGPchat
         </h3>
         <button onClick={onClose} className="p-1 hover:bg-muted rounded">
           <X className="w-5 h-5" />
