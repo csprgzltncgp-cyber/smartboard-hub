@@ -167,7 +167,7 @@ export const SMARTBOARDS: SmartboardConfig[] = [
     menuItems: [
       { id: "opr_dispatch", label: "Eset kiközvetítése", path: "/dashboard/operator/dispatch" },
       { id: "opr_chat", label: "Chat", path: "/dashboard/operator/chat" },
-      { id: "opr_eap_messages", label: "Beérkezett EAP online üzenetek", path: "/dashboard/operator/eap-messages" },
+      { id: "opr_eap_messages", label: "EAP Online - üzenetek", path: "/dashboard/operator/eap-messages" },
       { id: "opr_cases_in_progress", label: "Folyamatban lévő esetek", path: "/dashboard/operator/cases-in-progress" },
       { id: "opr_experts_list", label: "Szakértők", path: "/dashboard/operator/experts" },
       { id: "opr_qa", label: "Q&A (Kisokos)", path: "/dashboard/operator/qa" },
