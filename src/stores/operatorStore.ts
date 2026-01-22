@@ -31,7 +31,7 @@ let operators: User[] = [
       {
         smartboardId: "operator",
         isDefault: true,
-        enabledMenuItems: ["opr_dispatch", "opr_chat", "opr_eap_messages", "opr_cases_in_progress", "opr_experts_list", "opr_qa"],
+        enabledMenuItems: ["opr_cases_in_progress", "opr_experts", "opr_chat", "opr_dispatch", "opr_eap_messages", "opr_qa"],
       },
       getSearchPermissions(),
     ],
@@ -51,7 +51,7 @@ let operators: User[] = [
       {
         smartboardId: "operator",
         isDefault: true,
-        enabledMenuItems: ["opr_dispatch", "opr_chat"],
+        enabledMenuItems: ["opr_cases_in_progress", "opr_experts", "opr_chat"],
       },
       getSearchPermissions(),
     ],
@@ -70,7 +70,7 @@ let operators: User[] = [
       {
         smartboardId: "operator",
         isDefault: true,
-        enabledMenuItems: ["opr_dispatch"],
+        enabledMenuItems: ["opr_cases_in_progress"],
       },
       getSearchPermissions(),
     ],
