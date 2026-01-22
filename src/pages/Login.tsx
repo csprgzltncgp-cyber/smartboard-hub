@@ -35,7 +35,7 @@ const Login = () => {
       {/* Content Container - keeps everything aligned */}
       <div className="w-full max-w-[458px] px-4 flex flex-col flex-1">
         {/* Header - aligned to form left edge */}
-        <header className="pt-8 mb-8">
+        <header className="pt-8 mb-4">
           <img 
             src={cgpLogo} 
             alt="Chestnut Global Partners" 
