@@ -4,7 +4,6 @@ import {
   ClipboardList, 
   FileText, 
   Monitor, 
-  Settings, 
   Users, 
   BarChart3, 
   FileSpreadsheet, 
@@ -14,9 +13,18 @@ import {
   Search,
   Menu,
   X,
+  LayoutDashboard,
+  Building2,
+  Globe,
+  MapPin,
+  Shield,
   UserCog,
-  ChevronRight,
-  LayoutDashboard
+  Headphones,
+  GraduationCap,
+  Coffee,
+  Gift,
+  Brain,
+  Database
 } from "lucide-react";
 import { SMARTBOARDS } from "@/config/smartboards";
 import cgpLogo from "@/assets/cgp_logo_green.svg";
@@ -30,11 +38,10 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
+  // Eredeti menüpontok
   { label: "TODO", icon: ClipboardList, path: "/dashboard", badge: 5, badgeColor: "bg-green-500" },
   { label: "Összes eset", icon: FileText, path: "/dashboard/cases/closed" },
   { label: "Folyamatban lévő esetek", icon: ClipboardList, path: "/dashboard/cases/in-progress" },
-  { label: "Digital", icon: Monitor, path: "/dashboard/digital" },
-  { label: "Beállítások", icon: Settings, path: "/dashboard/settings" },
   { label: "WS/CI/O", icon: Users, path: "/dashboard/outsources" },
   { label: "Riportok", icon: BarChart3, path: "/dashboard/reports" },
   { label: "Számlák", icon: FileSpreadsheet, path: "/dashboard/invoices" },
@@ -43,6 +50,23 @@ const menuItems: MenuItem[] = [
   { label: "Ügyfeleim", icon: Calendar, path: "/dashboard/activity-plan" },
   { label: "Feedback", icon: FileText, path: "/dashboard/feedback", badge: 3, badgeColor: "bg-orange-500" },
   { label: "Szakértő keresés", icon: Search, path: "/dashboard/affiliate-search" },
+  // Digital almenük (korábban Digital gyűjtőmenü alatt)
+  { label: "Business Breakfast", icon: Coffee, path: "/dashboard/digital/business-breakfast" },
+  { label: "Blog", icon: Globe, path: "/dashboard/digital/blog" },
+  { label: "EAP online", icon: Monitor, path: "/dashboard/digital/eap-online" },
+  { label: "Nyereményjáték", icon: Gift, path: "/dashboard/digital/prizegame" },
+  { label: "Pszichoszociális kockázatfelmérés", icon: Brain, path: "/dashboard/digital/psychosocial-risk-assessment" },
+  { label: "Adatok", icon: Database, path: "/dashboard/digital/data" },
+  // Beállítások almenük (korábban Beállítások gyűjtőmenü alatt)
+  { label: "Cégek", icon: Building2, path: "/dashboard/settings/companies" },
+  { label: "Országok", icon: Globe, path: "/dashboard/settings/countries" },
+  { label: "Városok", icon: MapPin, path: "/dashboard/settings/cities" },
+  { label: "Cég jogosultságok", icon: Shield, path: "/dashboard/settings/permissions" },
+  { label: "Felhasználók", icon: UserCog, path: "/dashboard/users" },
+  { label: "Szakértők", icon: Users, path: "/dashboard/settings/experts" },
+  { label: "Operátorok", icon: Headphones, path: "/dashboard/settings/operators" },
+  { label: "Operátor dokumentumok", icon: FileText, path: "/dashboard/settings/documents" },
+  { label: "Training Dashboard", icon: GraduationCap, path: "/dashboard/settings/training" },
 ];
 
 const DashboardLayout = () => {
@@ -73,21 +97,19 @@ const DashboardLayout = () => {
     const path = location.pathname;
     const breadcrumbs: { label: string; path: string }[] = [];
 
-    // Special routes mapping - now with Settings as parent for user routes
-    const specialRoutes: Record<string, { label: string; parentPath?: string; parentLabel?: string; grandParentPath?: string; grandParentLabel?: string }> = {
+    // Special routes mapping - egyszerűsített, nincs gyűjtőoldal
+    const specialRoutes: Record<string, { label: string; parentPath?: string; parentLabel?: string }> = {
       "/dashboard": { label: "TODO" },
-      "/dashboard/settings": { label: "Beállítások" },
-      "/dashboard/users": { label: "Felhasználók", parentPath: "/dashboard/settings", parentLabel: "Beállítások" },
-      "/dashboard/users/new": { label: "Új felhasználó regisztrálása", parentPath: "/dashboard/users", parentLabel: "Felhasználók", grandParentPath: "/dashboard/settings", grandParentLabel: "Beállítások" },
-      "/dashboard/settings/operators": { label: "Operátorok listája", parentPath: "/dashboard/settings", parentLabel: "Beállítások" },
-      "/dashboard/settings/operators/new": { label: "Új operátor regisztrálása", parentPath: "/dashboard/settings/operators", parentLabel: "Operátorok listája", grandParentPath: "/dashboard/settings", grandParentLabel: "Beállítások" },
+      "/dashboard/users": { label: "Felhasználók" },
+      "/dashboard/users/new": { label: "Új felhasználó regisztrálása", parentPath: "/dashboard/users", parentLabel: "Felhasználók" },
+      "/dashboard/settings/operators": { label: "Operátorok" },
+      "/dashboard/settings/operators/new": { label: "Új operátor regisztrálása", parentPath: "/dashboard/settings/operators", parentLabel: "Operátorok" },
     };
 
     // Check for user permissions route pattern
     const permissionsMatch = path.match(/^\/dashboard\/users\/(\d+)\/permissions$/);
     if (permissionsMatch) {
       return [
-        { label: "Beállítások", path: "/dashboard/settings" },
         { label: "Felhasználók", path: "/dashboard/users" },
         { label: "Jogosultságok szerkesztése", path: path },
       ];
@@ -97,8 +119,7 @@ const DashboardLayout = () => {
     const operatorPermissionsMatch = path.match(/^\/dashboard\/settings\/operators\/([^/]+)\/permissions$/);
     if (operatorPermissionsMatch) {
       return [
-        { label: "Beállítások", path: "/dashboard/settings" },
-        { label: "Operátorok listája", path: "/dashboard/settings/operators" },
+        { label: "Operátorok", path: "/dashboard/settings/operators" },
         { label: "Jogosultságok szerkesztése", path: path },
       ];
     }
@@ -106,10 +127,6 @@ const DashboardLayout = () => {
     // Check special routes first
     if (specialRoutes[path]) {
       const route = specialRoutes[path];
-      // Add grandparent if exists
-      if (route.grandParentPath && route.grandParentLabel) {
-        breadcrumbs.push({ label: route.grandParentLabel, path: route.grandParentPath });
-      }
       // Add parent if exists
       if (route.parentPath && route.parentLabel) {
         breadcrumbs.push({ label: route.parentLabel, path: route.parentPath });
