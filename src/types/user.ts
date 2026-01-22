@@ -14,6 +14,7 @@ export interface User {
   phone?: string;
   countryIds?: string[]; // Multiple countries support
   languageId?: string;
+  avatarUrl?: string; // Avatar image URL
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -28,6 +29,7 @@ export interface UserFormData {
   phone?: string;
   countryIds?: string[]; // Multiple countries support
   languageId?: string;
+  avatarUrl?: string; // Avatar image URL
 }
 
 // Mock countries for the form (based on Laravel database)
