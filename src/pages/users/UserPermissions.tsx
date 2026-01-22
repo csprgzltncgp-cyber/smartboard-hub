@@ -179,8 +179,8 @@ const UserPermissions = () => {
                     disabled={smartboard.alwaysEnabled}
                   />
                   
-                  {/* Default Star */}
-                  {enabled && (
+                  {/* Default Star - not available for 'search' smartboard */}
+                  {enabled && smartboard.id !== "search" && (
                     <Button
                       variant="ghost"
                       size="icon"
