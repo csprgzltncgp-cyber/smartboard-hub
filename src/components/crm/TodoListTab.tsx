@@ -1,5 +1,5 @@
 import { CrmTodoItem } from "@/data/crmMockData";
-import { Mail, Video, Phone, MessageSquare, Edit } from "lucide-react";
+import { Mail, Video, Phone, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -37,12 +37,6 @@ const TodoListTab = ({ items }: TodoListTabProps) => {
                 )}
                 onClick={() => setExpandedId(isExpanded ? null : item.id)}
               >
-                <div className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center",
-                  isExpanded ? "bg-destructive" : "bg-primary"
-                )}>
-                  <Edit className="w-4 h-4 text-primary-foreground" />
-                </div>
                 
                 <div className="flex-1 grid grid-cols-5 gap-4 items-center text-sm">
                   <span className="text-foreground">
