@@ -6,7 +6,8 @@ export type ContactType = 'email' | 'video' | 'phone' | 'in_person';
 
 export type MeetingMood = 'happy' | 'neutral' | 'confused' | 'negative';
 
-export type MeetingStatus = 'cancelled' | 'scheduled' | 'completed' | 'thumbs_up';
+// Status icons that control which tab the lead appears in
+export type LeadStatus = 'lead' | 'offer' | 'deal' | 'signed' | 'cancelled';
 
 export interface CrmContact {
   id: string;
@@ -30,7 +31,7 @@ export interface CrmMeeting {
   pillars: number;
   sessions: number;
   mood?: MeetingMood;
-  status?: MeetingStatus;
+  status?: 'cancelled' | 'scheduled' | 'completed' | 'thumbs_up';
   hasNotification?: boolean;
   note?: string;
 }
@@ -62,7 +63,7 @@ export interface CrmLead {
   companyName: string;
   assignedTo: string;
   assignedToId: string;
-  stage: CrmStage;
+  status: LeadStatus; // Controls which tab the lead appears in
   progress: number; // 0-100 percentage
   contacts: CrmContact[];
   meetings: CrmMeeting[];
@@ -106,3 +107,10 @@ export interface CrmFilters {
 
 // Tab types
 export type CrmTab = 'leads' | 'offers' | 'deals' | 'todolist' | 'companies' | 'reports';
+
+// Form data for creating new lead
+export interface NewLeadFormData {
+  companyName: string;
+  assignedTo: string;
+  assignedToId: string;
+}
