@@ -254,10 +254,77 @@ Az alábbi szövegek magyarul jelennek meg a frontenden:
 
 ---
 
+## 6. Avatar Rendszer
+
+### Felhasználói avatar mező
+
+A felhasználókhoz avatar kép társítható, amely megjelenik a menüben és a chat-ben.
+
+```sql
+-- Meglévő users táblához:
+ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500) DEFAULT NULL;
+```
+
+### Avatar tárolás
+
+- **Ajánlott**: Külső storage (S3, DigitalOcean Spaces, stb.)
+- **Max méret**: 5MB
+- **Formátumok**: JPG, PNG, GIF
+- **Resize**: Backend oldalon 200x200px-re méretezés ajánlott
+
+---
+
+## 7. CGPchat (Belső Chat) Modul
+
+### Chat üzenetek struktúra
+
+```sql
+CREATE TABLE chat_messages (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    conversation_id BIGINT UNSIGNED NOT NULL,
+    sender_id BIGINT UNSIGNED NOT NULL,
+    content TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id),
+    FOREIGN KEY (conversation_id) REFERENCES chat_conversations(id) ON DELETE CASCADE
+);
+
+CREATE TABLE chat_conversations (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE chat_participants (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    conversation_id BIGINT UNSIGNED NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    last_read_at TIMESTAMP NULL,
+    FOREIGN KEY (conversation_id) REFERENCES chat_conversations(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_participant (conversation_id, user_id)
+);
+```
+
+### Chat API Endpoints
+
+```
+GET  /api/chat/conversations                    - Beszélgetések listája
+GET  /api/chat/conversations/{id}/messages      - Üzenetek lekérése
+POST /api/chat/conversations/{id}/messages      - Új üzenet küldése
+PUT  /api/chat/messages/{id}/read               - Üzenet olvasottnak jelölése
+GET  /api/chat/unread-count                     - Olvasatlan üzenetek száma
+```
+
+---
+
 ## 🔄 Változásnapló
 
 | Dátum | Változás | Érintett terület |
 |-------|----------|------------------|
+| 2025-01-22 | Avatar rendszer hozzáadása (users.avatar_url mező) | Felhasználók |
+| 2025-01-22 | CGPchat adatbázis struktúra (messages, conversations, participants) | Chat |
 | 2025-01-22 | Belső Chat modul létrehozása (Slack-szerű) | Chat, Kommunikáció |
 | 2025-01-22 | Keresés/Szűrés univerzális panel létrehozása | Keresés, Szűrés |
 | 2025-01-22 | CRM modul teljes magyar lokalizáció | CRM, Lokalizáció |
@@ -279,3 +346,7 @@ Az alábbi szövegek magyarul jelennek meg a frontenden:
 3. **API válaszok**: A frontend JSON formátumban várja az adatokat, camelCase mezőnevekkel.
 
 4. **Perzisztencia**: A React frontend jelenleg localStorage-t használ demo célokra - éles környezetben ezt API hívásokra kell cserélni.
+
+5. **Avatar tárolás**: Ne adatbázisban tároljuk a képeket, hanem blob storage-ban (S3, stb.), és csak az URL-t mentsük.
+
+6. **Chat real-time**: Valós idejű chat-hez WebSocket vagy Pusher integráció szükséges.

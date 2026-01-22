@@ -522,6 +522,177 @@ className="flex items-center justify-between py-3 px-4 hover:bg-muted/50 rounded
 
 ---
 
+## 13. Avatar Rendszer
+
+### Avatar Upload Komponens
+A felhasználói regisztráció tartalmazza az avatar feltöltési lehetőséget:
+
+```tsx
+// Avatar megjelenítés
+<Avatar className="w-20 h-20 border-2 border-muted">
+  <AvatarImage src={formData.avatarUrl} alt="Avatar" />
+  <AvatarFallback className="bg-cgp-teal/10 text-cgp-teal text-xl">
+    {getInitials(name)}
+  </AvatarFallback>
+</Avatar>
+
+// Feltöltés gomb
+<Button variant="outline" size="sm" className="rounded-xl">
+  <Upload className="w-4 h-4 mr-2" />
+  Kép feltöltése
+</Button>
+```
+
+### Avatar a Főmenüben
+A bejelentkezett felhasználó avatárja megjelenik a kijelentkezés gomb felett:
+
+```tsx
+<Avatar className="w-8 h-8">
+  <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
+  <AvatarFallback className="bg-cgp-teal/20 text-cgp-teal text-xs">
+    {currentUser.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+  </AvatarFallback>
+</Avatar>
+```
+
+### Avatar Fájlok
+```
+src/assets/avatars/avatar-barbara.jpg
+src/assets/avatars/avatar-anna.jpg
+src/assets/avatars/avatar-janos.jpg
+src/assets/avatars/avatar-peter.jpg
+src/assets/avatars/avatar-eva.jpg
+```
+
+---
+
+## 14. CGPchat Panel
+
+### Panel Méret és Elhelyezés
+```tsx
+// Panel konténer - széles és magas
+className="bg-background border rounded-xl shadow-lg z-50 overflow-hidden w-[800px]"
+
+// Belső layout - felhasználók oldalsáv + chat terület
+<div className="flex h-[500px]">
+  <div className="w-72 border-r flex flex-col bg-muted/10">
+    {/* Felhasználók lista */}
+  </div>
+  <div className="flex-1 flex flex-col">
+    {/* Chat terület */}
+  </div>
+</div>
+```
+
+### Chat Felhasználó Lista Elem
+```tsx
+<button className={cn(
+  "w-full p-2 rounded-lg flex items-start gap-2 transition-colors text-left",
+  selectedUser?.id === user.id
+    ? "border-cgp-teal bg-cgp-teal/10 text-cgp-teal"
+    : "hover:bg-muted"
+)}>
+  <Avatar className="w-8 h-8">
+    <AvatarImage src={user.avatarUrl} alt={user.name} />
+    <AvatarFallback>...</AvatarFallback>
+  </Avatar>
+  {/* Online státusz jelző */}
+  <Circle className={cn(
+    "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5",
+    user.isOnline ? "text-green-500 fill-green-500" : "text-gray-400 fill-gray-400"
+  )} />
+</button>
+```
+
+### Chat Üzenet Buborék
+```tsx
+// Saját üzenet (jobb oldal)
+className="bg-cgp-teal text-white rounded-xl rounded-br-none px-3 py-2"
+
+// Kapott üzenet (bal oldal)
+className="bg-muted rounded-xl rounded-bl-none px-3 py-2"
+```
+
+### Chat Perzisztencia
+A kiválasztott beszélgetés localStorage-ban tárolódik:
+```tsx
+localStorage.getItem("cgpchat-selected-user")
+localStorage.setItem("cgpchat-selected-user", selectedUser.id)
+```
+
+---
+
+## 15. Keresés/Szűrés Panel
+
+### Keresési Kategóriák
+A keresési kategóriák sorrendje:
+1. **Szabad szavas keresés** (Search ikon) - globális kereső
+2. **Szakértők** (Users ikon)
+3. **Esetek** (FileText ikon)
+4. **Ügyfelek** (Building2 ikon)
+
+```tsx
+const searchCategories = [
+  { id: "freetext", label: "Szabad szavas keresés", icon: Search },
+  { id: "experts", label: "Szakértők", icon: Users },
+  { id: "cases", label: "Esetek", icon: FileText },
+  { id: "companies", label: "Ügyfelek", icon: Building2 },
+];
+```
+
+---
+
+## 16. Menügombok Stílusok
+
+### Jobb Felső Menügombok
+Három azonos szélességű gomb egymás alatt:
+
+```tsx
+// MENÜ gomb - sötétzöld
+className="w-48 text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-calibri-bold uppercase bg-cgp-teal hover:bg-cgp-teal/90"
+
+// KERESÉS és CHAT gombok - középzöld
+className="w-48 text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-calibri-bold uppercase bg-cgp-teal-light hover:bg-cgp-teal-light/90"
+```
+
+### Dropdown Panel Pozicionálás
+Minden panel a saját gombja alatt nyílik meg:
+```tsx
+<div className="relative">
+  <button>MENÜ</button>
+  {isMenuOpen && (
+    <div className="absolute top-full right-0 mt-2 z-50">
+      <MenuPanel />
+    </div>
+  )}
+</div>
+```
+
+---
+
+## 17. SmartBoard Üdvözlések
+
+### Személyre szabott köszöntés
+A SmartBoard nyitóoldalakon a felhasználó beceneve jelenik meg:
+
+```tsx
+// Becenév mapping
+const nicknames: Record<string, string> = {
+  "Barbara": "Barbi",
+  "Katalin": "Kati",
+  "János": "Jani",
+  "István": "Pisti",
+  "László": "Laci",
+  "Péter": "Peti",
+  // ...
+};
+
+// Üdvözlés megjelenítése
+<h1 className="text-3xl font-calibri-bold mb-2">Szia {greetingName}!</h1>
+```
+
+---
+
 ## Changelog
 
 | Dátum | Menüpont | Hozzáadott szabályok |
@@ -532,3 +703,8 @@ className="flex items-center justify-between py-3 px-4 hover:bg-muted/50 rounded
 | 2025-01-21 | Link színek | Kék link szín (#007bff) és hover állapot (#0056b3) tokenek hozzáadása |
 | 2025-01-22 | CRM Modul | CRM státusz színek szinkronizálva (Lead/Offer/Deal/Signed), státusz ikonok, lead kártya és tab fülek stílusok, szűrő dropdownok |
 | 2025-01-22 | SmartBoard | Összefoglaló panel kártyák, mai feladatok panel, panel layout szabályok |
+| 2025-01-22 | Avatar rendszer | Felhasználói avatar feltöltés, avatar megjelenítés főmenüben és CGPchat-ben |
+| 2025-01-22 | CGPchat | Chat panel layout (800px széles, 500px magas), felhasználó lista avatárokkal, üzenet buborékok, perzisztencia |
+| 2025-01-22 | Keresés/Szűrés | Szabad szavas keresés első helyen, keresési kategóriák átrendezése |
+| 2025-01-22 | Menügombok | Egységes szélesség (w-48), MENÜ sötétzöld, KERESÉS/CHAT középzöld, panel pozicionálás |
+| 2025-01-22 | SmartBoard üdvözlés | Személyre szabott "Szia Barbi!" köszöntés magyar becenevekkel |
