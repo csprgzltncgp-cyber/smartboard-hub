@@ -13,6 +13,7 @@ import UserPermissions from "./pages/users/UserPermissions";
 import OperatorList from "./pages/operators/OperatorList";
 import OperatorForm from "./pages/operators/OperatorForm";
 import OperatorPermissions from "./pages/operators/OperatorPermissions";
+import InputsPage from "./pages/inputs/InputsPage";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="settings/operators" element={<OperatorList />} />
             <Route path="settings/operators/new" element={<OperatorForm />} />
             <Route path="settings/operators/:operatorId/permissions" element={<OperatorPermissions />} />
+            <Route path="inputs" element={<InputsPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
