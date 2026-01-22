@@ -37,10 +37,10 @@ const SearchFilterPanel = ({ onClose }: SearchFilterPanelProps) => {
   const [filterProblemType, setFilterProblemType] = useState<string>("");
 
   const searchCategories = [
+    { id: "freetext", label: "Szabad szavas keresés", icon: Search, placeholder: "Írj be bármit..." },
     { id: "experts", label: "Szakértők", icon: Users, placeholder: "Név alapján..." },
     { id: "cases", label: "Esetek", icon: FileText, placeholder: "Esetszám alapján..." },
     { id: "companies", label: "Ügyfelek", icon: Building2, placeholder: "Cégnév alapján..." },
-    { id: "countries", label: "Országok", icon: Globe, placeholder: "Országnév alapján..." },
   ];
 
   const handleSearch = () => {
