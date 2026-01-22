@@ -1,8 +1,19 @@
 import { CrmLead, LeadStatus } from "@/types/crm";
-import { ChevronDown, ChevronUp, Bell, VolumeX, X, Hourglass, Calculator, Handshake, FileSignature } from "lucide-react";
+import { ChevronDown, ChevronUp, Bell, VolumeX, Trash2, Hourglass, Calculator, Handshake, FileSignature } from "lucide-react";
 import { useState } from "react";
 import CrmLeadDetails from "./CrmLeadDetails";
 import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Lead status icons matching NewLeadModal
 const getLeadStatusIcon = (status: LeadStatus) => {
@@ -34,8 +45,7 @@ interface CrmLeadCardProps {
 const CrmLeadCard = ({ lead, onUpdate, onDelete }: CrmLeadCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDelete = () => {
     onDelete?.(lead.id);
   };
 
@@ -72,13 +82,31 @@ const CrmLeadCard = ({ lead, onUpdate, onDelete }: CrmLeadCardProps) => {
           )}
         </div>
 
-        <button 
-          onClick={handleDelete}
-          className="p-1 hover:bg-destructive/20 rounded text-muted-foreground hover:text-destructive transition-colors"
-          title="Delete lead"
-        >
-          <X className="w-4 h-4" />
-        </button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button 
+              onClick={(e) => e.stopPropagation()}
+              className="p-1 hover:bg-destructive/20 rounded text-muted-foreground hover:text-destructive transition-colors"
+              title="Delete lead"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Lead törlése</AlertDialogTitle>
+              <AlertDialogDescription>
+                Biztosan törölni szeretnéd a "{lead.companyName || 'Unnamed Lead'}" leaded? Ez a művelet nem vonható vissza.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Mégse</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+                Törlés
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         <button className="p-1 hover:bg-muted rounded">
           {isExpanded ? (

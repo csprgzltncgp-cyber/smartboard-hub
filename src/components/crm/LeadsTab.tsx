@@ -44,7 +44,7 @@ const LeadsTab = ({ leads, onAddLead, onUpdateLead, onDeleteLead }: LeadsTabProp
       <div className="mb-4">
         <button 
           onClick={handleNewLead}
-          className="text-[#007bff] hover:text-[#0056b3] underline text-sm font-medium"
+          className="text-[#007bff] hover:text-[#0056b3] underline font-medium"
         >
           + New lead
         </button>
