@@ -157,7 +157,7 @@ const UserPermissions = () => {
       {/* SmartBoards */}
       <div className="space-y-4 mb-6">
         <Accordion type="multiple" className="space-y-2">
-          {SMARTBOARDS.filter(sb => sb.id !== "client").map((smartboard) => {
+          {SMARTBOARDS.filter(sb => sb.id !== "client" && sb.id !== "operator").map((smartboard) => {
             const enabled = isSmartboardEnabled(smartboard.id);
             const isDefault = isDefaultSmartboard(smartboard.id);
             const enabledItems = getEnabledMenuItems(smartboard.id);
