@@ -18,9 +18,9 @@ const digitalMenuItems: DigitalMenuItem[] = [
   { label: "Business Breakfast", path: "/dashboard/digital/business-breakfast", icon: Coffee },
   { label: "Blog", path: "/dashboard/digital/blog", icon: Globe },
   { label: "EAP online", path: "/dashboard/digital/eap-online", icon: Monitor },
-  { label: "Prize game", path: "/dashboard/digital/prize-game", icon: Gift },
-  { label: "Psychosocial risk assessment", path: "/dashboard/digital/psychosocial-risk-assessment", icon: Brain },
-  { label: "Data", path: "/dashboard/digital/data", icon: Database },
+  { label: "Nyereményjáték", path: "/dashboard/digital/prizegame", icon: Gift },
+  { label: "Pszichoszociális kockázatfelmérés", path: "/dashboard/digital/psychosocial-risk-assessment", icon: Brain },
+  { label: "Adatok", path: "/dashboard/digital/data", icon: Database },
 ];
 
 const DigitalMenu = () => {
