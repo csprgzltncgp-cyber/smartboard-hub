@@ -22,7 +22,7 @@ const settingsMenuItems: SettingsMenuItem[] = [
   { label: "Országok listája", path: "/dashboard/settings/countries", icon: Globe },
   { label: "Városok listája", path: "/dashboard/settings/cities", icon: MapPin },
   { label: "Jogosultságok listája", path: "/dashboard/settings/permissions", icon: Shield },
-  { label: "Adminok listája", path: "/dashboard/settings/admins", icon: UserCog },
+  { label: "Felhasználók", path: "/dashboard/users", icon: UserCog },
   { label: "Szakértők listája", path: "/dashboard/settings/experts", icon: Users },
   { label: "Operátorok listája", path: "/dashboard/settings/operators", icon: Headphones },
   { label: "Dokumentumok listája", path: "/dashboard/settings/documents", icon: FileText },
