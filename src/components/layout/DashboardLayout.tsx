@@ -337,12 +337,27 @@ const DashboardLayout = () => {
       {/* SmartBoard Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4" ref={smartboardMenuRef}>
         <div className="flex items-center gap-1 text-sm">
-          {/* SmartBoard root - not clickable yet */}
-          <div className="flex items-center gap-1 text-muted-foreground">
+          {/* SmartBoard root - clickable, navigates to user's default SmartBoard */}
+          <button 
+            onClick={() => {
+              // Find user's default smartboard and navigate to its first menu item
+              const defaultPermission = currentUser?.smartboardPermissions?.find(p => p.isDefault);
+              if (defaultPermission) {
+                const smartboard = SMARTBOARDS.find(sb => sb.id === defaultPermission.smartboardId);
+                if (smartboard && smartboard.menuItems.length > 0) {
+                  navigate(smartboard.menuItems[0].path);
+                  return;
+                }
+              }
+              // Fallback to TODO dashboard
+              navigate("/dashboard");
+            }}
+            className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+          >
             <span>...</span>
             <LayoutDashboard className="w-4 h-4" />
-            <span className="font-medium">SmartBoard</span>
-          </div>
+            <span className="font-medium hover:underline">SmartBoard</span>
+          </button>
 
           {/* Breadcrumb path */}
           {breadcrumbs.map((crumb, index) => (
