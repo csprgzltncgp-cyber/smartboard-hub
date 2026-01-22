@@ -39,6 +39,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { filterMenuItems } from "@/utils/menuPermissions";
 import SearchFilterPanel from "@/components/panels/SearchFilterPanel";
 import ChatPanel from "@/components/panels/ChatPanel";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface MenuItem {
   label: string;
@@ -302,9 +303,14 @@ const DashboardLayout = () => {
             {/* Kijelentkezés - always visible */}
             <div className="border-t mt-2 pt-2">
               {currentUser && (
-                <div className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground mb-2">
-                  <User className="w-4 h-4" />
-                  <span>{currentUser.name}</span>
+                <div className="flex items-center gap-3 px-4 py-2 text-sm text-muted-foreground mb-2">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
+                    <AvatarFallback className="bg-cgp-teal/20 text-cgp-teal text-xs">
+                      {currentUser.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium">{currentUser.name}</span>
                 </div>
               )}
               <button
@@ -369,9 +375,14 @@ const DashboardLayout = () => {
                   {/* Kijelentkezés - always visible */}
                   <div className="border-t mt-2">
                     {currentUser && (
-                      <div className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground">
-                        <User className="w-4 h-4" />
-                        <span>{currentUser.name}</span>
+                      <div className="flex items-center gap-3 px-4 py-2 text-sm text-muted-foreground">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
+                          <AvatarFallback className="bg-cgp-teal/20 text-cgp-teal text-xs">
+                            {currentUser.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{currentUser.name}</span>
                       </div>
                     )}
                     <button
