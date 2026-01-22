@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import { 
   ClipboardList, 
@@ -14,8 +14,11 @@ import {
   Search,
   Menu,
   X,
-  UserCog
+  UserCog,
+  ChevronRight,
+  LayoutDashboard
 } from "lucide-react";
+import { SMARTBOARDS } from "@/config/smartboards";
 import cgpLogo from "@/assets/cgp_logo_green.svg";
 
 interface MenuItem {
@@ -47,8 +50,24 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSmartboardMenuOpen, setIsSmartboardMenuOpen] = useState(false);
+  const smartboardMenuRef = useRef<HTMLDivElement>(null);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  // Close smartboard menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (smartboardMenuRef.current && !smartboardMenuRef.current.contains(event.target as Node)) {
+        setIsSmartboardMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Filter out client smartboard for the menu
+  const availableSmartboards = SMARTBOARDS.filter(sb => sb.id !== "client");
 
   return (
     <div className="min-h-screen bg-background">
@@ -156,11 +175,47 @@ const DashboardLayout = () => {
         )}
       </div>
 
-      {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4">
-        <p className="text-sm text-muted-foreground">
-          ... Home (TODO)
-        </p>
+      {/* SmartBoard Sitemap */}
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4" ref={smartboardMenuRef}>
+        <div className="relative inline-block">
+          <button
+            onClick={() => setIsSmartboardMenuOpen(!isSmartboardMenuOpen)}
+            className="text-sm text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
+          >
+            <span className="text-muted-foreground">...</span>
+            <LayoutDashboard className="w-4 h-4" />
+            <span className="font-medium">SmartBoard</span>
+            <ChevronRight className={`w-4 h-4 transition-transform ${isSmartboardMenuOpen ? "rotate-90" : ""}`} />
+          </button>
+
+          {/* SmartBoard Dropdown Menu */}
+          {isSmartboardMenuOpen && (
+            <div className="absolute left-0 top-full mt-2 w-72 bg-white shadow-lg rounded-xl z-50 border overflow-hidden">
+              <div className="py-2 max-h-96 overflow-y-auto">
+                {availableSmartboards.map((smartboard) => (
+                  <div key={smartboard.id} className="group">
+                    <button
+                      onClick={() => {
+                        // Navigate to the first menu item of this smartboard
+                        if (smartboard.menuItems.length > 0) {
+                          navigate(smartboard.menuItems[0].path);
+                        }
+                        setIsSmartboardMenuOpen(false);
+                      }}
+                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted transition-colors text-left"
+                    >
+                      <div>
+                        <span className="font-medium text-foreground">{smartboard.name}</span>
+                        <p className="text-xs text-muted-foreground mt-0.5">{smartboard.description}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Main Content */}
