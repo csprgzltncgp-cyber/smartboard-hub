@@ -17,12 +17,12 @@ const CrmFilterBar = ({
 }: CrmFilterBarProps) => {
   return (
     <div className="flex gap-4 mb-6">
-      <Select value={selectedCountry || ""} onValueChange={(v) => onCountryChange(v || null)}>
+      <Select value={selectedCountry || "all"} onValueChange={(v) => onCountryChange(v === "all" ? null : v)}>
         <SelectTrigger className="w-[200px] bg-primary text-primary-foreground border-0 rounded-none hover:bg-primary/90">
           <SelectValue placeholder="Choose country" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All countries</SelectItem>
+          <SelectItem value="all">All countries</SelectItem>
           {mockCountries.map((country) => (
             <SelectItem key={country} value={country}>
               {country}
@@ -31,12 +31,12 @@ const CrmFilterBar = ({
         </SelectContent>
       </Select>
 
-      <Select value={selectedColleague || ""} onValueChange={(v) => onColleagueChange(v || null)}>
+      <Select value={selectedColleague || "all"} onValueChange={(v) => onColleagueChange(v === "all" ? null : v)}>
         <SelectTrigger className="w-[200px] bg-primary text-primary-foreground border-0 rounded-none hover:bg-primary/90">
           <SelectValue placeholder="Choose a colleague" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All colleagues</SelectItem>
+          <SelectItem value="all">All colleagues</SelectItem>
           {mockColleagues.map((colleague) => (
             <SelectItem key={colleague.id} value={colleague.id}>
               {colleague.name}
