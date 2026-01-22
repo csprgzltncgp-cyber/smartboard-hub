@@ -69,23 +69,22 @@ const DashboardLayout = () => {
   // Filter out client smartboard for the menu
   const availableSmartboards = SMARTBOARDS.filter(sb => sb.id !== "client");
 
-  // Build breadcrumb based on current path
+  // Build breadcrumb based on current path (without SmartBoard category names like "Admin")
   const buildBreadcrumb = () => {
     const path = location.pathname;
     const breadcrumbs: { label: string; path: string }[] = [];
 
-    // Special routes that aren't in SmartBoard config
-    const specialRoutes: Record<string, { smartboard: string; label: string; parentPath?: string; parentLabel?: string }> = {
-      "/dashboard": { smartboard: "TODO", label: "TODO" },
-      "/dashboard/users": { smartboard: "Admin", label: "Felhasználók" },
-      "/dashboard/users/new": { smartboard: "Admin", label: "Új felhasználó regisztrálása", parentPath: "/dashboard/users", parentLabel: "Felhasználók" },
+    // Special routes mapping
+    const specialRoutes: Record<string, { label: string; parentPath?: string; parentLabel?: string }> = {
+      "/dashboard": { label: "TODO" },
+      "/dashboard/users": { label: "Felhasználók" },
+      "/dashboard/users/new": { label: "Új felhasználó regisztrálása", parentPath: "/dashboard/users", parentLabel: "Felhasználók" },
     };
 
     // Check for user permissions route pattern
     const permissionsMatch = path.match(/^\/dashboard\/users\/(\d+)\/permissions$/);
     if (permissionsMatch) {
       return [
-        { label: "Admin", path: "/dashboard/users" },
         { label: "Felhasználók", path: "/dashboard/users" },
         { label: "Jogosultságok szerkesztése", path: path },
       ];
@@ -94,23 +93,17 @@ const DashboardLayout = () => {
     // Check special routes first
     if (specialRoutes[path]) {
       const route = specialRoutes[path];
-      breadcrumbs.push({ label: route.smartboard, path: route.parentPath || path });
       if (route.parentPath && route.parentLabel) {
         breadcrumbs.push({ label: route.parentLabel, path: route.parentPath });
       }
-      if (route.parentPath) {
-        breadcrumbs.push({ label: route.label, path: path });
-      } else if (route.label !== route.smartboard) {
-        breadcrumbs.push({ label: route.label, path: path });
-      }
+      breadcrumbs.push({ label: route.label, path: path });
       return breadcrumbs;
     }
 
-    // Find matching SmartBoard and menu item
+    // Find matching SmartBoard menu item (without adding SmartBoard name)
     for (const smartboard of SMARTBOARDS) {
       const menuItem = smartboard.menuItems.find(item => path.startsWith(item.path));
       if (menuItem) {
-        breadcrumbs.push({ label: smartboard.name, path: smartboard.menuItems[0]?.path || "/dashboard" });
         breadcrumbs.push({ label: menuItem.label, path: menuItem.path });
         
         // Check for sub-routes (like /new, /edit, etc.)
@@ -241,43 +234,11 @@ const DashboardLayout = () => {
       {/* SmartBoard Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4" ref={smartboardMenuRef}>
         <div className="flex items-center gap-1 text-sm">
-          {/* SmartBoard root with dropdown */}
-          <div className="relative inline-block">
-            <button
-              onClick={() => setIsSmartboardMenuOpen(!isSmartboardMenuOpen)}
-              className="text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
-            >
-              <span className="text-muted-foreground">...</span>
-              <LayoutDashboard className="w-4 h-4" />
-              <span className="font-medium hover:underline">SmartBoard</span>
-            </button>
-
-            {/* SmartBoard Dropdown Menu */}
-            {isSmartboardMenuOpen && (
-              <div className="absolute left-0 top-full mt-2 w-72 bg-white shadow-lg rounded-xl z-50 border overflow-hidden">
-                <div className="py-2 max-h-96 overflow-y-auto">
-                  {availableSmartboards.map((smartboard) => (
-                    <div key={smartboard.id} className="group">
-                      <button
-                        onClick={() => {
-                          if (smartboard.menuItems.length > 0) {
-                            navigate(smartboard.menuItems[0].path);
-                          }
-                          setIsSmartboardMenuOpen(false);
-                        }}
-                        className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted transition-colors text-left"
-                      >
-                        <div>
-                          <span className="font-medium text-foreground">{smartboard.name}</span>
-                          <p className="text-xs text-muted-foreground mt-0.5">{smartboard.description}</p>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+          {/* SmartBoard root - not clickable yet */}
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <span>...</span>
+            <LayoutDashboard className="w-4 h-4" />
+            <span className="font-medium">SmartBoard</span>
           </div>
 
           {/* Breadcrumb path */}
