@@ -79,6 +79,8 @@ const DashboardLayout = () => {
       "/dashboard/settings": { label: "Beállítások" },
       "/dashboard/users": { label: "Felhasználók", parentPath: "/dashboard/settings", parentLabel: "Beállítások" },
       "/dashboard/users/new": { label: "Új felhasználó regisztrálása", parentPath: "/dashboard/users", parentLabel: "Felhasználók", grandParentPath: "/dashboard/settings", grandParentLabel: "Beállítások" },
+      "/dashboard/settings/operators": { label: "Operátorok listája", parentPath: "/dashboard/settings", parentLabel: "Beállítások" },
+      "/dashboard/settings/operators/new": { label: "Új operátor regisztrálása", parentPath: "/dashboard/settings/operators", parentLabel: "Operátorok listája", grandParentPath: "/dashboard/settings", grandParentLabel: "Beállítások" },
     };
 
     // Check for user permissions route pattern
@@ -87,6 +89,16 @@ const DashboardLayout = () => {
       return [
         { label: "Beállítások", path: "/dashboard/settings" },
         { label: "Felhasználók", path: "/dashboard/users" },
+        { label: "Jogosultságok szerkesztése", path: path },
+      ];
+    }
+
+    // Check for operator permissions route pattern
+    const operatorPermissionsMatch = path.match(/^\/dashboard\/settings\/operators\/([^/]+)\/permissions$/);
+    if (operatorPermissionsMatch) {
+      return [
+        { label: "Beállítások", path: "/dashboard/settings" },
+        { label: "Operátorok listája", path: "/dashboard/settings/operators" },
         { label: "Jogosultságok szerkesztése", path: path },
       ];
     }
