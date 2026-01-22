@@ -5,6 +5,10 @@ import { User, UserFormData, UserSmartboardPermission } from "@/types/user";
 
 // Import avatar images
 import avatarBarbara from "@/assets/avatars/avatar-barbara.jpg";
+import avatarAnita from "@/assets/avatars/avatar-anita.jpg";
+import avatarPeter from "@/assets/avatars/avatar-peter.jpg";
+import avatarMaria from "@/assets/avatars/avatar-maria.jpg";
+import avatarAdmin from "@/assets/avatars/avatar-admin.jpg";
 
 // Mock users data
 let users: User[] = [
@@ -16,6 +20,7 @@ let users: User[] = [
     phone: "+36 30 123 4567",
     countryIds: ["hu"],
     languageId: "hu",
+    avatarUrl: avatarAnita,
     active: true,
     createdAt: new Date("2022-01-15"),
     updatedAt: new Date("2024-12-01"),
@@ -58,6 +63,7 @@ let users: User[] = [
     username: "janky.peter",
     countryIds: ["hu"],
     languageId: "hu",
+    avatarUrl: avatarPeter,
     active: true,
     createdAt: new Date("2021-06-10"),
     updatedAt: new Date("2024-10-20"),
@@ -81,10 +87,17 @@ let users: User[] = [
     username: "szabo.maria",
     countryIds: ["hu"],
     languageId: "hu",
+    avatarUrl: avatarMaria,
     active: false,
     createdAt: new Date("2023-02-01"),
     updatedAt: new Date("2024-08-10"),
-    smartboardPermissions: [],
+    smartboardPermissions: [
+      {
+        smartboardId: "operative",
+        isDefault: true,
+        enabledMenuItems: ["op_experts_list", "op_expert_search", "op_all_cases"],
+      },
+    ],
   },
   {
     id: "5",
@@ -93,6 +106,7 @@ let users: User[] = [
     username: "admin",
     countryIds: ["hu"],
     languageId: "hu",
+    avatarUrl: avatarAdmin,
     active: true,
     createdAt: new Date("2021-01-01"),
     updatedAt: new Date("2024-12-01"),
