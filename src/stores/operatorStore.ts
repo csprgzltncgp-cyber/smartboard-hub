@@ -31,7 +31,7 @@ let operators: User[] = [
       {
         smartboardId: "operator",
         isDefault: true,
-        enabledMenuItems: ["opr_dispatch", "opr_chat", "opr_eap_messages", "opr_qa"],
+        enabledMenuItems: ["opr_dispatch", "opr_chat", "opr_eap_messages", "opr_cases_in_progress", "opr_experts_list", "opr_qa"],
       },
       getSearchPermissions(),
     ],
@@ -99,7 +99,7 @@ export const createOperator = (data: UserFormData): User => {
       {
         smartboardId: "operator",
         isDefault: true,
-        enabledMenuItems: ["opr_dispatch", "opr_chat", "opr_eap_messages", "opr_qa"],
+        enabledMenuItems: ["opr_dispatch", "opr_chat", "opr_eap_messages", "opr_cases_in_progress", "opr_experts_list", "opr_qa"],
       },
       getSearchPermissions(),
     ],
