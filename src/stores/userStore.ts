@@ -3,6 +3,9 @@
 
 import { User, UserFormData, UserSmartboardPermission } from "@/types/user";
 
+// Import avatar images
+import avatarBarbara from "@/assets/avatars/avatar-barbara.jpg";
+
 // Mock users data
 let users: User[] = [
   {
@@ -36,6 +39,7 @@ let users: User[] = [
     username: "kiss.barbara",
     countryIds: ["hu"],
     languageId: "hu",
+    avatarUrl: avatarBarbara,
     active: true,
     createdAt: new Date("2022-03-20"),
     updatedAt: new Date("2024-11-15"),
