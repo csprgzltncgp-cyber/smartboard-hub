@@ -15,7 +15,7 @@ const SignedTab = ({ signedLeads, onUpdateLead, onChangeLeadStatus, onDeleteLead
       <div className="border border-border rounded-sm overflow-hidden">
         {signedLeads.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            No signed leads yet.
+            Még nincsenek aláírt szerződések.
           </div>
         ) : (
           signedLeads.map((lead) => (

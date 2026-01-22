@@ -40,11 +40,11 @@ const TodoListTab = ({ items }: TodoListTabProps) => {
                 
                 <div className="flex-1 grid grid-cols-5 gap-4 items-center text-sm">
                   <span className="text-foreground">
-                    Next contact: {item.nextContactDate} - {item.nextContactTime}
+                    Következő kapcsolatfelvétel: {item.nextContactDate} - {item.nextContactTime}
                   </span>
                   
                   <span className="text-muted-foreground">
-                    Name of contact: {item.contactName}
+                    Kapcsolattartó: {item.contactName}
                   </span>
                   
                   <span className="text-muted-foreground">
@@ -52,7 +52,7 @@ const TodoListTab = ({ items }: TodoListTabProps) => {
                   </span>
                   
                   <span className="text-muted-foreground">
-                    Company: {item.companyName}
+                    Cég: {item.companyName}
                   </span>
                   
                   {/* Contact type icon instead of progress % */}
@@ -69,19 +69,19 @@ const TodoListTab = ({ items }: TodoListTabProps) => {
                 <div className="bg-muted/20 p-4 space-y-3">
                   <div className="grid grid-cols-5 gap-4 text-sm">
                     <div>
-                      <span className="text-muted-foreground">Country: </span>
+                      <span className="text-muted-foreground">Ország: </span>
                       <span className="text-foreground">{item.country}</span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">City: </span>
+                      <span className="text-muted-foreground">Város: </span>
                       <span className="text-foreground">{item.city}</span>
                     </div>
                     <div className="col-span-2">
-                      <span className="text-muted-foreground">Address: </span>
+                      <span className="text-muted-foreground">Cím: </span>
                       <span className="text-foreground">{item.address}</span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Phone: </span>
+                      <span className="text-muted-foreground">Telefon: </span>
                       <span className="text-foreground">{item.phone}</span>
                     </div>
                   </div>

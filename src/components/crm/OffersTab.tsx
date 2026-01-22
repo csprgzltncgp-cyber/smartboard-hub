@@ -15,7 +15,7 @@ const OffersTab = ({ offers, onUpdateLead, onChangeLeadStatus, onDeleteLead }: O
       <div className="border border-border rounded-sm overflow-hidden">
         {offers.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            No offers yet.
+            Még nincsenek ajánlatok.
           </div>
         ) : (
           offers.map((offer) => (

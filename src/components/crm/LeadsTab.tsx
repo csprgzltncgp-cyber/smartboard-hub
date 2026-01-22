@@ -47,7 +47,7 @@ const LeadsTab = ({ leads, onAddLead, onUpdateLead, onChangeLeadStatus, onDelete
           onClick={handleNewLead}
           className="text-[#007bff] hover:text-[#0056b3] underline font-medium"
         >
-          + New lead
+          + Új lead
         </button>
       </div>
 
@@ -55,7 +55,7 @@ const LeadsTab = ({ leads, onAddLead, onUpdateLead, onChangeLeadStatus, onDelete
       <div className="border border-border rounded-sm overflow-hidden">
         {leads.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            No leads yet. Click "+ New lead" to create one.
+            Még nincsenek leadek. Kattints a "+ Új lead" gombra egy új létrehozásához.
           </div>
         ) : (
           leads.map((lead) => (

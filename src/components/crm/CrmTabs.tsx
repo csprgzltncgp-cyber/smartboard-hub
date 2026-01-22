@@ -7,12 +7,12 @@ interface CrmTabsProps {
 }
 
 const tabs: { id: CrmTab; label: string }[] = [
-  { id: 'leads', label: 'LEADS' },
-  { id: 'offers', label: 'OFFERS' },
-  { id: 'deals', label: 'DEALS' },
-  { id: 'signed', label: 'SIGNED' },
-  { id: 'todolist', label: 'TO DO LIST' },
-  { id: 'reports', label: 'REPORTS' },
+  { id: 'leads', label: 'LEADEK' },
+  { id: 'offers', label: 'AJÁNLATOK' },
+  { id: 'deals', label: 'TÁRGYALÁSOK' },
+  { id: 'signed', label: 'ALÁÍRT' },
+  { id: 'todolist', label: 'TEENDŐK' },
+  { id: 'reports', label: 'RIPORTOK' },
 ];
 
 const CrmTabs = ({ activeTab, onTabChange }: CrmTabsProps) => {

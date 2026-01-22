@@ -40,16 +40,16 @@ const getMoodIcon = (mood?: CrmMeeting['mood']) => {
 // Lead status icons and colors for the status selector
 const leadStatusConfig: { status: LeadStatus; icon: React.ReactNode; label: string; activeClass: string }[] = [
   { status: 'lead', icon: <Hourglass className="w-4 h-4" />, label: 'Lead', activeClass: 'bg-cgp-teal-light text-white' },
-  { status: 'offer', icon: <Calculator className="w-4 h-4" />, label: 'Offer', activeClass: 'bg-cgp-badge-new text-white' },
-  { status: 'deal', icon: <Handshake className="w-4 h-4" />, label: 'Deal', activeClass: 'bg-cgp-badge-lastday text-white' },
-  { status: 'signed', icon: <FileSignature className="w-4 h-4" />, label: 'Signed', activeClass: 'bg-cgp-task-completed-purple text-white' },
+  { status: 'offer', icon: <Calculator className="w-4 h-4" />, label: 'Ajánlat', activeClass: 'bg-cgp-badge-new text-white' },
+  { status: 'deal', icon: <Handshake className="w-4 h-4" />, label: 'Tárgyalás', activeClass: 'bg-cgp-badge-lastday text-white' },
+  { status: 'signed', icon: <FileSignature className="w-4 h-4" />, label: 'Aláírt', activeClass: 'bg-cgp-task-completed-purple text-white' },
 ];
 
 const contactTypes: { type: ContactType; icon: React.ReactNode; label: string }[] = [
   { type: 'email', icon: <Mail className="w-4 h-4" />, label: 'Email' },
-  { type: 'video', icon: <Video className="w-4 h-4" />, label: 'Video' },
-  { type: 'phone', icon: <Phone className="w-4 h-4" />, label: 'Phone' },
-  { type: 'in_person', icon: <Users className="w-4 h-4" />, label: 'In Person' },
+  { type: 'video', icon: <Video className="w-4 h-4" />, label: 'Videó' },
+  { type: 'phone', icon: <Phone className="w-4 h-4" />, label: 'Telefon' },
+  { type: 'in_person', icon: <Users className="w-4 h-4" />, label: 'Személyes' },
 ];
 
 const moodIcons: { mood: MeetingMood; icon: React.ReactNode; color: string }[] = [
@@ -285,7 +285,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
     <div className="bg-background p-4 space-y-4 border-t border-border">
       {/* Lead Status Selector Row */}
       <div className="flex items-center gap-2 pb-3 border-b border-border">
-        <span className="text-sm font-medium text-muted-foreground mr-2">Status:</span>
+        <span className="text-sm font-medium text-muted-foreground mr-2">Státusz:</span>
         <div className="flex gap-1">
           {leadStatusConfig.map(({ status, icon, label, activeClass }) => (
             <button
@@ -311,7 +311,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
             size="sm"
           >
             <Building2 className="w-4 h-4" />
-            Incoming company
+            Bevitelre vár
           </Button>
         )}
 
@@ -319,7 +319,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
         {lead.status === 'incoming_company' && (
           <span className="ml-4 inline-flex items-center gap-2 px-3 py-1.5 bg-cgp-teal/20 text-cgp-teal rounded-xl text-sm font-medium">
             <Building2 className="w-4 h-4" />
-            Incoming company
+            Bevitelre vár
           </span>
         )}
       </div>
@@ -332,7 +332,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
           className="rounded-xl"
         >
           <Calendar className="w-4 h-4 mr-2" />
-          Add meeting
+          Találkozó
         </Button>
         <Button 
           onClick={() => setActiveForm(activeForm === 'contact' ? null : 'contact')}
@@ -340,7 +340,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
           className="rounded-xl"
         >
           <Users className="w-4 h-4 mr-2" />
-          Add contact
+          Kapcsolattartó
         </Button>
         <Button 
           onClick={() => setActiveForm(activeForm === 'details' ? null : 'details')}
@@ -348,7 +348,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
           className="rounded-xl"
         >
           <FileText className="w-4 h-4 mr-2" />
-          Add details
+          Részletek
         </Button>
         <Button 
           onClick={() => setActiveForm(activeForm === 'note' ? null : 'note')}
@@ -356,7 +356,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
           className="rounded-xl"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Add note
+          Feljegyzés
         </Button>
       </div>
 
@@ -364,7 +364,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
       {activeForm === 'meeting' && (
         <div className="p-4 bg-muted/30 rounded-sm space-y-4">
           <div className="flex justify-between items-center">
-            <h4 className="font-calibri-bold">{editingMeetingId ? 'Edit meeting' : 'New meeting'}</h4>
+            <h4 className="font-calibri-bold">{editingMeetingId ? 'Találkozó szerkesztése' : 'Új találkozó'}</h4>
             <button onClick={resetMeetingForm}><X className="w-4 h-4" /></button>
           </div>
           
@@ -382,17 +382,17 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
 
               {/* Contact Name */}
               <div className="flex items-center border-b border-border pb-2">
-                <Input value={meetingForm.contactName} onChange={(e) => setMeetingForm(p => ({ ...p, contactName: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Contact name" />
+                <Input value={meetingForm.contactName} onChange={(e) => setMeetingForm(p => ({ ...p, contactName: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Kapcsolattartó neve" />
               </div>
 
               {/* Address (meeting location) */}
               <div className="flex items-center border-b border-border pb-2">
-                <Input value={meetingForm.address} onChange={(e) => setMeetingForm(p => ({ ...p, address: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Address (meeting location)" />
+                <Input value={meetingForm.address} onChange={(e) => setMeetingForm(p => ({ ...p, address: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Helyszín (cím)" />
               </div>
 
               {/* Contact Type */}
               <div className="flex items-center border-b border-border pb-2">
-                <span className="w-28 text-sm font-medium">Contact type</span>
+                <span className="w-28 text-sm font-medium">Kapcsolat típus</span>
                 <div className="flex gap-1 flex-1">
                   {contactTypes.map(({ type, icon }) => (
                     <button key={type} onClick={() => setMeetingForm(p => ({ ...p, contactType: type }))}
@@ -407,15 +407,15 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
               <div className="flex items-center border-b border-border pb-2">
                 <div className="flex items-center gap-2 flex-1">
                   <Input type="number" value={meetingForm.pillars} onChange={(e) => setMeetingForm(p => ({ ...p, pillars: parseInt(e.target.value) || 0 }))} className="w-16 border-0 shadow-none" />
-                  <span className="text-sm text-muted-foreground">Pillars /</span>
+                  <span className="text-sm text-muted-foreground">Pillér /</span>
                   <Input type="number" value={meetingForm.sessions} onChange={(e) => setMeetingForm(p => ({ ...p, sessions: parseInt(e.target.value) || 0 }))} className="w-16 border-0 shadow-none" />
-                  <span className="text-sm text-muted-foreground">Sessions</span>
+                  <span className="text-sm text-muted-foreground">Alkalom</span>
                 </div>
               </div>
 
               {/* Mood */}
               <div className="flex items-center border-b border-border pb-2">
-                <span className="w-28 text-sm font-medium">Mood</span>
+                <span className="w-28 text-sm font-medium">Hangulat</span>
                 <div className="flex gap-1 flex-1">
                   {moodIcons.map(({ mood, icon }) => (
                     <button key={mood} onClick={() => setMeetingForm(p => ({ ...p, mood }))}
@@ -428,7 +428,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
 
               {/* Add notification */}
               <div className="flex items-center border-b border-border pb-2">
-                <span className="w-28 text-sm font-medium">Add notification</span>
+                <span className="w-28 text-sm font-medium">Értesítés</span>
                 <button 
                   onClick={() => setMeetingForm(p => ({ ...p, hasNotification: !p.hasNotification }))}
                   className={cn("p-2 rounded", meetingForm.hasNotification ? "bg-primary text-primary-foreground" : "bg-muted")}>
@@ -440,7 +440,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
             {/* Right Column - Note */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Note</span>
+                <span className="text-sm font-medium">Jegyzet</span>
                 <div className="flex gap-1">
                   <button className="p-1 hover:bg-muted rounded"><Plus className="w-4 h-4" /></button>
                   <button className="p-1 hover:bg-muted rounded"><FileText className="w-4 h-4" /></button>
@@ -449,14 +449,14 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
               <Textarea 
                 value={meetingForm.note} 
                 onChange={(e) => setMeetingForm(p => ({ ...p, note: e.target.value }))} 
-                placeholder="Add meeting notes..." 
+                placeholder="Találkozóval kapcsolatos jegyzetek..." 
                 rows={8}
                 className="resize-none"
               />
             </div>
           </div>
 
-          <Button onClick={handleSaveMeeting} className="bg-primary w-full"><Save className="w-4 h-4 mr-2" /> {editingMeetingId ? 'Update' : 'Save'}</Button>
+          <Button onClick={handleSaveMeeting} className="bg-primary w-full"><Save className="w-4 h-4 mr-2" /> {editingMeetingId ? 'Mentés' : 'Mentés'}</Button>
         </div>
       )}
 
@@ -464,22 +464,22 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
       {activeForm === 'contact' && (
         <div className="p-4 bg-muted/30 rounded-sm space-y-3">
           <div className="flex justify-between items-center">
-            <h4 className="font-calibri-bold">New Contact</h4>
+            <h4 className="font-calibri-bold">Új kapcsolattartó</h4>
             <button onClick={() => setActiveForm(null)}><X className="w-4 h-4" /></button>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <Input value={contactForm.name} onChange={(e) => setContactForm(p => ({ ...p, name: e.target.value }))} placeholder="Name" />
-            <Input value={contactForm.title} onChange={(e) => setContactForm(p => ({ ...p, title: e.target.value }))} placeholder="Title" />
-            <Input value={contactForm.phone} onChange={(e) => setContactForm(p => ({ ...p, phone: e.target.value }))} placeholder="Phone" />
+            <Input value={contactForm.name} onChange={(e) => setContactForm(p => ({ ...p, name: e.target.value }))} placeholder="Név" />
+            <Input value={contactForm.title} onChange={(e) => setContactForm(p => ({ ...p, title: e.target.value }))} placeholder="Beosztás" />
+            <Input value={contactForm.phone} onChange={(e) => setContactForm(p => ({ ...p, phone: e.target.value }))} placeholder="Telefon" />
             <Input value={contactForm.email} onChange={(e) => setContactForm(p => ({ ...p, email: e.target.value }))} placeholder="Email" />
           </div>
           <div className="flex gap-2">
             <button onClick={() => setContactForm(p => ({ ...p, gender: 'female' }))}
-              className={cn("px-3 py-1 rounded", contactForm.gender === 'female' ? "bg-pink-500 text-white" : "bg-muted")}>♀ Female</button>
+              className={cn("px-3 py-1 rounded", contactForm.gender === 'female' ? "bg-pink-500 text-white" : "bg-muted")}>♀ Nő</button>
             <button onClick={() => setContactForm(p => ({ ...p, gender: 'male' }))}
-              className={cn("px-3 py-1 rounded", contactForm.gender === 'male' ? "bg-blue-500 text-white" : "bg-muted")}>♂ Male</button>
+              className={cn("px-3 py-1 rounded", contactForm.gender === 'male' ? "bg-blue-500 text-white" : "bg-muted")}>♂ Férfi</button>
           </div>
-          <Button onClick={handleAddContact} className="bg-primary"><Save className="w-4 h-4 mr-2" /> Save</Button>
+          <Button onClick={handleAddContact} className="bg-primary"><Save className="w-4 h-4 mr-2" /> Mentés</Button>
         </div>
       )}
 
@@ -487,28 +487,28 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
       {activeForm === 'details' && (
         <div className="p-4 bg-muted/30 rounded-sm space-y-3">
           <div className="flex justify-between items-center">
-            <h4 className="font-calibri-bold">Details</h4>
+            <h4 className="font-calibri-bold">Részletek</h4>
             <button onClick={() => setActiveForm(null)}><X className="w-4 h-4" /></button>
           </div>
           <div className="space-y-2">
             <div className="flex items-center border-b border-border pb-2">
-              <span className="w-24 text-sm font-medium">Name:</span>
-              <Input value={detailsForm.name} onChange={(e) => setDetailsForm(p => ({ ...p, name: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Company name" />
+              <span className="w-24 text-sm font-medium">Név:</span>
+              <Input value={detailsForm.name} onChange={(e) => setDetailsForm(p => ({ ...p, name: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Cégnév" />
             </div>
             <div className="flex items-center border-b border-border pb-2">
-              <span className="w-24 text-sm font-medium">City:</span>
-              <Input value={detailsForm.city} onChange={(e) => setDetailsForm(p => ({ ...p, city: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="City" />
+              <span className="w-24 text-sm font-medium">Város:</span>
+              <Input value={detailsForm.city} onChange={(e) => setDetailsForm(p => ({ ...p, city: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Város" />
             </div>
             <div className="flex items-center border-b border-border pb-2">
-              <span className="w-24 text-sm font-medium">Country:</span>
-              <Input value={detailsForm.country} onChange={(e) => setDetailsForm(p => ({ ...p, country: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Country" />
+              <span className="w-24 text-sm font-medium">Ország:</span>
+              <Input value={detailsForm.country} onChange={(e) => setDetailsForm(p => ({ ...p, country: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Ország" />
             </div>
             <div className="flex items-center border-b border-border pb-2">
-              <span className="w-24 text-sm font-medium">Industry:</span>
-              <Input value={detailsForm.industry} onChange={(e) => setDetailsForm(p => ({ ...p, industry: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Industry" />
+              <span className="w-24 text-sm font-medium">Iparág:</span>
+              <Input value={detailsForm.industry} onChange={(e) => setDetailsForm(p => ({ ...p, industry: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Iparág" />
             </div>
             <div className="flex items-center border-b border-border pb-2">
-              <span className="w-24 text-sm font-medium">Headcount:</span>
+              <span className="w-24 text-sm font-medium">Létszám:</span>
               <Input
                 type="number"
                 value={Number.isFinite(detailsForm.headcount) ? detailsForm.headcount : ''}
@@ -520,11 +520,11 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
                   }));
                 }}
                 className="flex-1 border-0 shadow-none"
-                placeholder="Headcount"
+                placeholder="Létszám"
               />
             </div>
             <div className="flex items-center border-b border-border pb-2">
-              <span className="w-24 text-sm font-medium">Service:</span>
+              <span className="w-24 text-sm font-medium">Szolgáltatás:</span>
               <div className="flex-1 flex items-center gap-2">
                 <Input
                   type="number"
@@ -537,9 +537,9 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
                     }));
                   }}
                   className="w-16 border-0 shadow-none"
-                  placeholder="Pillars"
+                  placeholder="Pillér"
                 />
-                <span className="text-sm text-muted-foreground">Piller /</span>
+                <span className="text-sm text-muted-foreground">Pillér /</span>
                 <Input
                   type="number"
                   value={Number.isFinite(detailsForm.sessions) ? detailsForm.sessions : ''}
@@ -551,13 +551,13 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
                     }));
                   }}
                   className="w-16 border-0 shadow-none"
-                  placeholder="Sessions"
+                  placeholder="Alkalom"
                 />
-                <span className="text-sm text-muted-foreground">Sessions</span>
+                <span className="text-sm text-muted-foreground">Alkalom</span>
               </div>
             </div>
           </div>
-          <Button onClick={handleUpdateDetails} className="bg-primary w-full"><Save className="w-4 h-4 mr-2" /> Save</Button>
+          <Button onClick={handleUpdateDetails} className="bg-primary w-full"><Save className="w-4 h-4 mr-2" /> Mentés</Button>
         </div>
       )}
 
@@ -565,18 +565,18 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
       {activeForm === 'note' && (
         <div className="p-4 bg-muted/30 rounded-sm space-y-3">
           <div className="flex justify-between items-center">
-            <h4 className="font-calibri-bold">New Note</h4>
+            <h4 className="font-calibri-bold">Új feljegyzés</h4>
             <button onClick={() => setActiveForm(null)}><X className="w-4 h-4" /></button>
           </div>
-          <Textarea value={noteForm} onChange={(e) => setNoteForm(e.target.value)} placeholder="Write a note..." rows={3} />
-          <Button onClick={handleAddNote} className="bg-primary"><Save className="w-4 h-4 mr-2" /> Save</Button>
+          <Textarea value={noteForm} onChange={(e) => setNoteForm(e.target.value)} placeholder="Írj egy feljegyzést..." rows={3} />
+          <Button onClick={handleAddNote} className="bg-primary"><Save className="w-4 h-4 mr-2" /> Mentés</Button>
         </div>
       )}
 
       {/* Existing Meetings */}
       {lead.meetings.length > 0 && (
         <div className="space-y-2">
-          <h4 className="font-calibri-bold text-sm text-muted-foreground">Meetings ({lead.meetings.length})</h4>
+          <h4 className="font-calibri-bold text-sm text-muted-foreground">Találkozók ({lead.meetings.length})</h4>
           {lead.meetings.map((meeting, index) => {
             const ContactIcon = getContactTypeIcon(meeting.contactType);
             const MoodIcon = getMoodIcon(meeting.mood);
@@ -585,7 +585,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
                 <button 
                   onClick={() => handleEditMeeting(meeting)}
                   className="bg-primary p-2 rounded-sm hover:bg-primary/80 transition-colors"
-                  title="Edit meeting"
+                  title="Találkozó szerkesztése"
                 >
                   <Edit className="w-4 h-4 text-primary-foreground" />
                 </button>
@@ -597,7 +597,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
                 <button 
                   onClick={() => handleDeleteMeeting(meeting.id)}
                   className="ml-auto p-1 hover:bg-destructive/20 rounded text-muted-foreground hover:text-destructive transition-colors"
-                  title="Delete meeting"
+                  title="Találkozó törlése"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -610,7 +610,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
       {/* Existing Contacts */}
       {lead.contacts.length > 0 && (
         <div className="space-y-2">
-          <h4 className="font-calibri-bold text-sm text-muted-foreground">Contacts ({lead.contacts.length})</h4>
+          <h4 className="font-calibri-bold text-sm text-muted-foreground">Kapcsolattartók ({lead.contacts.length})</h4>
           {lead.contacts.map((contact) => (
             <div key={contact.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-sm">
               <span className="text-sm font-medium">{contact.name}</span>
@@ -625,22 +625,22 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
       {/* Company Details Display */}
       {(lead.details.city || lead.details.industry || (Number.isFinite(lead.details.headcount) && lead.details.headcount > 0) || (Number.isFinite(lead.details.pillars) && lead.details.pillars > 0) || (Number.isFinite(lead.details.sessions) && lead.details.sessions > 0)) && (
         <div className="space-y-2">
-          <h4 className="font-calibri-bold text-sm text-muted-foreground">Details</h4>
+          <h4 className="font-calibri-bold text-sm text-muted-foreground">Részletek</h4>
           <div className="space-y-1 text-sm bg-muted/30 p-3 rounded-sm">
-            {lead.companyName && <div className="border-b border-border pb-1">Name: {lead.companyName}</div>}
-            {lead.details.city && <div className="border-b border-border pb-1">City: {lead.details.city}</div>}
-            {lead.details.country && <div className="border-b border-border pb-1">Country: {lead.details.country}</div>}
-            {lead.details.industry && <div className="border-b border-border pb-1">Industry: {lead.details.industry}</div>}
+            {lead.companyName && <div className="border-b border-border pb-1">Név: {lead.companyName}</div>}
+            {lead.details.city && <div className="border-b border-border pb-1">Város: {lead.details.city}</div>}
+            {lead.details.country && <div className="border-b border-border pb-1">Ország: {lead.details.country}</div>}
+            {lead.details.industry && <div className="border-b border-border pb-1">Iparág: {lead.details.industry}</div>}
             {Number.isFinite(lead.details.headcount) && lead.details.headcount > 0 && (
-              <div className="border-b border-border pb-1">Headcount: {lead.details.headcount}</div>
+              <div className="border-b border-border pb-1">Létszám: {lead.details.headcount}</div>
             )}
             {(Number.isFinite(lead.details.pillars) || Number.isFinite(lead.details.sessions)) && (
               <div>
-                Service:
+                Szolgáltatás:
                 {Number.isFinite(lead.details.pillars) && lead.details.pillars > 0 ? ` ${lead.details.pillars}` : ' —'}
-                {' '}Piller /{' '}
+                {' '}Pillér /{' '}
                 {Number.isFinite(lead.details.sessions) && lead.details.sessions > 0 ? ` ${lead.details.sessions}` : ' —'}
-                {' '}Sessions
+                {' '}Alkalom
               </div>
             )}
           </div>
@@ -650,7 +650,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
       {/* Existing Notes */}
       {lead.notes.length > 0 && (
         <div className="space-y-2">
-          <h4 className="font-calibri-bold text-sm text-muted-foreground">Notes ({lead.notes.length})</h4>
+          <h4 className="font-calibri-bold text-sm text-muted-foreground">Feljegyzések ({lead.notes.length})</h4>
           {lead.notes.map((note) => (
             <div key={note.id} className="p-3 bg-muted/30 rounded-sm">
               <p className="text-sm">{note.content}</p>

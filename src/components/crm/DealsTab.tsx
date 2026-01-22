@@ -15,7 +15,7 @@ const DealsTab = ({ deals, onUpdateLead, onChangeLeadStatus, onDeleteLead }: Dea
       <div className="border border-border rounded-sm overflow-hidden">
         {deals.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            No deals yet.
+            Még nincsenek tárgyalások.
           </div>
         ) : (
           deals.map((deal) => (
