@@ -65,7 +65,7 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
   
   // Form states
   const [meetingForm, setMeetingForm] = useState({
-    date: '', time: '', title: '', contactName: '', contactTitle: '',
+    date: '', time: '', contactName: '', address: '',
     contactType: 'email' as ContactType, pillars: 3, sessions: 4,
     mood: undefined as MeetingMood | undefined,
     status: undefined as 'cancelled' | 'scheduled' | 'completed' | 'thumbs_up' | undefined,
@@ -94,8 +94,18 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
     
     const newMeeting: CrmMeeting = {
       id: `m-${Date.now()}`,
-      ...meetingForm,
+      date: meetingForm.date,
+      time: meetingForm.time,
       contactId: '',
+      contactName: meetingForm.contactName,
+      contactTitle: meetingForm.address, // address used as contactTitle for location
+      contactType: meetingForm.contactType,
+      pillars: meetingForm.pillars,
+      sessions: meetingForm.sessions,
+      mood: meetingForm.mood,
+      status: meetingForm.status,
+      hasNotification: meetingForm.hasNotification,
+      note: meetingForm.note,
     };
     
     const updatedLead = {
@@ -105,7 +115,7 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
     };
     
     onUpdate?.(updatedLead);
-    setMeetingForm({ date: '', time: '', title: '', contactName: '', contactTitle: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined, status: undefined, hasNotification: false, note: '' });
+    setMeetingForm({ date: '', time: '', contactName: '', address: '', contactType: 'email', pillars: 3, sessions: 4, mood: undefined, status: undefined, hasNotification: false, note: '' });
     setActiveForm(null);
   };
 
@@ -228,11 +238,6 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
                 </div>
               </div>
 
-              {/* Title */}
-              <div className="flex items-center border-b border-border pb-2">
-                <Input value={meetingForm.title} onChange={(e) => setMeetingForm(p => ({ ...p, title: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Meeting title" />
-              </div>
-              
               {/* Contact Name */}
               <div className="flex items-center border-b border-border pb-2">
                 <Input value={meetingForm.contactName} onChange={(e) => setMeetingForm(p => ({ ...p, contactName: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Contact name" />
@@ -240,7 +245,7 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
 
               {/* Address (meeting location) */}
               <div className="flex items-center border-b border-border pb-2">
-                <Input value={meetingForm.contactTitle} onChange={(e) => setMeetingForm(p => ({ ...p, contactTitle: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Address (meeting location)" />
+                <Input value={meetingForm.address} onChange={(e) => setMeetingForm(p => ({ ...p, address: e.target.value }))} className="flex-1 border-0 shadow-none" placeholder="Address (meeting location)" />
               </div>
 
               {/* Contact Type */}
