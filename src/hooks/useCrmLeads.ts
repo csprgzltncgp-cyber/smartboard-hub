@@ -1,38 +1,27 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { CrmLead, LeadStatus } from "@/types/crm";
 import { mockLeads, mockOffers, mockDeals } from "@/data/crmMockData";
 
-// Create initial leads array ONCE outside the hook
-const createInitialLeads = (): CrmLead[] => [
+// Create initial leads array ONCE - stored in module scope to persist across renders
+const initialLeads: CrmLead[] = [
   ...mockLeads.map(l => ({ ...l, status: 'lead' as LeadStatus })),
   ...mockOffers.map(l => ({ ...l, status: 'offer' as LeadStatus })),
   ...mockDeals.map(l => ({ ...l, status: 'deal' as LeadStatus })),
 ];
 
-// Global state to persist between renders - this simulates a proper state management solution
-let globalLeads: CrmLead[] | null = null;
-let globalSetLeads: ((leads: CrmLead[]) => void) | null = null;
+// Module-level state to persist between component unmounts
+let persistedLeads: CrmLead[] = [...initialLeads];
 
 export const useCrmLeads = () => {
-  // Initialize from global state or create new
-  const [leads, setLeads] = useState<CrmLead[]>(() => {
-    if (globalLeads === null) {
-      globalLeads = createInitialLeads();
-    }
-    return globalLeads;
-  });
+  const [leads, setLeads] = useState<CrmLead[]>(persistedLeads);
 
-  // Keep global state in sync
-  useEffect(() => {
-    globalLeads = leads;
-    globalSetLeads = setLeads;
-  }, [leads]);
-
-  // Sync with global state when it changes from another component
-  useEffect(() => {
-    if (globalLeads && globalLeads !== leads) {
-      setLeads(globalLeads);
-    }
+  // Wrapper to update both local state and persisted state
+  const updateLeadsState = useCallback((updater: (prev: CrmLead[]) => CrmLead[]) => {
+    setLeads(prev => {
+      const newLeads = updater(prev);
+      persistedLeads = newLeads;
+      return newLeads;
+    });
   }, []);
 
   // Filter leads by status
@@ -42,43 +31,27 @@ export const useCrmLeads = () => {
 
   // Add a new lead
   const addLead = useCallback((lead: CrmLead) => {
-    setLeads(prev => {
-      const newLeads = [...prev, lead];
-      globalLeads = newLeads;
-      return newLeads;
-    });
-  }, []);
+    updateLeadsState(prev => [...prev, lead]);
+  }, [updateLeadsState]);
 
   // Update an existing lead
   const updateLead = useCallback((updatedLead: CrmLead) => {
-    setLeads(prev => {
-      const newLeads = prev.map(lead => 
-        lead.id === updatedLead.id ? updatedLead : lead
-      );
-      globalLeads = newLeads;
-      return newLeads;
-    });
-  }, []);
+    updateLeadsState(prev => prev.map(lead => 
+      lead.id === updatedLead.id ? updatedLead : lead
+    ));
+  }, [updateLeadsState]);
 
   // Change lead status (moves it to a different tab)
   const changeLeadStatus = useCallback((leadId: string, newStatus: LeadStatus) => {
-    setLeads(prev => {
-      const newLeads = prev.map(lead => 
-        lead.id === leadId ? { ...lead, status: newStatus, updatedAt: new Date().toISOString() } : lead
-      );
-      globalLeads = newLeads;
-      return newLeads;
-    });
-  }, []);
+    updateLeadsState(prev => prev.map(lead => 
+      lead.id === leadId ? { ...lead, status: newStatus, updatedAt: new Date().toISOString() } : lead
+    ));
+  }, [updateLeadsState]);
 
   // Delete a lead
   const deleteLead = useCallback((leadId: string) => {
-    setLeads(prev => {
-      const newLeads = prev.filter(lead => lead.id !== leadId);
-      globalLeads = newLeads;
-      return newLeads;
-    });
-  }, []);
+    updateLeadsState(prev => prev.filter(lead => lead.id !== leadId));
+  }, [updateLeadsState]);
 
   // Memoized filtered lists
   const leadsList = useMemo(() => getLeadsByStatus('lead'), [getLeadsByStatus]);
