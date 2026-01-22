@@ -16,7 +16,7 @@ const CrmPage = () => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [selectedColleague, setSelectedColleague] = useState<string | null>(null);
   
-  const { leadsList, offersList, dealsList, addLead, updateLead, deleteLead } = useCrmLeads();
+  const { leadsList, offersList, dealsList, signedList, addLead, updateLead, deleteLead } = useCrmLeads();
 
   // Get colleague name for header
   const colleagueName = selectedColleague 
@@ -34,7 +34,7 @@ const CrmPage = () => {
       case 'todolist':
         return <TodoListTab items={mockTodoItems} />;
       case 'companies':
-        return <CompaniesTab signedCompanies={mockSignedCompanies} />;
+        return <CompaniesTab signedCompanies={mockSignedCompanies} signedLeads={signedList} onUpdateLead={updateLead} onDeleteLead={deleteLead} />;
       case 'reports':
         return <ReportsTab />;
       default:
