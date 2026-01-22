@@ -25,7 +25,8 @@ import {
   Gift,
   Brain,
   Database,
-  ListChecks
+  ListChecks,
+  Contact
 } from "lucide-react";
 import { SMARTBOARDS } from "@/config/smartboards";
 import cgpLogo from "@/assets/cgp_logo_green.svg";
@@ -69,6 +70,7 @@ const menuItems: MenuItem[] = [
   { label: "Operátorok", icon: Headphones, path: "/dashboard/settings/operators" },
   { label: "Operátor dokumentumok", icon: FileText, path: "/dashboard/settings/documents" },
   { label: "Training Dashboard", icon: GraduationCap, path: "/dashboard/settings/training" },
+  { label: "CRM", icon: Contact, path: "/dashboard/crm" },
 ];
 
 const DashboardLayout = () => {

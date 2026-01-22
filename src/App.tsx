@@ -14,6 +14,7 @@ import OperatorList from "./pages/operators/OperatorList";
 import OperatorForm from "./pages/operators/OperatorForm";
 import OperatorPermissions from "./pages/operators/OperatorPermissions";
 import InputsPage from "./pages/inputs/InputsPage";
+import CrmPage from "./pages/crm/CrmPage";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="settings/operators/new" element={<OperatorForm />} />
             <Route path="settings/operators/:operatorId/permissions" element={<OperatorPermissions />} />
             <Route path="inputs" element={<InputsPage />} />
+            <Route path="crm" element={<CrmPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
