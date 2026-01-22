@@ -22,7 +22,7 @@ const CrmFilterBar = ({
           <SelectValue placeholder="Válassz országot" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All countries</SelectItem>
+          <SelectItem value="all">Összes ország</SelectItem>
           {mockCountries.map((country) => (
             <SelectItem key={country} value={country}>
               {country}
@@ -36,7 +36,7 @@ const CrmFilterBar = ({
           <SelectValue placeholder="Válassz kollégát" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All colleagues</SelectItem>
+          <SelectItem value="all">Összes kolléga</SelectItem>
           {mockColleagues.map((colleague) => (
             <SelectItem key={colleague.id} value={colleague.id}>
               {colleague.name}

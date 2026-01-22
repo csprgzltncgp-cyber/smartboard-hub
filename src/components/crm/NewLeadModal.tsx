@@ -25,24 +25,24 @@ interface NewLeadModalProps {
 
 const statusIcons: { status: LeadStatus; icon: React.ReactNode; label: string; color: string }[] = [
   { status: 'lead', icon: <Hourglass className="w-4 h-4" />, label: 'Lead', color: 'bg-cgp-teal-light' },
-  { status: 'offer', icon: <Calculator className="w-4 h-4" />, label: 'Offer', color: 'bg-cgp-badge-new' },
-  { status: 'deal', icon: <Handshake className="w-4 h-4" />, label: 'Deal', color: 'bg-cgp-badge-lastday' },
-  { status: 'signed', icon: <FileSignature className="w-4 h-4" />, label: 'Signed', color: 'bg-cgp-task-completed-purple' },
-  { status: 'cancelled', icon: <XCircle className="w-4 h-4" />, label: 'Cancelled', color: 'bg-destructive' },
+  { status: 'offer', icon: <Calculator className="w-4 h-4" />, label: 'Ajánlat', color: 'bg-cgp-badge-new' },
+  { status: 'deal', icon: <Handshake className="w-4 h-4" />, label: 'Tárgyalás', color: 'bg-cgp-badge-lastday' },
+  { status: 'signed', icon: <FileSignature className="w-4 h-4" />, label: 'Aláírt', color: 'bg-cgp-task-completed-purple' },
+  { status: 'cancelled', icon: <XCircle className="w-4 h-4" />, label: 'Törölt', color: 'bg-destructive' },
 ];
 
 const contactTypes: { type: ContactType; icon: React.ReactNode; label: string }[] = [
   { type: 'email', icon: <Mail className="w-4 h-4" />, label: 'Email' },
-  { type: 'video', icon: <Video className="w-4 h-4" />, label: 'Video' },
-  { type: 'phone', icon: <Phone className="w-4 h-4" />, label: 'Phone' },
-  { type: 'in_person', icon: <Users className="w-4 h-4" />, label: 'In Person' },
+  { type: 'video', icon: <Video className="w-4 h-4" />, label: 'Videó' },
+  { type: 'phone', icon: <Phone className="w-4 h-4" />, label: 'Telefon' },
+  { type: 'in_person', icon: <Users className="w-4 h-4" />, label: 'Személyes' },
 ];
 
 const moodIcons: { mood: MeetingMood; icon: React.ReactNode; label: string; color: string }[] = [
-  { mood: 'happy', icon: <Smile className="w-4 h-4" />, label: 'Happy', color: 'bg-green-100 text-green-600' },
-  { mood: 'neutral', icon: <Meh className="w-4 h-4" />, label: 'Neutral', color: 'bg-amber-100 text-amber-600' },
-  { mood: 'confused', icon: <HelpCircle className="w-4 h-4" />, label: 'Confused', color: 'bg-blue-100 text-blue-600' },
-  { mood: 'negative', icon: <Frown className="w-4 h-4" />, label: 'Negative', color: 'bg-red-100 text-red-600' },
+  { mood: 'happy', icon: <Smile className="w-4 h-4" />, label: 'Pozitív', color: 'bg-green-100 text-green-600' },
+  { mood: 'neutral', icon: <Meh className="w-4 h-4" />, label: 'Semleges', color: 'bg-amber-100 text-amber-600' },
+  { mood: 'confused', icon: <HelpCircle className="w-4 h-4" />, label: 'Bizonytalan', color: 'bg-blue-100 text-blue-600' },
+  { mood: 'negative', icon: <Frown className="w-4 h-4" />, label: 'Negatív', color: 'bg-red-100 text-red-600' },
 ];
 
 const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'create' }: NewLeadModalProps) => {
@@ -200,7 +200,7 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
         <DialogHeader className="p-4 bg-primary text-primary-foreground">
           <DialogTitle className="font-calibri-bold text-lg">
-            {mode === 'create' ? 'New Lead' : 'Edit Lead'}
+            {mode === 'create' ? 'Új Lead' : 'Lead szerkesztése'}
           </DialogTitle>
         </DialogHeader>
 
@@ -208,17 +208,17 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
           {/* Header: Company Name & Status */}
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <Label className="text-sm font-calibri-bold mb-2 block">Company Name</Label>
+              <Label className="text-sm font-calibri-bold mb-2 block">Cégnév</Label>
               <Input
                 value={formData.companyName}
                 onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value, details: { ...prev.details!, name: e.target.value } }))}
-                placeholder="Enter company name"
+                placeholder="Add meg a cégnevet"
                 className="border-border"
               />
             </div>
             
             <div>
-              <Label className="text-sm font-calibri-bold mb-2 block">Assigned to</Label>
+              <Label className="text-sm font-calibri-bold mb-2 block">Felelős</Label>
               <Select 
                 value={formData.assignedToId} 
                 onValueChange={(v) => {
@@ -239,7 +239,7 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
 
             {/* Status Icons */}
             <div>
-              <Label className="text-sm font-calibri-bold mb-2 block">Status</Label>
+              <Label className="text-sm font-calibri-bold mb-2 block">Státusz</Label>
               <div className="flex gap-1">
                 {statusIcons.map(({ status, icon, label, color }) => (
                   <button
@@ -263,10 +263,10 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
           {/* Section Tabs */}
           <div className="flex border-b border-border">
             {[
-              { id: 'meeting' as const, label: 'Meeting', icon: <Calendar className="w-4 h-4" /> },
-              { id: 'contact' as const, label: 'Contact Information', icon: <Users className="w-4 h-4" /> },
-              { id: 'details' as const, label: 'Details', icon: <FileText className="w-4 h-4" /> },
-              { id: 'notes' as const, label: 'Notes', icon: <FileText className="w-4 h-4" /> },
+              { id: 'meeting' as const, label: 'Találkozó', icon: <Calendar className="w-4 h-4" /> },
+              { id: 'contact' as const, label: 'Kapcsolattartó', icon: <Users className="w-4 h-4" /> },
+              { id: 'details' as const, label: 'Részletek', icon: <FileText className="w-4 h-4" /> },
+              { id: 'notes' as const, label: 'Feljegyzések', icon: <FileText className="w-4 h-4" /> },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -287,11 +287,11 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
           {/* Meeting Section */}
           {activeSection === 'meeting' && (
             <div className="space-y-4">
-              <h3 className="font-calibri-bold text-lg">Add Meeting</h3>
+              <h3 className="font-calibri-bold text-lg">Találkozó hozzáadása</h3>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm mb-1 block">Date</Label>
+                  <Label className="text-sm mb-1 block">Dátum</Label>
                   <Input 
                     type="date" 
                     value={newMeeting.date}
@@ -299,7 +299,7 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
                   />
                 </div>
                 <div>
-                  <Label className="text-sm mb-1 block">Time</Label>
+                  <Label className="text-sm mb-1 block">Időpont</Label>
                   <Input 
                     type="time"
                     value={newMeeting.time}
@@ -310,25 +310,25 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm mb-1 block">Contact Name</Label>
+                  <Label className="text-sm mb-1 block">Kapcsolattartó neve</Label>
                   <Input 
                     value={newMeeting.contactName}
                     onChange={(e) => setNewMeeting(prev => ({ ...prev, contactName: e.target.value }))}
-                    placeholder="Name of contact"
+                    placeholder="Kapcsolattartó neve"
                   />
                 </div>
                 <div>
-                  <Label className="text-sm mb-1 block">Title</Label>
+                  <Label className="text-sm mb-1 block">Beosztás</Label>
                   <Input 
                     value={newMeeting.contactTitle}
                     onChange={(e) => setNewMeeting(prev => ({ ...prev, contactTitle: e.target.value }))}
-                    placeholder="e.g. HR Director"
+                    placeholder="pl. HR igazgató"
                   />
                 </div>
               </div>
 
               <div>
-                <Label className="text-sm mb-2 block">Contact Type</Label>
+                <Label className="text-sm mb-2 block">Kapcsolat típusa</Label>
                 <div className="flex gap-2">
                   {contactTypes.map(({ type, icon, label }) => (
                     <button
@@ -351,7 +351,7 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm mb-1 block">Pillars</Label>
+                  <Label className="text-sm mb-1 block">Pillérek</Label>
                   <Input 
                     type="number"
                     min={1}
@@ -361,7 +361,7 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
                   />
                 </div>
                 <div>
-                  <Label className="text-sm mb-1 block">Sessions</Label>
+                  <Label className="text-sm mb-1 block">Alkalmak</Label>
                   <Input 
                     type="number"
                     min={1}
@@ -373,7 +373,7 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
               </div>
 
               <div>
-                <Label className="text-sm mb-2 block">Mood</Label>
+                <Label className="text-sm mb-2 block">Hangulat</Label>
                 <div className="flex gap-2">
                   {moodIcons.map(({ mood, icon, label, color }) => (
                     <button
@@ -394,24 +394,24 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
               </div>
 
               <div>
-                <Label className="text-sm mb-1 block">Note</Label>
+                <Label className="text-sm mb-1 block">Jegyzet</Label>
                 <Textarea 
                   value={newMeeting.note}
                   onChange={(e) => setNewMeeting(prev => ({ ...prev, note: e.target.value }))}
-                  placeholder="Meeting notes..."
+                  placeholder="Találkozó jegyzetek..."
                   rows={3}
                 />
               </div>
 
               <Button onClick={handleAddMeeting} className="bg-primary">
                 <Plus className="w-4 h-4 mr-2" />
-                Add Meeting
+                Találkozó hozzáadása
               </Button>
 
               {/* Existing Meetings List */}
               {(formData.meetings?.length || 0) > 0 && (
                 <div className="mt-4 space-y-2">
-                  <h4 className="font-calibri-bold text-sm">Added Meetings</h4>
+                  <h4 className="font-calibri-bold text-sm">Hozzáadott találkozók</h4>
                   {formData.meetings?.map((meeting, idx) => (
                     <div key={meeting.id} className="p-3 bg-muted/30 rounded flex items-center justify-between">
                       <span className="text-sm">
@@ -436,29 +436,29 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
           {/* Contact Section */}
           {activeSection === 'contact' && (
             <div className="space-y-4">
-              <h3 className="font-calibri-bold text-lg">Add Contact</h3>
+              <h3 className="font-calibri-bold text-lg">Kapcsolattartó hozzáadása</h3>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm mb-1 block">Name</Label>
+                  <Label className="text-sm mb-1 block">Név</Label>
                   <Input 
                     value={newContact.name}
                     onChange={(e) => setNewContact(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Contact name"
+                    placeholder="Kapcsolattartó neve"
                   />
                 </div>
                 <div>
-                  <Label className="text-sm mb-1 block">Title</Label>
+                  <Label className="text-sm mb-1 block">Beosztás</Label>
                   <Input 
                     value={newContact.title}
                     onChange={(e) => setNewContact(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="e.g. HR Director"
+                    placeholder="pl. HR igazgató"
                   />
                 </div>
               </div>
 
               <div>
-                <Label className="text-sm mb-2 block">Gender</Label>
+                <Label className="text-sm mb-2 block">Nem</Label>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setNewContact(prev => ({ ...prev, gender: 'female' }))}
@@ -469,7 +469,7 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
                         : "bg-muted hover:bg-muted-foreground/20"
                     )}
                   >
-                    ♀ Female
+                    ♀ Nő
                   </button>
                   <button
                     onClick={() => setNewContact(prev => ({ ...prev, gender: 'male' }))}
@@ -480,14 +480,14 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
                         : "bg-muted hover:bg-muted-foreground/20"
                     )}
                   >
-                    ♂ Male
+                    ♂ Férfi
                   </button>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm mb-1 block">Phone</Label>
+                  <Label className="text-sm mb-1 block">Telefon</Label>
                   <Input 
                     value={newContact.phone}
                     onChange={(e) => setNewContact(prev => ({ ...prev, phone: e.target.value }))}
@@ -507,13 +507,13 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
 
               <Button onClick={handleAddContact} className="bg-primary">
                 <Plus className="w-4 h-4 mr-2" />
-                Add Contact
+                Kapcsolattartó hozzáadása
               </Button>
 
               {/* Existing Contacts List */}
               {(formData.contacts?.length || 0) > 0 && (
                 <div className="mt-4 space-y-2">
-                  <h4 className="font-calibri-bold text-sm">Added Contacts</h4>
+                  <h4 className="font-calibri-bold text-sm">Hozzáadott kapcsolattartók</h4>
                   {formData.contacts?.map((contact, idx) => (
                     <div key={contact.id} className="p-3 bg-muted/30 rounded flex items-center justify-between">
                       <span className="text-sm">
@@ -538,47 +538,47 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
           {/* Details Section */}
           {activeSection === 'details' && (
             <div className="space-y-4">
-              <h3 className="font-calibri-bold text-lg">Company Details</h3>
+              <h3 className="font-calibri-bold text-lg">Cég részletei</h3>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm mb-1 block">City</Label>
+                  <Label className="text-sm mb-1 block">Város</Label>
                   <Input 
                     value={formData.details?.city}
                     onChange={(e) => setFormData(prev => ({ 
                       ...prev, 
                       details: { ...prev.details!, city: e.target.value } 
                     }))}
-                    placeholder="City"
+                    placeholder="Város"
                   />
                 </div>
                 <div>
-                  <Label className="text-sm mb-1 block">Country</Label>
+                  <Label className="text-sm mb-1 block">Ország</Label>
                   <Input 
                     value={formData.details?.country}
                     onChange={(e) => setFormData(prev => ({ 
                       ...prev, 
                       details: { ...prev.details!, country: e.target.value } 
                     }))}
-                    placeholder="Country"
+                    placeholder="Ország"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm mb-1 block">Industry</Label>
+                  <Label className="text-sm mb-1 block">Iparág</Label>
                   <Input 
                     value={formData.details?.industry}
                     onChange={(e) => setFormData(prev => ({ 
                       ...prev, 
                       details: { ...prev.details!, industry: e.target.value } 
                     }))}
-                    placeholder="e.g. IT, Automotive, FMCG"
+                    placeholder="pl. IT, Autóipar, FMCG"
                   />
                 </div>
                 <div>
-                  <Label className="text-sm mb-1 block">Headcount</Label>
+                  <Label className="text-sm mb-1 block">Létszám</Label>
                   <Input 
                     type="number"
                     value={formData.details?.headcount}
@@ -586,13 +586,13 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
                       ...prev, 
                       details: { ...prev.details!, headcount: parseInt(e.target.value) || 0 } 
                     }))}
-                    placeholder="Number of employees"
+                    placeholder="Alkalmazottak száma"
                   />
                 </div>
               </div>
 
               <div>
-                <Label className="text-sm mb-1 block">Service</Label>
+                <Label className="text-sm mb-1 block">Szolgáltatás</Label>
                 <div className="flex items-center gap-2">
                   <Input 
                     type="number"
@@ -601,7 +601,7 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
                       ...prev, 
                       details: { ...prev.details!, pillars: parseInt(e.target.value) || 0 } 
                     }))}
-                    placeholder="Pillars"
+                    placeholder="Pillér"
                     className="w-20"
                   />
                   <span className="text-muted-foreground">PILL /</span>
@@ -612,7 +612,7 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
                       ...prev, 
                       details: { ...prev.details!, sessions: parseInt(e.target.value) || 0 } 
                     }))}
-                    placeholder="Sessions"
+                    placeholder="Alkalom"
                     className="w-20"
                   />
                   <span className="text-muted-foreground">SESS</span>
@@ -624,24 +624,24 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
           {/* Notes Section */}
           {activeSection === 'notes' && (
             <div className="space-y-4">
-              <h3 className="font-calibri-bold text-lg">Notes</h3>
+              <h3 className="font-calibri-bold text-lg">Feljegyzések</h3>
               
               <Textarea 
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
-                placeholder="Add a note..."
+                placeholder="Feljegyzés hozzáadása..."
                 rows={4}
               />
 
               <Button onClick={handleAddNote} className="bg-primary">
                 <Plus className="w-4 h-4 mr-2" />
-                Add Note
+                Feljegyzés hozzáadása
               </Button>
 
               {/* Existing Notes List */}
               {(formData.notes?.length || 0) > 0 && (
                 <div className="mt-4 space-y-2">
-                  <h4 className="font-calibri-bold text-sm">Added Notes</h4>
+                  <h4 className="font-calibri-bold text-sm">Hozzáadott feljegyzések</h4>
                   {formData.notes?.map((note, idx) => (
                     <div key={note.id} className="p-3 bg-muted/30 rounded">
                       <div className="flex justify-between items-start mb-2">
@@ -669,10 +669,10 @@ const NewLeadModal = ({ open, onOpenChange, onSubmit, initialLead, mode = 'creat
           {/* Submit Button */}
           <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              Mégse
             </Button>
             <Button onClick={handleSubmit} className="bg-primary">
-              {mode === 'create' ? 'Create Lead' : 'Save Changes'}
+              {mode === 'create' ? 'Lead létrehozása' : 'Változtatások mentése'}
             </Button>
           </div>
         </div>
