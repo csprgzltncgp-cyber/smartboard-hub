@@ -82,7 +82,8 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
     city: lead.details.city, 
     country: lead.details.country,
     industry: lead.details.industry, 
-    headcount: lead.details.headcount,
+    // Treat 0 as “no data” and store missing numeric values as NaN so inputs can be empty
+    headcount: lead.details.headcount > 0 ? lead.details.headcount : Number.NaN,
     pillars: lead.details.pillars || 0,
     sessions: lead.details.sessions || 0,
   });
@@ -390,7 +391,19 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
             </div>
             <div className="flex items-center border-b border-border pb-2">
               <span className="w-24 text-sm font-medium">Headcount:</span>
-              <Input type="number" value={detailsForm.headcount || ''} onChange={(e) => setDetailsForm(p => ({ ...p, headcount: parseInt(e.target.value) || 0 }))} className="flex-1 border-0 shadow-none" placeholder="Headcount" />
+              <Input
+                type="number"
+                value={Number.isFinite(detailsForm.headcount) ? detailsForm.headcount : ''}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  setDetailsForm((p) => ({
+                    ...p,
+                    headcount: raw === '' ? Number.NaN : parseInt(raw, 10),
+                  }));
+                }}
+                className="flex-1 border-0 shadow-none"
+                placeholder="Headcount"
+              />
             </div>
             <div className="flex items-center border-b border-border pb-2">
               <span className="w-24 text-sm font-medium">Service:</span>
@@ -455,7 +468,7 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
       )}
 
       {/* Company Details Display */}
-      {(lead.details.city || lead.details.industry || lead.details.headcount > 0 || lead.details.pillars || lead.details.sessions) && (
+      {(lead.details.city || lead.details.industry || (Number.isFinite(lead.details.headcount) && lead.details.headcount > 0) || lead.details.pillars || lead.details.sessions) && (
         <div className="space-y-2">
           <h4 className="font-calibri-bold text-sm text-muted-foreground">Details</h4>
           <div className="space-y-1 text-sm bg-muted/30 p-3 rounded-sm">
@@ -463,7 +476,9 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
             {lead.details.city && <div className="border-b border-border pb-1">City: {lead.details.city}</div>}
             {lead.details.country && <div className="border-b border-border pb-1">Country: {lead.details.country}</div>}
             {lead.details.industry && <div className="border-b border-border pb-1">Industry: {lead.details.industry}</div>}
-            {lead.details.headcount > 0 && <div className="border-b border-border pb-1">Headcount: {lead.details.headcount}</div>}
+            {Number.isFinite(lead.details.headcount) && lead.details.headcount > 0 && (
+              <div className="border-b border-border pb-1">Headcount: {lead.details.headcount}</div>
+            )}
             {(lead.details.pillars || lead.details.sessions) && (
               <div>Service: {lead.details.pillars || 0} Piller / {lead.details.sessions || 0} Sessions</div>
             )}
