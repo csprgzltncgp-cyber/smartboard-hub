@@ -84,6 +84,13 @@ const DashboardLayout = () => {
   const [isSmartboardMenuOpen, setIsSmartboardMenuOpen] = useState(false);
   const smartboardMenuRef = useRef<HTMLDivElement>(null);
 
+  // Guard: if not authenticated, redirect to login
+  useEffect(() => {
+    if (!currentUser) {
+      navigate("/", { replace: true });
+    }
+  }, [currentUser, navigate]);
+
   // Filter menu items based on user permissions
   const menuItems = useMemo(() => {
     return filterMenuItems(allMenuItems, currentUser);
@@ -178,6 +185,8 @@ const DashboardLayout = () => {
   };
 
   const breadcrumbs = buildBreadcrumb();
+
+  if (!currentUser) return null;
 
   return (
     <div className="min-h-screen bg-background">

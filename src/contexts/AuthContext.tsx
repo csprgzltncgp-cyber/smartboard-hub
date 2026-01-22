@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Check localStorage for persisted user
     const savedUserId = localStorage.getItem("currentUserId");
     const savedUserType = localStorage.getItem("currentUserType");
+    console.log("[Auth] init", { savedUserId, savedUserType });
     if (savedUserId && savedUserType) {
       // Primary lookup based on the stored type
       const primaryList = savedUserType === "operator" ? getOperators() : getUsers();
@@ -39,6 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setCurrentUser(foundUser);
       localStorage.setItem("currentUserId", foundUser.id);
       localStorage.setItem("currentUserType", "user");
+      console.log("[Auth] login success", { username: foundUser.username, userType: "user", userId: foundUser.id });
       return foundUser;
     }
 
@@ -50,6 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setCurrentUser(foundUser);
       localStorage.setItem("currentUserId", foundUser.id);
       localStorage.setItem("currentUserType", "operator");
+      console.log("[Auth] login success", { username: foundUser.username, userType: "operator", userId: foundUser.id });
       return foundUser;
     }
 
@@ -60,6 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setCurrentUser(null);
     localStorage.removeItem("currentUserId");
     localStorage.removeItem("currentUserType");
+    console.log("[Auth] logout");
   };
 
   return (
