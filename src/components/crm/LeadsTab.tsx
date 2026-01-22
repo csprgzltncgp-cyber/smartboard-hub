@@ -2,7 +2,7 @@ import { useState } from "react";
 import { CrmLead } from "@/types/crm";
 import CrmLeadCard from "./CrmLeadCard";
 import { Button } from "@/components/ui/button";
-import { Plus, Search } from "lucide-react";
+import { Plus } from "lucide-react";
 import NewLeadModal from "./NewLeadModal";
 
 interface LeadsTabProps {
@@ -28,9 +28,6 @@ const LeadsTab = ({ leads, onAddLead, onUpdateLead }: LeadsTabProps) => {
         >
           <Plus className="w-4 h-4 mr-2" />
           New lead
-        </Button>
-        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-none p-2">
-          <Search className="w-4 h-4" />
         </Button>
       </div>
 
