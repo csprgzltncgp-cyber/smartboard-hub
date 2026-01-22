@@ -24,10 +24,10 @@ interface NewLeadModalProps {
 }
 
 const statusIcons: { status: LeadStatus; icon: React.ReactNode; label: string; color: string }[] = [
-  { status: 'lead', icon: <Hourglass className="w-4 h-4" />, label: 'Lead', color: 'bg-blue-500' },
-  { status: 'offer', icon: <Calculator className="w-4 h-4" />, label: 'Offer', color: 'bg-amber-500' },
-  { status: 'deal', icon: <Handshake className="w-4 h-4" />, label: 'Deal', color: 'bg-green-500' },
-  { status: 'signed', icon: <FileSignature className="w-4 h-4" />, label: 'Signed', color: 'bg-primary' },
+  { status: 'lead', icon: <Hourglass className="w-4 h-4" />, label: 'Lead', color: 'bg-cgp-teal-light' },
+  { status: 'offer', icon: <Calculator className="w-4 h-4" />, label: 'Offer', color: 'bg-cgp-badge-new' },
+  { status: 'deal', icon: <Handshake className="w-4 h-4" />, label: 'Deal', color: 'bg-cgp-badge-lastday' },
+  { status: 'signed', icon: <FileSignature className="w-4 h-4" />, label: 'Signed', color: 'bg-cgp-task-completed-purple' },
   { status: 'cancelled', icon: <XCircle className="w-4 h-4" />, label: 'Cancelled', color: 'bg-destructive' },
 ];
 
