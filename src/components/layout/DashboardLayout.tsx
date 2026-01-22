@@ -330,7 +330,9 @@ const DashboardLayout = () => {
                 setIsSearchFilterOpen(false);
                 setIsChatOpen(false);
               }}
-              className="bg-cgp-teal-light text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase hover:bg-primary transition-colors"
+              className={`w-48 text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-calibri-bold uppercase transition-colors ${
+                isMenuOpen ? "bg-cgp-teal/80" : "bg-cgp-teal hover:bg-cgp-teal/90"
+              }`}
             >
               <Menu className="w-5 h-5" />
               MENÜ
@@ -393,12 +395,12 @@ const DashboardLayout = () => {
                 setIsMenuOpen(false);
                 setIsChatOpen(false);
               }}
-              className={`text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase transition-colors ${
-                isSearchFilterOpen ? "bg-cgp-teal/80" : "bg-cgp-teal hover:bg-cgp-teal/90"
+              className={`w-48 text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-calibri-bold uppercase transition-colors ${
+                isSearchFilterOpen ? "bg-cgp-teal-light/80" : "bg-cgp-teal-light hover:bg-cgp-teal-light/90"
               }`}
             >
               <Filter className="w-5 h-5" />
-              KERESÉS/SZŰRÉS
+              KERESÉS
             </button>
             
             {/* Desktop Search/Filter Dropdown Panel */}
@@ -417,8 +419,8 @@ const DashboardLayout = () => {
                 setIsMenuOpen(false);
                 setIsSearchFilterOpen(false);
               }}
-              className={`text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase transition-colors ${
-                isChatOpen ? "bg-cgp-teal/80" : "bg-cgp-teal hover:bg-cgp-teal/90"
+              className={`w-48 text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-calibri-bold uppercase transition-colors ${
+                isChatOpen ? "bg-cgp-teal-light/80" : "bg-cgp-teal-light hover:bg-cgp-teal-light/90"
               }`}
             >
               <MessageCircle className="w-5 h-5" />
