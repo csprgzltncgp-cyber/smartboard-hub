@@ -10,8 +10,10 @@ import avatarPeter from "@/assets/avatars/avatar-peter.jpg";
 import avatarMaria from "@/assets/avatars/avatar-maria.jpg";
 import avatarAdmin from "@/assets/avatars/avatar-admin.jpg";
 
-// Mock users data
-let users: User[] = [
+const STORAGE_KEY = "users-store-v1";
+
+// Default mock users data
+const defaultUsers: User[] = [
   {
     id: "1",
     name: "Tompa Anita",
@@ -120,6 +122,50 @@ let users: User[] = [
   },
 ];
 
+// Helper to serialize users for localStorage
+const serializeUsers = (users: User[]): string => {
+  return JSON.stringify(users.map(user => ({
+    ...user,
+    createdAt: user.createdAt.toISOString(),
+    updatedAt: user.updatedAt.toISOString(),
+  })));
+};
+
+// Helper to deserialize users from localStorage
+const deserializeUsers = (data: string): User[] => {
+  const parsed = JSON.parse(data);
+  return parsed.map((user: any) => ({
+    ...user,
+    createdAt: new Date(user.createdAt),
+    updatedAt: new Date(user.updatedAt),
+  }));
+};
+
+// Load users from localStorage or use defaults
+const loadUsers = (): User[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return deserializeUsers(stored);
+    }
+  } catch (e) {
+    console.error("[userStore] Failed to load from localStorage:", e);
+  }
+  return [...defaultUsers];
+};
+
+// Save users to localStorage
+const saveUsers = () => {
+  try {
+    localStorage.setItem(STORAGE_KEY, serializeUsers(users));
+  } catch (e) {
+    console.error("[userStore] Failed to save to localStorage:", e);
+  }
+};
+
+// Initialize users from storage
+let users: User[] = loadUsers();
+
 // Get all users
 export const getUsers = (): User[] => {
   return [...users];
@@ -141,6 +187,7 @@ export const createUser = (data: UserFormData): User => {
     smartboardPermissions: [],
   };
   users.push(newUser);
+  saveUsers();
   return newUser;
 };
 
@@ -154,6 +201,7 @@ export const updateUser = (id: string, data: Partial<UserFormData>): User | unde
     ...data,
     updatedAt: new Date(),
   };
+  saveUsers();
   return users[index];
 };
 
@@ -167,6 +215,7 @@ export const toggleUserActive = (id: string): User | undefined => {
     active: !users[index].active,
     updatedAt: new Date(),
   };
+  saveUsers();
   return users[index];
 };
 
@@ -183,6 +232,7 @@ export const updateUserSmartboardPermissions = (
     smartboardPermissions: permissions,
     updatedAt: new Date(),
   };
+  saveUsers();
   return users[index];
 };
 
@@ -192,5 +242,6 @@ export const deleteUser = (id: string): boolean => {
   if (index === -1) return false;
   
   users.splice(index, 1);
+  saveUsers();
   return true;
 };
