@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { CrmTab, CrmLead } from "@/types/crm";
-import { mockSignedCompanies, mockTodoItems, mockColleagues } from "@/data/crmMockData";
+import { mockTodoItems, mockColleagues } from "@/data/crmMockData";
 import CrmFilterBar from "@/components/crm/CrmFilterBar";
 import CrmTabs from "@/components/crm/CrmTabs";
 import LeadsTab from "@/components/crm/LeadsTab";
 import OffersTab from "@/components/crm/OffersTab";
 import DealsTab from "@/components/crm/DealsTab";
+import SignedTab from "@/components/crm/SignedTab";
 import TodoListTab from "@/components/crm/TodoListTab";
-import CompaniesTab from "@/components/crm/CompaniesTab";
 import ReportsTab from "@/components/crm/ReportsTab";
 import { useCrmLeads } from "@/hooks/useCrmLeads";
 
@@ -33,8 +33,8 @@ const CrmPage = () => {
         return <DealsTab deals={dealsList} onUpdateLead={updateLead} onDeleteLead={deleteLead} />;
       case 'todolist':
         return <TodoListTab items={mockTodoItems} />;
-      case 'companies':
-        return <CompaniesTab signedCompanies={mockSignedCompanies} signedLeads={signedList} onUpdateLead={updateLead} onDeleteLead={deleteLead} />;
+      case 'signed':
+        return <SignedTab signedLeads={signedList} onUpdateLead={updateLead} onDeleteLead={deleteLead} />;
       case 'reports':
         return <ReportsTab />;
       default:

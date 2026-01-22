@@ -107,7 +107,7 @@ export interface CrmFilters {
 }
 
 // Tab types
-export type CrmTab = 'leads' | 'offers' | 'deals' | 'todolist' | 'companies' | 'reports';
+export type CrmTab = 'leads' | 'offers' | 'deals' | 'signed' | 'todolist' | 'reports';
 
 // Form data for creating new lead
 export interface NewLeadFormData {

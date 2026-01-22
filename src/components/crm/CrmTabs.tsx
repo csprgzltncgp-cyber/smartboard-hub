@@ -10,8 +10,8 @@ const tabs: { id: CrmTab; label: string }[] = [
   { id: 'leads', label: 'LEADS' },
   { id: 'offers', label: 'OFFERS' },
   { id: 'deals', label: 'DEALS' },
+  { id: 'signed', label: 'SIGNED' },
   { id: 'todolist', label: 'TO DO LIST' },
-  { id: 'companies', label: 'COMPANIES' },
   { id: 'reports', label: 'REPORTS' },
 ];
 
