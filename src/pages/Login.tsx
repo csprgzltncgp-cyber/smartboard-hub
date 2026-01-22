@@ -31,11 +31,11 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center">
+    <div className="min-h-screen flex flex-col items-center justify-center">
       {/* Content Container - keeps everything aligned */}
-      <div className="w-full max-w-[458px] px-4 flex flex-col flex-1">
-        {/* Header - aligned to form left edge */}
-        <header className="pt-8 mb-4">
+      <div className="w-full max-w-[458px] px-4 flex flex-col">
+        {/* Logo - directly above form */}
+        <header className="mb-5">
           <img 
             src={cgpLogo} 
             alt="Chestnut Global Partners" 
@@ -44,7 +44,7 @@ const Login = () => {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col justify-center">
+        <main className="flex flex-col">
           {/* Error Message */}
           {error && (
             <div className="bg-destructive text-destructive-foreground px-5 py-5 mb-4 flex items-center gap-2 font-calibri-bold w-full">
