@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import UserList from "./pages/users/UserList";
 import UserForm from "./pages/users/UserForm";
 import UserPermissions from "./pages/users/UserPermissions";
+import SettingsMenu from "./pages/settings/SettingsMenu";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="users" element={<UserList />} />
             <Route path="users/new" element={<UserForm />} />
             <Route path="users/:userId/permissions" element={<UserPermissions />} />
+            <Route path="settings" element={<SettingsMenu />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
