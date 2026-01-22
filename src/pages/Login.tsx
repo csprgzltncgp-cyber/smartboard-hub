@@ -20,8 +20,8 @@ const Login = () => {
     // For now, simulate a login attempt
     setTimeout(() => {
       setIsLoading(false);
-      // Demo: show error for empty credentials
-      if (!username || !password) {
+      // Demo: accept any username with password "smartboard"
+      if (!username || password !== "smartboard") {
         setError("Hibás felhasználónév vagy jelszó.");
         return;
       }
