@@ -84,8 +84,8 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
     industry: lead.details.industry, 
     // Treat 0 as “no data” and store missing numeric values as NaN so inputs can be empty
     headcount: lead.details.headcount > 0 ? lead.details.headcount : Number.NaN,
-    pillars: lead.details.pillars || 0,
-    sessions: lead.details.sessions || 0,
+    pillars: lead.details.pillars > 0 ? lead.details.pillars : Number.NaN,
+    sessions: lead.details.sessions > 0 ? lead.details.sessions : Number.NaN,
   });
   
   const [noteForm, setNoteForm] = useState('');
@@ -408,9 +408,33 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
             <div className="flex items-center border-b border-border pb-2">
               <span className="w-24 text-sm font-medium">Service:</span>
               <div className="flex-1 flex items-center gap-2">
-                <Input type="number" value={detailsForm.pillars} onChange={(e) => setDetailsForm(p => ({ ...p, pillars: parseInt(e.target.value) || 0 }))} className="w-16 border-0 shadow-none" placeholder="0" />
+                <Input
+                  type="number"
+                  value={Number.isFinite(detailsForm.pillars) ? detailsForm.pillars : ''}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    setDetailsForm((p) => ({
+                      ...p,
+                      pillars: raw === '' ? Number.NaN : parseInt(raw, 10),
+                    }));
+                  }}
+                  className="w-16 border-0 shadow-none"
+                  placeholder="Pillars"
+                />
                 <span className="text-sm text-muted-foreground">Piller /</span>
-                <Input type="number" value={detailsForm.sessions} onChange={(e) => setDetailsForm(p => ({ ...p, sessions: parseInt(e.target.value) || 0 }))} className="w-16 border-0 shadow-none" placeholder="0" />
+                <Input
+                  type="number"
+                  value={Number.isFinite(detailsForm.sessions) ? detailsForm.sessions : ''}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    setDetailsForm((p) => ({
+                      ...p,
+                      sessions: raw === '' ? Number.NaN : parseInt(raw, 10),
+                    }));
+                  }}
+                  className="w-16 border-0 shadow-none"
+                  placeholder="Sessions"
+                />
                 <span className="text-sm text-muted-foreground">Sessions</span>
               </div>
             </div>
@@ -468,7 +492,7 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
       )}
 
       {/* Company Details Display */}
-      {(lead.details.city || lead.details.industry || (Number.isFinite(lead.details.headcount) && lead.details.headcount > 0) || lead.details.pillars || lead.details.sessions) && (
+      {(lead.details.city || lead.details.industry || (Number.isFinite(lead.details.headcount) && lead.details.headcount > 0) || (Number.isFinite(lead.details.pillars) && lead.details.pillars > 0) || (Number.isFinite(lead.details.sessions) && lead.details.sessions > 0)) && (
         <div className="space-y-2">
           <h4 className="font-calibri-bold text-sm text-muted-foreground">Details</h4>
           <div className="space-y-1 text-sm bg-muted/30 p-3 rounded-sm">
@@ -479,8 +503,14 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
             {Number.isFinite(lead.details.headcount) && lead.details.headcount > 0 && (
               <div className="border-b border-border pb-1">Headcount: {lead.details.headcount}</div>
             )}
-            {(lead.details.pillars || lead.details.sessions) && (
-              <div>Service: {lead.details.pillars || 0} Piller / {lead.details.sessions || 0} Sessions</div>
+            {(Number.isFinite(lead.details.pillars) || Number.isFinite(lead.details.sessions)) && (
+              <div>
+                Service:
+                {Number.isFinite(lead.details.pillars) && lead.details.pillars > 0 ? ` ${lead.details.pillars}` : ' —'}
+                {' '}Piller /{' '}
+                {Number.isFinite(lead.details.sessions) && lead.details.sessions > 0 ? ` ${lead.details.sessions}` : ' —'}
+                {' '}Sessions
+              </div>
             )}
           </div>
         </div>

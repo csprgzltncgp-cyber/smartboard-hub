@@ -30,8 +30,8 @@ const LeadsTab = ({ leads, onAddLead, onUpdateLead, onDeleteLead }: LeadsTabProp
         industry: '',
         // Use NaN to represent “no value” for numeric fields so we don't show a default 0
         headcount: Number.NaN,
-        pillars: 0,
-        sessions: 0,
+        pillars: Number.NaN,
+        sessions: Number.NaN,
       },
       customDetails: [],
       notes: [],
