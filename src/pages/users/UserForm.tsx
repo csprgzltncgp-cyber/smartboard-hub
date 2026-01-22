@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Upload, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { createUser } from "@/stores/userStore";
+import { createUser, updateUser, getUserById } from "@/stores/userStore";
 import { UserFormData, LANGUAGES } from "@/types/user";
 import { toast } from "sonner";
 
 const UserForm = () => {
   const navigate = useNavigate();
+  const { userId } = useParams<{ userId: string }>();
+  const isEditMode = Boolean(userId);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<UserFormData>({
     name: "",
@@ -28,6 +30,26 @@ const UserForm = () => {
     avatarUrl: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof UserFormData, string>>>({});
+
+  // Load user data in edit mode
+  useEffect(() => {
+    if (isEditMode && userId) {
+      const user = getUserById(userId);
+      if (user) {
+        setFormData({
+          name: user.name,
+          email: user.email,
+          username: user.username,
+          phone: user.phone || "",
+          languageId: user.languageId || "hu",
+          avatarUrl: user.avatarUrl || "",
+        });
+      } else {
+        toast.error("Felhasználó nem található");
+        navigate("/dashboard/users");
+      }
+    }
+  }, [isEditMode, userId, navigate]);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof UserFormData, string>> = {};
@@ -53,11 +75,16 @@ const UserForm = () => {
     
     if (!validateForm()) return;
     
-    const newUser = createUser(formData);
-    toast.success("Felhasználó sikeresen létrehozva");
-    
-    // Navigate to permissions page to set up smartboards
-    navigate(`/dashboard/users/${newUser.id}/permissions`);
+    if (isEditMode && userId) {
+      updateUser(userId, formData);
+      toast.success("Felhasználó sikeresen frissítve");
+      navigate("/dashboard/users");
+    } else {
+      const newUser = createUser(formData);
+      toast.success("Felhasználó sikeresen létrehozva");
+      // Navigate to permissions page to set up smartboards
+      navigate(`/dashboard/users/${newUser.id}/permissions`);
+    }
   };
 
   const handleChange = (field: keyof UserFormData, value: string) => {
@@ -112,7 +139,9 @@ const UserForm = () => {
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h1 className="text-3xl font-calibri-bold">Új felhasználó regisztrálása</h1>
+        <h1 className="text-3xl font-calibri-bold">
+          {isEditMode ? "Felhasználó szerkesztése" : "Új felhasználó regisztrálása"}
+        </h1>
       </div>
 
       <div className="max-w-2xl">
@@ -246,7 +275,7 @@ const UserForm = () => {
           <div className="flex items-center gap-4">
             <Button type="submit" className="bg-primary hover:bg-primary/90">
               <Save className="w-4 h-4 mr-2" />
-              Mentés és jogosultságok beállítása
+              {isEditMode ? "Mentés" : "Mentés és jogosultságok beállítása"}
             </Button>
             <Button
               type="button"
