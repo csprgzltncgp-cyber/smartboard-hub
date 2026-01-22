@@ -5,9 +5,11 @@ import { Search } from "lucide-react";
 
 interface OffersTabProps {
   offers: CrmLead[];
+  onUpdateLead?: (lead: CrmLead) => void;
+  onDeleteLead?: (leadId: string) => void;
 }
 
-const OffersTab = ({ offers }: OffersTabProps) => {
+const OffersTab = ({ offers, onUpdateLead, onDeleteLead }: OffersTabProps) => {
   return (
     <div>
       {/* Action Bar */}
@@ -20,9 +22,15 @@ const OffersTab = ({ offers }: OffersTabProps) => {
 
       {/* Offers List */}
       <div className="border border-border rounded-sm overflow-hidden">
-        {offers.map((offer) => (
-          <CrmLeadCard key={offer.id} lead={offer} />
-        ))}
+        {offers.length === 0 ? (
+          <div className="p-8 text-center text-muted-foreground">
+            No offers yet.
+          </div>
+        ) : (
+          offers.map((offer) => (
+            <CrmLeadCard key={offer.id} lead={offer} onUpdate={onUpdateLead} onDelete={onDeleteLead} />
+          ))
+        )}
       </div>
     </div>
   );
