@@ -162,14 +162,22 @@ const DashboardLayout = () => {
     }
 
     // Find matching SmartBoard menu item (without adding SmartBoard name)
+    // Skip admin smartboard as it has a catch-all path
     for (const smartboard of SMARTBOARDS) {
-      const menuItem = smartboard.menuItems.find(item => path.startsWith(item.path));
+      if (smartboard.id === "admin") continue; // Skip admin, it matches everything
+      
+      const menuItem = smartboard.menuItems.find(item => {
+        // Exact match or path starts with menu item path followed by /
+        return path === item.path || path.startsWith(item.path + "/") || 
+               (item.path.includes("?") && path === item.path.split("?")[0]);
+      });
       if (menuItem) {
-        breadcrumbs.push({ label: menuItem.label, path: menuItem.path });
+        breadcrumbs.push({ label: menuItem.label, path: menuItem.path.split("?")[0] });
         
         // Check for sub-routes (like /new, /edit, etc.)
-        if (path !== menuItem.path) {
-          const subPath = path.replace(menuItem.path, "");
+        const basePath = menuItem.path.split("?")[0];
+        if (path !== basePath) {
+          const subPath = path.replace(basePath, "");
           if (subPath.includes("/new")) {
             breadcrumbs.push({ label: "Új létrehozása", path: path });
           } else if (subPath.includes("/edit")) {
