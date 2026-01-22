@@ -32,18 +32,18 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   { label: "TODO", icon: ClipboardList, path: "/dashboard", badge: 5, badgeColor: "bg-green-500" },
   { label: "Felhasználók", icon: UserCog, path: "/dashboard/users" },
-  { label: "Lezárt esetek", icon: FileText, path: "/dashboard/cases/closed" },
+  { label: "Összes eset", icon: FileText, path: "/dashboard/cases/closed" },
   { label: "Folyamatban lévő esetek", icon: ClipboardList, path: "/dashboard/cases/in-progress" },
   { label: "Digital", icon: Monitor, path: "/dashboard/digital" },
   { label: "Beállítások", icon: Settings, path: "/dashboard/settings" },
-  { label: "Partnerek", icon: Users, path: "/dashboard/outsources" },
+  { label: "WS/CI/O", icon: Users, path: "/dashboard/outsources" },
   { label: "Riportok", icon: BarChart3, path: "/dashboard/reports" },
   { label: "Számlák", icon: FileSpreadsheet, path: "/dashboard/invoices" },
-  { label: "Értesítések", icon: Bell, path: "/dashboard/notifications" },
-  { label: "Eszközök", icon: FolderOpen, path: "/dashboard/assets" },
-  { label: "Tevékenység terv", icon: Calendar, path: "/dashboard/activity-plan" },
+  { label: "Értesítés", icon: Bell, path: "/dashboard/notifications" },
+  { label: "Leltár", icon: FolderOpen, path: "/dashboard/assets" },
+  { label: "Ügyfeleim", icon: Calendar, path: "/dashboard/activity-plan" },
   { label: "Feedback", icon: FileText, path: "/dashboard/feedback", badge: 3, badgeColor: "bg-orange-500" },
-  { label: "Partner keresés", icon: Search, path: "/dashboard/affiliate-search" },
+  { label: "Szakértő keresés", icon: Search, path: "/dashboard/affiliate-search" },
 ];
 
 const DashboardLayout = () => {
