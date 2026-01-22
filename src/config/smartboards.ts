@@ -85,11 +85,9 @@ export const SMARTBOARDS: SmartboardConfig[] = [
     description: "Értékesítés és ügyfélszerzés",
     menuItems: [
       { id: "sales_crm", label: "CRM", path: "/dashboard/crm" },
-      { id: "sales_signed", label: "Signed", path: "/dashboard/crm?tab=signed" },
     ],
     panels: [
       "CRM - Leadek, találkozók, ajánlatok kezelése",
-      "Signed - Aláírt szerződések és incoming companies",
     ],
   },
   {
