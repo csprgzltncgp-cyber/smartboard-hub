@@ -18,8 +18,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const savedUserId = localStorage.getItem("currentUserId");
     const savedUserType = localStorage.getItem("currentUserType");
     if (savedUserId && savedUserType) {
-      const users = savedUserType === "operator" ? getOperators() : getUsers();
-      return users.find(u => u.id === savedUserId) || null;
+      // Primary lookup based on the stored type
+      const primaryList = savedUserType === "operator" ? getOperators() : getUsers();
+      const primaryMatch = primaryList.find(u => u.id === savedUserId) || null;
+      if (primaryMatch) return primaryMatch;
+
+      // Fallback: if the stored type is stale/wrong, try the other list too
+      const fallbackList = savedUserType === "operator" ? getUsers() : getOperators();
+      return fallbackList.find(u => u.id === savedUserId) || null;
     }
     return null;
   });
