@@ -318,7 +318,7 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
         <Button 
           onClick={handleOpenMeetingForm}
           variant={activeForm === 'meeting' ? 'default' : 'outline'}
-          className="rounded-none"
+          className="rounded-xl"
         >
           <Calendar className="w-4 h-4 mr-2" />
           Add meeting
@@ -326,7 +326,7 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
         <Button 
           onClick={() => setActiveForm(activeForm === 'contact' ? null : 'contact')}
           variant={activeForm === 'contact' ? 'default' : 'outline'}
-          className="rounded-none"
+          className="rounded-xl"
         >
           <Users className="w-4 h-4 mr-2" />
           Add contact
@@ -334,7 +334,7 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
         <Button 
           onClick={() => setActiveForm(activeForm === 'details' ? null : 'details')}
           variant={activeForm === 'details' ? 'default' : 'outline'}
-          className="rounded-none"
+          className="rounded-xl"
         >
           <FileText className="w-4 h-4 mr-2" />
           Add details
@@ -342,7 +342,7 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
         <Button 
           onClick={() => setActiveForm(activeForm === 'note' ? null : 'note')}
           variant={activeForm === 'note' ? 'default' : 'outline'}
-          className="rounded-none"
+          className="rounded-xl"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add note
