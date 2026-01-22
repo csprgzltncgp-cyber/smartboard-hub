@@ -1,8 +1,5 @@
-import { useState } from "react";
 import { CrmLead } from "@/types/crm";
 import CrmLeadCard from "./CrmLeadCard";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { mockColleagues } from "@/data/crmMockData";
 
 interface LeadsTabProps {
@@ -28,7 +25,6 @@ const LeadsTab = ({ leads, onAddLead, onUpdateLead, onDeleteLead }: LeadsTabProp
         city: '',
         country: '',
         industry: '',
-        // Use NaN to represent “no value” for numeric fields so we don't show a default 0
         headcount: Number.NaN,
         pillars: Number.NaN,
         sessions: Number.NaN,
@@ -44,22 +40,21 @@ const LeadsTab = ({ leads, onAddLead, onUpdateLead, onDeleteLead }: LeadsTabProp
 
   return (
     <div>
-      {/* Action Bar */}
-      <div className="flex gap-2 mb-4">
-        <Button 
+      {/* Action Link */}
+      <div className="mb-4">
+        <button 
           onClick={handleNewLead}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-none"
+          className="text-[#007bff] hover:text-[#0056b3] underline text-sm font-medium"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          New lead
-        </Button>
+          + New lead
+        </button>
       </div>
 
       {/* Leads List */}
       <div className="border border-border rounded-sm overflow-hidden">
         {leads.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            No leads yet. Click "New lead" to create one.
+            No leads yet. Click "+ New lead" to create one.
           </div>
         ) : (
           leads.map((lead) => (
