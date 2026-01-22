@@ -37,8 +37,8 @@ import { SMARTBOARDS } from "@/config/smartboards";
 import cgpLogo from "@/assets/cgp_logo_green.svg";
 import { useAuth } from "@/contexts/AuthContext";
 import { filterMenuItems } from "@/utils/menuPermissions";
-import SearchFilterModal from "@/components/modals/SearchFilterModal";
-import ChatModal from "@/components/modals/ChatModal";
+import SearchFilterPanel from "@/components/panels/SearchFilterPanel";
+import ChatPanel from "@/components/panels/ChatPanel";
 
 interface MenuItem {
   label: string;
@@ -222,28 +222,46 @@ const DashboardLayout = () => {
               />
             </div>
 
-            {/* Mobile Menu Buttons */}
-            <div className="lg:hidden flex gap-2">
+            {/* Mobile Menu Buttons - stacked layout */}
+            <div className="lg:hidden flex flex-col items-end gap-1">
               <button 
-                onClick={toggleMenu}
-                className="bg-cgp-teal-light text-white px-4 py-3 rounded-xl flex items-center gap-2"
+                onClick={() => {
+                  toggleMenu();
+                  setIsSearchFilterOpen(false);
+                  setIsChatOpen(false);
+                }}
+                className="bg-cgp-teal-light text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm"
               >
-                {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {isMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
                 MENÜ
               </button>
               <button 
-                onClick={() => setIsSearchFilterOpen(true)}
-                className="bg-cgp-teal text-white p-3 rounded-xl"
+                onClick={() => {
+                  setIsSearchFilterOpen(!isSearchFilterOpen);
+                  setIsMenuOpen(false);
+                  setIsChatOpen(false);
+                }}
+                className={`text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm ${
+                  isSearchFilterOpen ? "bg-cgp-teal/80" : "bg-cgp-teal"
+                }`}
               >
-                <Filter className="w-5 h-5" />
+                <Filter className="w-4 h-4" />
+                KERESÉS
               </button>
               <button 
-                onClick={() => setIsChatOpen(true)}
-                className="bg-cgp-teal text-white p-3 rounded-xl relative"
+                onClick={() => {
+                  setIsChatOpen(!isChatOpen);
+                  setIsMenuOpen(false);
+                  setIsSearchFilterOpen(false);
+                }}
+                className={`text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm relative ${
+                  isChatOpen ? "bg-cgp-teal/80" : "bg-cgp-teal"
+                }`}
               >
-                <MessageCircle className="w-5 h-5" />
+                <MessageCircle className="w-4 h-4" />
+                CHAT
                 {unreadChatCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-destructive text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                  <span className="absolute -top-1 -right-1 bg-destructive text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-bold text-[10px]">
                     {unreadChatCount}
                   </span>
                 )}
@@ -301,12 +319,16 @@ const DashboardLayout = () => {
         </div>
       )}
 
-      {/* Desktop Menu Button (shown on desktop) */}
+      {/* Desktop Buttons - Stacked vertically */}
       <div className="hidden lg:block max-w-7xl mx-auto px-4 lg:px-8 mt-4">
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-col items-end gap-2">
           {/* MENÜ Button */}
           <button 
-            onClick={toggleMenu}
+            onClick={() => {
+              toggleMenu();
+              setIsSearchFilterOpen(false);
+              setIsChatOpen(false);
+            }}
             className="bg-cgp-teal-light text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase hover:bg-primary transition-colors"
           >
             <Menu className="w-5 h-5" />
@@ -315,8 +337,14 @@ const DashboardLayout = () => {
           
           {/* Keresés/Szűrés Button */}
           <button 
-            onClick={() => setIsSearchFilterOpen(true)}
-            className="bg-cgp-teal text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase hover:bg-cgp-teal/90 transition-colors"
+            onClick={() => {
+              setIsSearchFilterOpen(!isSearchFilterOpen);
+              setIsMenuOpen(false);
+              setIsChatOpen(false);
+            }}
+            className={`text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase transition-colors ${
+              isSearchFilterOpen ? "bg-cgp-teal/80" : "bg-cgp-teal hover:bg-cgp-teal/90"
+            }`}
           >
             <Filter className="w-5 h-5" />
             KERESÉS/SZŰRÉS
@@ -324,8 +352,14 @@ const DashboardLayout = () => {
           
           {/* Chat Button with badge */}
           <button 
-            onClick={() => setIsChatOpen(true)}
-            className="bg-cgp-teal text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase hover:bg-cgp-teal/90 transition-colors relative"
+            onClick={() => {
+              setIsChatOpen(!isChatOpen);
+              setIsMenuOpen(false);
+              setIsSearchFilterOpen(false);
+            }}
+            className={`text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase transition-colors relative ${
+              isChatOpen ? "bg-cgp-teal/80" : "bg-cgp-teal hover:bg-cgp-teal/90"
+            }`}
           >
             <MessageCircle className="w-5 h-5" />
             CHAT
@@ -339,7 +373,7 @@ const DashboardLayout = () => {
 
         {/* Desktop Dropdown Menu */}
         {isMenuOpen && (
-          <div className="absolute right-8 mt-2 w-80 bg-white shadow-lg rounded-xl z-50 border">
+          <div className="absolute right-8 mt-2 w-80 bg-background shadow-lg rounded-xl z-50 border">
             <nav className="py-2">
               {menuItems.map((item) => (
                 <button
@@ -382,6 +416,20 @@ const DashboardLayout = () => {
                 </button>
               </div>
             </nav>
+          </div>
+        )}
+
+        {/* Desktop Search/Filter Dropdown Panel */}
+        {isSearchFilterOpen && (
+          <div className="absolute right-8 mt-2 w-[700px] z-50">
+            <SearchFilterPanel onClose={() => setIsSearchFilterOpen(false)} />
+          </div>
+        )}
+
+        {/* Desktop Chat Dropdown Panel */}
+        {isChatOpen && (
+          <div className="absolute right-8 mt-2 z-50">
+            <ChatPanel onClose={() => setIsChatOpen(false)} />
           </div>
         )}
       </div>
@@ -437,17 +485,23 @@ const DashboardLayout = () => {
         <Outlet />
       </main>
 
-      {/* Search/Filter Modal */}
-      <SearchFilterModal 
-        isOpen={isSearchFilterOpen} 
-        onClose={() => setIsSearchFilterOpen(false)} 
-      />
+      {/* Mobile Search/Filter Panel */}
+      {isSearchFilterOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
+          <div className="absolute top-20 left-4 right-4">
+            <SearchFilterPanel onClose={() => setIsSearchFilterOpen(false)} />
+          </div>
+        </div>
+      )}
 
-      {/* Chat Modal */}
-      <ChatModal 
-        isOpen={isChatOpen} 
-        onClose={() => setIsChatOpen(false)} 
-      />
+      {/* Mobile Chat Panel */}
+      {isChatOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
+          <div className="absolute top-20 left-4 right-4">
+            <ChatPanel onClose={() => setIsChatOpen(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
