@@ -118,7 +118,7 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
   };
 
   return (
-    <div className="bg-background border rounded-xl shadow-lg z-50 overflow-hidden w-full max-w-4xl">
+    <div className="bg-background border rounded-xl shadow-lg z-50 overflow-hidden w-[800px]">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b bg-cgp-teal/5">
         <h3 className="font-calibri-bold flex items-center gap-2">
@@ -130,9 +130,9 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
         </button>
       </div>
 
-      <div className="flex h-[400px]">
+      <div className="flex h-[500px]">
         {/* Users sidebar */}
-        <div className="w-56 border-r flex flex-col bg-muted/10">
+        <div className="w-72 border-r flex flex-col bg-muted/10">
           {/* Search */}
           <div className="p-2 border-b">
             <div className="relative">
