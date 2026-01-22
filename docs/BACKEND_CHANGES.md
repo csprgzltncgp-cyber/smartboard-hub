@@ -258,6 +258,8 @@ Az alábbi szövegek magyarul jelennek meg a frontenden:
 
 | Dátum | Változás | Érintett terület |
 |-------|----------|------------------|
+| 2025-01-22 | Belső Chat modul létrehozása (Slack-szerű) | Chat, Kommunikáció |
+| 2025-01-22 | Keresés/Szűrés univerzális panel létrehozása | Keresés, Szűrés |
 | 2025-01-22 | CRM modul teljes magyar lokalizáció | CRM, Lokalizáció |
 | 2025-01-22 | CRM státusz színek szinkronizálása SmartBoard panellel | CRM |
 | 2025-01-22 | SmartBoard alapú jogosultságkezelés bevezetése | Jogosultságok |
