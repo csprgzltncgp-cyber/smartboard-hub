@@ -23,7 +23,7 @@ const CrmTabs = ({ activeTab, onTabChange }: CrmTabsProps) => {
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
           className={cn(
-            "py-3 md:py-4 px-4 md:px-6 text-base md:text-lg lg:text-xl font-calibri-bold transition-colors text-center rounded-t-[20px]",
+            "py-4 md:py-5 px-6 md:px-8 text-xl md:text-2xl lg:text-3xl font-calibri-bold transition-colors text-center rounded-t-[25px] uppercase",
             activeTab === tab.id
               ? "bg-primary text-primary-foreground"
               : "bg-muted/60 text-muted-foreground hover:bg-muted"
