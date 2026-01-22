@@ -143,7 +143,7 @@ const OperatorPermissions = () => {
             <AccordionTrigger className="flex-1 hover:no-underline py-2">
               <div className="flex items-center gap-3">
                 <Badge variant="default" className="bg-primary">
-                  Operátor interfész (nyitóoldal)
+                  Operátor menüpontok
                 </Badge>
                 <span className="text-sm text-muted-foreground">
                   {operatorSmartboard.description}
@@ -286,7 +286,7 @@ const OperatorPermissions = () => {
         <h3 className="font-semibold mb-2">Összegzés</h3>
         <div className="flex flex-wrap gap-2">
           <Badge variant="default" className="bg-primary">
-            Operátor interfész (nyitóoldal) - {operatorMenuItems.length} menüpont
+            Operátor menüpontok - {operatorMenuItems.length} menüpont
           </Badge>
           <Badge variant="secondary">
             Keresés/Szűrés - {searchMenuItems.length} menüpont
