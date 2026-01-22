@@ -11,8 +11,20 @@ import {
   User,
   Headphones,
   Circle,
-  X
+  X,
+  Trash2
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthContext";
 
 // Import avatar images
@@ -123,6 +135,10 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [filterRole, setFilterRole] = useState<"all" | "operator" | "expert" | "staff">("all");
+  const [deletedConversations, setDeletedConversations] = useState<string[]>(() => {
+    const saved = localStorage.getItem(getStorageKey("deleted-conversations"));
+    return saved ? JSON.parse(saved) : [];
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load messages when selected user changes (user-specific)
@@ -177,8 +193,31 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
   const filteredUsers = mockUsers.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = filterRole === "all" || user.role === filterRole;
-    return matchesSearch && matchesRole;
+    const notDeleted = !deletedConversations.includes(user.id);
+    return matchesSearch && matchesRole && notDeleted;
   });
+
+  const handleDeleteConversation = (userId: string) => {
+    // Remove messages from localStorage
+    localStorage.removeItem(getStorageKey(`messages-${userId}`));
+    
+    // Add to deleted conversations list
+    const newDeleted = [...deletedConversations, userId];
+    setDeletedConversations(newDeleted);
+    localStorage.setItem(getStorageKey("deleted-conversations"), JSON.stringify(newDeleted));
+    
+    // Clear selection if this was the selected user
+    if (selectedUser?.id === userId) {
+      setSelectedUser(null);
+      setMessages([]);
+      localStorage.removeItem(getStorageKey("selected-user"));
+    }
+  };
+
+  const handleRestoreAllConversations = () => {
+    setDeletedConversations([]);
+    localStorage.removeItem(getStorageKey("deleted-conversations"));
+  };
 
   const handleSendMessage = () => {
     if (!newMessage.trim() || !selectedUser) return;
@@ -279,43 +318,74 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
               {filteredUsers.map((user) => {
                 const RoleIcon = getRoleIcon(user.role);
                 return (
-                  <button
+                  <div
                     key={user.id}
-                    onClick={() => setSelectedUser(user)}
-                    className={`w-full p-2 rounded-lg flex items-start gap-2 transition-colors text-left ${
+                    className={`w-full p-2 rounded-lg flex items-start gap-2 transition-colors text-left group ${
                       selectedUser?.id === user.id
                         ? "bg-cgp-teal/10 border border-cgp-teal"
                         : "hover:bg-muted"
                     }`}
                   >
-                    <div className="relative flex-shrink-0">
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage src={user.avatarUrl} alt={user.name} />
-                        <AvatarFallback className="bg-cgp-teal/20 text-cgp-teal text-xs">
-                          {user.name.split(" ").map(n => n[0]).join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <Circle 
-                        className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 ${
-                          user.isOnline ? "text-green-500 fill-green-500" : "text-gray-400 fill-gray-400"
-                        }`}
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium truncate">{user.name}</span>
-                        {user.unreadCount && (
-                          <span className="bg-destructive text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
-                            {user.unreadCount}
-                          </span>
-                        )}
+                    <button
+                      onClick={() => setSelectedUser(user)}
+                      className="flex items-start gap-2 flex-1 min-w-0"
+                    >
+                      <div className="relative flex-shrink-0">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={user.avatarUrl} alt={user.name} />
+                          <AvatarFallback className="bg-cgp-teal/20 text-cgp-teal text-xs">
+                            {user.name.split(" ").map(n => n[0]).join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <Circle 
+                          className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 ${
+                            user.isOnline ? "text-green-500 fill-green-500" : "text-gray-400 fill-gray-400"
+                          }`}
+                        />
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <RoleIcon className="w-2.5 h-2.5" />
-                        <span>{getRoleLabel(user.role)}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium truncate">{user.name}</span>
+                          {user.unreadCount && (
+                            <span className="bg-destructive text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                              {user.unreadCount}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <RoleIcon className="w-2.5 h-2.5" />
+                          <span>{getRoleLabel(user.role)}</span>
+                        </div>
                       </div>
-                    </div>
-                  </button>
+                    </button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button
+                          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-destructive/10 rounded transition-opacity"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Beszélgetés törlése</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Biztosan törlöd a beszélgetést {user.name} felhasználóval? Ez a művelet nem vonható vissza.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Mégse</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteConversation(user.id)}
+                            className="bg-destructive hover:bg-destructive/90"
+                          >
+                            Törlés
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 );
               })}
             </div>
