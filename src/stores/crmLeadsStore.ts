@@ -24,10 +24,18 @@ export const useCrmLeadsStore = create<CrmLeadsState>((set) => ({
     leads: [...state.leads, lead] 
   })),
   
-  updateLead: (updatedLead) => set((state) => ({ 
-    leads: state.leads.map(lead => 
-      lead.id === updatedLead.id ? updatedLead : lead
-    )
+  // NOTE: status changes must go through changeLeadStatus (ID-based) to avoid
+  // stale objects accidentally overwriting the current status when saving
+  // meetings/contacts/details/notes.
+  updateLead: (updatedLead) => set((state) => ({
+    leads: state.leads.map((lead) => {
+      if (lead.id !== updatedLead.id) return lead;
+      return {
+        ...lead,
+        ...updatedLead,
+        status: lead.status,
+      };
+    }),
   })),
   
   changeLeadStatus: (leadId, newStatus) => set((state) => ({ 
