@@ -406,6 +406,122 @@ A Dashboard magyar és angol nyelvű. Szövegek jelenleg hardcode-olva, később
 
 ---
 
+## 11. CRM Modul Stílusok
+
+### CRM Státusz Színek
+A lead progresszió színei a SmartBoard összefoglaló panellel szinkronban:
+
+| Státusz | Tailwind Class | Token | Leírás |
+|---------|---------------|-------|--------|
+| Lead | `bg-cgp-teal-light` | `--cgp-teal-light` | Teal - új lead |
+| Offer | `bg-cgp-badge-new` | `--cgp-badge-new` | Zöld - ajánlat küldve |
+| Deal | `bg-cgp-badge-lastday` | `--cgp-badge-lastday` | Narancs - tárgyalás alatt |
+| Signed | `bg-cgp-task-completed-purple` | `--cgp-task-completed-purple` | Lila - aláírva |
+| Incoming Company | `bg-cgp-teal` | `--cgp-teal` | Sötét teal - cégbevitel folyamatban |
+
+### CRM Státusz Ikonok
+```tsx
+import { Hourglass, Calculator, Handshake, FileSignature, Building2 } from "lucide-react";
+
+// Lead: Hourglass (homokóra)
+// Offer: Calculator (számológép)
+// Deal: Handshake (kézfogás)
+// Signed: FileSignature (toll/papír)
+// Incoming Company: Building2 (épület)
+```
+
+### CRM Státusz Gomb Konfiguráció
+```tsx
+const leadStatusConfig = [
+  { status: 'lead', icon: <Hourglass />, label: 'Lead', activeClass: 'bg-cgp-teal-light text-white' },
+  { status: 'offer', icon: <Calculator />, label: 'Offer', activeClass: 'bg-cgp-badge-new text-white' },
+  { status: 'deal', icon: <Handshake />, label: 'Deal', activeClass: 'bg-cgp-badge-lastday text-white' },
+  { status: 'signed', icon: <FileSignature />, label: 'Signed', activeClass: 'bg-cgp-task-completed-purple text-white' },
+];
+```
+
+### CRM Lead Kártya
+```tsx
+// Kártya fejléc (összecsukható)
+className="flex items-center gap-4 py-3 px-4 bg-muted/30 cursor-pointer hover:bg-muted/50"
+
+// Státusz ikon doboz
+className={cn("p-1.5 rounded", getLeadStatusColor(lead.status))}
+
+// Kártya részletek (kinyitva)
+// 4 szekció: Meeting, Contact, Details, Notes
+```
+
+### CRM Tab Fülek
+```tsx
+// Navigációs fülek (mappa-stílus)
+className={cn(
+  "py-4 md:py-5 px-6 md:px-8 text-xl md:text-2xl lg:text-3xl font-calibri-bold rounded-t-[25px] uppercase",
+  activeTab === tab.id
+    ? "bg-primary text-primary-foreground"
+    : "bg-muted/60 text-muted-foreground hover:bg-muted"
+)}
+```
+
+### CRM Szűrő Dropdownok
+```tsx
+// Ország és kolléga választó
+<SelectTrigger className="w-[200px] bg-background border border-border rounded-xl hover:bg-muted">
+  <SelectValue placeholder="Válassz országot" />
+</SelectTrigger>
+```
+
+---
+
+## 12. SmartBoard Panel Stílusok
+
+### SmartBoard Összefoglaló Kártyák
+A CRM összefoglaló panel kártyái a státusz színekkel:
+
+```tsx
+// StatCard komponens
+<div 
+  className={cn("flex items-center gap-3 p-4 rounded-xl cursor-pointer transition-colors", colorClass)}
+  onClick={onClick}
+>
+  <Icon className="w-8 h-8" />
+  <div>
+    <div className="text-2xl font-calibri-bold">{count}</div>
+    <div className="text-sm">{label}</div>
+  </div>
+</div>
+
+// Színek a CRM státuszoknak megfelelően:
+// Leads: bg-cgp-teal-light/20 text-cgp-teal
+// Offers: bg-cgp-badge-new/20 text-cgp-badge-new
+// Deals: bg-cgp-badge-lastday/20 text-cgp-badge-lastday
+// Signed: bg-cgp-task-completed-purple/20 text-cgp-task-completed-purple
+```
+
+### SmartBoard Panelek Layout
+```tsx
+// Panel konténer
+className="bg-white rounded-xl border p-6 mb-6"
+
+// Panel címsor
+className="flex items-center justify-between mb-4"
+<h2 className="text-xl font-calibri-bold">Panel Címe</h2>
+<Button variant="outline" size="sm">Teljes nézet</Button>
+```
+
+### Mai Feladatok Panel
+```tsx
+// Task elem
+className="flex items-center justify-between py-3 px-4 hover:bg-muted/50 rounded-lg cursor-pointer"
+
+// Task badge-ek
+<Badge className="bg-cgp-badge-new text-white">Új</Badge>
+<Badge className="bg-cgp-badge-lastday text-white">Utolsó nap</Badge>
+<Badge className="bg-cgp-badge-overdue text-white">Határidőn túl</Badge>
+```
+
+---
+
 ## Changelog
 
 | Dátum | Menüpont | Hozzáadott szabályok |
@@ -414,3 +530,5 @@ A Dashboard magyar és angol nyelvű. Szövegek jelenleg hardcode-olva, később
 | 2025-01-21 | TODO Dashboard | Task szekció színek, headline stílusok, task kártya layout, gombok, badge-ek |
 | 2025-01-21 | Felhasználók | Táblázat stílusok, form layout, accordion, keresőmező, oldalcím + akciógomb header, törlés megerősítés dialog, badge variánsok, összegzés panel |
 | 2025-01-21 | Link színek | Kék link szín (#007bff) és hover állapot (#0056b3) tokenek hozzáadása |
+| 2025-01-22 | CRM Modul | CRM státusz színek szinkronizálva (Lead/Offer/Deal/Signed), státusz ikonok, lead kártya és tab fülek stílusok, szűrő dropdownok |
+| 2025-01-22 | SmartBoard | Összefoglaló panel kártyák, mai feladatok panel, panel layout szabályok |
