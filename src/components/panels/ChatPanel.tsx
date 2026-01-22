@@ -61,11 +61,25 @@ const mockMessages: Message[] = [
 
 const ChatPanel = ({ onClose }: ChatPanelProps) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<ChatUser | null>(() => {
+    // Restore selected user from localStorage
+    const savedUserId = localStorage.getItem("cgpchat-selected-user");
+    if (savedUserId) {
+      return mockUsers.find(u => u.id === savedUserId) || null;
+    }
+    return null;
+  });
   const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [newMessage, setNewMessage] = useState("");
   const [filterRole, setFilterRole] = useState<"all" | "operator" | "expert" | "staff">("all");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Save selected user to localStorage when it changes
+  useEffect(() => {
+    if (selectedUser) {
+      localStorage.setItem("cgpchat-selected-user", selectedUser.id);
+    }
+  }, [selectedUser]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
