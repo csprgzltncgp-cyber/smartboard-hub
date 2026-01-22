@@ -1,15 +1,21 @@
 import { CrmLead } from "@/types/crm";
-import { ChevronDown, ChevronUp, Bell, VolumeX } from "lucide-react";
+import { ChevronDown, ChevronUp, Bell, VolumeX, X } from "lucide-react";
 import { useState } from "react";
 import CrmLeadDetails from "./CrmLeadDetails";
 
 interface CrmLeadCardProps {
   lead: CrmLead;
   onUpdate?: (lead: CrmLead) => void;
+  onDelete?: (leadId: string) => void;
 }
 
-const CrmLeadCard = ({ lead, onUpdate }: CrmLeadCardProps) => {
+const CrmLeadCard = ({ lead, onUpdate, onDelete }: CrmLeadCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete?.(lead.id);
+  };
 
   return (
     <div className="border-b border-border">
@@ -20,7 +26,7 @@ const CrmLeadCard = ({ lead, onUpdate }: CrmLeadCardProps) => {
       >
         <div className="flex-1 flex items-center gap-3">
           <span className="font-medium text-foreground">
-            {lead.companyName}
+            {lead.companyName || 'Unnamed Lead'}
           </span>
           <span className="text-muted-foreground">-</span>
           <span className="text-muted-foreground">{lead.assignedTo}</span>
@@ -34,7 +40,13 @@ const CrmLeadCard = ({ lead, onUpdate }: CrmLeadCardProps) => {
           )}
         </div>
 
-        
+        <button 
+          onClick={handleDelete}
+          className="p-1 hover:bg-destructive/20 rounded text-muted-foreground hover:text-destructive transition-colors"
+          title="Delete lead"
+        >
+          <X className="w-4 h-4" />
+        </button>
 
         <button className="p-1 hover:bg-muted rounded">
           {isExpanded ? (

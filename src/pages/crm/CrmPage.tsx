@@ -16,7 +16,7 @@ const CrmPage = () => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [selectedColleague, setSelectedColleague] = useState<string | null>(null);
   
-  const { leadsList, offersList, dealsList, addLead, updateLead } = useCrmLeads();
+  const { leadsList, offersList, dealsList, addLead, updateLead, deleteLead } = useCrmLeads();
 
   // Get colleague name for header
   const colleagueName = selectedColleague 
@@ -26,7 +26,7 @@ const CrmPage = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'leads':
-        return <LeadsTab leads={leadsList} onAddLead={addLead} onUpdateLead={updateLead} />;
+        return <LeadsTab leads={leadsList} onAddLead={addLead} onUpdateLead={updateLead} onDeleteLead={deleteLead} />;
       case 'offers':
         return <OffersTab offers={offersList} />;
       case 'deals':

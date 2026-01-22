@@ -9,9 +9,10 @@ interface LeadsTabProps {
   leads: CrmLead[];
   onAddLead?: (lead: CrmLead) => void;
   onUpdateLead?: (lead: CrmLead) => void;
+  onDeleteLead?: (leadId: string) => void;
 }
 
-const LeadsTab = ({ leads, onAddLead, onUpdateLead }: LeadsTabProps) => {
+const LeadsTab = ({ leads, onAddLead, onUpdateLead, onDeleteLead }: LeadsTabProps) => {
   const handleNewLead = () => {
     const newLead: CrmLead = {
       id: `lead-${Date.now()}`,
@@ -61,7 +62,7 @@ const LeadsTab = ({ leads, onAddLead, onUpdateLead }: LeadsTabProps) => {
           </div>
         ) : (
           leads.map((lead) => (
-            <CrmLeadCard key={lead.id} lead={lead} onUpdate={onUpdateLead} />
+            <CrmLeadCard key={lead.id} lead={lead} onUpdate={onUpdateLead} onDelete={onDeleteLead} />
           ))
         )}
       </div>
