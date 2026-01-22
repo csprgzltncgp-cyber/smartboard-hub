@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   MessageCircle, 
   Send, 
@@ -13,6 +13,13 @@ import {
   Circle,
   X
 } from "lucide-react";
+
+// Import avatar images
+import avatarBarbara from "@/assets/avatars/avatar-barbara.jpg";
+import avatarAnna from "@/assets/avatars/avatar-anna.jpg";
+import avatarJanos from "@/assets/avatars/avatar-janos.jpg";
+import avatarPeter from "@/assets/avatars/avatar-peter.jpg";
+import avatarEva from "@/assets/avatars/avatar-eva.jpg";
 
 interface ChatPanelProps {
   onClose: () => void;
@@ -25,6 +32,7 @@ interface ChatUser {
   isOnline: boolean;
   lastMessage?: string;
   unreadCount?: number;
+  avatarUrl?: string;
 }
 
 interface Message {
@@ -35,13 +43,13 @@ interface Message {
   isOwn: boolean;
 }
 
-// Mock users for demo
+// Mock users for demo with avatars
 const mockUsers: ChatUser[] = [
-  { id: "1", name: "Kiss Barbara", role: "operator", isOnline: true, lastMessage: "Rendben, köszönöm!", unreadCount: 2 },
-  { id: "2", name: "Nagy Anna", role: "operator", isOnline: true, lastMessage: "Az eset továbbítva." },
-  { id: "3", name: "Dr. Szabó János", role: "expert", isOnline: false, lastMessage: "Holnap visszahívom." },
-  { id: "4", name: "Kovács Péter", role: "staff", isOnline: true, lastMessage: "Megkaptam a dokumentumot." },
-  { id: "5", name: "Tóth Éva", role: "staff", isOnline: false, lastMessage: "Jó reggelt!" },
+  { id: "1", name: "Kiss Barbara", role: "operator", isOnline: true, lastMessage: "Rendben, köszönöm!", unreadCount: 2, avatarUrl: avatarBarbara },
+  { id: "2", name: "Nagy Anna", role: "operator", isOnline: true, lastMessage: "Az eset továbbítva.", avatarUrl: avatarAnna },
+  { id: "3", name: "Dr. Szabó János", role: "expert", isOnline: false, lastMessage: "Holnap visszahívom.", avatarUrl: avatarJanos },
+  { id: "4", name: "Kovács Péter", role: "staff", isOnline: true, lastMessage: "Megkaptam a dokumentumot.", avatarUrl: avatarPeter },
+  { id: "5", name: "Tóth Éva", role: "staff", isOnline: false, lastMessage: "Jó reggelt!", avatarUrl: avatarEva },
 ];
 
 // Mock messages for demo
@@ -185,6 +193,7 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
                   >
                     <div className="relative flex-shrink-0">
                       <Avatar className="w-8 h-8">
+                        <AvatarImage src={user.avatarUrl} alt={user.name} />
                         <AvatarFallback className="bg-cgp-teal/20 text-cgp-teal text-xs">
                           {user.name.split(" ").map(n => n[0]).join("")}
                         </AvatarFallback>
@@ -223,6 +232,7 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
               {/* Chat header */}
               <div className="p-3 border-b flex items-center gap-2 bg-background">
                 <Avatar className="w-8 h-8">
+                  <AvatarImage src={selectedUser.avatarUrl} alt={selectedUser.name} />
                   <AvatarFallback className="bg-cgp-teal/20 text-cgp-teal text-xs">
                     {selectedUser.name.split(" ").map(n => n[0]).join("")}
                   </AvatarFallback>

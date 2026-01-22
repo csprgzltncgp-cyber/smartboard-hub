@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Upload, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,18 +11,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createUser } from "@/stores/userStore";
 import { UserFormData, LANGUAGES } from "@/types/user";
 import { toast } from "sonner";
 
 const UserForm = () => {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<UserFormData>({
     name: "",
     email: "",
     username: "",
     phone: "",
     languageId: "hu",
+    avatarUrl: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof UserFormData, string>>>({});
 
@@ -64,6 +67,41 @@ const UserForm = () => {
     }
   };
 
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("A kép mérete maximum 5MB lehet");
+        return;
+      }
+      if (!file.type.startsWith("image/")) {
+        toast.error("Csak képfájlok tölthetők fel");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setFormData(prev => ({ ...prev, avatarUrl: event.target?.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeAvatar = () => {
+    setFormData(prev => ({ ...prev, avatarUrl: "" }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map(part => part[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <div>
       <div className="flex items-center gap-4 mb-6">
@@ -81,7 +119,52 @@ const UserForm = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="bg-white rounded-xl border p-6 space-y-4">
             <h2 className="text-lg font-semibold mb-4">Alapadatok</h2>
-            
+
+            {/* Avatar Upload */}
+            <div className="space-y-2">
+              <Label>Profilkép</Label>
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <Avatar className="w-20 h-20 border-2 border-muted">
+                    <AvatarImage src={formData.avatarUrl} alt="Avatar" />
+                    <AvatarFallback className="bg-cgp-teal/10 text-cgp-teal text-xl">
+                      {formData.name ? getInitials(formData.name) : <User className="w-8 h-8" />}
+                    </AvatarFallback>
+                  </Avatar>
+                  {formData.avatarUrl && (
+                    <button
+                      type="button"
+                      onClick={removeAvatar}
+                      className="absolute -top-1 -right-1 bg-destructive text-white rounded-full p-1 hover:bg-destructive/90"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="rounded-xl"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Kép feltöltése
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    JPG, PNG vagy GIF. Max 5MB.
+                  </p>
+                </div>
+              </div>
+            </div>
             {/* Name */}
             <div className="space-y-2">
               <Label htmlFor="name">Név *</Label>
