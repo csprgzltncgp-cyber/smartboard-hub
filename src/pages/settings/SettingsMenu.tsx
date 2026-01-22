@@ -18,14 +18,14 @@ interface SettingsMenuItem {
 }
 
 const settingsMenuItems: SettingsMenuItem[] = [
-  { label: "Cégek listája", path: "/dashboard/settings/companies", icon: Building2 },
-  { label: "Országok listája", path: "/dashboard/settings/countries", icon: Globe },
-  { label: "Városok listája", path: "/dashboard/settings/cities", icon: MapPin },
-  { label: "Jogosultságok listája", path: "/dashboard/settings/permissions", icon: Shield },
+  { label: "Cégek", path: "/dashboard/settings/companies", icon: Building2 },
+  { label: "Országok", path: "/dashboard/settings/countries", icon: Globe },
+  { label: "Városok", path: "/dashboard/settings/cities", icon: MapPin },
+  { label: "Jogosultságok", path: "/dashboard/settings/permissions", icon: Shield },
   { label: "Felhasználók", path: "/dashboard/users", icon: UserCog },
-  { label: "Szakértők listája", path: "/dashboard/settings/experts", icon: Users },
-  { label: "Operátorok listája", path: "/dashboard/settings/operators", icon: Headphones },
-  { label: "Dokumentumok listája", path: "/dashboard/settings/documents", icon: FileText },
+  { label: "Szakértők", path: "/dashboard/settings/experts", icon: Users },
+  { label: "Operátorok", path: "/dashboard/settings/operators", icon: Headphones },
+  { label: "Dokumentumok", path: "/dashboard/settings/documents", icon: FileText },
   { label: "Training Dashboard", path: "/dashboard/settings/training", icon: GraduationCap },
 ];
 
