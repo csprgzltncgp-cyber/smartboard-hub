@@ -73,17 +73,19 @@ const DashboardLayout = () => {
     const path = location.pathname;
     const breadcrumbs: { label: string; path: string }[] = [];
 
-    // Special routes mapping
-    const specialRoutes: Record<string, { label: string; parentPath?: string; parentLabel?: string }> = {
+    // Special routes mapping - now with Settings as parent for user routes
+    const specialRoutes: Record<string, { label: string; parentPath?: string; parentLabel?: string; grandParentPath?: string; grandParentLabel?: string }> = {
       "/dashboard": { label: "TODO" },
-      "/dashboard/users": { label: "Felhasználók" },
-      "/dashboard/users/new": { label: "Új felhasználó regisztrálása", parentPath: "/dashboard/users", parentLabel: "Felhasználók" },
+      "/dashboard/settings": { label: "Beállítások" },
+      "/dashboard/users": { label: "Felhasználók", parentPath: "/dashboard/settings", parentLabel: "Beállítások" },
+      "/dashboard/users/new": { label: "Új felhasználó regisztrálása", parentPath: "/dashboard/users", parentLabel: "Felhasználók", grandParentPath: "/dashboard/settings", grandParentLabel: "Beállítások" },
     };
 
     // Check for user permissions route pattern
     const permissionsMatch = path.match(/^\/dashboard\/users\/(\d+)\/permissions$/);
     if (permissionsMatch) {
       return [
+        { label: "Beállítások", path: "/dashboard/settings" },
         { label: "Felhasználók", path: "/dashboard/users" },
         { label: "Jogosultságok szerkesztése", path: path },
       ];
@@ -92,6 +94,11 @@ const DashboardLayout = () => {
     // Check special routes first
     if (specialRoutes[path]) {
       const route = specialRoutes[path];
+      // Add grandparent if exists
+      if (route.grandParentPath && route.grandParentLabel) {
+        breadcrumbs.push({ label: route.grandParentLabel, path: route.grandParentPath });
+      }
+      // Add parent if exists
       if (route.parentPath && route.parentLabel) {
         breadcrumbs.push({ label: route.parentLabel, path: route.parentPath });
       }
