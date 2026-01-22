@@ -22,12 +22,26 @@ const UserPermissions = () => {
   const [user, setUser] = useState<User | null>(null);
   const [permissions, setPermissions] = useState<UserSmartboardPermission[]>([]);
 
+  // Get always-enabled smartboards (like search)
+  const alwaysEnabledSmartboards = SMARTBOARDS.filter(sb => sb.alwaysEnabled);
+
   useEffect(() => {
     if (userId) {
       const foundUser = getUserById(userId);
       if (foundUser) {
         setUser(foundUser);
-        setPermissions([...foundUser.smartboardPermissions]);
+        // Merge user permissions with always-enabled smartboards
+        const userPerms = [...foundUser.smartboardPermissions];
+        alwaysEnabledSmartboards.forEach(sb => {
+          if (!userPerms.some(p => p.smartboardId === sb.id)) {
+            userPerms.push({
+              smartboardId: sb.id,
+              isDefault: false,
+              enabledMenuItems: sb.menuItems.map(m => m.id),
+            });
+          }
+        });
+        setPermissions(userPerms);
       } else {
         toast.error("Felhasználó nem található");
         navigate("/dashboard/users");
@@ -157,11 +171,12 @@ const UserPermissions = () => {
                 }`}
               >
                 <div className="flex items-center gap-4 px-4 py-2">
-                  {/* Enable/Disable Checkbox */}
+                  {/* Enable/Disable Checkbox - disabled for always-enabled smartboards */}
                   <Checkbox
                     id={`sb-${smartboard.id}`}
                     checked={enabled}
                     onCheckedChange={() => toggleSmartboard(smartboard)}
+                    disabled={smartboard.alwaysEnabled}
                   />
                   
                   {/* Default Star */}

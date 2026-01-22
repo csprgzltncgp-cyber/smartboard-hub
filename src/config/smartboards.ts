@@ -13,9 +13,38 @@ export interface SmartboardConfig {
   description: string;
   menuItems: SmartboardMenuItem[];
   panels: string[]; // Panel descriptions for reference
+  alwaysEnabled?: boolean; // If true, this smartboard is always enabled for all users
 }
 
 export const SMARTBOARDS: SmartboardConfig[] = [
+  // Admin at the top
+  {
+    id: "admin",
+    name: "Admin",
+    description: "Adminisztrátori funkciók és beállítások",
+    menuItems: [
+      { id: "admin_users", label: "Felhasználók kezelése", path: "/dashboard/users" },
+      { id: "admin_companies", label: "Cégek listája", path: "/dashboard/admin/companies" },
+      { id: "admin_permissions", label: "Jogosultságok kezelése", path: "/dashboard/admin/permissions" },
+      { id: "admin_countries", label: "Országok listája", path: "/dashboard/admin/countries" },
+      { id: "admin_cities", label: "Városok listája", path: "/dashboard/admin/cities" },
+      { id: "admin_experts", label: "Szakértők listája", path: "/dashboard/admin/experts" },
+      { id: "admin_operators", label: "Operátorok listája", path: "/dashboard/admin/operators" },
+      { id: "admin_documents", label: "Dokumentumok listája", path: "/dashboard/admin/documents" },
+      { id: "admin_stats", label: "Statisztikák", path: "/dashboard/admin/stats" },
+      { id: "admin_settings", label: "Beállítások", path: "/dashboard/admin/settings" },
+    ],
+    panels: [
+      "Felhasználók kezelése",
+      "Cégek listája",
+      "Jogosultságok kezelése",
+      "Országok és városok listája",
+      "Szakértők és operátorok kezelése",
+      "Dokumentumok",
+      "Rendszerstatisztikák",
+      "Rendszerbeállítások",
+    ],
+  },
   {
     id: "account",
     name: "Account",
@@ -132,25 +161,6 @@ export const SMARTBOARDS: SmartboardConfig[] = [
     ],
   },
   {
-    id: "search",
-    name: "Keresés/Szűrés",
-    description: "Keresési és szűrési funkciók (univerzális, minden SmartBoard része)",
-    menuItems: [
-      { id: "search_compare", label: "Összehasonlítás", path: "/dashboard/search/compare" },
-      { id: "search_dimension", label: "Dimenzió szerinti bontás", path: "/dashboard/search/dimension" },
-      { id: "search_trend", label: "Trend-elemzés", path: "/dashboard/search/trend" },
-      { id: "search_search", label: "Keresés", path: "/dashboard/search/search" },
-      { id: "search_filter", label: "Szűrés", path: "/dashboard/search/filter" },
-    ],
-    panels: [
-      "Összehasonlítás - adatok egymás melletti vizsgálata",
-      "Dimenzió szerinti bontás - kategóriák szerinti elemzés",
-      "Trend-elemzés - időbeli alakulás és tendenciák",
-      "Keresés - általános keresési felület",
-      "Szűrés - átfogó szűrési felület",
-    ],
-  },
-  {
     id: "operator",
     name: "Operátor",
     description: "Operátor munkaállomás",
@@ -191,33 +201,6 @@ export const SMARTBOARDS: SmartboardConfig[] = [
     ],
   },
   {
-    id: "admin",
-    name: "Admin",
-    description: "Adminisztrátori funkciók és beállítások",
-    menuItems: [
-      { id: "admin_users", label: "Felhasználók kezelése", path: "/dashboard/users" },
-      { id: "admin_companies", label: "Cégek listája", path: "/dashboard/admin/companies" },
-      { id: "admin_permissions", label: "Jogosultságok kezelése", path: "/dashboard/admin/permissions" },
-      { id: "admin_countries", label: "Országok listája", path: "/dashboard/admin/countries" },
-      { id: "admin_cities", label: "Városok listája", path: "/dashboard/admin/cities" },
-      { id: "admin_experts", label: "Szakértők listája", path: "/dashboard/admin/experts" },
-      { id: "admin_operators", label: "Operátorok listája", path: "/dashboard/admin/operators" },
-      { id: "admin_documents", label: "Dokumentumok listája", path: "/dashboard/admin/documents" },
-      { id: "admin_stats", label: "Statisztikák", path: "/dashboard/admin/stats" },
-      { id: "admin_settings", label: "Beállítások", path: "/dashboard/admin/settings" },
-    ],
-    panels: [
-      "Felhasználók kezelése",
-      "Cégek listája",
-      "Jogosultságok kezelése",
-      "Országok és városok listája",
-      "Szakértők és operátorok kezelése",
-      "Dokumentumok",
-      "Rendszerstatisztikák",
-      "Rendszerbeállítások",
-    ],
-  },
-  {
     id: "client",
     name: "Ügyfél",
     description: "Ügyfél felület (változatlan, céges profilban kezelt)",
@@ -228,6 +211,27 @@ export const SMARTBOARDS: SmartboardConfig[] = [
     panels: [
       "Ügyfél riportok",
       "Statisztikák",
+    ],
+  },
+  // Search/Filter at the bottom, always enabled
+  {
+    id: "search",
+    name: "Keresés/Szűrés",
+    description: "Keresési és szűrési funkciók (univerzális, minden SmartBoard része)",
+    alwaysEnabled: true,
+    menuItems: [
+      { id: "search_compare", label: "Összehasonlítás", path: "/dashboard/search/compare" },
+      { id: "search_dimension", label: "Dimenzió szerinti bontás", path: "/dashboard/search/dimension" },
+      { id: "search_trend", label: "Trend-elemzés", path: "/dashboard/search/trend" },
+      { id: "search_search", label: "Keresés", path: "/dashboard/search/search" },
+      { id: "search_filter", label: "Szűrés", path: "/dashboard/search/filter" },
+    ],
+    panels: [
+      "Összehasonlítás - adatok egymás melletti vizsgálata",
+      "Dimenzió szerinti bontás - kategóriák szerinti elemzés",
+      "Trend-elemzés - időbeli alakulás és tendenciák",
+      "Keresés - általános keresési felület",
+      "Szűrés - átfogó szűrési felület",
     ],
   },
 ];
@@ -247,4 +251,9 @@ export const getMenuItemsForSmartboards = (smartboardIds: string[]): SmartboardM
     }
   });
   return items;
+};
+
+// Get smartboards that are always enabled
+export const getAlwaysEnabledSmartboards = (): SmartboardConfig[] => {
+  return SMARTBOARDS.filter(sb => sb.alwaysEnabled);
 };
