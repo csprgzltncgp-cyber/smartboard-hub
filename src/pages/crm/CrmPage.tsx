@@ -28,9 +28,9 @@ const CrmPage = () => {
       case 'leads':
         return <LeadsTab leads={leadsList} onAddLead={addLead} onUpdateLead={updateLead} onDeleteLead={deleteLead} />;
       case 'offers':
-        return <OffersTab offers={offersList} />;
+        return <OffersTab offers={offersList} onUpdateLead={updateLead} onDeleteLead={deleteLead} />;
       case 'deals':
-        return <DealsTab deals={dealsList} />;
+        return <DealsTab deals={dealsList} onUpdateLead={updateLead} onDeleteLead={deleteLead} />;
       case 'todolist':
         return <TodoListTab items={mockTodoItems} />;
       case 'companies':
