@@ -7,6 +7,7 @@ interface AuthContextType {
   currentUser: User | null;
   login: (username: string) => User | null;
   logout: () => void;
+  refreshCurrentUser: () => void;
   isAuthenticated: boolean;
 }
 
@@ -66,11 +67,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     console.log("[Auth] logout");
   };
 
+  const refreshCurrentUser = () => {
+    const savedUserId = localStorage.getItem("currentUserId");
+    const savedUserType = localStorage.getItem("currentUserType");
+    if (savedUserId && savedUserType) {
+      const primaryList = savedUserType === "operator" ? getOperators() : getUsers();
+      const updatedUser = primaryList.find(u => u.id === savedUserId) || null;
+      if (updatedUser) {
+        setCurrentUser(updatedUser);
+        console.log("[Auth] refreshed user", { name: updatedUser.name });
+      }
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       currentUser,
       login,
       logout,
+      refreshCurrentUser,
       isAuthenticated: currentUser !== null,
     }}>
       {children}

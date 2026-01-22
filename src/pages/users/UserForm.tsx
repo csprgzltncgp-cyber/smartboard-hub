@@ -15,10 +15,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { createUser, updateUser, getUserById } from "@/stores/userStore";
 import { UserFormData, LANGUAGES } from "@/types/user";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const UserForm = () => {
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
+  const { currentUser, refreshCurrentUser } = useAuth();
   const isEditMode = Boolean(userId);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<UserFormData>({
@@ -77,6 +79,10 @@ const UserForm = () => {
     
     if (isEditMode && userId) {
       updateUser(userId, formData);
+      // Refresh current user if editing self
+      if (currentUser?.id === userId) {
+        refreshCurrentUser();
+      }
       toast.success("Felhasználó sikeresen frissítve");
       navigate("/dashboard/users");
     } else {
