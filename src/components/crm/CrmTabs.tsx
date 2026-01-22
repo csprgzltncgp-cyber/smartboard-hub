@@ -17,16 +17,16 @@ const tabs: { id: CrmTab; label: string }[] = [
 
 const CrmTabs = ({ activeTab, onTabChange }: CrmTabsProps) => {
   return (
-    <div className="flex items-end gap-0.5 border-b border-border">
+    <div className="flex items-end gap-1 border-b border-border">
       {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
           className={cn(
-            "py-2.5 px-5 text-sm font-calibri-bold transition-colors text-center rounded-t-md",
+            "py-3 md:py-4 px-4 md:px-6 text-base md:text-lg lg:text-xl font-calibri-bold transition-colors text-center rounded-t-[20px]",
             activeTab === tab.id
-              ? "bg-primary text-primary-foreground border-t border-l border-r border-primary"
-              : "bg-muted/60 text-muted-foreground hover:bg-muted border-t border-l border-r border-transparent"
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted/60 text-muted-foreground hover:bg-muted"
           )}
         >
           {tab.label}
