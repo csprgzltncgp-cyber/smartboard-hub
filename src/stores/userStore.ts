@@ -82,6 +82,24 @@ let users: User[] = [
     updatedAt: new Date("2024-08-10"),
     smartboardPermissions: [],
   },
+  {
+    id: "5",
+    name: "Admin User",
+    email: "admin@cgp.hu",
+    username: "admin",
+    countryIds: ["hu"],
+    languageId: "hu",
+    active: true,
+    createdAt: new Date("2021-01-01"),
+    updatedAt: new Date("2024-12-01"),
+    smartboardPermissions: [
+      {
+        smartboardId: "admin",
+        isDefault: true,
+        enabledMenuItems: ["admin_all"],
+      },
+    ],
+  },
 ];
 
 // Get all users
