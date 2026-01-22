@@ -20,12 +20,12 @@ let users: User[] = [
       {
         smartboardId: "account",
         isDefault: true,
-        enabledMenuItems: ["account_incoming", "account_high_usage", "account_low_usage", "account_loss", "account_activity"],
+        enabledMenuItems: ["account_companies", "account_company_permissions", "account_inputs", "account_my_clients", "account_reports", "account_ws_ci_o"],
       },
       {
         smartboardId: "operative",
         isDefault: false,
-        enabledMenuItems: ["op_no_expert", "op_24h", "op_rejected", "op_5day"],
+        enabledMenuItems: ["op_experts_list", "op_expert_search", "op_notifications", "op_all_cases"],
       },
     ],
   },
@@ -43,7 +43,7 @@ let users: User[] = [
       {
         smartboardId: "sales",
         isDefault: true,
-        enabledMenuItems: ["sales_leads", "sales_meetings", "sales_offers", "sales_contracts", "sales_incoming", "sales_expiring", "sales_reminders"],
+        enabledMenuItems: ["sales_crm"],
       },
     ],
   },
@@ -61,12 +61,12 @@ let users: User[] = [
       {
         smartboardId: "financial",
         isDefault: true,
-        enabledMenuItems: ["fin_billable", "fin_overdue", "fin_incoming", "fin_loss", "fin_limit"],
+        enabledMenuItems: ["fin_invoices", "fin_inventory"],
       },
       {
         smartboardId: "account",
         isDefault: false,
-        enabledMenuItems: ["account_loss"],
+        enabledMenuItems: ["account_companies"],
       },
     ],
   },
