@@ -12,8 +12,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createOperator } from "@/stores/operatorStore";
-import { UserFormData, LANGUAGES } from "@/types/user";
+import { UserFormData, LANGUAGES, COUNTRIES } from "@/types/user";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
+import { X } from "lucide-react";
 
 const OperatorForm = () => {
   const navigate = useNavigate();
@@ -22,9 +24,11 @@ const OperatorForm = () => {
     email: "",
     username: "",
     phone: "",
+    countryIds: [],
     languageId: "hu",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof UserFormData, string>>>({});
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof UserFormData, string>> = {};
@@ -64,12 +68,25 @@ const OperatorForm = () => {
     navigate(`/dashboard/settings/operators/${newOperator.id}/permissions`);
   };
 
-  const handleChange = (field: keyof UserFormData, value: string) => {
+  const handleChange = (field: keyof UserFormData, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
+  };
+
+  const handleCountryToggle = (countryId: string) => {
+    const currentCountries = formData.countryIds || [];
+    const newCountries = currentCountries.includes(countryId)
+      ? currentCountries.filter(id => id !== countryId)
+      : [...currentCountries, countryId];
+    handleChange("countryIds", newCountries);
+  };
+
+  const removeCountry = (countryId: string) => {
+    const currentCountries = formData.countryIds || [];
+    handleChange("countryIds", currentCountries.filter(id => id !== countryId));
   };
 
   return (
@@ -160,6 +177,67 @@ const OperatorForm = () => {
                 onChange={(e) => handleChange("phone", e.target.value)}
                 placeholder="+36 30 123 4567"
               />
+            </div>
+
+            {/* Countries - Multi-select */}
+            <div className="space-y-2">
+              <Label>Ország(ok)</Label>
+              
+              {/* Selected countries display */}
+              {formData.countryIds && formData.countryIds.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {formData.countryIds.map(countryId => {
+                    const country = COUNTRIES.find(c => c.id === countryId);
+                    return country ? (
+                      <span
+                        key={countryId}
+                        className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-sm"
+                      >
+                        {country.name}
+                        <button
+                          type="button"
+                          onClick={() => removeCountry(countryId)}
+                          className="hover:bg-primary/20 rounded p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              )}
+
+              {/* Country dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                  className="w-full flex items-center justify-between px-3 py-2 border rounded-md bg-background text-left text-sm hover:bg-muted/50"
+                >
+                  <span className="text-muted-foreground">
+                    {formData.countryIds && formData.countryIds.length > 0 
+                      ? `${formData.countryIds.length} ország kiválasztva`
+                      : "Válassz országo(ka)t"}
+                  </span>
+                </button>
+                
+                {isCountryDropdownOpen && (
+                  <div className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-lg max-h-60 overflow-auto">
+                    {COUNTRIES.map((country) => (
+                      <label
+                        key={country.id}
+                        className="flex items-center gap-2 px-3 py-2 hover:bg-muted cursor-pointer"
+                      >
+                        <Checkbox
+                          checked={formData.countryIds?.includes(country.id) || false}
+                          onCheckedChange={() => handleCountryToggle(country.id)}
+                        />
+                        <span className="text-sm">{country.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Language */}

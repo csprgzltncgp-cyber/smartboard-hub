@@ -12,7 +12,7 @@ export interface User {
   email: string;
   username: string;
   phone?: string;
-  countryId?: string;
+  countryIds?: string[]; // Multiple countries support
   languageId?: string;
   active: boolean;
   createdAt: Date;
@@ -26,21 +26,22 @@ export interface UserFormData {
   email: string;
   username: string;
   phone?: string;
-  countryId?: string;
+  countryIds?: string[]; // Multiple countries support
   languageId?: string;
 }
 
-// Mock countries for the form
+// Mock countries for the form (based on Laravel database)
 export const COUNTRIES = [
   { id: "hu", name: "Magyarország" },
-  { id: "us", name: "USA" },
-  { id: "uk", name: "United Kingdom" },
-  { id: "de", name: "Németország" },
-  { id: "at", name: "Ausztria" },
-  { id: "ro", name: "Románia" },
-  { id: "sk", name: "Szlovákia" },
   { id: "cz", name: "Csehország" },
-  { id: "pl", name: "Lengyelország" },
+  { id: "sk", name: "Szlovákia" },
+  { id: "ro", name: "Románia" },
+  { id: "rs", name: "Szerbia" },
+  { id: "md", name: "Moldova" },
+  { id: "al", name: "Albánia" },
+  { id: "xk", name: "Koszovó" },
+  { id: "mk", name: "Észak-Macedónia" },
+  { id: "ua", name: "Ukrajna" },
 ];
 
 // Mock languages for the form
