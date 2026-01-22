@@ -11,10 +11,10 @@ import UserList from "./pages/users/UserList";
 import UserForm from "./pages/users/UserForm";
 import UserPermissions from "./pages/users/UserPermissions";
 import SettingsMenu from "./pages/settings/SettingsMenu";
+import DigitalMenu from "./pages/digital/DigitalMenu";
 import OperatorList from "./pages/operators/OperatorList";
 import OperatorForm from "./pages/operators/OperatorForm";
 import OperatorPermissions from "./pages/operators/OperatorPermissions";
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -34,6 +34,7 @@ const App = () => (
             <Route path="settings/operators" element={<OperatorList />} />
             <Route path="settings/operators/new" element={<OperatorForm />} />
             <Route path="settings/operators/:operatorId/permissions" element={<OperatorPermissions />} />
+            <Route path="digital" element={<DigitalMenu />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
