@@ -1,14 +1,15 @@
 import { CrmLead } from "@/types/crm";
 import CrmProgressBar from "./CrmProgressBar";
-import { ChevronDown, ChevronUp, Bell, BellOff, VolumeX } from "lucide-react";
+import { ChevronDown, ChevronUp, Bell, VolumeX } from "lucide-react";
 import { useState } from "react";
 import CrmLeadDetails from "./CrmLeadDetails";
 
 interface CrmLeadCardProps {
   lead: CrmLead;
+  onUpdate?: (lead: CrmLead) => void;
 }
 
-const CrmLeadCard = ({ lead }: CrmLeadCardProps) => {
+const CrmLeadCard = ({ lead, onUpdate }: CrmLeadCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (

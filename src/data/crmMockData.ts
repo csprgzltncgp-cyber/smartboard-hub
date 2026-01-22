@@ -1,6 +1,6 @@
 // CRM Mock Data - Based on UXPin screenshots
 
-import { CrmLead, CrmSignedCompany } from '@/types/crm';
+import { CrmLead, CrmSignedCompany, LeadStatus } from '@/types/crm';
 
 export const mockLeads: CrmLead[] = [
   {
@@ -8,7 +8,7 @@ export const mockLeads: CrmLead[] = [
     companyName: 'MWR Manufacturing Ltd.',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'lead',
+    status: 'lead',
     progress: 12,
     contacts: [
       {
@@ -110,7 +110,7 @@ export const mockLeads: CrmLead[] = [
     companyName: 'New York Hotels',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'lead',
+    status: 'lead',
     progress: 5,
     contacts: [
       {
@@ -158,7 +158,7 @@ export const mockLeads: CrmLead[] = [
     companyName: 'Arpelius',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'lead',
+    status: 'lead',
     progress: 34,
     contacts: [],
     meetings: [],
@@ -180,7 +180,7 @@ export const mockLeads: CrmLead[] = [
     companyName: 'RRTPE',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'lead',
+    status: 'lead',
     progress: 22,
     contacts: [],
     meetings: [],
@@ -202,7 +202,7 @@ export const mockLeads: CrmLead[] = [
     companyName: 'Huston Airspace',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'lead',
+    status: 'lead',
     progress: 10,
     contacts: [],
     meetings: [],
@@ -227,7 +227,7 @@ export const mockOffers: CrmLead[] = [
     companyName: 'ORSAR Fastcar Always Ltd.',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'offer',
+    status: 'offer',
     progress: 35,
     contacts: [],
     meetings: [],
@@ -249,7 +249,7 @@ export const mockOffers: CrmLead[] = [
     companyName: 'Mondelez',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'offer',
+    status: 'offer',
     progress: 65,
     contacts: [],
     meetings: [],
@@ -271,7 +271,7 @@ export const mockOffers: CrmLead[] = [
     companyName: 'Hello',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'offer',
+    status: 'offer',
     progress: 70,
     contacts: [
       {
@@ -343,7 +343,7 @@ export const mockDeals: CrmLead[] = [
     companyName: 'Mercedes-Benz Ltd.',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'deal',
+    status: 'deal',
     progress: 80,
     contacts: [
       {
@@ -414,7 +414,7 @@ export const mockDeals: CrmLead[] = [
     companyName: 'Coca-Cola USA',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'deal',
+    status: 'deal',
     progress: 95,
     contacts: [],
     meetings: [],
@@ -439,7 +439,7 @@ export const mockSignedCompanies: CrmSignedCompany[] = [
     companyName: 'East India Company',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'signed',
+    status: 'signed',
     progress: 80,
     contacts: [
       {
@@ -487,7 +487,7 @@ export const mockSignedCompanies: CrmSignedCompany[] = [
     companyName: 'Car Company Ltd.',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'signed',
+    status: 'signed',
     progress: 90,
     contacts: [],
     meetings: [],
@@ -519,7 +519,7 @@ export const mockSignedCompanies: CrmSignedCompany[] = [
     companyName: 'Procter&Gamble',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'signed',
+    status: 'signed',
     progress: 85,
     contacts: [
       {
@@ -574,7 +574,7 @@ export const mockSignedCompanies: CrmSignedCompany[] = [
     companyName: 'Suzuki',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'signed',
+    status: 'signed',
     progress: 95,
     contacts: [],
     meetings: [],
@@ -606,7 +606,7 @@ export const mockSignedCompanies: CrmSignedCompany[] = [
     companyName: 'Libri',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'signed',
+    status: 'signed',
     progress: 90,
     contacts: [],
     meetings: [],
@@ -638,7 +638,7 @@ export const mockSignedCompanies: CrmSignedCompany[] = [
     companyName: 'White House Ltd.',
     assignedTo: 'Peter Janky',
     assignedToId: 'pj1',
-    stage: 'signed',
+    status: 'signed',
     progress: 80,
     contacts: [],
     meetings: [],
