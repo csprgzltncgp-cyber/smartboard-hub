@@ -84,10 +84,13 @@ export const SMARTBOARDS: SmartboardConfig[] = [
     name: "Sales",
     description: "Értékesítés és ügyfélszerzés",
     menuItems: [
+      { id: "sales_smartboard", label: "Sales SmartBoard", path: "/dashboard/smartboard/sales" },
       { id: "sales_crm", label: "CRM", path: "/dashboard/crm" },
     ],
     panels: [
-      "CRM - Leadek, találkozók, ajánlatok kezelése",
+      "Szerződés lejár - figyelmeztetés 30 napon belül lejáró szerződésekre",
+      "CRM Összefoglaló - Leadek, ajánlatok, tárgyalások, aláírt szerződések",
+      "Közelgő találkozók - ütemezett megbeszélések listája",
     ],
   },
   {
