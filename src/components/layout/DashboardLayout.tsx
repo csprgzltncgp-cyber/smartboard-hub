@@ -24,7 +24,8 @@ import {
   Coffee,
   Gift,
   Brain,
-  Database
+  Database,
+  ListChecks
 } from "lucide-react";
 import { SMARTBOARDS } from "@/config/smartboards";
 import cgpLogo from "@/assets/cgp_logo_green.svg";
@@ -59,6 +60,7 @@ const menuItems: MenuItem[] = [
   { label: "Adatok", icon: Database, path: "/dashboard/digital/data" },
   // Beállítások almenük (korábban Beállítások gyűjtőmenü alatt)
   { label: "Cégek", icon: Building2, path: "/dashboard/settings/companies" },
+  { label: "Inputok", icon: ListChecks, path: "/dashboard/inputs" },
   { label: "Országok", icon: Globe, path: "/dashboard/settings/countries" },
   { label: "Városok", icon: MapPin, path: "/dashboard/settings/cities" },
   { label: "Cég jogosultságok", icon: Shield, path: "/dashboard/settings/permissions" },
