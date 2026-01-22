@@ -321,116 +321,122 @@ const DashboardLayout = () => {
 
       {/* Desktop Buttons - Stacked vertically */}
       <div className="hidden lg:block max-w-7xl mx-auto px-4 lg:px-8 mt-4">
-        <div className="flex flex-col items-end gap-2 relative">
-          {/* MENÜ Button */}
-          <button 
-            onClick={() => {
-              toggleMenu();
-              setIsSearchFilterOpen(false);
-              setIsChatOpen(false);
-            }}
-            className="bg-cgp-teal-light text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase hover:bg-primary transition-colors"
-          >
-            <Menu className="w-5 h-5" />
-            MENÜ
-          </button>
-          
-          {/* Keresés/Szűrés Button */}
-          <button 
-            onClick={() => {
-              setIsSearchFilterOpen(!isSearchFilterOpen);
-              setIsMenuOpen(false);
-              setIsChatOpen(false);
-            }}
-            className={`text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase transition-colors ${
-              isSearchFilterOpen ? "bg-cgp-teal/80" : "bg-cgp-teal hover:bg-cgp-teal/90"
-            }`}
-          >
-            <Filter className="w-5 h-5" />
-            KERESÉS/SZŰRÉS
-          </button>
-          
-          {/* Chat Button with badge */}
-          <button 
-            onClick={() => {
-              setIsChatOpen(!isChatOpen);
-              setIsMenuOpen(false);
-              setIsSearchFilterOpen(false);
-            }}
-            className={`text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase transition-colors relative ${
-              isChatOpen ? "bg-cgp-teal/80" : "bg-cgp-teal hover:bg-cgp-teal/90"
-            }`}
-          >
-            <MessageCircle className="w-5 h-5" />
-            CHAT
-            {unreadChatCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-destructive text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">
-                {unreadChatCount}
-              </span>
-            )}
-          </button>
-
-          {/* Desktop Dropdown Menu */}
-          {isMenuOpen && (
-            <div className="absolute top-full right-0 mt-2 w-80 bg-background shadow-lg rounded-xl z-50 border">
-              <nav className="py-2">
-                {menuItems.map((item) => (
-                  <button
-                    key={item.path}
-                    onClick={() => {
-                      navigate(item.path);
-                      setIsMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-4 py-3 transition-colors ${
-                      location.pathname === item.path
-                        ? "bg-primary text-white"
-                        : "hover:bg-muted"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <item.icon className="w-5 h-5" />
-                      <span>{item.label}</span>
-                    </div>
-                    {item.badge && (
-                      <span className={`${item.badgeColor} text-white w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold`}>
-                        {item.badge}
-                      </span>
+        <div className="flex flex-col items-end gap-2">
+          {/* MENÜ Button + Panel */}
+          <div className="relative">
+            <button 
+              onClick={() => {
+                toggleMenu();
+                setIsSearchFilterOpen(false);
+                setIsChatOpen(false);
+              }}
+              className="bg-cgp-teal-light text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase hover:bg-primary transition-colors"
+            >
+              <Menu className="w-5 h-5" />
+              MENÜ
+            </button>
+            
+            {/* Desktop Dropdown Menu */}
+            {isMenuOpen && (
+              <div className="absolute top-full right-0 mt-2 w-80 bg-background shadow-lg rounded-xl z-50 border">
+                <nav className="py-2">
+                  {menuItems.map((item) => (
+                    <button
+                      key={item.path}
+                      onClick={() => {
+                        navigate(item.path);
+                        setIsMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-4 py-3 transition-colors ${
+                        location.pathname === item.path
+                          ? "bg-primary text-white"
+                          : "hover:bg-muted"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <item.icon className="w-5 h-5" />
+                        <span>{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <span className={`${item.badgeColor} text-white w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                  {/* Kijelentkezés - always visible */}
+                  <div className="border-t mt-2">
+                    {currentUser && (
+                      <div className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground">
+                        <User className="w-4 h-4" />
+                        <span>{currentUser.name}</span>
+                      </div>
                     )}
-                  </button>
-                ))}
-                {/* Kijelentkezés - always visible */}
-                <div className="border-t mt-2">
-                  {currentUser && (
-                    <div className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground">
-                      <User className="w-4 h-4" />
-                      <span>{currentUser.name}</span>
-                    </div>
-                  )}
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-destructive hover:bg-destructive/10 transition-colors"
-                  >
-                    <LogOut className="w-5 h-5" />
-                    <span>Kijelentkezés</span>
-                  </button>
-                </div>
-              </nav>
-            </div>
-          )}
-
-          {/* Desktop Search/Filter Dropdown Panel */}
-          {isSearchFilterOpen && (
-            <div className="absolute top-full right-0 mt-2 w-[700px] z-50">
-              <SearchFilterPanel onClose={() => setIsSearchFilterOpen(false)} />
-            </div>
-          )}
-
-          {/* Desktop Chat Dropdown Panel */}
-          {isChatOpen && (
-            <div className="absolute top-full right-0 mt-2 z-50">
-              <ChatPanel onClose={() => setIsChatOpen(false)} />
-            </div>
-          )}
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-destructive hover:bg-destructive/10 transition-colors"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span>Kijelentkezés</span>
+                    </button>
+                  </div>
+                </nav>
+              </div>
+            )}
+          </div>
+          
+          {/* Keresés/Szűrés Button + Panel */}
+          <div className="relative">
+            <button 
+              onClick={() => {
+                setIsSearchFilterOpen(!isSearchFilterOpen);
+                setIsMenuOpen(false);
+                setIsChatOpen(false);
+              }}
+              className={`text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase transition-colors ${
+                isSearchFilterOpen ? "bg-cgp-teal/80" : "bg-cgp-teal hover:bg-cgp-teal/90"
+              }`}
+            >
+              <Filter className="w-5 h-5" />
+              KERESÉS/SZŰRÉS
+            </button>
+            
+            {/* Desktop Search/Filter Dropdown Panel */}
+            {isSearchFilterOpen && (
+              <div className="absolute top-full right-0 mt-2 w-[700px] z-50">
+                <SearchFilterPanel onClose={() => setIsSearchFilterOpen(false)} />
+              </div>
+            )}
+          </div>
+          
+          {/* Chat Button + Panel */}
+          <div className="relative">
+            <button 
+              onClick={() => {
+                setIsChatOpen(!isChatOpen);
+                setIsMenuOpen(false);
+                setIsSearchFilterOpen(false);
+              }}
+              className={`text-white px-6 py-3 rounded-xl flex items-center gap-2 font-calibri-bold uppercase transition-colors ${
+                isChatOpen ? "bg-cgp-teal/80" : "bg-cgp-teal hover:bg-cgp-teal/90"
+              }`}
+            >
+              <MessageCircle className="w-5 h-5" />
+              CHAT
+              {unreadChatCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-destructive text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">
+                  {unreadChatCount}
+                </span>
+              )}
+            </button>
+            
+            {/* Desktop Chat Dropdown Panel */}
+            {isChatOpen && (
+              <div className="absolute top-full right-0 mt-2 z-50">
+                <ChatPanel onClose={() => setIsChatOpen(false)} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
