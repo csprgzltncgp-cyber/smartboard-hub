@@ -1,115 +1,57 @@
-import { CrmSignedCompany, CrmLead } from "@/types/crm";
-import { Button } from "@/components/ui/button";
-import { Plus, Search, Mail, Video, Phone, Smile, Calendar, ThumbsUp, FileText, Eye, ChevronDown, ChevronUp, Home } from "lucide-react";
+import { CrmSignedCompany } from "@/types/crm";
+import { Mail, Video, Phone, Smile, Calendar, ThumbsUp, FileText, Plus, FileSignature } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import CrmProgressBar from "./CrmProgressBar";
+import { Button } from "@/components/ui/button";
 
 interface CompaniesTabProps {
-  deals: CrmLead[];
   signedCompanies: CrmSignedCompany[];
 }
 
-const CompaniesTab = ({ deals, signedCompanies }: CompaniesTabProps) => {
-  const [showDeals, setShowDeals] = useState(true);
-  const [showSigned, setShowSigned] = useState(true);
+const CompaniesTab = ({ signedCompanies }: CompaniesTabProps) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
     <div>
-      {/* Action Bar */}
-      <div className="flex gap-2 mb-4">
-        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-none">
-          <Plus className="w-4 h-4 mr-2" />
-          New company
-        </Button>
-        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-none p-2">
-          <Search className="w-4 h-4" />
-        </Button>
-      </div>
-
-      {/* Collapsible Arrow */}
-      <div className="flex justify-center mb-2">
-        <button className="p-1 hover:bg-muted rounded">
-          <ChevronDown className="w-5 h-5 text-muted-foreground" />
-        </button>
-      </div>
-
-      {/* Deals Section */}
-      <div className="mb-6">
-        <h3 className="text-lg font-calibri-bold text-foreground mb-3">
-          Deals - {deals.length} db
-        </h3>
-        <div className="border border-border rounded-sm overflow-hidden">
-          {deals.map((deal) => (
-            <div 
-              key={deal.id}
-              className="flex items-center gap-4 py-3 px-4 bg-muted/30 border-b border-border last:border-b-0 hover:bg-muted/50 transition-colors"
-            >
-              <span className="flex-1 text-sm">Company: {deal.companyName}</span>
-              <span className="text-sm text-muted-foreground">CGP: {deal.assignedTo}</span>
-              <span className="text-sm text-muted-foreground">{deal.details.pillars} PILL/{deal.details.sessions} SESS</span>
-              
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-primary" />
-                <Smile className="w-4 h-4 text-muted-foreground" />
-                <Calendar className="w-4 h-4 text-muted-foreground" />
-                <FileText className="w-4 h-4 text-muted-foreground" />
-                <Eye className="w-4 h-4 text-muted-foreground" />
-              </div>
-              
-              <span className="text-lg font-calibri-bold min-w-[60px] text-right">
-                {deal.progress}%
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Signed Section */}
-      <div>
-        <h3 className="text-lg font-calibri-bold text-foreground mb-3">
-          Signed - {signedCompanies.length} db
-        </h3>
-        <div className="border border-border rounded-sm overflow-hidden">
-          {signedCompanies.map((company) => {
-            const isExpanded = expandedId === company.id;
-            
-            return (
-              <div key={company.id} className="border-b border-border last:border-b-0">
-                {/* Company Row */}
-                <div 
-                  className="flex items-center gap-4 py-3 px-4 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
-                  onClick={() => setExpandedId(isExpanded ? null : company.id)}
-                >
-                  <div className={cn(
-                    "w-8 h-8 rounded-sm flex items-center justify-center",
-                    company.dashboardInfo.isActive ? "bg-primary" : "bg-muted"
-                  )}>
-                    <Home className="w-4 h-4 text-primary-foreground" />
-                  </div>
-                  
-                  <span className="flex-1 text-sm">Company: {company.companyName}</span>
-                  <span className="text-sm text-muted-foreground">CGP: {company.assignedTo}</span>
-                  <span className="text-sm text-muted-foreground">{company.details.pillars} PILL/{company.details.sessions} SESS</span>
-                  
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-primary" />
-                    <Smile className="w-4 h-4 text-muted-foreground" />
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                    <ThumbsUp className="w-4 h-4 text-muted-foreground" />
-                  </div>
+      {/* Signed Companies List */}
+      <div className="border border-border rounded-sm overflow-hidden">
+        {signedCompanies.map((company) => {
+          const isExpanded = expandedId === company.id;
+          
+          return (
+            <div key={company.id} className="border-b border-border last:border-b-0">
+              {/* Company Row */}
+              <div 
+                className="flex items-center gap-4 py-3 px-4 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                onClick={() => setExpandedId(isExpanded ? null : company.id)}
+              >
+                <div className={cn(
+                  "w-8 h-8 rounded-sm flex items-center justify-center",
+                  company.dashboardInfo.isActive ? "bg-primary" : "bg-muted"
+                )}>
+                  <FileSignature className="w-4 h-4 text-primary-foreground" />
                 </div>
-
-                {/* Expanded Company Details */}
-                {isExpanded && (
-                  <CompanyExpandedDetails company={company} />
-                )}
+                
+                <span className="flex-1 text-sm">Company: {company.companyName}</span>
+                <span className="text-sm text-muted-foreground">CGP: {company.assignedTo}</span>
+                <span className="text-sm text-muted-foreground">{company.details.pillars} PILL/{company.details.sessions} SESS</span>
+                
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-primary" />
+                  <Smile className="w-4 h-4 text-muted-foreground" />
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  <FileText className="w-4 h-4 text-muted-foreground" />
+                  <ThumbsUp className="w-4 h-4 text-muted-foreground" />
+                </div>
               </div>
-            );
-          })}
-        </div>
+
+              {/* Expanded Company Details */}
+              {isExpanded && (
+                <CompanyExpandedDetails company={company} />
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -321,7 +263,7 @@ const CompanyExpandedDetails = ({ company }: { company: CrmSignedCompany }) => {
       {/* Submit Button */}
       <div className="flex justify-center">
         <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-none px-12">
-          <Home className="w-4 h-4" />
+          <FileSignature className="w-4 h-4" />
         </Button>
       </div>
     </div>

@@ -34,7 +34,7 @@ const CrmPage = () => {
       case 'todolist':
         return <TodoListTab items={mockTodoItems} />;
       case 'companies':
-        return <CompaniesTab deals={dealsList} signedCompanies={mockSignedCompanies} />;
+        return <CompaniesTab signedCompanies={mockSignedCompanies} />;
       case 'reports':
         return <ReportsTab />;
       default:
