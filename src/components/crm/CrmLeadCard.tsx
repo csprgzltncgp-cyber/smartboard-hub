@@ -31,7 +31,7 @@ const getLeadStatusColor = (status: LeadStatus) => {
     case 'lead': return 'bg-blue-500 text-white';
     case 'offer': return 'bg-amber-500 text-white';
     case 'deal': return 'bg-green-500 text-white';
-    case 'signed': return 'bg-primary text-primary-foreground';
+    case 'signed': return 'bg-cgp-task-completed-purple text-white';
     default: return 'bg-muted text-muted-foreground';
   }
 };
