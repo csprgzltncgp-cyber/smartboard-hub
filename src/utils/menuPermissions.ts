@@ -35,7 +35,8 @@ const pathToSmartboardMenuMap: Record<string, string[]> = {
   "/dashboard/assets": ["op_inventory", "fin_inventory"],
   
   // Sales menük
-  "/dashboard/crm": ["sales_crm"],
+  "/dashboard/smartboard/sales": ["sales_smartboard"],
+  "/dashboard/crm": ["sales_crm", "sales_smartboard"],
   
   // Pénzügyi menük
   "/dashboard/invoices": ["fin_invoices"],
