@@ -17,6 +17,7 @@ import OperatorPermissions from "./pages/operators/OperatorPermissions";
 import InputsPage from "./pages/inputs/InputsPage";
 import CrmPage from "./pages/crm/CrmPage";
 import CaseDispatchPage from "./pages/cases/CaseDispatchPage";
+import SalesSmartboard from "./pages/smartboard/SalesSmartboard";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="settings/operators/:operatorId/permissions" element={<OperatorPermissions />} />
               <Route path="inputs" element={<InputsPage />} />
               <Route path="crm" element={<CrmPage />} />
+              <Route path="smartboard/sales" element={<SalesSmartboard />} />
               <Route path="case-dispatch" element={<CaseDispatchPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
