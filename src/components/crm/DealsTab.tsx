@@ -1,13 +1,14 @@
-import { CrmLead } from "@/types/crm";
+import { CrmLead, LeadStatus } from "@/types/crm";
 import CrmLeadCard from "./CrmLeadCard";
 
 interface DealsTabProps {
   deals: CrmLead[];
   onUpdateLead?: (lead: CrmLead) => void;
+  onChangeLeadStatus?: (leadId: string, newStatus: LeadStatus) => void;
   onDeleteLead?: (leadId: string) => void;
 }
 
-const DealsTab = ({ deals, onUpdateLead, onDeleteLead }: DealsTabProps) => {
+const DealsTab = ({ deals, onUpdateLead, onChangeLeadStatus, onDeleteLead }: DealsTabProps) => {
   return (
     <div>
       {/* Deals List */}
@@ -18,7 +19,7 @@ const DealsTab = ({ deals, onUpdateLead, onDeleteLead }: DealsTabProps) => {
           </div>
         ) : (
           deals.map((deal) => (
-            <CrmLeadCard key={deal.id} lead={deal} onUpdate={onUpdateLead} onDelete={onDeleteLead} />
+            <CrmLeadCard key={deal.id} lead={deal} onUpdate={onUpdateLead} onChangeStatus={onChangeLeadStatus} onDelete={onDeleteLead} />
           ))
         )}
       </div>

@@ -41,10 +41,11 @@ const getLeadStatusColor = (status: LeadStatus) => {
 interface CrmLeadCardProps {
   lead: CrmLead;
   onUpdate?: (lead: CrmLead) => void;
+  onChangeStatus?: (leadId: string, newStatus: LeadStatus) => void;
   onDelete?: (leadId: string) => void;
 }
 
-const CrmLeadCard = ({ lead, onUpdate, onDelete }: CrmLeadCardProps) => {
+const CrmLeadCard = ({ lead, onUpdate, onChangeStatus, onDelete }: CrmLeadCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleDelete = () => {
@@ -112,7 +113,7 @@ const CrmLeadCard = ({ lead, onUpdate, onDelete }: CrmLeadCardProps) => {
       </div>
 
       {/* Expanded Content */}
-      {isExpanded && <CrmLeadDetails lead={lead} onUpdate={onUpdate} />}
+      {isExpanded && <CrmLeadDetails lead={lead} onUpdate={onUpdate} onChangeStatus={onChangeStatus} />}
     </div>
   );
 };

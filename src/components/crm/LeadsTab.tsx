@@ -1,4 +1,4 @@
-import { CrmLead } from "@/types/crm";
+import { CrmLead, LeadStatus } from "@/types/crm";
 import CrmLeadCard from "./CrmLeadCard";
 import { mockColleagues } from "@/data/crmMockData";
 
@@ -6,10 +6,11 @@ interface LeadsTabProps {
   leads: CrmLead[];
   onAddLead?: (lead: CrmLead) => void;
   onUpdateLead?: (lead: CrmLead) => void;
+  onChangeLeadStatus?: (leadId: string, newStatus: LeadStatus) => void;
   onDeleteLead?: (leadId: string) => void;
 }
 
-const LeadsTab = ({ leads, onAddLead, onUpdateLead, onDeleteLead }: LeadsTabProps) => {
+const LeadsTab = ({ leads, onAddLead, onUpdateLead, onChangeLeadStatus, onDeleteLead }: LeadsTabProps) => {
   const handleNewLead = () => {
     const newLead: CrmLead = {
       id: `lead-${Date.now()}`,
@@ -58,7 +59,7 @@ const LeadsTab = ({ leads, onAddLead, onUpdateLead, onDeleteLead }: LeadsTabProp
           </div>
         ) : (
           leads.map((lead) => (
-            <CrmLeadCard key={lead.id} lead={lead} onUpdate={onUpdateLead} onDelete={onDeleteLead} />
+            <CrmLeadCard key={lead.id} lead={lead} onUpdate={onUpdateLead} onChangeStatus={onChangeLeadStatus} onDelete={onDeleteLead} />
           ))
         )}
       </div>
