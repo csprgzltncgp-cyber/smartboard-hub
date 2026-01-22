@@ -1,6 +1,5 @@
 import { CrmTodoItem } from "@/data/crmMockData";
-import { Button } from "@/components/ui/button";
-import { Search, Mail, Video, Phone, MessageSquare, Smile, Meh, Calendar, ThumbsUp, FileX, Edit, Copy, Eye } from "lucide-react";
+import { Mail, Video, Phone, MessageSquare, Edit } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +21,6 @@ const TodoListTab = ({ items }: TodoListTabProps) => {
 
   return (
     <div>
-
       {/* Todo Items List */}
       <div className="border border-border rounded-sm overflow-hidden">
         {items.map((item) => {
@@ -63,9 +61,12 @@ const TodoListTab = ({ items }: TodoListTabProps) => {
                     Company: {item.companyName}
                   </span>
                   
-                  <span className="font-calibri-bold text-right">
-                    {item.progress}%
-                  </span>
+                  {/* Contact type icon instead of progress % */}
+                  <div className="flex justify-end">
+                    <div className="w-8 h-8 bg-primary rounded-sm flex items-center justify-center">
+                      <ContactIcon className="w-4 h-4 text-primary-foreground" />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -105,22 +106,6 @@ const TodoListTab = ({ items }: TodoListTabProps) => {
                     </div>
                     <div className="bg-muted px-3 py-1">
                       {item.service}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ContactIcon className="w-4 h-4 text-primary" />
-                    </div>
-                    {item.mood === 'happy' && (
-                      <Smile className="w-4 h-4 text-green-500" />
-                    )}
-                    {item.status === 'scheduled' && (
-                      <Copy className="w-4 h-4 text-muted-foreground" />
-                    )}
-                    {item.status === 'completed' && (
-                      <ThumbsUp className="w-4 h-4 text-green-500" />
-                    )}
-                    <Eye className="w-4 h-4 text-muted-foreground" />
-                    <div className="bg-primary text-primary-foreground px-2 py-1 rounded-sm">
-                      <Edit className="w-4 h-4" />
                     </div>
                   </div>
                 </div>
