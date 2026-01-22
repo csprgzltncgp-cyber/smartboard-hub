@@ -8,7 +8,7 @@ import {
   Smile, Meh, HelpCircle, Frown, 
   Hourglass, Calculator, Handshake, FileSignature, Calendar,
   Edit, Trash2, Save, X,
-  Bell, Users, FileText
+  Bell, Users, FileText, Building2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +41,7 @@ const leadStatusConfig: { status: LeadStatus; icon: React.ReactNode; label: stri
   { status: 'lead', icon: <Hourglass className="w-4 h-4" />, label: 'Lead', activeClass: 'bg-blue-500 text-white' },
   { status: 'offer', icon: <Calculator className="w-4 h-4" />, label: 'Offer', activeClass: 'bg-amber-500 text-white' },
   { status: 'deal', icon: <Handshake className="w-4 h-4" />, label: 'Deal', activeClass: 'bg-green-500 text-white' },
-  { status: 'signed', icon: <FileSignature className="w-4 h-4" />, label: 'Signed', activeClass: 'bg-primary text-primary-foreground' },
+  { status: 'signed', icon: <FileSignature className="w-4 h-4" />, label: 'Signed', activeClass: 'bg-cgp-task-completed-purple text-white' },
 ];
 
 const contactTypes: { type: ContactType; icon: React.ReactNode; label: string }[] = [
@@ -99,6 +99,16 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
     const updatedLead = {
       ...lead,
       status: newStatus,
+      updatedAt: new Date().toISOString(),
+    };
+    onUpdate?.(updatedLead);
+  };
+
+  // Handle sending to Companies (Incoming company)
+  const handleSendToCompanies = () => {
+    const updatedLead = {
+      ...lead,
+      status: 'incoming_company' as LeadStatus,
       updatedAt: new Date().toISOString(),
     };
     onUpdate?.(updatedLead);
@@ -281,6 +291,26 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
             </button>
           ))}
         </div>
+
+        {/* Incoming Company Button - only show when status is signed */}
+        {lead.status === 'signed' && (
+          <Button
+            onClick={handleSendToCompanies}
+            className="ml-4 bg-cgp-teal hover:bg-cgp-teal-hover text-white rounded-xl gap-2"
+            size="sm"
+          >
+            <Building2 className="w-4 h-4" />
+            Incoming company
+          </Button>
+        )}
+
+        {/* Incoming Company Badge - show when already sent */}
+        {lead.status === 'incoming_company' && (
+          <span className="ml-4 inline-flex items-center gap-2 px-3 py-1.5 bg-cgp-teal/20 text-cgp-teal rounded-xl text-sm font-medium">
+            <Building2 className="w-4 h-4" />
+            Incoming company
+          </span>
+        )}
       </div>
 
       {/* Action Buttons Row */}
