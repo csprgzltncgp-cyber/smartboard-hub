@@ -43,7 +43,7 @@ let users: User[] = [
       {
         smartboardId: "sales",
         isDefault: true,
-        enabledMenuItems: ["sales_crm"],
+        enabledMenuItems: ["sales_smartboard", "sales_crm"],
       },
     ],
   },
