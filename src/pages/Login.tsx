@@ -4,6 +4,7 @@ import { LogIn, AlertTriangle } from "lucide-react";
 import cgpLogo from "@/assets/cgp_logo_green.svg";
 import whiteLogo from "@/assets/white_logo.svg";
 import { useAuth } from "@/contexts/AuthContext";
+import { SMARTBOARDS } from "@/config/smartboards";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -34,7 +35,16 @@ const Login = () => {
         return;
       }
       
-      // Navigate to dashboard on success
+      // Navigate to user's default SmartBoard on success
+      const defaultPermission = user.smartboardPermissions?.find(p => p.isDefault);
+      if (defaultPermission) {
+        const smartboard = SMARTBOARDS.find(sb => sb.id === defaultPermission.smartboardId);
+        if (smartboard && smartboard.menuItems.length > 0) {
+          navigate(smartboard.menuItems[0].path);
+          return;
+        }
+      }
+      // Fallback to TODO dashboard
       navigate("/dashboard");
     }, 500);
   };
