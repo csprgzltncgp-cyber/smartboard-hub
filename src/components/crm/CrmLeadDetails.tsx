@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { 
   Plus, Mail, Video, Phone, MessageSquare, 
   Smile, Meh, HelpCircle, Frown, 
-  FileX, Calendar, ThumbsUp,
+  Hourglass, Calculator, Handshake, FileSignature, Calendar,
   Edit, Trash2, Save, X,
   Bell, Users, FileText
 } from "lucide-react";
@@ -38,10 +38,10 @@ const getMoodIcon = (mood?: CrmMeeting['mood']) => {
 
 const getStatusIcon = (status?: CrmMeeting['status']) => {
   switch (status) {
-    case 'cancelled': return FileX;
-    case 'scheduled': return Calendar;
-    case 'completed': return ThumbsUp;
-    case 'thumbs_up': return ThumbsUp;
+    case 'cancelled': return Hourglass; // Lead
+    case 'scheduled': return Calculator; // Offer
+    case 'completed': return Handshake; // Deal
+    case 'thumbs_up': return FileSignature; // Signed
     default: return null;
   }
 };
@@ -290,20 +290,24 @@ const CrmLeadDetails = ({ lead, onUpdate }: CrmLeadDetailsProps) => {
                 <span className="w-28 text-sm font-medium">Status</span>
                 <div className="flex gap-1 flex-1">
                   <button onClick={() => setMeetingForm(p => ({ ...p, status: 'cancelled' }))}
-                    className={cn("p-2 rounded", meetingForm.status === 'cancelled' ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                    <FileX className="w-4 h-4" />
+                    className={cn("p-2 rounded", meetingForm.status === 'cancelled' ? "bg-blue-500 text-white" : "bg-muted")}
+                    title="Lead">
+                    <Hourglass className="w-4 h-4" />
                   </button>
                   <button onClick={() => setMeetingForm(p => ({ ...p, status: 'scheduled' }))}
-                    className={cn("p-2 rounded", meetingForm.status === 'scheduled' ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                    <Calendar className="w-4 h-4" />
+                    className={cn("p-2 rounded", meetingForm.status === 'scheduled' ? "bg-amber-500 text-white" : "bg-muted")}
+                    title="Offer">
+                    <Calculator className="w-4 h-4" />
                   </button>
                   <button onClick={() => setMeetingForm(p => ({ ...p, status: 'completed' }))}
-                    className={cn("p-2 rounded", meetingForm.status === 'completed' ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                    <ThumbsUp className="w-4 h-4" />
+                    className={cn("p-2 rounded", meetingForm.status === 'completed' ? "bg-green-500 text-white" : "bg-muted")}
+                    title="Deal">
+                    <Handshake className="w-4 h-4" />
                   </button>
                   <button onClick={() => setMeetingForm(p => ({ ...p, status: 'thumbs_up' }))}
-                    className={cn("p-2 rounded", meetingForm.status === 'thumbs_up' ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                    <ThumbsUp className="w-4 h-4" />
+                    className={cn("p-2 rounded", meetingForm.status === 'thumbs_up' ? "bg-primary text-primary-foreground" : "bg-muted")}
+                    title="Signed">
+                    <FileSignature className="w-4 h-4" />
                   </button>
                 </div>
               </div>
