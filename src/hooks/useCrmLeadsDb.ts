@@ -101,7 +101,7 @@ const migrateLocalStorageToDb = async () => {
 
 // Seed initial mock data if database is empty
 const seedInitialData = async () => {
-  const seedKey = 'crm-leads-seeded';
+  const seedKey = 'crm-leads-seeded-v2';
   
   if (localStorage.getItem(seedKey)) {
     return;
@@ -120,8 +120,13 @@ const seedInitialData = async () => {
       ];
       
       for (const lead of allMockLeads) {
-        const dbRow = mapLeadToDbRow(lead);
-        await supabase.from('crm_leads').upsert(dbRow);
+        // Generate new UUID for each lead since mock IDs are not valid UUIDs
+        const leadWithUuid = { ...lead, id: crypto.randomUUID() };
+        const dbRow = mapLeadToDbRow(leadWithUuid);
+        const { error } = await supabase.from('crm_leads').insert(dbRow);
+        if (error) {
+          console.error('[CRM] Failed to seed lead:', lead.companyName, error);
+        }
       }
       
       console.log('[CRM] Seeding complete!');
