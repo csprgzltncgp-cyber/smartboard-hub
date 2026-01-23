@@ -1,5 +1,5 @@
 import { CrmLead, CrmMeeting } from "@/types/crm";
-import { Mail, Video, Phone, Users, MessageSquare, FileText, EyeOff, Edit, ChevronDown, ChevronUp } from "lucide-react";
+import { Mail, Video, Phone, Users, MessageSquare, FileText, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useCrmLeads } from "@/hooks/useCrmLeads";
@@ -112,9 +112,8 @@ const TodoListTab = () => {
                   <span className="font-medium text-foreground">{item.lead.companyName}</span>
                 </div>
                 
-                {/* Progress */}
-                <div className="flex items-center justify-end gap-2">
-                  <span className="text-lg font-bold text-primary">{item.lead.progress}%</span>
+                {/* Expand arrow */}
+                <div className="flex items-center justify-end">
                   {isExpanded ? (
                     <ChevronUp className="w-5 h-5 text-muted-foreground" />
                   ) : (
@@ -174,50 +173,8 @@ const TodoListTab = () => {
                     </span>
                   </div>
                   
-                  {/* Action Buttons */}
-                  <div className="px-4 py-3 col-span-2 flex items-center justify-end gap-2">
-                    <button 
-                      className="w-9 h-9 bg-primary rounded flex items-center justify-center hover:bg-primary/90 transition-colors"
-                      title="Üzenet"
-                    >
-                      <MessageSquare className="w-4 h-4 text-primary-foreground" />
-                    </button>
-                    <button 
-                      className="w-9 h-9 bg-muted rounded flex items-center justify-center hover:bg-muted/70 transition-colors"
-                      title="Mood"
-                    >
-                      <span className="text-lg">
-                        {item.meeting.mood === 'happy' ? '😊' : 
-                         item.meeting.mood === 'neutral' ? '😐' : 
-                         item.meeting.mood === 'confused' ? '😕' : 
-                         item.meeting.mood === 'negative' ? '😟' : '😊'}
-                      </span>
-                    </button>
-                    <button 
-                      className="w-9 h-9 bg-muted rounded flex items-center justify-center hover:bg-muted/70 transition-colors"
-                      title="Videó"
-                    >
-                      <Video className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                    <button 
-                      className="w-9 h-9 bg-muted rounded flex items-center justify-center hover:bg-muted/70 transition-colors"
-                      title="Dokumentum"
-                    >
-                      <FileText className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                    <button 
-                      className="w-9 h-9 bg-muted rounded flex items-center justify-center hover:bg-muted/70 transition-colors"
-                      title="Elrejtés"
-                    >
-                      <EyeOff className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                    <button 
-                      className="w-9 h-9 bg-primary rounded flex items-center justify-center hover:bg-primary/90 transition-colors"
-                      title="Szerkesztés"
-                    >
-                      <Edit className="w-4 h-4 text-primary-foreground" />
-                    </button>
-                  </div>
+                  {/* Placeholder for alignment */}
+                  <div className="px-4 py-3 col-span-2"></div>
                 </div>
 
                 {/* Note if exists */}
