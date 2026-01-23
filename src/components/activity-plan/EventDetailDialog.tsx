@@ -132,18 +132,16 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
       <Dialog open={!!event} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle className="flex items-center gap-3">
-                {(() => {
-                  const IconComponent = EventTypeIcons[event.event_type];
-                  return <IconComponent className="w-6 h-6" />;
-                })()}
-                {event.title}
-              </DialogTitle>
-              <Badge className={STATUS_COLORS[event.status]}>
-                {STATUS_LABELS[event.status]}
-              </Badge>
-            </div>
+            <DialogTitle className="flex items-center gap-3">
+              {(() => {
+                const IconComponent = EventTypeIcons[event.event_type];
+                return <IconComponent className="w-6 h-6" />;
+              })()}
+              {event.title}
+            </DialogTitle>
+            <Badge className={`w-fit mt-2 ${STATUS_COLORS[event.status]}`}>
+              {STATUS_LABELS[event.status]}
+            </Badge>
           </DialogHeader>
 
           <div className="space-y-6">
@@ -296,26 +294,6 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
               )}
             </div>
 
-            {/* Status actions */}
-            <div className="border-t pt-4">
-              <Label className="text-muted-foreground mb-3 block">Státusz módosítása</Label>
-              <div className="flex flex-wrap gap-2">
-                {statusActions
-                  .filter(action => action.status !== event.status)
-                  .map(action => (
-                    <Button
-                      key={action.status}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleStatusChange(action.status)}
-                      className="rounded-xl"
-                    >
-                      <action.icon className={`w-4 h-4 mr-2 ${action.color}`} />
-                      {action.label}
-                    </Button>
-                  ))}
-              </div>
-            </div>
 
             {/* Timestamps */}
             {(event.completed_at || event.archived_at) && (
@@ -329,8 +307,19 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
               </div>
             )}
 
-            {/* Delete button */}
-            <div className="flex justify-end pt-4 border-t">
+            {/* Action buttons */}
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              {event.status !== 'archived' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleStatusChange('archived')}
+                  className="rounded-xl"
+                >
+                  <Archive className="w-4 h-4 mr-2" />
+                  Esemény archiválása
+                </Button>
+              )}
               <Button
                 variant="destructive"
                 size="sm"
