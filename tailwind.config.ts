@@ -67,7 +67,6 @@ export default {
           "input-placeholder": "hsl(var(--cgp-input-placeholder))",
           error: "hsl(var(--cgp-error))",
           "error-foreground": "hsl(var(--cgp-error-foreground))",
-          "task-overdue": "hsl(var(--cgp-task-overdue))",
           "task-today": "hsl(var(--cgp-task-today))",
           "badge-new": "hsl(var(--cgp-badge-new))",
           "badge-lastday": "hsl(var(--cgp-badge-lastday))",

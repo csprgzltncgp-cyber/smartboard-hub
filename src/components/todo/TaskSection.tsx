@@ -23,8 +23,8 @@ interface TaskSectionProps {
 
 const variantStyles = {
   overdue: {
-    bg: "bg-cgp-task-overdue/20",
-    headline: "bg-cgp-task-overdue",
+    bg: "bg-cgp-badge-overdue/20",
+    headline: "bg-cgp-badge-overdue",
     textColor: "text-white",
   },
   today: {
