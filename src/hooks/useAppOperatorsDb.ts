@@ -152,29 +152,36 @@ const migrateLocalStorageOperators = async () => {
   }
 };
 
-// Seed initial operators if database is empty
+// Seed initial operators if database is empty - always check DB directly
 const seedInitialOperators = async () => {
-  const seedKey = 'operators-seeded';
-  
-  if (localStorage.getItem(seedKey)) {
-    return;
-  }
-  
   try {
-    const { data: existing } = await supabase.from('app_operators').select('id').limit(1);
+    const { data: existing, error: checkError } = await supabase
+      .from('app_operators')
+      .select('id')
+      .limit(1);
+    
+    if (checkError) {
+      console.error('[Operators] Error checking for existing operators:', checkError);
+      return;
+    }
     
     if (!existing || existing.length === 0) {
-      console.log('[Operators] Seeding initial operators...');
+      console.log('[Operators] Database is empty, seeding initial operators...');
       
       for (const op of defaultOperators) {
         const dbRow = mapOperatorToDbRow(op);
-        await supabase.from('app_operators').upsert(dbRow);
+        const { error: insertError } = await supabase.from('app_operators').upsert(dbRow);
+        if (insertError) {
+          console.error('[Operators] Failed to seed operator:', op.name, insertError);
+        } else {
+          console.log('[Operators] Seeded operator:', op.name);
+        }
       }
       
       console.log('[Operators] Seeding complete!');
+    } else {
+      console.log('[Operators] Database already has operators, skipping seed.');
     }
-    
-    localStorage.setItem(seedKey, 'true');
   } catch (e) {
     console.error('[Operators] Seeding failed:', e);
   }
