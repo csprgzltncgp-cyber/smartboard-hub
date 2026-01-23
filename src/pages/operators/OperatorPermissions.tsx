@@ -11,7 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { getOperatorById, updateOperatorSmartboardPermissions } from "@/stores/operatorStore";
+import { useAppOperatorsDb } from "@/hooks/useAppOperatorsDb";
 import { getSmartboardById } from "@/config/smartboards";
 import { User, UserSmartboardPermission } from "@/types/user";
 import { toast } from "sonner";
@@ -19,16 +19,18 @@ import { toast } from "sonner";
 const OperatorPermissions = () => {
   const navigate = useNavigate();
   const { operatorId } = useParams<{ operatorId: string }>();
+  const { getOperatorById, updateOperatorSmartboardPermissions, loading } = useAppOperatorsDb();
   const [operator, setOperator] = useState<User | null>(null);
   const [operatorMenuItems, setOperatorMenuItems] = useState<string[]>([]);
   const [searchMenuItems, setSearchMenuItems] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Get smartboard configs
   const operatorSmartboard = getSmartboardById("operator");
   const searchSmartboard = getSmartboardById("search");
 
   useEffect(() => {
-    if (operatorId) {
+    if (operatorId && !loading) {
       const foundOperator = getOperatorById(operatorId);
       if (foundOperator) {
         setOperator(foundOperator);
@@ -43,12 +45,12 @@ const OperatorPermissions = () => {
           p => p.smartboardId === "search"
         );
         setSearchMenuItems(searchPermission?.enabledMenuItems || (searchSmartboard?.menuItems.map(m => m.id) || []));
-      } else {
+      } else if (!loading) {
         toast.error("Operátor nem található");
         navigate("/dashboard/settings/operators");
       }
     }
-  }, [operatorId, navigate]);
+  }, [operatorId, loading, getOperatorById, navigate, searchSmartboard]);
 
   const toggleOperatorMenuItem = (menuItemId: string) => {
     setOperatorMenuItems(prev => {
@@ -86,8 +88,11 @@ const OperatorPermissions = () => {
     }
   };
 
-  const handleSave = () => {
-    if (operatorId) {
+  const handleSave = async () => {
+    if (!operatorId) return;
+    
+    setIsSaving(true);
+    try {
       const permissions: UserSmartboardPermission[] = [
         {
           smartboardId: "operator",
@@ -100,14 +105,22 @@ const OperatorPermissions = () => {
           enabledMenuItems: searchMenuItems,
         },
       ];
-      updateOperatorSmartboardPermissions(operatorId, permissions);
+      await updateOperatorSmartboardPermissions(operatorId, permissions);
       toast.success("Jogosultságok mentve");
       navigate("/dashboard/settings/operators");
+    } catch (error) {
+      toast.error("Hiba történt a mentés során");
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  if (!operator || !operatorSmartboard || !searchSmartboard) {
-    return <div>Betöltés...</div>;
+  if (loading || !operator || !operatorSmartboard || !searchSmartboard) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-muted-foreground">Betöltés...</div>
+      </div>
+    );
   }
 
   return (
@@ -296,9 +309,13 @@ const OperatorPermissions = () => {
 
       {/* Save Button */}
       <div className="flex items-center gap-4">
-        <Button onClick={handleSave} className="bg-primary hover:bg-primary/90">
+        <Button 
+          onClick={handleSave} 
+          className="bg-primary hover:bg-primary/90"
+          disabled={isSaving}
+        >
           <Save className="w-4 h-4 mr-2" />
-          Mentés
+          {isSaving ? "Mentés..." : "Mentés"}
         </Button>
         <Button
           variant="outline"

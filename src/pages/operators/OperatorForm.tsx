@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createOperator } from "@/stores/operatorStore";
+import { useAppOperatorsDb } from "@/hooks/useAppOperatorsDb";
 import { UserFormData, LANGUAGES, COUNTRIES } from "@/types/user";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -19,6 +19,7 @@ import { X } from "lucide-react";
 
 const OperatorForm = () => {
   const navigate = useNavigate();
+  const { createOperator } = useAppOperatorsDb();
   const [formData, setFormData] = useState<UserFormData>({
     name: "",
     email: "",
@@ -29,6 +30,7 @@ const OperatorForm = () => {
   });
   const [errors, setErrors] = useState<Partial<Record<keyof UserFormData, string>>>({});
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof UserFormData, string>> = {};
@@ -53,7 +55,7 @@ const OperatorForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -61,11 +63,18 @@ const OperatorForm = () => {
       return;
     }
 
-    const newOperator = createOperator(formData);
-    toast.success("Operátor sikeresen létrehozva");
-    
-    // Navigate to permissions page for the new operator
-    navigate(`/dashboard/settings/operators/${newOperator.id}/permissions`);
+    setIsSubmitting(true);
+    try {
+      const newOperator = await createOperator(formData);
+      toast.success("Operátor sikeresen létrehozva");
+      
+      // Navigate to permissions page for the new operator
+      navigate(`/dashboard/settings/operators/${newOperator.id}/permissions`);
+    } catch (error) {
+      toast.error("Hiba történt az operátor létrehozásakor");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (field: keyof UserFormData, value: string | string[]) => {
@@ -264,9 +273,13 @@ const OperatorForm = () => {
 
         {/* Submit buttons */}
         <div className="flex items-center gap-4 mt-6">
-          <Button type="submit" className="bg-primary hover:bg-primary/90">
+          <Button 
+            type="submit" 
+            className="bg-primary hover:bg-primary/90"
+            disabled={isSubmitting}
+          >
             <Save className="w-4 h-4 mr-2" />
-            Regisztráció és jogosultságok beállítása
+            {isSubmitting ? "Mentés..." : "Regisztráció és jogosultságok beállítása"}
           </Button>
           <Button
             type="button"

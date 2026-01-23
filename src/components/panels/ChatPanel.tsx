@@ -28,8 +28,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUsers } from "@/stores/userStore";
-import { getOperators } from "@/stores/operatorStore";
+import { useAppUsersDb } from "@/hooks/useAppUsersDb";
+import { useAppOperatorsDb } from "@/hooks/useAppOperatorsDb";
+import { User as UserType } from "@/types/user";
 
 // Import avatar images for fallback/demo
 import avatarBarbara from "@/assets/avatars/avatar-barbara.jpg";
@@ -70,10 +71,11 @@ const defaultAvatars: Record<string, string> = {
 };
 
 // Build chat users from registered users and operators
-const buildChatUsers = (currentUserId: string | undefined): ChatUser[] => {
-  const users = getUsers();
-  const operators = getOperators();
-  
+const buildChatUsersFromData = (
+  currentUserId: string | undefined, 
+  users: UserType[], 
+  operators: UserType[]
+): ChatUser[] => {
   const chatUsers: ChatUser[] = [];
   
   // Add users (as staff by default, could be enhanced with role detection)
@@ -164,24 +166,21 @@ const generateMockMessagesForUser = (currentUserId: string, chatPartnerId: strin
 
 const ChatPanel = ({ onClose }: ChatPanelProps) => {
   const { currentUser } = useAuth();
+  const { users, loading: usersLoading } = useAppUsersDb();
+  const { operators, loading: operatorsLoading } = useAppOperatorsDb();
   const currentUserId = currentUser?.id || "guest";
   
-  // Build chat users from registered users/operators (memoized)
-  const chatUsers = useMemo(() => buildChatUsers(currentUserId), [currentUserId]);
+  // Build chat users from database (memoized)
+  const chatUsers = useMemo(() => {
+    if (usersLoading || operatorsLoading) return [];
+    return buildChatUsersFromData(currentUserId, users, operators);
+  }, [currentUserId, users, operators, usersLoading, operatorsLoading]);
   
   // User-specific localStorage keys
   const getStorageKey = (key: string) => `cgpchat-${currentUserId}-${key}`;
   
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUser, setSelectedUser] = useState<ChatUser | null>(() => {
-    // Restore selected user from localStorage (user-specific)
-    const savedUserId = localStorage.getItem(getStorageKey("selected-user"));
-    if (savedUserId) {
-      const users = buildChatUsers(currentUserId);
-      return users.find(u => u.id === savedUserId) || null;
-    }
-    return null;
-  });
+  const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [filterRole, setFilterRole] = useState<"all" | "operator" | "expert" | "staff">("all");
@@ -193,6 +192,19 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
   const [selectedForDelete, setSelectedForDelete] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Restore selected user when chat users are loaded
+  useEffect(() => {
+    if (chatUsers.length > 0 && !selectedUser) {
+      const savedUserId = localStorage.getItem(getStorageKey("selected-user"));
+      if (savedUserId) {
+        const user = chatUsers.find(u => u.id === savedUserId);
+        if (user) {
+          setSelectedUser(user);
+        }
+      }
+    }
+  }, [chatUsers, selectedUser, getStorageKey]);
 
   // Load messages when selected user changes (user-specific)
   useEffect(() => {
@@ -224,7 +236,7 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
   // Reset state when user changes
   useEffect(() => {
     const savedUserId = localStorage.getItem(getStorageKey("selected-user"));
-    if (savedUserId) {
+    if (savedUserId && chatUsers.length > 0) {
       const user = chatUsers.find(u => u.id === savedUserId);
       setSelectedUser(user || null);
     } else {
@@ -336,6 +348,8 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
     return date.toLocaleTimeString("hu-HU", { hour: "2-digit", minute: "2-digit" });
   };
 
+  const isLoading = usersLoading || operatorsLoading;
+
   return (
     <div className="bg-background border rounded-xl shadow-lg z-50 overflow-hidden w-[800px]">
       {/* Header */}
@@ -426,70 +440,98 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
 
           {/* Users list */}
           <ScrollArea className="flex-1">
-            <div className="p-1.5 space-y-1">
-              {filteredUsers.map((user) => {
-                const RoleIcon = getRoleIcon(user.role);
-                const isSelectedForDelete = selectedForDelete.includes(user.id);
-                return (
-                  <div
-                    key={user.id}
-                    className={`w-full p-2 rounded-lg flex items-start gap-2 transition-all text-left ${
-                      selectedUser?.id === user.id && !isSelectMode
-                        ? "bg-cgp-teal/10 border border-cgp-teal"
-                        : isSelectedForDelete
-                        ? "bg-destructive/10 border border-destructive/30"
-                        : "hover:bg-muted"
-                    }`}
-                  >
-                    {/* Checkbox for select mode */}
-                    <div 
-                      className={`flex items-center justify-center transition-all duration-200 overflow-hidden ${
-                        isSelectMode ? "w-6 opacity-100" : "w-0 opacity-0"
+            {isLoading ? (
+              <div className="p-4 text-center text-muted-foreground text-sm">
+                Betöltés...
+              </div>
+            ) : (
+              <div className="p-1.5 space-y-1">
+                {filteredUsers.map((user) => {
+                  const RoleIcon = getRoleIcon(user.role);
+                  const isSelectedForDelete = selectedForDelete.includes(user.id);
+                  return (
+                    <div
+                      key={user.id}
+                      className={`w-full p-2 rounded-lg flex items-start gap-2 transition-all text-left ${
+                        selectedUser?.id === user.id && !isSelectMode
+                          ? "bg-cgp-teal/10 border border-cgp-teal"
+                          : isSelectedForDelete
+                          ? "bg-destructive/10 border border-destructive/30"
+                          : "hover:bg-muted"
                       }`}
                     >
-                      <Checkbox
-                        checked={isSelectedForDelete}
-                        onCheckedChange={() => toggleSelectForDelete(user.id)}
-                        className="data-[state=checked]:bg-destructive data-[state=checked]:border-destructive"
-                      />
-                    </div>
-                    
-                    <button
-                      onClick={() => isSelectMode ? toggleSelectForDelete(user.id) : setSelectedUser(user)}
-                      className="flex items-start gap-2 flex-1 min-w-0"
-                    >
-                      <div className="relative flex-shrink-0">
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={user.avatarUrl} alt={user.name} />
-                          <AvatarFallback className="bg-cgp-teal/20 text-cgp-teal text-xs">
-                            {user.name.split(" ").map(n => n[0]).join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <Circle 
-                          className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 ${
-                            user.isOnline ? "text-green-500 fill-green-500" : "text-gray-400 fill-gray-400"
-                          }`}
+                      {/* Checkbox for select mode */}
+                      <div 
+                        className={`flex items-center justify-center transition-all duration-200 overflow-hidden ${
+                          isSelectMode ? "w-6 opacity-100" : "w-0 opacity-0"
+                        }`}
+                      >
+                        <Checkbox
+                          checked={isSelectedForDelete}
+                          onCheckedChange={() => toggleSelectForDelete(user.id)}
+                          className="data-[state=checked]:bg-destructive data-[state=checked]:border-destructive"
                         />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium truncate">{user.name}</span>
-                          {user.unreadCount && !isSelectMode && (
-                            <span className="bg-destructive text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
-                              {user.unreadCount}
-                            </span>
+                      
+                      <button
+                        onClick={() => isSelectMode ? toggleSelectForDelete(user.id) : setSelectedUser(user)}
+                        className="flex items-start gap-2 flex-1 min-w-0"
+                      >
+                        <div className="relative flex-shrink-0">
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={user.avatarUrl} alt={user.name} />
+                            <AvatarFallback className="bg-cgp-teal/20 text-cgp-teal text-xs">
+                              {user.name.split(" ").map(n => n[0]).join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <Circle 
+                            className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 ${
+                              user.isOnline ? "fill-green-500 text-green-500" : "fill-gray-300 text-gray-300"
+                            }`}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm font-medium truncate">{user.name}</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <RoleIcon className="w-3 h-3" />
+                            <span>{getRoleLabel(user.role)}</span>
+                          </div>
+                          {user.lastMessage && (
+                            <p className="text-xs text-muted-foreground truncate mt-0.5">
+                              {user.lastMessage}
+                            </p>
                           )}
                         </div>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <RoleIcon className="w-2.5 h-2.5" />
-                          <span>{getRoleLabel(user.role)}</span>
-                        </div>
+                        {user.unreadCount && user.unreadCount > 0 && (
+                          <span className="bg-cgp-teal text-white text-xs rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">
+                            {user.unreadCount}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+                {filteredUsers.length === 0 && !isLoading && (
+                  <div className="p-4 text-center text-muted-foreground text-sm">
+                    {deletedConversations.length > 0 ? (
+                      <div>
+                        <p>Nincs megjeleníthető beszélgetés</p>
+                        <button 
+                          onClick={handleRestoreAllConversations}
+                          className="text-cgp-teal hover:underline mt-1"
+                        >
+                          Visszaállítás
+                        </button>
                       </div>
-                    </button>
+                    ) : (
+                      "Nincs találat"
+                    )}
                   </div>
-                );
-              })}
-            </div>
+                )}
+              </div>
+            )}
           </ScrollArea>
         </div>
 
@@ -498,28 +540,28 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
           {selectedUser ? (
             <>
               {/* Chat header */}
-              <div className="p-3 border-b flex items-center gap-2 bg-background">
-                <Avatar className="w-8 h-8">
+              <div className="px-4 py-2 border-b flex items-center gap-3 bg-muted/30">
+                <Avatar className="w-9 h-9">
                   <AvatarImage src={selectedUser.avatarUrl} alt={selectedUser.name} />
-                  <AvatarFallback className="bg-cgp-teal/20 text-cgp-teal text-xs">
+                  <AvatarFallback className="bg-cgp-teal/20 text-cgp-teal">
                     {selectedUser.name.split(" ").map(n => n[0]).join("")}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <h4 className="text-sm font-medium">{selectedUser.name}</h4>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <div className="flex-1">
+                  <div className="font-medium text-sm">{selectedUser.name}</div>
+                  <div className="text-xs text-muted-foreground flex items-center gap-1">
                     <Circle 
-                      className={`w-1.5 h-1.5 ${
-                        selectedUser.isOnline ? "text-green-500 fill-green-500" : "text-gray-400 fill-gray-400"
+                      className={`w-2 h-2 ${
+                        selectedUser.isOnline ? "fill-green-500 text-green-500" : "fill-gray-300 text-gray-300"
                       }`}
                     />
                     {selectedUser.isOnline ? "Online" : "Offline"}
-                  </p>
+                  </div>
                 </div>
               </div>
 
               {/* Messages */}
-              <ScrollArea className="flex-1 p-3">
+              <ScrollArea className="flex-1 p-4">
                 <div className="space-y-3">
                   {messages.map((message) => (
                     <div
@@ -527,14 +569,16 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
                       className={`flex ${message.isOwn ? "justify-end" : "justify-start"}`}
                     >
                       <div
-                        className={`max-w-[80%] rounded-xl px-3 py-2 ${
+                        className={`max-w-[70%] rounded-2xl px-4 py-2 ${
                           message.isOwn
-                            ? "bg-cgp-teal text-white rounded-br-none"
-                            : "bg-muted rounded-bl-none"
+                            ? "bg-cgp-teal text-white rounded-br-md"
+                            : "bg-muted rounded-bl-md"
                         }`}
                       >
                         <p className="text-sm">{message.text}</p>
-                        <p className={`text-xs mt-0.5 ${message.isOwn ? "text-white/70" : "text-muted-foreground"}`}>
+                        <p className={`text-xs mt-1 ${
+                          message.isOwn ? "text-white/70" : "text-muted-foreground"
+                        }`}>
                           {formatTime(message.timestamp)}
                         </p>
                       </div>
@@ -545,20 +589,19 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
               </ScrollArea>
 
               {/* Message input */}
-              <div className="p-3 border-t bg-background">
+              <div className="p-3 border-t">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Üzenet..."
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="flex-1 h-9"
+                    placeholder="Írj üzenetet..."
+                    className="flex-1"
                   />
                   <Button 
-                    size="sm"
                     onClick={handleSendMessage}
-                    className="rounded-xl bg-cgp-teal hover:bg-cgp-teal/90"
                     disabled={!newMessage.trim()}
+                    className="bg-cgp-teal hover:bg-cgp-teal/90"
                   >
                     <Send className="w-4 h-4" />
                   </Button>
@@ -568,8 +611,8 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
           ) : (
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
               <div className="text-center">
-                <MessageCircle className="w-10 h-10 mx-auto mb-2 opacity-20" />
-                <p className="text-sm">Válassz munkatársat</p>
+                <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                <p>Válassz egy beszélgetést a bal oldali listából</p>
               </div>
             </div>
           )}
@@ -582,14 +625,15 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Beszélgetések törlése</AlertDialogTitle>
             <AlertDialogDescription>
-              Biztosan törlöd a kijelölt {selectedForDelete.length} beszélgetést? Ez a művelet nem vonható vissza.
+              Biztosan törölni szeretnéd a kijelölt {selectedForDelete.length} beszélgetést?
+              Ez a művelet nem vonható vissza.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Mégse</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteSelected}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Törlés
             </AlertDialogAction>

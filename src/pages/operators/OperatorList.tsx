@@ -22,13 +22,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { getOperators, deleteOperator, toggleOperatorActive } from "@/stores/operatorStore";
+import { useAppOperatorsDb } from "@/hooks/useAppOperatorsDb";
 import { User } from "@/types/user";
 import { toast } from "sonner";
 
 const OperatorList = () => {
   const navigate = useNavigate();
-  const [operators, setOperators] = useState<User[]>(getOperators());
+  const { operators, loading, toggleOperatorActive, deleteOperator } = useAppOperatorsDb();
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [operatorToDelete, setOperatorToDelete] = useState<User | null>(null);
@@ -39,9 +39,8 @@ const OperatorList = () => {
     operator.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleToggleActive = (operator: User) => {
-    toggleOperatorActive(operator.id);
-    setOperators(getOperators());
+  const handleToggleActive = async (operator: User) => {
+    await toggleOperatorActive(operator.id);
     toast.success(operator.active ? "Operátor deaktiválva" : "Operátor aktiválva");
   };
 
@@ -50,10 +49,9 @@ const OperatorList = () => {
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (operatorToDelete) {
-      deleteOperator(operatorToDelete.id);
-      setOperators(getOperators());
+      await deleteOperator(operatorToDelete.id);
       toast.success("Operátor törölve");
     }
     setDeleteDialogOpen(false);
@@ -66,6 +64,14 @@ const OperatorList = () => {
     );
     return operatorPermission?.enabledMenuItems.length || 0;
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-muted-foreground">Betöltés...</div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -116,7 +122,7 @@ const OperatorList = () => {
                 <TableCell>{operator.username}</TableCell>
                 <TableCell className="text-center">
                   <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                    {getEnabledMenuCount(operator)} / 4
+                    {getEnabledMenuCount(operator)} / 6
                   </Badge>
                 </TableCell>
                 <TableCell className="text-center">
