@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { 
   GitCompare, 
   Layers, 
@@ -27,6 +28,7 @@ interface SearchFilterPanelProps {
 const SearchFilterPanel = ({ onClose }: SearchFilterPanelProps) => {
   const [searchCategory, setSearchCategory] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchGlobal, setSearchGlobal] = useState<boolean>(true);
 
   // Filter states
   const [filterPeriod, setFilterPeriod] = useState<string>("");
@@ -80,6 +82,25 @@ const SearchFilterPanel = ({ onClose }: SearchFilterPanelProps) => {
         <button onClick={onClose} className="p-1 hover:bg-muted rounded">
           <X className="w-5 h-5" />
         </button>
+      </div>
+
+      {/* Search Scope Switch */}
+      <div className="px-4 py-3 border-b bg-muted/20">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium">Keresési hatókör</Label>
+          <div className="flex items-center gap-3">
+            <span className={`text-sm ${!searchGlobal ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
+              Aktuális menüpont
+            </span>
+            <Switch
+              checked={searchGlobal}
+              onCheckedChange={setSearchGlobal}
+            />
+            <span className={`text-sm ${searchGlobal ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
+              Teljes Dashboard
+            </span>
+          </div>
+        </div>
       </div>
 
       <Tabs defaultValue="search" className="w-full">
