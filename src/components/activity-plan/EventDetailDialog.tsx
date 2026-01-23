@@ -35,7 +35,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -52,8 +51,6 @@ import { useUpdateEvent, useDeleteEvent } from "@/hooks/useActivityPlan";
 import { 
   ActivityPlanEvent, 
   EVENT_TYPE_LABELS,
-  STATUS_LABELS,
-  STATUS_COLORS,
   MOOD_LABELS,
   ActivityEventStatus,
   MeetingMood,
@@ -139,9 +136,6 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
               })()}
               {event.title}
             </DialogTitle>
-            <Badge className={`w-fit mt-2 ${STATUS_COLORS[event.status]}`}>
-              {STATUS_LABELS[event.status]}
-            </Badge>
           </DialogHeader>
 
           <div className="space-y-6">

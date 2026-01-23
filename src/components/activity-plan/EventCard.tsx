@@ -6,8 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { 
   ActivityPlanEvent, 
   EVENT_TYPE_LABELS,
-  STATUS_LABELS,
-  STATUS_COLORS,
   MeetingMood,
 } from "@/types/activityPlan";
 
@@ -95,10 +93,6 @@ const EventCard = ({ event, onClick, compact }: EventCardProps) => {
 
           {/* Right side badges */}
           <div className="flex flex-col items-end gap-2">
-            {/* Status */}
-            <Badge className={STATUS_COLORS[event.status]}>
-              {STATUS_LABELS[event.status]}
-            </Badge>
 
             {/* Price/Free */}
             <Badge variant={event.is_free ? "secondary" : "outline"} className="text-xs flex items-center gap-1">
