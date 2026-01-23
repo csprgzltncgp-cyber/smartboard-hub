@@ -9,16 +9,10 @@ import { useAppUsersDb } from "@/hooks/useAppUsersDb";
 import { useAppOperatorsDb } from "@/hooks/useAppOperatorsDb";
 import { User } from "@/types/user";
 
-// List of implemented routes (pages that actually exist)
-const IMPLEMENTED_ROUTES = [
-  "/dashboard",
-  "/dashboard/users",
-  "/dashboard/settings/operators",
-  "/dashboard/inputs",
-  "/dashboard/crm",
+// List of implemented SmartBoard landing pages (dedicated SmartBoard dashboards)
+const IMPLEMENTED_SMARTBOARD_PAGES = [
   "/dashboard/smartboard/sales",
-  "/dashboard/case-dispatch",
-  "/dashboard/my-clients",
+  // Add more SmartBoard pages here as they are implemented
 ];
 
 const Login = () => {
@@ -51,35 +45,23 @@ const Login = () => {
     return accounts.sort((a, b) => a.username.localeCompare(b.username, "hu"));
   })();
 
-  // Find first implemented route from user's smartboard permissions
-  const findFirstImplementedRoute = (user: User): string => {
+  // Find SmartBoard landing page if implemented, otherwise fallback to TODO
+  const findLandingPage = (user: User): string => {
     const defaultPermission = user.smartboardPermissions?.find(p => p.isDefault);
     
     if (defaultPermission) {
       const smartboard = SMARTBOARDS.find(sb => sb.id === defaultPermission.smartboardId);
       if (smartboard) {
-        // Check each menu item's path to see if it's implemented
+        // Check if there's an implemented SmartBoard landing page
         for (const menuItem of smartboard.menuItems) {
-          if (IMPLEMENTED_ROUTES.includes(menuItem.path)) {
+          if (IMPLEMENTED_SMARTBOARD_PAGES.includes(menuItem.path)) {
             return menuItem.path;
           }
         }
       }
     }
     
-    // Check all other permissions for any implemented route
-    for (const perm of user.smartboardPermissions || []) {
-      const smartboard = SMARTBOARDS.find(sb => sb.id === perm.smartboardId);
-      if (smartboard) {
-        for (const menuItem of smartboard.menuItems) {
-          if (IMPLEMENTED_ROUTES.includes(menuItem.path)) {
-            return menuItem.path;
-          }
-        }
-      }
-    }
-    
-    // Fallback to TODO dashboard
+    // Fallback to TODO dashboard for all other cases
     return "/dashboard";
   };
 
@@ -104,8 +86,8 @@ const Login = () => {
         return;
       }
       
-      // Navigate to first implemented route
-      const targetRoute = findFirstImplementedRoute(user);
+      // Navigate to SmartBoard page if available, otherwise TODO
+      const targetRoute = findLandingPage(user);
       navigate(targetRoute);
     } catch (err) {
       setError("Hiba történt a bejelentkezés során.");
