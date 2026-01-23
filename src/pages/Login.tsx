@@ -116,6 +116,7 @@ const Login = () => {
               <li><strong>kiss.barbara</strong> - Sales (CRM)</li>
               <li><strong>janky.peter</strong> - Pénzügyi + Account</li>
               <li><strong>kovacs.anna</strong> - Operátor</li>
+              <li><strong>admin</strong> - Admin (teljes hozzáférés)</li>
             </ul>
             <p className="mt-2 text-xs">Jelszó: <strong>smartboard</strong></p>
           </div>
