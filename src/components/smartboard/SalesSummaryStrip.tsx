@@ -1,4 +1,5 @@
 import { Users, FileText, Handshake, PenTool, Calendar, AlertTriangle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface SalesSummaryStripProps {
   leadsCount: number;
@@ -14,10 +15,14 @@ interface SummaryItemProps {
   count: number;
   label: string;
   color: string;
+  onClick?: () => void;
 }
 
-const SummaryItem = ({ icon, count, label, color }: SummaryItemProps) => (
-  <div className="flex items-center gap-3">
+const SummaryItem = ({ icon, count, label, color, onClick }: SummaryItemProps) => (
+  <div 
+    className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+    onClick={onClick}
+  >
     <div className={`w-10 h-10 ${color} rounded-lg flex items-center justify-center`}>
       {icon}
     </div>
@@ -28,6 +33,13 @@ const SummaryItem = ({ icon, count, label, color }: SummaryItemProps) => (
   </div>
 );
 
+const scrollToElement = (id: string) => {
+  const element = document.getElementById(id);
+  if (element) {
+    element.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+};
+
 const SalesSummaryStrip = ({
   leadsCount,
   offersCount,
@@ -36,6 +48,9 @@ const SalesSummaryStrip = ({
   upcomingMeetingsCount,
   expiringContractsCount,
 }: SalesSummaryStripProps) => {
+  const navigate = useNavigate();
+  const goToCrm = () => navigate("/dashboard/crm");
+
   return (
     <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
       <div className="flex flex-wrap items-center justify-between gap-6">
@@ -44,24 +59,28 @@ const SalesSummaryStrip = ({
           count={leadsCount}
           label="Leadek"
           color="bg-cgp-teal-light"
+          onClick={goToCrm}
         />
         <SummaryItem
           icon={<FileText className="w-5 h-5 text-white" />}
           count={offersCount}
           label="Ajánlatok"
           color="bg-cgp-badge-new"
+          onClick={goToCrm}
         />
         <SummaryItem
           icon={<Handshake className="w-5 h-5 text-white" />}
           count={dealsCount}
           label="Tárgyalások"
           color="bg-cgp-badge-lastday"
+          onClick={goToCrm}
         />
         <SummaryItem
           icon={<PenTool className="w-5 h-5 text-white" />}
           count={signedCount}
           label="Aláírt"
           color="bg-cgp-task-completed-purple"
+          onClick={goToCrm}
         />
         <div className="h-10 w-px bg-border" />
         <SummaryItem
@@ -69,12 +88,14 @@ const SalesSummaryStrip = ({
           count={upcomingMeetingsCount}
           label="Találkozók"
           color="bg-primary"
+          onClick={() => scrollToElement("upcoming-meetings-panel")}
         />
         <SummaryItem
           icon={<AlertTriangle className="w-5 h-5 text-white" />}
           count={expiringContractsCount}
           label="Lejáró szerződés"
           color="bg-cgp-badge-overdue"
+          onClick={() => scrollToElement("contract-expiring-panel")}
         />
       </div>
     </div>
