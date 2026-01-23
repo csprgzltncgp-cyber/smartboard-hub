@@ -6,16 +6,13 @@ import {
   Calendar, 
   LayoutGrid, 
   List, 
-  Search,
   ChevronRight,
-  MapPin,
-  Mail
+  MapPin
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { 
+import {
   Table, 
   TableBody, 
   TableCell, 
@@ -43,7 +40,7 @@ const MyClientsPage = () => {
   const [isClientDirector, setIsClientDirector] = useState(false);
   const [clientDirectorLoading, setClientDirectorLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
-  const [searchQuery, setSearchQuery] = useState("");
+  
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [createPlanCompanyId, setCreatePlanCompanyId] = useState<string | null>(null);
@@ -107,22 +104,10 @@ const MyClientsPage = () => {
 
   // Build list of companies to display
   const clientsToShow = useMemo(() => {
-    const items = hasFullAccess 
+    return hasFullAccess 
       ? allCompanies?.map(company => ({ id: company.id, company })) || []
       : assignments || [];
-    
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      return items.filter(item => 
-        item.company?.name?.toLowerCase().includes(query) ||
-        item.company?.country?.name?.toLowerCase().includes(query) ||
-        item.company?.contact_email?.toLowerCase().includes(query)
-      );
-    }
-    
-    return items;
-  }, [hasFullAccess, allCompanies, assignments, searchQuery]);
+  }, [hasFullAccess, allCompanies, assignments]);
 
   // Helper functions
   const getActivePlan = (companyId: string) => {
@@ -200,16 +185,6 @@ const MyClientsPage = () => {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          placeholder="Keresés cég, ország vagy email alapján..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 max-w-md"
-        />
-      </div>
 
       {!hasClients ? (
         /* Empty state */
