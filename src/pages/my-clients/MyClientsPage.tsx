@@ -1,15 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
-import { Building2, Crown, Calendar, LayoutGrid, List } from "lucide-react";
+import { Building2, Crown, Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useUserClientAssignments, useActivityPlans, useCompanies } from "@/hooks/useActivityPlan";
 import { useSeedActivityPlanData } from "@/hooks/useSeedActivityPlanData";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import ClientExpandableRow from "@/components/activity-plan/ClientExpandableRow";
-
-type ViewMode = "list" | "cards";
 
 const MyClientsPage = () => {
   const { currentUser } = useAuth();
@@ -17,7 +14,7 @@ const MyClientsPage = () => {
   
   const [isClientDirector, setIsClientDirector] = useState(false);
   const [clientDirectorLoading, setClientDirectorLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  
   
   // Check if user is admin (has admin smartboard)
   const isAdmin = currentUser?.smartboardPermissions?.some(
@@ -137,16 +134,6 @@ const MyClientsPage = () => {
           )}
         </div>
         
-        <div className="flex items-center gap-2">
-          <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as ViewMode)}>
-            <ToggleGroupItem value="list" aria-label="Lista nézet">
-              <List className="w-4 h-4" />
-            </ToggleGroupItem>
-            <ToggleGroupItem value="cards" aria-label="Kártya nézet">
-              <LayoutGrid className="w-4 h-4" />
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
       </div>
 
       {!hasClients ? (
@@ -165,7 +152,7 @@ const MyClientsPage = () => {
             </p>
           </CardContent>
         </Card>
-      ) : viewMode === "list" ? (
+      ) : (
         /* LIST VIEW - Expandable Rows */
         <div className="space-y-6">
           {/* Companies with Activity Plans */}
@@ -214,27 +201,6 @@ const MyClientsPage = () => {
                 })}
               </Card>
             </div>
-          )}
-        </div>
-      ) : (
-        /* CARDS VIEW - Same expandable rows but in a different layout could be added */
-        <div className="space-y-6">
-          {/* All companies as expandable rows in cards view too for consistency */}
-          {clientsToShow.length > 0 && (
-            <Card className="overflow-hidden">
-              {clientsToShow.map((item) => {
-                const company = item.company!;
-                return (
-                  <ClientExpandableRow
-                    key={item.id}
-                    company={company}
-                    userId={currentUser?.id || ""}
-                    activePlan={getActivePlan(company.id)}
-                    planCount={getPlanCount(company.id)}
-                  />
-                );
-              })}
-            </Card>
           )}
         </div>
       )}
