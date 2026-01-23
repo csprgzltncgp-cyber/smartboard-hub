@@ -80,15 +80,7 @@ const ActivityPlanTimeline = ({ planId, events }: ActivityPlanTimelineProps) => 
                   {(() => {
                     const IconComponent = EventTypeIcons[event.event_type];
                     return (
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                        event.status === 'completed' 
-                          ? 'bg-cgp-badge-new/20 border-2 border-cgp-badge-new' 
-                          : event.status === 'in_progress'
-                          ? 'bg-cgp-teal-light/20 border-2 border-cgp-teal-light'
-                          : event.status === 'approved'
-                          ? 'bg-primary/10 border-2 border-primary'
-                          : 'bg-muted border-2 border-border'
-                      }`}>
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center bg-background border-2 border-border">
                         <IconComponent className="w-5 h-5" />
                       </div>
                     );
