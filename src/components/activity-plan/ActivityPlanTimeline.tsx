@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, ChevronRight, BookOpen, Video, Users, Heart, Target, MessageSquare, Pin } from "lucide-react";
+import { Plus, BookOpen, Video, Users, Heart, Target, MessageSquare, Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   ActivityPlanEvent, 
@@ -95,10 +95,6 @@ const ActivityPlanTimeline = ({ planId, events }: ActivityPlanTimelineProps) => 
                   />
                 </div>
 
-                {/* Arrow to next event */}
-                {index < activeEvents.length - 1 && (
-                  <ChevronRight className="absolute left-[42px] top-14 w-4 h-4 text-primary/30 -rotate-90" />
-                )}
               </div>
             ))}
           </div>
