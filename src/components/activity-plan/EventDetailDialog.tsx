@@ -89,7 +89,6 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
   const [editingNotes, setEditingNotes] = useState(false);
   const [notes, setNotes] = useState(event?.notes || "");
   const [meetingSummary, setMeetingSummary] = useState(event?.meeting_summary || "");
-  const [editingMood, setEditingMood] = useState(false);
   const [currentMood, setCurrentMood] = useState<MeetingMood | null>(event?.meeting_mood || null);
 
   if (!event) return null;
@@ -101,7 +100,6 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
   const handleMoodChange = async (mood: MeetingMood) => {
     setCurrentMood(mood);
     await updateEvent.mutateAsync({ id: event.id, meeting_mood: mood });
-    setEditingMood(false);
   };
 
   const handleSaveNotes = async () => {
@@ -198,41 +196,22 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
                   )}
                 </div>
 
-                {/* Mood selector */}
                 <div>
                   <Label className="text-muted-foreground">Hangulat</Label>
-                  {editingMood ? (
-                    <div className="flex gap-2 mt-2">
-                      {Object.entries(MoodIcons).map(([mood, IconComponent]) => (
-                        <Button
-                          key={mood}
-                          variant={currentMood === mood ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => handleMoodChange(mood as MeetingMood)}
-                          title={MOOD_LABELS[mood as MeetingMood]}
-                        >
-                          <IconComponent className="w-4 h-4" />
-                        </Button>
-                      ))}
-                      <Button variant="ghost" size="sm" onClick={() => setEditingMood(false)}>
-                        <X className="w-4 h-4" />
+                  <div className="flex gap-2 mt-2">
+                    {Object.entries(MoodIcons).map(([mood, IconComponent]) => (
+                      <Button
+                        key={mood}
+                        variant={currentMood === mood ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleMoodChange(mood as MeetingMood)}
+                        title={MOOD_LABELS[mood as MeetingMood]}
+                        className="rounded-xl"
+                      >
+                        <IconComponent className="w-4 h-4" />
                       </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 mt-1">
-                      {currentMood ? (
-                        (() => {
-                          const MoodIcon = MoodIcons[currentMood];
-                          return <span className="flex items-center gap-2"><MoodIcon className="w-5 h-5" /> {MOOD_LABELS[currentMood]}</span>;
-                        })()
-                      ) : (
-                        <span className="text-muted-foreground">Nincs beállítva</span>
-                      )}
-                      <Button variant="ghost" size="sm" onClick={() => setEditingMood(true)}>
-                        <Edit className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  )}
+                    ))}
+                  </div>
                 </div>
 
                 {/* Meeting summary */}
