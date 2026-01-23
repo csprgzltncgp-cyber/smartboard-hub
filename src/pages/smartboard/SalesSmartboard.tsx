@@ -75,6 +75,7 @@ const SalesSmartboard = () => {
         signedCount={signedList.length}
         upcomingMeetingsCount={upcomingMeetings.length}
         expiringContractsCount={expiringContracts.length}
+        todayTasksCount={mockTodayTasks.length}
       />
 
       {/* Today's Tasks - Universal panel for all SmartBoards */}

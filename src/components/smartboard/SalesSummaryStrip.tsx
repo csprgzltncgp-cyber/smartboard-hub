@@ -1,4 +1,4 @@
-import { Users, FileText, Handshake, PenTool, Calendar, AlertTriangle } from "lucide-react";
+import { Users, FileText, Handshake, PenTool, Calendar, AlertTriangle, CheckSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface SalesSummaryStripProps {
@@ -8,22 +8,22 @@ interface SalesSummaryStripProps {
   signedCount: number;
   upcomingMeetingsCount: number;
   expiringContractsCount: number;
+  todayTasksCount: number;
 }
 
 interface SummaryItemProps {
   icon: React.ReactNode;
   count: number;
   label: string;
-  color: string;
   onClick?: () => void;
 }
 
-const SummaryItem = ({ icon, count, label, color, onClick }: SummaryItemProps) => (
+const SummaryItem = ({ icon, count, label, onClick }: SummaryItemProps) => (
   <div 
-    className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+    className="flex items-center gap-3 cursor-pointer hover:opacity-70 transition-opacity"
     onClick={onClick}
   >
-    <div className={`w-10 h-10 ${color} rounded-lg flex items-center justify-center`}>
+    <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center text-muted-foreground">
       {icon}
     </div>
     <div>
@@ -47,6 +47,7 @@ const SalesSummaryStrip = ({
   signedCount,
   upcomingMeetingsCount,
   expiringContractsCount,
+  todayTasksCount,
 }: SalesSummaryStripProps) => {
   const navigate = useNavigate();
   const goToCrm = () => navigate("/dashboard/crm");
@@ -55,46 +56,46 @@ const SalesSummaryStrip = ({
     <div className="bg-white rounded-xl shadow-sm border p-6 mb-8">
       <div className="flex flex-wrap items-center justify-between gap-6">
         <SummaryItem
-          icon={<Users className="w-5 h-5 text-white" />}
+          icon={<CheckSquare className="w-5 h-5" />}
+          count={todayTasksCount}
+          label="Mai feladatok"
+          onClick={() => scrollToElement("today-tasks-panel")}
+        />
+        <SummaryItem
+          icon={<Users className="w-5 h-5" />}
           count={leadsCount}
           label="Leadek"
-          color="bg-cgp-teal-light"
           onClick={goToCrm}
         />
         <SummaryItem
-          icon={<FileText className="w-5 h-5 text-white" />}
+          icon={<FileText className="w-5 h-5" />}
           count={offersCount}
           label="Ajánlatok"
-          color="bg-cgp-badge-new"
           onClick={goToCrm}
         />
         <SummaryItem
-          icon={<Handshake className="w-5 h-5 text-white" />}
+          icon={<Handshake className="w-5 h-5" />}
           count={dealsCount}
           label="Tárgyalások"
-          color="bg-cgp-badge-lastday"
           onClick={goToCrm}
         />
         <SummaryItem
-          icon={<PenTool className="w-5 h-5 text-white" />}
+          icon={<PenTool className="w-5 h-5" />}
           count={signedCount}
           label="Aláírt"
-          color="bg-cgp-task-completed-purple"
           onClick={goToCrm}
         />
         <div className="h-10 w-px bg-border" />
         <SummaryItem
-          icon={<Calendar className="w-5 h-5 text-white" />}
+          icon={<Calendar className="w-5 h-5" />}
           count={upcomingMeetingsCount}
           label="Találkozók"
-          color="bg-primary"
           onClick={() => scrollToElement("upcoming-meetings-panel")}
         />
         <SummaryItem
-          icon={<AlertTriangle className="w-5 h-5 text-white" />}
+          icon={<AlertTriangle className="w-5 h-5" />}
           count={expiringContractsCount}
           label="Lejáró szerződés"
-          color="bg-cgp-badge-overdue"
           onClick={() => scrollToElement("contract-expiring-panel")}
         />
       </div>
