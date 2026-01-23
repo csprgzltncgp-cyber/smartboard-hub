@@ -77,9 +77,11 @@ const TodoListTab = () => {
               )}
               onClick={() => setExpandedId(isExpanded ? null : item.id)}
             >
-              {/* Icon - no background */}
+              {/* Icon - dark green box only, no faded background */}
               <div className="w-12 flex items-center justify-center flex-shrink-0">
-                <ContactIcon className="w-5 h-5 text-primary" />
+                <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
+                  <ContactIcon className="w-4 h-4 text-primary-foreground" />
+                </div>
               </div>
 
               {/* Content Grid */}
