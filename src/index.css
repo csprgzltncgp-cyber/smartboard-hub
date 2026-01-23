@@ -39,7 +39,6 @@
     --cgp-teal-hover: 185 100% 19%;     /* Active button state */
     
     /* Task Section Colors */
-    --cgp-task-overdue: 306 50% 39%;    /* #a33095 - Magenta for overdue section */
     --cgp-task-today: 176 47% 50%;      /* #59c6c6 - Teal for today section */
     
     /* Badge Colors (from Laravel) */
