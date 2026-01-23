@@ -29,7 +29,7 @@ const getContactLabel = (type: ContactType) => {
 
 const UpcomingMeetingsPanel = ({ meetings }: UpcomingMeetingsPanelProps) => {
   return (
-    <div className="mb-8">
+    <div id="upcoming-meetings-panel" className="mb-8">
       {/* Panel Header */}
       <div className="flex items-end justify-between">
         <h2 className="bg-cgp-teal-light text-white uppercase text-xl md:text-2xl lg:text-3xl px-6 md:px-8 py-4 md:py-5 rounded-t-[25px] font-calibri-bold flex items-center gap-3">
