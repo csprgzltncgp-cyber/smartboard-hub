@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Building2, Plus, X, Search, Globe } from "lucide-react";
+import { Building2, Plus, X, Search, Globe, ArrowRightLeft, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -8,6 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -24,7 +26,9 @@ import {
   useUserClientAssignments,
   useAssignClientToUser,
   useRemoveClientFromUser,
+  useTransferClients,
 } from "@/hooks/useActivityPlan";
+import { useAppUsersDb } from "@/hooks/useAppUsersDb";
 import { Company } from "@/types/activityPlan";
 
 interface ClientAssignmentSectionProps {
@@ -34,14 +38,18 @@ interface ClientAssignmentSectionProps {
 
 const ClientAssignmentSection = ({ userId, userName }: ClientAssignmentSectionProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isTransferOpen, setIsTransferOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCountryId, setSelectedCountryId] = useState<string>("");
+  const [targetUserId, setTargetUserId] = useState<string>("");
 
   const { data: countries, isLoading: countriesLoading } = useCountries();
   const { data: companies, isLoading: companiesLoading } = useCompanies();
   const { data: assignments, isLoading: assignmentsLoading } = useUserClientAssignments(userId);
+  const { users } = useAppUsersDb();
   const assignClient = useAssignClientToUser();
   const removeClient = useRemoveClientFromUser();
+  const transferClients = useTransferClients();
 
   const assignedCompanyIds = new Set(assignments?.map(a => a.company_id) || []);
 
@@ -51,6 +59,12 @@ const ClientAssignmentSection = ({ userId, userName }: ClientAssignmentSectionPr
     (selectedCountryId ? c.country_id === selectedCountryId : false) &&
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
+
+  // Get users with Account smartboard (excluding current user)
+  const accountUsers = users.filter(u => 
+    u.id !== userId && 
+    u.smartboardPermissions.some(p => p.smartboardId === "account")
+  );
 
   const handleAssign = async (company: Company) => {
     await assignClient.mutateAsync({
@@ -62,10 +76,28 @@ const ClientAssignmentSection = ({ userId, userName }: ClientAssignmentSectionPr
   const handleDialogOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
-      // Reset filters when closing
       setSelectedCountryId("");
       setSearchQuery("");
     }
+  };
+
+  const handleTransferDialogOpenChange = (open: boolean) => {
+    setIsTransferOpen(open);
+    if (!open) {
+      setTargetUserId("");
+    }
+  };
+
+  const handleTransfer = async () => {
+    if (!targetUserId) return;
+    
+    await transferClients.mutateAsync({
+      fromUserId: userId,
+      toUserId: targetUserId,
+    });
+    
+    setIsTransferOpen(false);
+    setTargetUserId("");
   };
 
   const handleRemove = async (assignmentId: string) => {
@@ -85,13 +117,75 @@ const ClientAssignmentSection = ({ userId, userName }: ClientAssignmentSectionPr
           )}
         </div>
         
-        <Dialog open={isOpen} onOpenChange={handleDialogOpenChange}>
-          <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
-              <Plus className="w-4 h-4 mr-1" />
-              Ügyfél hozzárendelése
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          {/* Transfer clients button */}
+          {assignments && assignments.length > 0 && accountUsers.length > 0 && (
+            <Dialog open={isTransferOpen} onOpenChange={handleTransferDialogOpenChange}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline" className="text-amber-600 border-amber-300 hover:bg-amber-50">
+                  <ArrowRightLeft className="w-4 h-4 mr-1" />
+                  Átadás
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Ügyfelek átadása</DialogTitle>
+                  <DialogDescription>
+                    <span className="font-medium">{userName}</span> összes ügyfelét ({assignments.length} cég) átadhatod egy másik kollégának.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <Users className="w-4 h-4" />
+                      Válaszd ki a célszemélyt
+                    </label>
+                    <Select value={targetUserId} onValueChange={setTargetUserId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Válassz kollégát..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {accountUsers.map(user => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {targetUserId && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+                      <strong>Figyelem:</strong> Az átadás után az összes ügyfél ({assignments.length} cég) 
+                      a kiválasztott kolléga neve alá kerül.
+                    </div>
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsTransferOpen(false)}>
+                    Mégse
+                  </Button>
+                  <Button 
+                    onClick={handleTransfer} 
+                    disabled={!targetUserId || transferClients.isPending}
+                    className="bg-amber-600 hover:bg-amber-700"
+                  >
+                    <ArrowRightLeft className="w-4 h-4 mr-2" />
+                    Átadás
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          {/* Add client button */}
+          <Dialog open={isOpen} onOpenChange={handleDialogOpenChange}>
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline">
+                <Plus className="w-4 h-4 mr-1" />
+                Ügyfél hozzárendelése
+              </Button>
+            </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Ügyfél hozzárendelése</DialogTitle>
@@ -186,7 +280,8 @@ const ClientAssignmentSection = ({ userId, userName }: ClientAssignmentSectionPr
               )}
             </div>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       {/* Assigned clients list */}
