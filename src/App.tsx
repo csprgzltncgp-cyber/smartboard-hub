@@ -18,6 +18,8 @@ import InputsPage from "./pages/inputs/InputsPage";
 import CrmPage from "./pages/crm/CrmPage";
 import CaseDispatchPage from "./pages/cases/CaseDispatchPage";
 import SalesSmartboard from "./pages/smartboard/SalesSmartboard";
+import MyClientsPage from "./pages/my-clients/MyClientsPage";
+import ClientActivityPage from "./pages/my-clients/ClientActivityPage";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +45,8 @@ const App = () => (
               <Route path="crm" element={<CrmPage />} />
               <Route path="smartboard/sales" element={<SalesSmartboard />} />
               <Route path="case-dispatch" element={<CaseDispatchPage />} />
+              <Route path="my-clients" element={<MyClientsPage />} />
+              <Route path="my-clients/:companyId" element={<ClientActivityPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
