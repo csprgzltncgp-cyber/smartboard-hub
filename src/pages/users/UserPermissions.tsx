@@ -170,8 +170,8 @@ const UserPermissions = () => {
     }
   };
 
-  // Check if user has Account smartboard enabled
-  const hasAccountSmartboard = permissions.some(p => p.smartboardId === "account");
+  // Check if user has Account smartboard as DEFAULT (determines their work role)
+  const hasAccountAsDefault = permissions.some(p => p.smartboardId === "account" && p.isDefault);
 
   if (loading) {
     return (
@@ -210,8 +210,8 @@ const UserPermissions = () => {
         </p>
       </div>
 
-      {/* Client Director Toggle - only shown when Account smartboard is enabled */}
-      {hasAccountSmartboard && (
+      {/* Client Director Toggle - only shown when Account is the DEFAULT smartboard */}
+      {hasAccountAsDefault && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -232,8 +232,8 @@ const UserPermissions = () => {
         </div>
       )}
 
-      {/* Client Assignment - only shown when Account smartboard is enabled */}
-      {hasAccountSmartboard && userId && (
+      {/* Client Assignment - only shown when Account is the DEFAULT smartboard */}
+      {hasAccountAsDefault && userId && (
         <div className="mb-6">
           <ClientAssignmentSection userId={userId} userName={user?.name || ""} />
         </div>
