@@ -90,6 +90,7 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
   const [notes, setNotes] = useState(event?.notes || "");
   const [meetingSummary, setMeetingSummary] = useState(event?.meeting_summary || "");
   const [editingMood, setEditingMood] = useState(false);
+  const [currentMood, setCurrentMood] = useState<MeetingMood | null>(event?.meeting_mood || null);
 
   if (!event) return null;
 
@@ -98,6 +99,7 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
   };
 
   const handleMoodChange = async (mood: MeetingMood) => {
+    setCurrentMood(mood);
     await updateEvent.mutateAsync({ id: event.id, meeting_mood: mood });
     setEditingMood(false);
   };
@@ -204,7 +206,7 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
                       {Object.entries(MoodIcons).map(([mood, IconComponent]) => (
                         <Button
                           key={mood}
-                          variant={event.meeting_mood === mood ? "default" : "outline"}
+                          variant={currentMood === mood ? "default" : "outline"}
                           size="sm"
                           onClick={() => handleMoodChange(mood as MeetingMood)}
                           title={MOOD_LABELS[mood as MeetingMood]}
@@ -218,10 +220,10 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 mt-1">
-                      {event.meeting_mood ? (
+                      {currentMood ? (
                         (() => {
-                          const MoodIcon = MoodIcons[event.meeting_mood];
-                          return <span className="flex items-center gap-2"><MoodIcon className="w-5 h-5" /> {MOOD_LABELS[event.meeting_mood]}</span>;
+                          const MoodIcon = MoodIcons[currentMood];
+                          return <span className="flex items-center gap-2"><MoodIcon className="w-5 h-5" /> {MOOD_LABELS[currentMood]}</span>;
                         })()
                       ) : (
                         <span className="text-muted-foreground">Nincs beállítva</span>
