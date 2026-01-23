@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Plus } from "lucide-react";
+import { Plus, BookOpen, Video, Users, Heart, Target, MessageSquare, Pin, User, Monitor } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,8 +20,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCreateEvent } from "@/hooks/useActivityPlan";
-import { ActivityEventType, EVENT_TYPE_LABELS, EVENT_TYPE_ICONS } from "@/types/activityPlan";
+import { ActivityEventType, EVENT_TYPE_LABELS } from "@/types/activityPlan";
 import { format } from "date-fns";
+
+// Map event types to Lucide icons
+const EventTypeIcons: Record<ActivityEventType, React.ComponentType<{ className?: string }>> = {
+  workshop: BookOpen,
+  webinar: Video,
+  meeting: Users,
+  health_day: Heart,
+  orientation: Target,
+  communication_refresh: MessageSquare,
+  other: Pin,
+};
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -104,14 +115,17 @@ const CreateEventDialog = ({ open, onOpenChange, planId }: CreateEventDialogProp
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(EVENT_TYPE_LABELS).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    <span className="flex items-center gap-2">
-                      <span>{EVENT_TYPE_ICONS[value as ActivityEventType]}</span>
-                      {label}
-                    </span>
-                  </SelectItem>
-                ))}
+                {Object.entries(EVENT_TYPE_LABELS).map(([value, label]) => {
+                  const IconComponent = EventTypeIcons[value as ActivityEventType];
+                  return (
+                    <SelectItem key={value} value={value}>
+                      <span className="flex items-center gap-2">
+                        <IconComponent className="w-4 h-4" />
+                        {label}
+                      </span>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
@@ -175,8 +189,12 @@ const CreateEventDialog = ({ open, onOpenChange, planId }: CreateEventDialogProp
                     <SelectValue placeholder="Válassz..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="personal">👤 Személyes</SelectItem>
-                    <SelectItem value="online">💻 Online</SelectItem>
+                    <SelectItem value="personal">
+                      <span className="flex items-center gap-2"><User className="w-4 h-4" /> Személyes</span>
+                    </SelectItem>
+                    <SelectItem value="online">
+                      <span className="flex items-center gap-2"><Monitor className="w-4 h-4" /> Online</span>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>

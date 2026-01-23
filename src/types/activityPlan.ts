@@ -108,14 +108,15 @@ export const EVENT_TYPE_LABELS: Record<ActivityEventType, string> = {
   other: 'Egyéb',
 };
 
-export const EVENT_TYPE_ICONS: Record<ActivityEventType, string> = {
-  workshop: '📚',
-  webinar: '🎥',
-  meeting: '👥',
-  health_day: '🏥',
-  orientation: '🎯',
-  communication_refresh: '📢',
-  other: '📌',
+// Icon names for Lucide - import and use these in components
+export const EVENT_TYPE_ICON_NAMES: Record<ActivityEventType, string> = {
+  workshop: 'BookOpen',
+  webinar: 'Video',
+  meeting: 'Users',
+  health_day: 'Heart',
+  orientation: 'Target',
+  communication_refresh: 'MessageSquare',
+  other: 'Pin',
 };
 
 export const STATUS_LABELS: Record<ActivityEventStatus, string> = {
@@ -127,11 +128,11 @@ export const STATUS_LABELS: Record<ActivityEventStatus, string> = {
 };
 
 export const STATUS_COLORS: Record<ActivityEventStatus, string> = {
-  planned: 'bg-gray-100 text-gray-700',
-  approved: 'bg-blue-100 text-blue-700',
-  in_progress: 'bg-yellow-100 text-yellow-700',
-  completed: 'bg-green-100 text-green-700',
-  archived: 'bg-purple-100 text-purple-700',
+  planned: 'bg-muted text-muted-foreground',
+  approved: 'bg-primary/10 text-primary',
+  in_progress: 'bg-cgp-teal-light/20 text-foreground',
+  completed: 'bg-cgp-badge-new/20 text-foreground',
+  archived: 'bg-cgp-task-completed-purple/20 text-foreground',
 };
 
 export const MOOD_LABELS: Record<MeetingMood, string> = {
@@ -142,12 +143,13 @@ export const MOOD_LABELS: Record<MeetingMood, string> = {
   very_negative: 'Nagyon negatív',
 };
 
-export const MOOD_ICONS: Record<MeetingMood, string> = {
-  very_positive: '😄',
-  positive: '🙂',
-  neutral: '😐',
-  negative: '😕',
-  very_negative: '😞',
+// Mood icon names for Lucide
+export const MOOD_ICON_NAMES: Record<MeetingMood, string> = {
+  very_positive: 'SmilePlus',
+  positive: 'Smile',
+  neutral: 'Meh',
+  negative: 'Frown',
+  very_negative: 'Angry',
 };
 
 export const PERIOD_LABELS: Record<PeriodType, string> = {
