@@ -1,27 +1,43 @@
 import { useMemo } from "react";
-import { useCrmLeadsStore } from "@/stores/crmLeadsStore";
+import { useCrmLeadsDb } from "@/hooks/useCrmLeadsDb";
 
 export const useCrmLeads = () => {
-  const { leads, addLead, updateLead, changeLeadStatus, deleteLead } = useCrmLeadsStore();
+  const { 
+    leads, 
+    leadsList: dbLeadsList, 
+    offersList: dbOffersList, 
+    dealsList: dbDealsList, 
+    signedList: dbSignedList, 
+    loading,
+    error,
+    addLead, 
+    updateLead, 
+    changeLeadStatus, 
+    deleteLead,
+    refetch,
+  } = useCrmLeadsDb();
 
-  // Memoized filtered lists
-  const leadsList = useMemo(() => leads.filter(lead => lead.status === 'lead'), [leads]);
-  const offersList = useMemo(() => leads.filter(lead => lead.status === 'offer'), [leads]);
-  const dealsList = useMemo(() => leads.filter(lead => lead.status === 'deal'), [leads]);
-  const signedList = useMemo(() => leads.filter(lead => lead.status === 'signed' || lead.status === 'incoming_company'), [leads]);
+  // Include incoming_company in signed list
+  const signedList = useMemo(() => 
+    leads.filter(lead => lead.status === 'signed' || lead.status === 'incoming_company'), 
+    [leads]
+  );
 
   const getLeadsByStatus = (status: string) => leads.filter(lead => lead.status === status);
 
   return {
     leads,
-    leadsList,
-    offersList,
-    dealsList,
+    leadsList: dbLeadsList,
+    offersList: dbOffersList,
+    dealsList: dbDealsList,
     signedList,
+    loading,
+    error,
     addLead,
     updateLead,
     changeLeadStatus,
     deleteLead,
     getLeadsByStatus,
+    refetch,
   };
 };

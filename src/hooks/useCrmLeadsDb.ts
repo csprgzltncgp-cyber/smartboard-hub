@@ -34,6 +34,9 @@ const mapDbRowToLead = (row: any): CrmLead => {
   };
 };
 
+// Database status type (subset of LeadStatus that DB accepts)
+type DbLeadStatus = 'lead' | 'offer' | 'deal' | 'signed' | 'incoming_company' | 'cancelled';
+
 // Map CrmLead to database row format
 const mapLeadToDbRow = (lead: CrmLead) => ({
   id: lead.id,
@@ -41,7 +44,7 @@ const mapLeadToDbRow = (lead: CrmLead) => ({
   contact_name: lead.contacts?.[0]?.name || null,
   email: lead.contacts?.[0]?.email || null,
   phone: lead.contacts?.[0]?.phone || null,
-  status: lead.status,
+  status: lead.status as DbLeadStatus,
   notes: lead.notes?.[0]?.content || null,
   details: JSON.parse(JSON.stringify({
     assignedTo: lead.assignedTo,
@@ -217,7 +220,7 @@ export const useCrmLeadsDb = () => {
     try {
       const { error: updateError } = await supabase
         .from('crm_leads')
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .update({ status: newStatus as DbLeadStatus, updated_at: new Date().toISOString() })
         .eq('id', leadId);
       
       if (updateError) throw updateError;

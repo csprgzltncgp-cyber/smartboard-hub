@@ -145,7 +145,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      lead_status: "lead" | "offer" | "deal" | "signed"
+      lead_status:
+        | "lead"
+        | "offer"
+        | "deal"
+        | "signed"
+        | "incoming_company"
+        | "cancelled"
       meeting_type: "email" | "video" | "phone" | "personal"
     }
     CompositeTypes: {
@@ -274,7 +280,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      lead_status: ["lead", "offer", "deal", "signed"],
+      lead_status: [
+        "lead",
+        "offer",
+        "deal",
+        "signed",
+        "incoming_company",
+        "cancelled",
+      ],
       meeting_type: ["email", "video", "phone", "personal"],
     },
   },
