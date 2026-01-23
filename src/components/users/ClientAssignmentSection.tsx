@@ -60,10 +60,10 @@ const ClientAssignmentSection = ({ userId, userName }: ClientAssignmentSectionPr
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  // Get users with Account smartboard (excluding current user)
+  // Get users with Account as their DEFAULT smartboard (excluding current user)
   const accountUsers = users.filter(u => 
     u.id !== userId && 
-    u.smartboardPermissions.some(p => p.smartboardId === "account")
+    u.smartboardPermissions.some(p => p.smartboardId === "account" && p.isDefault)
   );
 
   const handleAssign = async (company: Company) => {
