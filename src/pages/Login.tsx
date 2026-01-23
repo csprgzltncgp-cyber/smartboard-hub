@@ -9,6 +9,18 @@ import { useAppUsersDb } from "@/hooks/useAppUsersDb";
 import { useAppOperatorsDb } from "@/hooks/useAppOperatorsDb";
 import { User } from "@/types/user";
 
+// List of implemented routes (pages that actually exist)
+const IMPLEMENTED_ROUTES = [
+  "/dashboard",
+  "/dashboard/users",
+  "/dashboard/settings/operators",
+  "/dashboard/inputs",
+  "/dashboard/crm",
+  "/dashboard/smartboard/sales",
+  "/dashboard/case-dispatch",
+  "/dashboard/my-clients",
+];
+
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -39,6 +51,38 @@ const Login = () => {
     return accounts.sort((a, b) => a.username.localeCompare(b.username, "hu"));
   })();
 
+  // Find first implemented route from user's smartboard permissions
+  const findFirstImplementedRoute = (user: User): string => {
+    const defaultPermission = user.smartboardPermissions?.find(p => p.isDefault);
+    
+    if (defaultPermission) {
+      const smartboard = SMARTBOARDS.find(sb => sb.id === defaultPermission.smartboardId);
+      if (smartboard) {
+        // Check each menu item's path to see if it's implemented
+        for (const menuItem of smartboard.menuItems) {
+          if (IMPLEMENTED_ROUTES.includes(menuItem.path)) {
+            return menuItem.path;
+          }
+        }
+      }
+    }
+    
+    // Check all other permissions for any implemented route
+    for (const perm of user.smartboardPermissions || []) {
+      const smartboard = SMARTBOARDS.find(sb => sb.id === perm.smartboardId);
+      if (smartboard) {
+        for (const menuItem of smartboard.menuItems) {
+          if (IMPLEMENTED_ROUTES.includes(menuItem.path)) {
+            return menuItem.path;
+          }
+        }
+      }
+    }
+    
+    // Fallback to TODO dashboard
+    return "/dashboard";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -60,17 +104,9 @@ const Login = () => {
         return;
       }
       
-      // Navigate to user's default SmartBoard on success
-      const defaultPermission = user.smartboardPermissions?.find(p => p.isDefault);
-      if (defaultPermission) {
-        const smartboard = SMARTBOARDS.find(sb => sb.id === defaultPermission.smartboardId);
-        if (smartboard && smartboard.menuItems.length > 0) {
-          navigate(smartboard.menuItems[0].path);
-          return;
-        }
-      }
-      // Fallback to TODO dashboard
-      navigate("/dashboard");
+      // Navigate to first implemented route
+      const targetRoute = findFirstImplementedRoute(user);
+      navigate(targetRoute);
     } catch (err) {
       setError("Hiba történt a bejelentkezés során.");
     } finally {
