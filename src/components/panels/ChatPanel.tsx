@@ -385,7 +385,6 @@ const ChatPanel = ({ onClose }: ChatPanelProps) => {
               {[
                 { id: "all", label: "Mind" },
                 { id: "operator", label: "Op." },
-                { id: "expert", label: "Szak." },
                 { id: "staff", label: "Munk." },
               ].map((role) => (
                 <button
