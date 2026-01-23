@@ -89,7 +89,48 @@ export const useUserClientAssignments = (userId?: string) => {
       if (error) throw error;
       return data as UserClientAssignment[];
     },
-    enabled: !!userId,
+    enabled: userId === undefined ? false : true,
+  });
+};
+
+// All User Client Assignments (for Client Directors)
+export const useAllUserClientAssignments = () => {
+  return useQuery({
+    queryKey: ["all_user_client_assignments"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_client_assignments")
+        .select("*, company:companies(*, country:countries(*)), user:app_users!user_client_assignments_user_id_fkey(id, name, username)")
+        .order("user_id");
+      
+      if (error) throw error;
+      return data as unknown as (UserClientAssignment & { user: { id: string; name: string; username: string } })[];
+    },
+  });
+};
+
+// Users with assigned clients (for colleague selector)
+export const useUsersWithClients = () => {
+  return useQuery({
+    queryKey: ["users_with_clients"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_client_assignments")
+        .select("user:app_users!user_client_assignments_user_id_fkey(id, name, username)")
+        .order("user_id");
+      
+      if (error) throw error;
+      
+      // Get unique users
+      const uniqueUsers = new Map<string, { id: string; name: string; username: string }>();
+      (data as unknown as { user: { id: string; name: string; username: string } }[])?.forEach(item => {
+        if (item.user && !uniqueUsers.has(item.user.id)) {
+          uniqueUsers.set(item.user.id, item.user);
+        }
+      });
+      
+      return Array.from(uniqueUsers.values());
+    },
   });
 };
 

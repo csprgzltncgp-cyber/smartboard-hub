@@ -16,9 +16,10 @@ interface ClientExpandableRowProps {
   userId: string;
   activePlan?: ActivityPlan;
   planCount: number;
+  ownerName?: string;
 }
 
-const ClientExpandableRow = ({ company, userId, activePlan, planCount }: ClientExpandableRowProps) => {
+const ClientExpandableRow = ({ company, userId, activePlan, planCount, ownerName }: ClientExpandableRowProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCreatePlan, setShowCreatePlan] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
@@ -60,6 +61,11 @@ const ClientExpandableRow = ({ company, userId, activePlan, planCount }: ClientE
             {company.country && (
               <span className="text-muted-foreground ml-2 text-sm">
                 ({company.country.name})
+              </span>
+            )}
+            {ownerName && (
+              <span className="text-muted-foreground ml-2 text-sm">
+                • {ownerName}
               </span>
             )}
           </div>
