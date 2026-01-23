@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { Building2, Crown, Calendar, Globe } from "lucide-react";
+import { Building2, Calendar, Globe } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUserClientAssignments, useActivityPlans, useCompanies, useCountries } from "@/hooks/useActivityPlan";
 import { useSeedActivityPlanData } from "@/hooks/useSeedActivityPlanData";
@@ -147,12 +146,6 @@ const MyClientsPage = () => {
               }
             </p>
           </div>
-          {hasFullAccess && (
-            <Badge variant="secondary" className="ml-2 bg-amber-100 text-amber-800 border-amber-300">
-              <Crown className="w-3 h-3 mr-1" />
-              {isAdmin ? "Admin" : "Client Director"}
-            </Badge>
-          )}
         </div>
         
         {/* Country Filter */}
