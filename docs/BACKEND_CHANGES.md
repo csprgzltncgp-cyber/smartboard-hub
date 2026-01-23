@@ -2,7 +2,7 @@
 
 Ez a dokumentum tartalmazza a React frontend fejlesztése során bevezetett változtatásokat, amelyeket a Laravel backend és MySQL adatbázis oldalon is implementálni kell.
 
-**Utolsó frissítés:** 2025-01-22
+**Utolsó frissítés:** 2025-01-23
 
 ---
 
@@ -323,6 +323,9 @@ GET  /api/chat/unread-count                     - Olvasatlan üzenetek száma
 
 | Dátum | Változás | Érintett terület |
 |-------|----------|------------------|
+| 2025-01-23 | Activity Plan modul - új táblák (activity_plans, activity_plan_events) | Ügyfeleim |
+| 2025-01-23 | Ügyfél-hozzárendelés tábla (user_client_assignments) | Felhasználók |
+| 2025-01-23 | Client Director szerepkör logika | Jogosultságok |
 | 2025-01-22 | Avatar rendszer hozzáadása (users.avatar_url mező) | Felhasználók |
 | 2025-01-22 | CGPchat adatbázis struktúra (messages, conversations, participants) | Chat |
 | 2025-01-22 | Belső Chat modul létrehozása (Slack-szerű) | Chat, Kommunikáció |
@@ -334,6 +337,139 @@ GET  /api/chat/unread-count                     - Olvasatlan üzenetek száma
 | 2025-01-21 | TODO Dashboard újraépítése React-ben | TODO |
 | 2025-01-21 | Login oldal újraépítése | Autentikáció |
 | 2025-01-21 | Felhasználók menüpont újraépítése | Admin |
+
+---
+
+## 8. Activity Plan Modul (Ügyfeleim)
+
+### Ügyfél-hozzárendelés tábla
+
+Az Account munkatársakhoz cégek rendelhetők hozzá:
+
+```sql
+CREATE TABLE user_client_assignments (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    company_id BIGINT UNSIGNED NOT NULL,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    assigned_by BIGINT UNSIGNED,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_by) REFERENCES users(id),
+    UNIQUE KEY unique_user_company (user_id, company_id)
+);
+```
+
+### Activity Plan tábla
+
+Időszakos tervek a cégekhez:
+
+```sql
+CREATE TABLE activity_plans (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    company_id BIGINT UNSIGNED NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    period_type ENUM('yearly', 'half_yearly', 'custom') DEFAULT 'yearly',
+    period_start DATE NOT NULL,
+    period_end DATE NOT NULL,
+    notes TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+);
+```
+
+### Activity Plan Események tábla
+
+```sql
+CREATE TABLE activity_plan_events (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    activity_plan_id BIGINT UNSIGNED NOT NULL,
+    event_type ENUM('workshop', 'webinar', 'meeting', 'health_day', 'orientation', 'communication_refresh', 'other') NOT NULL,
+    custom_type_name VARCHAR(100),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    event_date DATE NOT NULL,
+    event_time TIME,
+    is_free BOOLEAN DEFAULT TRUE,
+    price DECIMAL(10,2),
+    status ENUM('planned', 'approved', 'in_progress', 'completed', 'archived') DEFAULT 'planned',
+    notes TEXT,
+    -- Meeting specifikus mezők
+    meeting_location VARCHAR(500),
+    meeting_type ENUM('personal', 'online'),
+    meeting_mood ENUM('very_positive', 'positive', 'neutral', 'negative', 'very_negative'),
+    meeting_summary TEXT,
+    -- Metaadatok
+    completed_at TIMESTAMP NULL,
+    archived_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (activity_plan_id) REFERENCES activity_plans(id) ON DELETE CASCADE
+);
+```
+
+### Activity Plan ENUM értékek (frontend referencia)
+
+#### Esemény típusok:
+| Érték | Magyar | Ikon |
+|-------|--------|------|
+| workshop | Workshop | BookOpen |
+| webinar | Élő Webinár | Video |
+| meeting | Meeting | Users |
+| health_day | Egészségnap | Heart |
+| orientation | Extra Orientáció | Target |
+| communication_refresh | Kommunikáció frissítés | MessageSquare |
+| other | Egyéb | Pin |
+
+#### Esemény státuszok:
+| Érték | Magyar | Szín |
+|-------|--------|------|
+| planned | Tervezett | `bg-muted` |
+| approved | Jóváhagyott | `bg-primary/10` |
+| in_progress | Folyamatban | `bg-cgp-teal-light/20` |
+| completed | Lezajlott | `bg-cgp-badge-new/20` |
+| archived | Archivált | `bg-cgp-task-completed-purple/20` |
+
+#### Meeting hangulatok:
+| Érték | Magyar | Ikon |
+|-------|--------|------|
+| very_positive | Nagyon pozitív | SmilePlus |
+| positive | Pozitív | Smile |
+| neutral | Semleges | Meh |
+| negative | Negatív | Frown |
+| very_negative | Nagyon negatív | Angry |
+
+### API Endpoints - Activity Plan
+
+```
+GET  /api/my-clients                           - Hozzárendelt cégek listája
+GET  /api/my-clients/{company_id}/plans        - Cég Activity Plan-jei
+POST /api/activity-plans                       - Új Activity Plan létrehozása
+PUT  /api/activity-plans/{id}                  - Activity Plan módosítása
+DELETE /api/activity-plans/{id}                - Activity Plan törlése
+
+GET  /api/activity-plans/{plan_id}/events      - Plan eseményei
+POST /api/activity-plans/{plan_id}/events      - Új esemény hozzáadása
+PUT  /api/activity-plan-events/{id}            - Esemény módosítása
+DELETE /api/activity-plan-events/{id}          - Esemény törlése
+PUT  /api/activity-plan-events/{id}/archive    - Esemény archiválása
+```
+
+### Client Director jogosultság
+
+A `is_client_director` mező a `users` táblában jelzi, hogy a felhasználó láthatja-e más kollégák ügyfeleit:
+
+```sql
+ALTER TABLE users ADD COLUMN is_client_director BOOLEAN DEFAULT FALSE;
+```
+
+A Client Director nézetben megjelenik a "Csapat ügyfelei" tab, ahol szűrhet kollégára.
 
 ---
 
@@ -350,3 +486,7 @@ GET  /api/chat/unread-count                     - Olvasatlan üzenetek száma
 5. **Avatar tárolás**: Ne adatbázisban tároljuk a képeket, hanem blob storage-ban (S3, stb.), és csak az URL-t mentsük.
 
 6. **Chat real-time**: Valós idejű chat-hez WebSocket vagy Pusher integráció szükséges.
+
+7. **Activity Plan**: Az eseményeknél az `is_free` mező jelzi, hogy fizetős-e. A `price` mező csak akkor releváns, ha `is_free = FALSE`.
+
+8. **Client Director**: Az `is_client_director` mezőt csak Account SmartBoard-hoz rendelt felhasználóknál kell figyelembe venni.
