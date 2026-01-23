@@ -693,6 +693,242 @@ const nicknames: Record<string, string> = {
 
 ---
 
+## 18. Ügyfeleim (My Clients) Modul
+
+### Modul Áttekintés
+Az Account SmartBoard "Ügyfeleim" menüpontja a hozzárendelt ügyfelek és Activity Plan-ek kezelésére szolgál.
+
+### Ügyfél Lista Layout
+```tsx
+// Két szekció: Aktív ügyfelek (van Activity Plan) és Terv nélküli ügyfelek
+<div className="mb-8">
+  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+    <FileCheck className="w-5 h-5 text-primary" />
+    Aktív ügyfelek ({activeClients.length})
+  </h2>
+  {/* Lenyitható lista */}
+</div>
+```
+
+### Expandable Sor (CRM-szerű inline megnyitás)
+```tsx
+// Sor háttér - összecsukott
+className="hover:bg-muted/50 cursor-pointer transition-colors"
+
+// Sor háttér - kinyitott
+className="bg-muted/30"
+
+// Activity Plan badge (középzöld)
+<Badge className="bg-cgp-badge-new text-white">Activity Plan</Badge>
+```
+
+### Client Director / Admin Nézet
+Tab-os elrendezés két füllel:
+```tsx
+<Tabs defaultValue="my-clients">
+  <TabsList>
+    <TabsTrigger value="my-clients">Saját ügyfeleim</TabsTrigger>
+    <TabsTrigger value="team-clients">Csapat ügyfelei</TabsTrigger>
+  </TabsList>
+</Tabs>
+
+// Csapat ügyfelei szűrő
+<Select>
+  <SelectTrigger className="w-[200px]">
+    <SelectValue placeholder="Minden kolléga" />
+  </SelectTrigger>
+</Select>
+```
+
+---
+
+## 19. Activity Plan Komponensek
+
+### Activity Plan Header
+```tsx
+// Plan fejléc kártya
+<div className="bg-white rounded-xl border p-6 mb-6">
+  <div className="flex items-center justify-between mb-4">
+    <h2 className="text-xl font-semibold">{plan.title}</h2>
+    <div className="flex items-center gap-2">
+      <Badge variant={plan.is_active ? "default" : "secondary"}>
+        {plan.is_active ? "Aktív" : "Inaktív"}
+      </Badge>
+      <Badge variant="outline">{PERIOD_LABELS[plan.period_type]}</Badge>
+    </div>
+  </div>
+</div>
+```
+
+### Activity Plan Timeline
+Az események vertikális idővonalon jelennek meg:
+```tsx
+// Timeline pont (egységes stílus, nem státuszfüggő)
+<div className="w-4 h-4 rounded-full border-2 border-primary bg-background" />
+
+// Timeline vonal
+<div className="absolute left-[7px] top-0 bottom-0 w-0.5 bg-border -z-10" />
+
+// Esemény kártya
+<div className="bg-white rounded-xl border p-4 hover:shadow-md transition-shadow">
+  <div className="flex items-start gap-3">
+    <div className={cn("p-2 rounded-lg", getEventTypeBackground(event.event_type))}>
+      <EventTypeIcon type={event.event_type} className="w-5 h-5" />
+    </div>
+  </div>
+</div>
+```
+
+### Esemény Típus Ikonok és Színek
+```tsx
+// Lucide ikonok használata (emojik helyett!)
+const EVENT_TYPE_ICON_NAMES: Record<ActivityEventType, string> = {
+  workshop: 'BookOpen',
+  webinar: 'Video',
+  meeting: 'Users',
+  health_day: 'Heart',
+  orientation: 'Target',
+  communication_refresh: 'MessageSquare',
+  other: 'Pin',
+};
+
+// Háttér színek esemény típusonként
+const getEventTypeBackground = (type: ActivityEventType) => {
+  switch (type) {
+    case 'workshop': return 'bg-blue-100 text-blue-600';
+    case 'webinar': return 'bg-purple-100 text-purple-600';
+    case 'meeting': return 'bg-cgp-teal-light/20 text-cgp-teal';
+    case 'health_day': return 'bg-red-100 text-red-600';
+    case 'orientation': return 'bg-amber-100 text-amber-600';
+    case 'communication_refresh': return 'bg-green-100 text-green-600';
+    default: return 'bg-muted text-muted-foreground';
+  }
+};
+```
+
+### Meeting Hangulat Ikonok
+```tsx
+// Közvetlenül választható lista (nem modal-ban)
+const MOOD_ICON_NAMES: Record<MeetingMood, string> = {
+  very_positive: 'SmilePlus',
+  positive: 'Smile',
+  neutral: 'Meh',
+  negative: 'Frown',
+  very_negative: 'Angry',
+};
+
+// Hangulat választó megjelenítés
+<div className="flex items-center gap-2">
+  {Object.entries(MOOD_LABELS).map(([mood, label]) => (
+    <button
+      key={mood}
+      className={cn(
+        "p-2 rounded-lg transition-colors",
+        selectedMood === mood ? "bg-primary text-white" : "hover:bg-muted"
+      )}
+    >
+      <MoodIcon mood={mood} className="w-5 h-5" />
+    </button>
+  ))}
+</div>
+```
+
+### Esemény Részletek Nézet
+```tsx
+// Részletek panel (inline expansion, nem külön oldal)
+<div className="bg-muted/30 rounded-xl p-4 mt-4 space-y-4">
+  {/* Meeting specifikus mezők */}
+  {event.event_type === 'meeting' && (
+    <>
+      <div>
+        <span className="text-sm text-muted-foreground">Helyszín:</span>
+        <span className="ml-2">{event.meeting_location}</span>
+      </div>
+      <div>
+        <span className="text-sm text-muted-foreground">Típus:</span>
+        <Badge variant="outline">{event.meeting_type === 'personal' ? 'Személyes' : 'Online'}</Badge>
+      </div>
+    </>
+  )}
+  
+  {/* Akciógombok - nincs státuszváltás! */}
+  <div className="flex gap-2 pt-4 border-t">
+    <Button variant="outline" size="sm">
+      <Archive className="w-4 h-4 mr-2" />
+      Archiválás
+    </Button>
+    <Button variant="destructive" size="sm">
+      <Trash2 className="w-4 h-4 mr-2" />
+      Törlés
+    </Button>
+  </div>
+</div>
+```
+
+### Új Esemény Dialog
+```tsx
+<Dialog>
+  <DialogContent className="max-w-lg">
+    <DialogHeader>
+      <DialogTitle>Új esemény hozzáadása</DialogTitle>
+    </DialogHeader>
+    <form className="space-y-4">
+      {/* Esemény típus választó */}
+      <Select name="event_type">
+        <SelectTrigger>
+          <SelectValue placeholder="Válassz típust" />
+        </SelectTrigger>
+        <SelectContent>
+          {Object.entries(EVENT_TYPE_LABELS).map(([type, label]) => (
+            <SelectItem key={type} value={type}>{label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      
+      {/* Fizetős/Ingyenes toggle */}
+      <div className="flex items-center gap-3">
+        <Switch id="is_free" />
+        <Label htmlFor="is_free">Ingyenes</Label>
+      </div>
+    </form>
+  </DialogContent>
+</Dialog>
+```
+
+---
+
+## 20. Activity Plan Magyar Fordítások
+
+| Angol | Magyar |
+|-------|--------|
+| Activity Plan | Aktivitási Terv |
+| Workshop | Workshop |
+| Webinar | Élő Webinár |
+| Meeting | Meeting |
+| Health Day | Egészségnap |
+| Orientation | Extra Orientáció |
+| Communication Refresh | Kommunikáció frissítés |
+| Other | Egyéb |
+| Planned | Tervezett |
+| Approved | Jóváhagyott |
+| In Progress | Folyamatban |
+| Completed | Lezajlott |
+| Archived | Archivált |
+| Very Positive | Nagyon pozitív |
+| Positive | Pozitív |
+| Neutral | Semleges |
+| Negative | Negatív |
+| Very Negative | Nagyon negatív |
+| Yearly | Éves |
+| Half Yearly | Féléves |
+| Custom | Egyedi |
+| Personal | Személyes |
+| Online | Online |
+| Free | Ingyenes |
+| Paid | Fizetős |
+
+---
+
 ## Changelog
 
 | Dátum | Menüpont | Hozzáadott szabályok |
@@ -708,3 +944,6 @@ const nicknames: Record<string, string> = {
 | 2025-01-22 | Keresés/Szűrés | Szabad szavas keresés első helyen, keresési kategóriák átrendezése |
 | 2025-01-22 | Menügombok | Egységes szélesség (w-48), MENÜ sötétzöld, KERESÉS/CHAT középzöld, panel pozicionálás |
 | 2025-01-22 | SmartBoard üdvözlés | Személyre szabott "Szia Barbi!" köszöntés magyar becenevekkel |
+| 2025-01-23 | Ügyfeleim modul | Ügyfél lista layout, expandable sorok, Client Director tab nézet, országszűrő |
+| 2025-01-23 | Activity Plan | Timeline komponens, esemény típus ikonok/színek, meeting hangulat választó, inline részletek nézet |
+| 2025-01-23 | Activity Plan Dialog | Új esemény/plan dialógok, fizetős/ingyenes toggle, magyar fordítások |
