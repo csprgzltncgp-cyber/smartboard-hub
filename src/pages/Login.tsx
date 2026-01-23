@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogIn, AlertTriangle } from "lucide-react";
 import cgpLogo from "@/assets/cgp_logo_green.svg";
 import whiteLogo from "@/assets/white_logo.svg";
 import { useAuth } from "@/contexts/AuthContext";
 import { SMARTBOARDS } from "@/config/smartboards";
-import { getUsers } from "@/stores/userStore";
-import { getOperators } from "@/stores/operatorStore";
+import { useAppUsersDb } from "@/hooks/useAppUsersDb";
+import { useAppOperatorsDb } from "@/hooks/useAppOperatorsDb";
 import { User } from "@/types/user";
 
 const Login = () => {
@@ -16,6 +16,9 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { users, loading: usersLoading } = useAppUsersDb();
+  const { operators, loading: operatorsLoading } = useAppOperatorsDb();
 
   const summarizeSmartboards = (user: User): string => {
     const ids = (user.smartboardPermissions || [])
@@ -31,8 +34,8 @@ const Login = () => {
 
   const demoAccounts: Array<{ username: string; label: string }> = (() => {
     const accounts: Array<{ username: string; label: string }> = [];
-    getUsers().forEach(u => accounts.push({ username: u.username, label: summarizeSmartboards(u) }));
-    getOperators().forEach(o => accounts.push({ username: o.username, label: summarizeSmartboards(o) }));
+    users.forEach(u => accounts.push({ username: u.username, label: summarizeSmartboards(u) }));
+    operators.forEach(o => accounts.push({ username: o.username, label: summarizeSmartboards(o) }));
     return accounts.sort((a, b) => a.username.localeCompare(b.username, "hu"));
   })();
 
@@ -41,19 +44,19 @@ const Login = () => {
     setError(null);
     setIsLoading(true);
 
-    setTimeout(() => {
-      setIsLoading(false);
-      
+    try {
       // Check password
       if (password !== "smartboard") {
         setError("Hibás felhasználónév vagy jelszó.");
+        setIsLoading(false);
         return;
       }
       
       // Try to login with username
-      const user = login(username);
+      const user = await login(username);
       if (!user) {
         setError("Hibás felhasználónév vagy jelszó.");
+        setIsLoading(false);
         return;
       }
       
@@ -68,8 +71,14 @@ const Login = () => {
       }
       // Fallback to TODO dashboard
       navigate("/dashboard");
-    }, 500);
+    } catch (err) {
+      setError("Hiba történt a bejelentkezés során.");
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const isDataLoading = usersLoading || operatorsLoading;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
@@ -133,16 +142,20 @@ const Login = () => {
           {/* Demo users hint */}
           <div className="mt-4 p-4 bg-muted rounded-lg text-sm">
             <p className="font-calibri-bold mb-2">Jelenlegi hozzáférések (Felhasználó jogosultságok alapján):</p>
-            <ul className="space-y-1 text-muted-foreground">
-              {demoAccounts.map(acc => (
-                <li key={acc.username}>
-                  <strong>{acc.username}</strong> - {acc.label}
-                </li>
-              ))}
-            </ul>
+            {isDataLoading ? (
+              <p className="text-muted-foreground">Betöltés...</p>
+            ) : (
+              <ul className="space-y-1 text-muted-foreground">
+                {demoAccounts.map(acc => (
+                  <li key={acc.username}>
+                    <strong>{acc.username}</strong> - {acc.label}
+                  </li>
+                ))}
+              </ul>
+            )}
             <p className="mt-2 text-xs">Jelszó: <strong>smartboard</strong></p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Megjegyzés: a beállítások a böngésző localStorage-ában tárolódnak, ezért a Preview és a Published oldal között nem közösek.
+              Megjegyzés: az adatok az adatbázisban tárolódnak.
             </p>
           </div>
 

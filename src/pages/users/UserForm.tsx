@@ -83,7 +83,7 @@ const UserForm = () => {
         await updateUser(userId, formData);
         // Refresh current user if editing self
         if (currentUser?.id === userId) {
-          refreshCurrentUser();
+          await refreshCurrentUser();
         }
         toast.success("Felhasználó sikeresen frissítve");
         navigate("/dashboard/users");
