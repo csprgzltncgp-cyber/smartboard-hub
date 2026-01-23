@@ -14,7 +14,129 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      app_operators: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          id: string
+          language: string | null
+          name: string
+          phone: string | null
+          smartboard_permissions: Json | null
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          language?: string | null
+          name: string
+          phone?: string | null
+          smartboard_permissions?: Json | null
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          language?: string | null
+          name?: string
+          phone?: string | null
+          smartboard_permissions?: Json | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      app_users: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          id: string
+          language: string | null
+          name: string
+          phone: string | null
+          smartboard_permissions: Json | null
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          language?: string | null
+          name: string
+          phone?: string | null
+          smartboard_permissions?: Json | null
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          language?: string | null
+          name?: string
+          phone?: string | null
+          smartboard_permissions?: Json | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      crm_leads: {
+        Row: {
+          company_name: string
+          contact_name: string | null
+          contacts: Json | null
+          created_at: string
+          details: Json | null
+          email: string | null
+          id: string
+          meetings: Json | null
+          notes: string | null
+          phone: string | null
+          status: Database["public"]["Enums"]["lead_status"]
+          updated_at: string
+        }
+        Insert: {
+          company_name: string
+          contact_name?: string | null
+          contacts?: Json | null
+          created_at?: string
+          details?: Json | null
+          email?: string | null
+          id?: string
+          meetings?: Json | null
+          notes?: string | null
+          phone?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string
+          contact_name?: string | null
+          contacts?: Json | null
+          created_at?: string
+          details?: Json | null
+          email?: string | null
+          id?: string
+          meetings?: Json | null
+          notes?: string | null
+          phone?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +145,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      lead_status: "lead" | "offer" | "deal" | "signed"
+      meeting_type: "email" | "video" | "phone" | "personal"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +273,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      lead_status: ["lead", "offer", "deal", "signed"],
+      meeting_type: ["email", "video", "phone", "personal"],
+    },
   },
 } as const
