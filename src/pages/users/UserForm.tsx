@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { createUser, updateUser, getUserById } from "@/stores/userStore";
+import { useAppUsersDb } from "@/hooks/useAppUsersDb";
 import { UserFormData, LANGUAGES } from "@/types/user";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,6 +21,7 @@ const UserForm = () => {
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
   const { currentUser, refreshCurrentUser } = useAuth();
+  const { users, loading, createUser, updateUser } = useAppUsersDb();
   const isEditMode = Boolean(userId);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<UserFormData>({
@@ -35,8 +36,8 @@ const UserForm = () => {
 
   // Load user data in edit mode
   useEffect(() => {
-    if (isEditMode && userId) {
-      const user = getUserById(userId);
+    if (!loading && isEditMode && userId) {
+      const user = users.find(u => u.id === userId);
       if (user) {
         setFormData({
           name: user.name,
@@ -51,7 +52,7 @@ const UserForm = () => {
         navigate("/dashboard/users");
       }
     }
-  }, [isEditMode, userId, navigate]);
+  }, [isEditMode, userId, users, loading, navigate]);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof UserFormData, string>> = {};
@@ -72,24 +73,28 @@ const UserForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
     
-    if (isEditMode && userId) {
-      updateUser(userId, formData);
-      // Refresh current user if editing self
-      if (currentUser?.id === userId) {
-        refreshCurrentUser();
+    try {
+      if (isEditMode && userId) {
+        await updateUser(userId, formData);
+        // Refresh current user if editing self
+        if (currentUser?.id === userId) {
+          refreshCurrentUser();
+        }
+        toast.success("Felhasználó sikeresen frissítve");
+        navigate("/dashboard/users");
+      } else {
+        const newUser = await createUser(formData);
+        toast.success("Felhasználó sikeresen létrehozva");
+        // Navigate to permissions page to set up smartboards
+        navigate(`/dashboard/users/${newUser.id}/permissions`);
       }
-      toast.success("Felhasználó sikeresen frissítve");
-      navigate("/dashboard/users");
-    } else {
-      const newUser = createUser(formData);
-      toast.success("Felhasználó sikeresen létrehozva");
-      // Navigate to permissions page to set up smartboards
-      navigate(`/dashboard/users/${newUser.id}/permissions`);
+    } catch (err) {
+      toast.error("Hiba történt a mentés során");
     }
   };
 
@@ -134,6 +139,14 @@ const UserForm = () => {
       .toUpperCase()
       .slice(0, 2);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-muted-foreground">Betöltés...</div>
+      </div>
+    );
+  }
 
   return (
     <div>
