@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { hu } from "date-fns/locale";
-import { Clock, MapPin, DollarSign, FileText } from "lucide-react";
+import { Clock, MapPin, DollarSign, FileText, Gift, User, Monitor, SmilePlus, Smile, Meh, Frown, Angry } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
@@ -8,8 +8,17 @@ import {
   EVENT_TYPE_LABELS,
   STATUS_LABELS,
   STATUS_COLORS,
-  MOOD_ICONS,
+  MeetingMood,
 } from "@/types/activityPlan";
+
+// Map mood to Lucide icons
+const MoodIcons: Record<MeetingMood, React.ComponentType<{ className?: string }>> = {
+  very_positive: SmilePlus,
+  positive: Smile,
+  neutral: Meh,
+  negative: Frown,
+  very_negative: Angry,
+};
 
 interface EventCardProps {
   event: ActivityPlanEvent;
@@ -55,8 +64,12 @@ const EventCard = ({ event, onClick, compact }: EventCardProps) => {
             {event.event_type === 'meeting' && (
               <div className="flex items-center gap-4 text-sm mb-2">
                 {event.meeting_type && (
-                  <Badge variant="secondary" className="text-xs">
-                    {event.meeting_type === 'personal' ? '👤 Személyes' : '💻 Online'}
+                  <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                    {event.meeting_type === 'personal' ? (
+                      <><User className="w-3 h-3" /> Személyes</>
+                    ) : (
+                      <><Monitor className="w-3 h-3" /> Online</>
+                    )}
                   </Badge>
                 )}
                 {event.meeting_location && (
@@ -65,11 +78,10 @@ const EventCard = ({ event, onClick, compact }: EventCardProps) => {
                     {event.meeting_location}
                   </span>
                 )}
-                {event.meeting_mood && (
-                  <span className="text-lg" title={`Hangulat: ${event.meeting_mood}`}>
-                    {MOOD_ICONS[event.meeting_mood]}
-                  </span>
-                )}
+                {event.meeting_mood && (() => {
+                  const MoodIcon = MoodIcons[event.meeting_mood];
+                  return <MoodIcon className="w-5 h-5" />;
+                })()}
               </div>
             )}
 
@@ -89,12 +101,12 @@ const EventCard = ({ event, onClick, compact }: EventCardProps) => {
             </Badge>
 
             {/* Price/Free */}
-            <Badge variant={event.is_free ? "secondary" : "outline"} className="text-xs">
+            <Badge variant={event.is_free ? "secondary" : "outline"} className="text-xs flex items-center gap-1">
               {event.is_free ? (
-                "🎁 Ingyenes"
+                <><Gift className="w-3 h-3" /> Ingyenes</>
               ) : event.price ? (
                 <>
-                  <DollarSign className="w-3 h-3 mr-1" />
+                  <DollarSign className="w-3 h-3" />
                   {event.price.toLocaleString('hu-HU')} Ft
                 </>
               ) : (

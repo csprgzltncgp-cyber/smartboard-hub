@@ -1,18 +1,24 @@
 import { useState } from "react";
-import { Plus, ChevronRight } from "lucide-react";
+import { Plus, ChevronRight, BookOpen, Video, Users, Heart, Target, MessageSquare, Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   ActivityPlanEvent, 
-  EVENT_TYPE_LABELS, 
-  EVENT_TYPE_ICONS,
-  STATUS_LABELS,
-  STATUS_COLORS,
+  ActivityEventType,
 } from "@/types/activityPlan";
-import { format } from "date-fns";
-import { hu } from "date-fns/locale";
 import EventCard from "./EventCard";
 import CreateEventDialog from "./CreateEventDialog";
 import EventDetailDialog from "./EventDetailDialog";
+
+// Map event types to Lucide icons
+const EventTypeIcons: Record<ActivityEventType, React.ComponentType<{ className?: string }>> = {
+  workshop: BookOpen,
+  webinar: Video,
+  meeting: Users,
+  health_day: Heart,
+  orientation: Target,
+  communication_refresh: MessageSquare,
+  other: Pin,
+};
 
 interface ActivityPlanTimelineProps {
   planId: string;
@@ -71,17 +77,22 @@ const ActivityPlanTimeline = ({ planId, events }: ActivityPlanTimelineProps) => 
               <div key={event.id} className="relative flex items-start gap-4">
                 {/* Timeline dot */}
                 <div className="relative z-10 flex-shrink-0">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-xl ${
-                    event.status === 'completed' 
-                      ? 'bg-green-100 border-2 border-green-500' 
-                      : event.status === 'in_progress'
-                      ? 'bg-yellow-100 border-2 border-yellow-500'
-                      : event.status === 'approved'
-                      ? 'bg-blue-100 border-2 border-blue-500'
-                      : 'bg-gray-100 border-2 border-gray-300'
-                  }`}>
-                    {EVENT_TYPE_ICONS[event.event_type]}
-                  </div>
+                  {(() => {
+                    const IconComponent = EventTypeIcons[event.event_type];
+                    return (
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                        event.status === 'completed' 
+                          ? 'bg-cgp-badge-new/20 border-2 border-cgp-badge-new' 
+                          : event.status === 'in_progress'
+                          ? 'bg-cgp-teal-light/20 border-2 border-cgp-teal-light'
+                          : event.status === 'approved'
+                          ? 'bg-primary/10 border-2 border-primary'
+                          : 'bg-muted border-2 border-border'
+                      }`}>
+                        <IconComponent className="w-5 h-5" />
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Event card */}
@@ -110,9 +121,14 @@ const ActivityPlanTimeline = ({ planId, events }: ActivityPlanTimelineProps) => 
                 {archivedEvents.map((event) => (
                   <div key={event.id} className="relative flex items-start gap-4">
                     <div className="relative z-10 flex-shrink-0">
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl bg-gray-100 border-2 border-gray-300">
-                        {EVENT_TYPE_ICONS[event.event_type]}
-                      </div>
+                      {(() => {
+                        const IconComponent = EventTypeIcons[event.event_type];
+                        return (
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-muted border-2 border-border">
+                            <IconComponent className="w-5 h-5" />
+                          </div>
+                        );
+                      })()}
                     </div>
                     <div className="flex-1">
                       <EventCard 

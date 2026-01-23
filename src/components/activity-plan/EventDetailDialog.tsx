@@ -11,7 +11,22 @@ import {
   CheckCircle,
   Play,
   ThumbsUp,
-  X
+  X,
+  BookOpen,
+  Video,
+  Users,
+  Heart,
+  Target,
+  MessageSquare,
+  Pin,
+  User,
+  Monitor,
+  Gift,
+  SmilePlus,
+  Smile,
+  Meh,
+  Frown,
+  Angry,
 } from "lucide-react";
 import {
   Dialog,
@@ -23,13 +38,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,14 +52,33 @@ import { useUpdateEvent, useDeleteEvent } from "@/hooks/useActivityPlan";
 import { 
   ActivityPlanEvent, 
   EVENT_TYPE_LABELS,
-  EVENT_TYPE_ICONS,
   STATUS_LABELS,
   STATUS_COLORS,
   MOOD_LABELS,
-  MOOD_ICONS,
   ActivityEventStatus,
   MeetingMood,
+  ActivityEventType,
 } from "@/types/activityPlan";
+
+// Map event types to Lucide icons
+const EventTypeIcons: Record<ActivityEventType, React.ComponentType<{ className?: string }>> = {
+  workshop: BookOpen,
+  webinar: Video,
+  meeting: Users,
+  health_day: Heart,
+  orientation: Target,
+  communication_refresh: MessageSquare,
+  other: Pin,
+};
+
+// Map mood to Lucide icons
+const MoodIcons: Record<MeetingMood, React.ComponentType<{ className?: string }>> = {
+  very_positive: SmilePlus,
+  positive: Smile,
+  neutral: Meh,
+  negative: Frown,
+  very_negative: Angry,
+};
 
 interface EventDetailDialogProps {
   event: ActivityPlanEvent | null;
@@ -107,7 +134,10 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle className="flex items-center gap-3">
-                <span className="text-2xl">{EVENT_TYPE_ICONS[event.event_type]}</span>
+                {(() => {
+                  const IconComponent = EventTypeIcons[event.event_type];
+                  return <IconComponent className="w-6 h-6" />;
+                })()}
                 {event.title}
               </DialogTitle>
               <Badge className={STATUS_COLORS[event.status]}>
@@ -127,8 +157,8 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
               </div>
               <div className="space-y-1">
                 <Label className="text-muted-foreground">Ár</Label>
-                <p className="font-medium">
-                  {event.is_free ? "🎁 Ingyenes" : event.price ? `${event.price.toLocaleString('hu-HU')} Ft` : "Fizetős"}
+                <p className="font-medium flex items-center gap-1">
+                  {event.is_free ? <><Gift className="w-4 h-4" /> Ingyenes</> : event.price ? `${event.price.toLocaleString('hu-HU')} Ft` : "Fizetős"}
                 </p>
               </div>
               <div className="space-y-1">
@@ -158,8 +188,8 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
                   {event.meeting_type && (
                     <div>
                       <Label className="text-muted-foreground">Típus</Label>
-                      <p className="font-medium">
-                        {event.meeting_type === 'personal' ? '👤 Személyes' : '💻 Online'}
+                      <p className="font-medium flex items-center gap-1">
+                        {event.meeting_type === 'personal' ? <><User className="w-4 h-4" /> Személyes</> : <><Monitor className="w-4 h-4" /> Online</>}
                       </p>
                     </div>
                   )}
@@ -179,7 +209,7 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
                   <Label className="text-muted-foreground">Hangulat</Label>
                   {editingMood ? (
                     <div className="flex gap-2 mt-2">
-                      {Object.entries(MOOD_ICONS).map(([mood, icon]) => (
+                      {Object.entries(MoodIcons).map(([mood, IconComponent]) => (
                         <Button
                           key={mood}
                           variant={event.meeting_mood === mood ? "default" : "outline"}
@@ -187,7 +217,7 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
                           onClick={() => handleMoodChange(mood as MeetingMood)}
                           title={MOOD_LABELS[mood as MeetingMood]}
                         >
-                          {icon}
+                          <IconComponent className="w-4 h-4" />
                         </Button>
                       ))}
                       <Button variant="ghost" size="sm" onClick={() => setEditingMood(false)}>
@@ -197,7 +227,10 @@ const EventDetailDialog = ({ event, onClose }: EventDetailDialogProps) => {
                   ) : (
                     <div className="flex items-center gap-2 mt-1">
                       {event.meeting_mood ? (
-                        <span className="text-xl">{MOOD_ICONS[event.meeting_mood]} {MOOD_LABELS[event.meeting_mood]}</span>
+                        (() => {
+                          const MoodIcon = MoodIcons[event.meeting_mood];
+                          return <span className="flex items-center gap-2"><MoodIcon className="w-5 h-5" /> {MOOD_LABELS[event.meeting_mood]}</span>;
+                        })()
                       ) : (
                         <span className="text-muted-foreground">Nincs beállítva</span>
                       )}
