@@ -4,6 +4,7 @@ import ContractExpiringPanel from "@/components/smartboard/ContractExpiringPanel
 import CrmSummaryPanel from "@/components/smartboard/CrmSummaryPanel";
 import UpcomingMeetingsPanel from "@/components/smartboard/UpcomingMeetingsPanel";
 import TodayTasksPanel from "@/components/smartboard/TodayTasksPanel";
+import SalesSummaryStrip from "@/components/smartboard/SalesSummaryStrip";
 import { useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -65,6 +66,16 @@ const SalesSmartboard = () => {
       <p className="text-muted-foreground mb-6">
         Értékesítési műszerfal - áttekintés és gyors műveletek
       </p>
+
+      {/* Sales Summary Strip - Quick overview at the top */}
+      <SalesSummaryStrip
+        leadsCount={leadsList.length}
+        offersCount={offersList.length}
+        dealsCount={dealsList.length}
+        signedCount={signedList.length}
+        upcomingMeetingsCount={upcomingMeetings.length}
+        expiringContractsCount={expiringContracts.length}
+      />
 
       {/* Today's Tasks - Universal panel for all SmartBoards */}
       <TodayTasksPanel tasks={mockTodayTasks} />
