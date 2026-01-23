@@ -1,28 +1,82 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Plus, Users, ArrowRight, Calendar } from "lucide-react";
+import { Building2, Plus, Users, ArrowRight, Calendar, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useUserClientAssignments, useActivityPlans } from "@/hooks/useActivityPlan";
+import { useUserClientAssignments, useActivityPlans, useCompanies } from "@/hooks/useActivityPlan";
 import { useSeedActivityPlanData } from "@/hooks/useSeedActivityPlanData";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { hu } from "date-fns/locale";
 
-// Mock current user - in real app this would come from auth context
-const MOCK_CURRENT_USER_ID = "mock-user-1";
-
 const MyClientsPage = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const { isSeeding } = useSeedActivityPlanData();
   
-  // Get user's assigned clients
-  const { data: assignments, isLoading: assignmentsLoading } = useUserClientAssignments(MOCK_CURRENT_USER_ID);
+  const [isClientDirector, setIsClientDirector] = useState(false);
+  const [clientDirectorLoading, setClientDirectorLoading] = useState(true);
   
-  // Get all activity plans for this user
-  const { data: activityPlans, isLoading: plansLoading } = useActivityPlans(MOCK_CURRENT_USER_ID);
+  // Check if user is admin (has admin smartboard)
+  const isAdmin = currentUser?.smartboardPermissions?.some(
+    p => p.smartboardId === "admin"
+  ) ?? false;
+  
+  // Check if user is client director from database
+  useEffect(() => {
+    const checkClientDirector = async () => {
+      if (!currentUser?.id) {
+        setClientDirectorLoading(false);
+        return;
+      }
+      
+      // Admin users are automatically client directors
+      if (isAdmin) {
+        setIsClientDirector(true);
+        setClientDirectorLoading(false);
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from("app_users")
+          .select("is_client_director")
+          .eq("id", currentUser.id)
+          .maybeSingle();
+        
+        if (!error && data) {
+          setIsClientDirector(data.is_client_director);
+        }
+      } catch (e) {
+        console.error("Failed to check client director status:", e);
+      } finally {
+        setClientDirectorLoading(false);
+      }
+    };
+    
+    checkClientDirector();
+  }, [currentUser?.id, isAdmin]);
+  
+  // Decide whether to show all companies or just assigned ones
+  const hasFullAccess = isAdmin || isClientDirector;
+  
+  // Get user's assigned clients (only used when not client director)
+  const { data: assignments, isLoading: assignmentsLoading } = useUserClientAssignments(
+    hasFullAccess ? undefined : currentUser?.id
+  );
+  
+  // Get all companies (only used when client director/admin)
+  const { data: allCompanies, isLoading: companiesLoading } = useCompanies();
+  
+  // Get all activity plans (for client director: all, for regular user: only theirs)
+  const { data: activityPlans, isLoading: plansLoading } = useActivityPlans(
+    hasFullAccess ? undefined : currentUser?.id
+  );
 
-  const isLoading = isSeeding || assignmentsLoading || plansLoading;
+  const isLoading = isSeeding || clientDirectorLoading || 
+    (hasFullAccess ? companiesLoading : assignmentsLoading) || plansLoading;
 
   // Get active plan for a company
   const getActivePlan = (companyId: string) => {
@@ -45,17 +99,33 @@ const MyClientsPage = () => {
     );
   }
 
-  const hasClients = assignments && assignments.length > 0;
+  // Build list of companies to display
+  const clientsToShow = hasFullAccess 
+    ? allCompanies?.map(company => ({ id: company.id, company })) || []
+    : assignments || [];
+  
+  const hasClients = clientsToShow.length > 0;
 
   return (
     <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-calibri-bold">Ügyfeleim</h1>
-          <p className="text-muted-foreground">
-            A hozzád rendelt ügyfelek és Activity Plan-jeik kezelése
-          </p>
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-3xl font-calibri-bold">Ügyfeleim</h1>
+            <p className="text-muted-foreground">
+              {hasFullAccess 
+                ? "Teljes hozzáférés az összes ügyfél Activity Plan-jéhez"
+                : "A hozzád rendelt ügyfelek és Activity Plan-jeik kezelése"
+              }
+            </p>
+          </div>
+          {hasFullAccess && (
+            <Badge variant="secondary" className="ml-2 bg-amber-100 text-amber-800 border-amber-300">
+              <Crown className="w-3 h-3 mr-1" />
+              {isAdmin ? "Admin" : "Client Director"}
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -72,23 +142,28 @@ const MyClientsPage = () => {
         <Card className="border-dashed">
           <CardContent className="py-12 text-center">
             <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Nincs hozzárendelt ügyfél</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              {hasFullAccess ? "Nincsenek cégek a rendszerben" : "Nincs hozzárendelt ügyfél"}
+            </h3>
             <p className="text-muted-foreground mb-4">
-              Kérd meg az adminisztrátort, hogy rendeljen hozzád ügyfeleket a Felhasználók menüben.
+              {hasFullAccess 
+                ? "Adj hozzá cégeket a Cégek menüpontban."
+                : "Kérd meg az adminisztrátort, hogy rendeljen hozzád ügyfeleket a Felhasználók menüben."
+              }
             </p>
           </CardContent>
         </Card>
       ) : (
         /* Client list */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {assignments.map((assignment) => {
-            const company = assignment.company;
+          {clientsToShow.map((item) => {
+            const company = item.company;
             const activePlan = getActivePlan(company?.id || "");
             const planCount = getPlanCount(company?.id || "");
 
             return (
               <Card 
-                key={assignment.id} 
+                key={item.id}
                 className="hover:shadow-md transition-shadow cursor-pointer group"
                 onClick={() => navigate(`/dashboard/my-clients/${company?.id}`)}
               >
