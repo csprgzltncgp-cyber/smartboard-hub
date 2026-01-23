@@ -76,7 +76,7 @@ const allMenuItems: MenuItem[] = [
   { label: "Számlák", icon: FileSpreadsheet, path: "/dashboard/invoices" },
   { label: "TODO", icon: ClipboardList, path: "/dashboard", badge: 5, badgeColor: "bg-green-500" },
   { label: "Training Dashboard", icon: GraduationCap, path: "/dashboard/settings/training" },
-  { label: "Ügyfeleim", icon: Calendar, path: "/dashboard/activity-plan" },
+  { label: "Ügyfeleim", icon: Calendar, path: "/dashboard/my-clients" },
   { label: "Városok", icon: MapPin, path: "/dashboard/settings/cities" },
   { label: "WS/CI/O", icon: Users, path: "/dashboard/outsources" },
 ];

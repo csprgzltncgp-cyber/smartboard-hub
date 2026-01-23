@@ -14,6 +14,140 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_plan_events: {
+        Row: {
+          activity_plan_id: string
+          archived_at: string | null
+          completed_at: string | null
+          created_at: string
+          custom_type_name: string | null
+          description: string | null
+          event_date: string
+          event_time: string | null
+          event_type: Database["public"]["Enums"]["activity_event_type"]
+          id: string
+          is_free: boolean
+          meeting_location: string | null
+          meeting_mood: Database["public"]["Enums"]["meeting_mood"] | null
+          meeting_summary: string | null
+          meeting_type: string | null
+          notes: string | null
+          price: number | null
+          status: Database["public"]["Enums"]["activity_event_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          activity_plan_id: string
+          archived_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          custom_type_name?: string | null
+          description?: string | null
+          event_date: string
+          event_time?: string | null
+          event_type: Database["public"]["Enums"]["activity_event_type"]
+          id?: string
+          is_free?: boolean
+          meeting_location?: string | null
+          meeting_mood?: Database["public"]["Enums"]["meeting_mood"] | null
+          meeting_summary?: string | null
+          meeting_type?: string | null
+          notes?: string | null
+          price?: number | null
+          status?: Database["public"]["Enums"]["activity_event_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          activity_plan_id?: string
+          archived_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          custom_type_name?: string | null
+          description?: string | null
+          event_date?: string
+          event_time?: string | null
+          event_type?: Database["public"]["Enums"]["activity_event_type"]
+          id?: string
+          is_free?: boolean
+          meeting_location?: string | null
+          meeting_mood?: Database["public"]["Enums"]["meeting_mood"] | null
+          meeting_summary?: string | null
+          meeting_type?: string | null
+          notes?: string | null
+          price?: number | null
+          status?: Database["public"]["Enums"]["activity_event_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_plan_events_activity_plan_id_fkey"
+            columns: ["activity_plan_id"]
+            isOneToOne: false
+            referencedRelation: "activity_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_plans: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          notes: string | null
+          period_end: string
+          period_start: string
+          period_type: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          period_end: string
+          period_start: string
+          period_type?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          period_end?: string
+          period_start?: string
+          period_type?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_plans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_operators: {
         Row: {
           avatar_url: string | null
@@ -59,6 +193,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          is_client_director: boolean
           language: string | null
           name: string
           phone: string | null
@@ -71,6 +206,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          is_client_director?: boolean
           language?: string | null
           name: string
           phone?: string | null
@@ -83,12 +219,78 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          is_client_director?: boolean
           language?: string | null
           name?: string
           phone?: string | null
           smartboard_permissions?: Json | null
           updated_at?: string
           username?: string
+        }
+        Relationships: []
+      }
+      companies: {
+        Row: {
+          address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          country_id: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          country_id: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          country_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companies_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      countries: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -137,6 +339,58 @@ export type Database = {
         }
         Relationships: []
       }
+      user_client_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          company_id: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_client_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_client_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_client_assignments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -145,6 +399,20 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      activity_event_status:
+        | "planned"
+        | "approved"
+        | "in_progress"
+        | "completed"
+        | "archived"
+      activity_event_type:
+        | "workshop"
+        | "webinar"
+        | "meeting"
+        | "health_day"
+        | "orientation"
+        | "communication_refresh"
+        | "other"
       lead_status:
         | "lead"
         | "offer"
@@ -152,6 +420,12 @@ export type Database = {
         | "signed"
         | "incoming_company"
         | "cancelled"
+      meeting_mood:
+        | "very_positive"
+        | "positive"
+        | "neutral"
+        | "negative"
+        | "very_negative"
       meeting_type: "email" | "video" | "phone" | "personal"
     }
     CompositeTypes: {
@@ -280,6 +554,22 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      activity_event_status: [
+        "planned",
+        "approved",
+        "in_progress",
+        "completed",
+        "archived",
+      ],
+      activity_event_type: [
+        "workshop",
+        "webinar",
+        "meeting",
+        "health_day",
+        "orientation",
+        "communication_refresh",
+        "other",
+      ],
       lead_status: [
         "lead",
         "offer",
@@ -287,6 +577,13 @@ export const Constants = {
         "signed",
         "incoming_company",
         "cancelled",
+      ],
+      meeting_mood: [
+        "very_positive",
+        "positive",
+        "neutral",
+        "negative",
+        "very_negative",
       ],
       meeting_type: ["email", "video", "phone", "personal"],
     },
