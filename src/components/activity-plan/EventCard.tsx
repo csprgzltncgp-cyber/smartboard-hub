@@ -95,10 +95,7 @@ const EventCard = ({ event, onClick, compact }: EventCardProps) => {
           <div className="flex flex-col items-end gap-2">
 
             {/* Price/Free */}
-            <Badge 
-              variant="outline" 
-              className={`text-xs flex items-center gap-1 ${event.is_free ? 'bg-cgp-badge-new/20 text-foreground border-cgp-badge-new' : ''}`}
-            >
+            <Badge variant={event.is_free ? "secondary" : "outline"} className="text-xs flex items-center gap-1">
               {event.is_free ? (
                 <><Gift className="w-3 h-3" /> Ingyenes</>
               ) : event.price ? (

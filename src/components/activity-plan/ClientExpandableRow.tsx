@@ -66,7 +66,7 @@ const ClientExpandableRow = ({ company, userId, activePlan, planCount }: ClientE
 
           {/* Active Plan Badge */}
           {activePlan ? (
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Badge variant="outline" className="bg-cgp-badge-new/20 text-foreground border-cgp-badge-new">
               <Calendar className="w-3 h-3 mr-1" />
               {activePlan.title}
             </Badge>
