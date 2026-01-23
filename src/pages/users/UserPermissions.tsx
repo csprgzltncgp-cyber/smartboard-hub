@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Check, Star, StarOff } from "lucide-react";
+import { ArrowLeft, Save, Check, Star, StarOff, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   Accordion,
   AccordionContent,
@@ -15,13 +16,16 @@ import { useAppUsersDb } from "@/hooks/useAppUsersDb";
 import { SMARTBOARDS, SmartboardConfig } from "@/config/smartboards";
 import { User, UserSmartboardPermission } from "@/types/user";
 import { toast } from "sonner";
-
+import { supabase } from "@/integrations/supabase/client";
+import ClientAssignmentSection from "@/components/users/ClientAssignmentSection";
 const UserPermissions = () => {
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
   const { users, loading, updateUserSmartboardPermissions } = useAppUsersDb();
   const [user, setUser] = useState<User | null>(null);
   const [permissions, setPermissions] = useState<UserSmartboardPermission[]>([]);
+  const [isClientDirector, setIsClientDirector] = useState(false);
+  const [clientDirectorLoading, setClientDirectorLoading] = useState(true);
 
   // Get always-enabled smartboards (like search)
   const alwaysEnabledSmartboards = SMARTBOARDS.filter(sb => sb.alwaysEnabled);
@@ -49,6 +53,30 @@ const UserPermissions = () => {
       }
     }
   }, [userId, users, loading, navigate]);
+
+  // Load client director status from database
+  useEffect(() => {
+    const loadClientDirectorStatus = async () => {
+      if (!userId) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from("app_users")
+          .select("is_client_director")
+          .eq("id", userId)
+          .single();
+        
+        if (error) throw error;
+        setIsClientDirector(data?.is_client_director ?? false);
+      } catch (e) {
+        console.error("Failed to load client director status:", e);
+      } finally {
+        setClientDirectorLoading(false);
+      }
+    };
+    
+    loadClientDirectorStatus();
+  }, [userId]);
 
   const isSmartboardEnabled = (smartboardId: string): boolean => {
     return permissions.some(p => p.smartboardId === smartboardId);
@@ -120,11 +148,30 @@ const UserPermissions = () => {
 
   const handleSave = async () => {
     if (userId) {
+      // Save smartboard permissions
       await updateUserSmartboardPermissions(userId, permissions);
+      
+      // Save client director status
+      try {
+        const { error } = await supabase
+          .from("app_users")
+          .update({ is_client_director: isClientDirector })
+          .eq("id", userId);
+        
+        if (error) throw error;
+      } catch (e) {
+        console.error("Failed to save client director status:", e);
+        toast.error("Hiba a Client Director mentésekor");
+        return;
+      }
+      
       toast.success("Jogosultságok mentve");
       navigate("/dashboard/users");
     }
   };
+
+  // Check if user has Account smartboard enabled
+  const hasAccountSmartboard = permissions.some(p => p.smartboardId === "account");
 
   if (loading) {
     return (
@@ -162,6 +209,35 @@ const UserPermissions = () => {
           A csillaggal jelölt SmartBoard lesz a nyitóoldal bejelentkezés után.
         </p>
       </div>
+
+      {/* Client Director Toggle - only shown when Account smartboard is enabled */}
+      {hasAccountSmartboard && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Crown className="w-5 h-5 text-amber-600" />
+              <div>
+                <h3 className="font-semibold text-amber-900">Client Director</h3>
+                <p className="text-sm text-amber-700">
+                  A Client Director látja az összes kolléga ügyfelének Activity Plan-jeit az Ügyfeleim menüben.
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={isClientDirector}
+              onCheckedChange={setIsClientDirector}
+              disabled={clientDirectorLoading}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Client Assignment - only shown when Account smartboard is enabled */}
+      {hasAccountSmartboard && userId && (
+        <div className="mb-6">
+          <ClientAssignmentSection userId={userId} userName={user?.name || ""} />
+        </div>
+      )}
 
       {/* SmartBoards */}
       <div className="space-y-4 mb-6">
