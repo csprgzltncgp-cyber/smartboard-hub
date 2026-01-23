@@ -77,11 +77,9 @@ const TodoListTab = () => {
               )}
               onClick={() => setExpandedId(isExpanded ? null : item.id)}
             >
-              {/* Icon */}
-              <div className="w-14 h-14 bg-primary/20 flex items-center justify-center flex-shrink-0">
-                <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
-                  <ContactIcon className="w-4 h-4 text-primary-foreground" />
-                </div>
+              {/* Icon - no background */}
+              <div className="w-12 flex items-center justify-center flex-shrink-0">
+                <ContactIcon className="w-5 h-5 text-primary" />
               </div>
 
               {/* Content Grid */}
@@ -123,11 +121,11 @@ const TodoListTab = () => {
               </div>
             </div>
 
-            {/* Expanded Details */}
+            {/* Expanded Details - 2 rows, 4 columns each */}
             {isExpanded && (
               <div className="bg-muted/20 border-t border-border">
                 {/* Details Grid Row 1 */}
-                <div className="grid grid-cols-6 divide-x divide-border border-b border-border">
+                <div className="grid grid-cols-4 divide-x divide-border border-b border-border">
                   <div className="px-4 py-3">
                     <span className="text-xs text-muted-foreground uppercase block">Ország</span>
                     <span className="text-sm font-medium">{item.lead.details?.country || 'Hungary'}</span>
@@ -135,10 +133,6 @@ const TodoListTab = () => {
                   <div className="px-4 py-3">
                     <span className="text-xs text-muted-foreground uppercase block">Város</span>
                     <span className="text-sm font-medium">{item.lead.details?.city || '-'}</span>
-                  </div>
-                  <div className="px-4 py-3 col-span-2">
-                    <span className="text-xs text-muted-foreground uppercase block">Cím</span>
-                    <span className="text-sm font-medium">{primaryContact?.address || '-'}</span>
                   </div>
                   <div className="px-4 py-3">
                     <span className="text-xs text-muted-foreground uppercase block">Telefon</span>
@@ -151,7 +145,7 @@ const TodoListTab = () => {
                 </div>
 
                 {/* Details Grid Row 2 */}
-                <div className="grid grid-cols-6 divide-x divide-border">
+                <div className="grid grid-cols-4 divide-x divide-border">
                   <div className="px-4 py-3">
                     <span className="text-xs text-muted-foreground uppercase block">CGP felelős</span>
                     <span className="text-sm font-medium">{item.lead.assignedTo}</span>
@@ -172,9 +166,6 @@ const TodoListTab = () => {
                       {item.lead.details?.headcount?.toLocaleString() || '-'} fő
                     </span>
                   </div>
-                  
-                  {/* Placeholder for alignment */}
-                  <div className="px-4 py-3 col-span-2"></div>
                 </div>
 
                 {/* Note if exists */}
