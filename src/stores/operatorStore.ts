@@ -4,6 +4,8 @@
 import { User, UserFormData, UserSmartboardPermission } from "@/types/user";
 import { getSmartboardById } from "@/config/smartboards";
 
+const STORAGE_KEY = "operators-store-v1";
+
 // Get default search smartboard permissions
 const getSearchPermissions = (): UserSmartboardPermission => {
   const searchSmartboard = getSmartboardById("search");
@@ -15,7 +17,7 @@ const getSearchPermissions = (): UserSmartboardPermission => {
 };
 
 // Mock operators data - operators have "operator" and "search" interfaces
-let operators: User[] = [
+const defaultOperators: User[] = [
   {
     id: "op1",
     name: "Kovács Anna",
@@ -77,6 +79,46 @@ let operators: User[] = [
   },
 ];
 
+const serializeOperators = (ops: User[]): string => {
+  return JSON.stringify(
+    ops.map(op => ({
+      ...op,
+      createdAt: op.createdAt.toISOString(),
+      updatedAt: op.updatedAt.toISOString(),
+    }))
+  );
+};
+
+const deserializeOperators = (data: string): User[] => {
+  const parsed = JSON.parse(data);
+  return parsed.map((op: any) => ({
+    ...op,
+    createdAt: new Date(op.createdAt),
+    updatedAt: new Date(op.updatedAt),
+  }));
+};
+
+const loadOperators = (): User[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return deserializeOperators(stored);
+  } catch (e) {
+    console.error("[operatorStore] Failed to load from localStorage:", e);
+  }
+  return [...defaultOperators];
+};
+
+const saveOperators = () => {
+  try {
+    localStorage.setItem(STORAGE_KEY, serializeOperators(operators));
+  } catch (e) {
+    console.error("[operatorStore] Failed to save to localStorage:", e);
+  }
+};
+
+// Initialize operators from storage
+let operators: User[] = loadOperators();
+
 // Get all operators
 export const getOperators = (): User[] => {
   return [...operators];
@@ -105,6 +147,7 @@ export const createOperator = (data: UserFormData): User => {
     ],
   };
   operators.push(newOperator);
+  saveOperators();
   return newOperator;
 };
 
@@ -118,6 +161,7 @@ export const updateOperator = (id: string, data: Partial<UserFormData>): User | 
     ...data,
     updatedAt: new Date(),
   };
+  saveOperators();
   return operators[index];
 };
 
@@ -131,6 +175,7 @@ export const toggleOperatorActive = (id: string): User | undefined => {
     active: !operators[index].active,
     updatedAt: new Date(),
   };
+  saveOperators();
   return operators[index];
 };
 
@@ -150,6 +195,7 @@ export const updateOperatorSmartboardPermissions = (
     smartboardPermissions: filteredPermissions,
     updatedAt: new Date(),
   };
+  saveOperators();
   return operators[index];
 };
 
@@ -159,5 +205,6 @@ export const deleteOperator = (id: string): boolean => {
   if (index === -1) return false;
   
   operators.splice(index, 1);
+  saveOperators();
   return true;
 };

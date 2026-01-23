@@ -5,6 +5,9 @@ import cgpLogo from "@/assets/cgp_logo_green.svg";
 import whiteLogo from "@/assets/white_logo.svg";
 import { useAuth } from "@/contexts/AuthContext";
 import { SMARTBOARDS } from "@/config/smartboards";
+import { getUsers } from "@/stores/userStore";
+import { getOperators } from "@/stores/operatorStore";
+import { User } from "@/types/user";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -13,6 +16,25 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const summarizeSmartboards = (user: User): string => {
+    const ids = (user.smartboardPermissions || [])
+      .filter(p => p.smartboardId !== "search")
+      .sort((a, b) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0))
+      .map(p => p.smartboardId);
+
+    if (ids.length === 0) return "(nincs SmartBoard beállítva)";
+
+    const names = ids.map(id => SMARTBOARDS.find(sb => sb.id === id)?.name || id);
+    return names.join(" + ");
+  };
+
+  const demoAccounts: Array<{ username: string; label: string }> = (() => {
+    const accounts: Array<{ username: string; label: string }> = [];
+    getUsers().forEach(u => accounts.push({ username: u.username, label: summarizeSmartboards(u) }));
+    getOperators().forEach(o => accounts.push({ username: o.username, label: summarizeSmartboards(o) }));
+    return accounts.sort((a, b) => a.username.localeCompare(b.username, "hu"));
+  })();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,15 +132,18 @@ const Login = () => {
 
           {/* Demo users hint */}
           <div className="mt-4 p-4 bg-muted rounded-lg text-sm">
-            <p className="font-calibri-bold mb-2">Demo felhasználók:</p>
+            <p className="font-calibri-bold mb-2">Jelenlegi hozzáférések (Felhasználó jogosultságok alapján):</p>
             <ul className="space-y-1 text-muted-foreground">
-              <li><strong>tompa.anita</strong> - Account + Operatív</li>
-              <li><strong>kiss.barbara</strong> - Sales (CRM)</li>
-              <li><strong>janky.peter</strong> - Pénzügyi + Account</li>
-              <li><strong>kovacs.anna</strong> - Operátor</li>
-              <li><strong>admin</strong> - Admin (teljes hozzáférés)</li>
+              {demoAccounts.map(acc => (
+                <li key={acc.username}>
+                  <strong>{acc.username}</strong> - {acc.label}
+                </li>
+              ))}
             </ul>
             <p className="mt-2 text-xs">Jelszó: <strong>smartboard</strong></p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Megjegyzés: a beállítások a böngésző localStorage-ában tárolódnak, ezért a Preview és a Published oldal között nem közösek.
+            </p>
           </div>
 
           {/* Footer Branding */}
