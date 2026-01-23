@@ -1,19 +1,23 @@
 import { useState, useEffect, useMemo } from "react";
-import { Building2, Crown, Calendar } from "lucide-react";
+import { Building2, Crown, Calendar, Globe } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useUserClientAssignments, useActivityPlans, useCompanies } from "@/hooks/useActivityPlan";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useUserClientAssignments, useActivityPlans, useCompanies, useCountries } from "@/hooks/useActivityPlan";
 import { useSeedActivityPlanData } from "@/hooks/useSeedActivityPlanData";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import ClientExpandableRow from "@/components/activity-plan/ClientExpandableRow";
-
 const MyClientsPage = () => {
   const { currentUser } = useAuth();
   const { isSeeding } = useSeedActivityPlanData();
   
   const [isClientDirector, setIsClientDirector] = useState(false);
   const [clientDirectorLoading, setClientDirectorLoading] = useState(true);
+  const [selectedCountry, setSelectedCountry] = useState<string>("all");
+  
+  // Fetch countries for filter
+  const { data: countries } = useCountries();
   
   
   // Check if user is admin (has admin smartboard)
@@ -75,10 +79,17 @@ const MyClientsPage = () => {
 
   // Build list of companies to display
   const clientsToShow = useMemo(() => {
-    return hasFullAccess 
+    const baseList = hasFullAccess 
       ? allCompanies?.map(company => ({ id: company.id, company })) || []
       : assignments || [];
-  }, [hasFullAccess, allCompanies, assignments]);
+    
+    // Apply country filter
+    if (selectedCountry === "all") {
+      return baseList;
+    }
+    
+    return baseList.filter(item => item.company?.country_id === selectedCountry);
+  }, [hasFullAccess, allCompanies, assignments, selectedCountry]);
 
   // Helper functions
   const getActivePlan = (companyId: string) => {
@@ -98,6 +109,16 @@ const MyClientsPage = () => {
   const companiesWithoutPlans = useMemo(() => {
     return clientsToShow.filter(item => getPlanCount(item.company?.id || "") === 0);
   }, [clientsToShow, activityPlans]);
+  
+  // Get unique countries from the client list (for showing only relevant countries)
+  const availableCountries = useMemo(() => {
+    const baseList = hasFullAccess 
+      ? allCompanies?.map(company => ({ id: company.id, company })) || []
+      : assignments || [];
+    
+    const countryIds = new Set(baseList.map(item => item.company?.country_id).filter(Boolean));
+    return countries?.filter(c => countryIds.has(c.id)) || [];
+  }, [hasFullAccess, allCompanies, assignments, countries]);
 
   if (isLoading) {
     return (
@@ -134,6 +155,25 @@ const MyClientsPage = () => {
           )}
         </div>
         
+        {/* Country Filter */}
+        {availableCountries.length > 1 && (
+          <div className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-muted-foreground" />
+            <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Ország szűrő" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Összes ország</SelectItem>
+                {availableCountries.map((country) => (
+                  <SelectItem key={country.id} value={country.id}>
+                    {country.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {!hasClients ? (
