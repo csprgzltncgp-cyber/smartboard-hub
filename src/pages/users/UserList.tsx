@@ -22,14 +22,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { getUsers, deleteUser, toggleUserActive } from "@/stores/userStore";
+import { useAppUsersDb } from "@/hooks/useAppUsersDb";
 import { getSmartboardById } from "@/config/smartboards";
 import { User } from "@/types/user";
 import { toast } from "sonner";
 
 const UserList = () => {
   const navigate = useNavigate();
-  const [users, setUsers] = useState<User[]>(getUsers());
+  const { users, loading, toggleUserActive, deleteUser } = useAppUsersDb();
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
@@ -40,9 +40,8 @@ const UserList = () => {
     user.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleToggleActive = (user: User) => {
-    toggleUserActive(user.id);
-    setUsers(getUsers());
+  const handleToggleActive = async (user: User) => {
+    await toggleUserActive(user.id);
     toast.success(user.active ? "Felhasználó deaktiválva" : "Felhasználó aktiválva");
   };
 
@@ -51,10 +50,9 @@ const UserList = () => {
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (userToDelete) {
-      deleteUser(userToDelete.id);
-      setUsers(getUsers());
+      await deleteUser(userToDelete.id);
       toast.success("Felhasználó törölve");
     }
     setDeleteDialogOpen(false);
@@ -73,6 +71,14 @@ const UserList = () => {
   const getSmartboardCount = (user: User): number => {
     return user.smartboardPermissions.length;
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-muted-foreground">Betöltés...</div>
+      </div>
+    );
+  }
 
   return (
     <div>

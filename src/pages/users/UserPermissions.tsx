@@ -11,7 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { getUserById, updateUserSmartboardPermissions } from "@/stores/userStore";
+import { useAppUsersDb } from "@/hooks/useAppUsersDb";
 import { SMARTBOARDS, SmartboardConfig } from "@/config/smartboards";
 import { User, UserSmartboardPermission } from "@/types/user";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ import { toast } from "sonner";
 const UserPermissions = () => {
   const navigate = useNavigate();
   const { userId } = useParams<{ userId: string }>();
+  const { users, loading, updateUserSmartboardPermissions } = useAppUsersDb();
   const [user, setUser] = useState<User | null>(null);
   const [permissions, setPermissions] = useState<UserSmartboardPermission[]>([]);
 
@@ -26,8 +27,8 @@ const UserPermissions = () => {
   const alwaysEnabledSmartboards = SMARTBOARDS.filter(sb => sb.alwaysEnabled);
 
   useEffect(() => {
-    if (userId) {
-      const foundUser = getUserById(userId);
+    if (!loading && userId) {
+      const foundUser = users.find(u => u.id === userId);
       if (foundUser) {
         setUser(foundUser);
         // Merge user permissions with always-enabled smartboards
@@ -47,7 +48,7 @@ const UserPermissions = () => {
         navigate("/dashboard/users");
       }
     }
-  }, [userId, navigate]);
+  }, [userId, users, loading, navigate]);
 
   const isSmartboardEnabled = (smartboardId: string): boolean => {
     return permissions.some(p => p.smartboardId === smartboardId);
@@ -117,13 +118,21 @@ const UserPermissions = () => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (userId) {
-      updateUserSmartboardPermissions(userId, permissions);
+      await updateUserSmartboardPermissions(userId, permissions);
       toast.success("Jogosultságok mentve");
       navigate("/dashboard/users");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-muted-foreground">Betöltés...</div>
+      </div>
+    );
+  }
 
   if (!user) {
     return <div>Betöltés...</div>;
