@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, TrendingUp, ArrowDownLeft, ArrowUpRight, Building2, BarChart3, Users } from "lucide-react";
+import { Calendar, TrendingUp, ArrowDownLeft, ArrowUpRight, Building2, BarChart3, Users, Scale } from "lucide-react";
 import { useCountries } from "@/hooks/useActivityPlan";
 import { MONTH_NAMES } from "@/data/financialMockData";
 import FinancialSummaryTab from "@/components/financial/FinancialSummaryTab";
 import RevenueTab from "@/components/financial/RevenueTab";
 import ExpensesTab from "@/components/financial/ExpensesTab";
 import ContractHoldersTab from "@/components/financial/ContractHoldersTab";
+import ComparisonTab from "@/components/financial/ComparisonTab";
 
 const DataPage = () => {
   const currentYear = new Date().getFullYear();
@@ -126,6 +127,13 @@ const DataPage = () => {
             <Users className="w-4 h-4" />
             Tanácsadások száma
           </TabsTrigger>
+          <TabsTrigger 
+            value="comparison"
+            className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            <Scale className="w-4 h-4" />
+            Összehasonlító tábla
+          </TabsTrigger>
         </TabsList>
 
         {/* Tab Contents */}
@@ -154,6 +162,14 @@ const DataPage = () => {
 
         <TabsContent value="contract-holders">
           <ContractHoldersTab
+            year={parseInt(filterYear)}
+            month={filterMonth !== 'all' ? parseInt(filterMonth) : undefined}
+            country={filterCountry !== 'all' ? filterCountry : undefined}
+          />
+        </TabsContent>
+
+        <TabsContent value="comparison">
+          <ComparisonTab
             year={parseInt(filterYear)}
             month={filterMonth !== 'all' ? parseInt(filterMonth) : undefined}
             country={filterCountry !== 'all' ? filterCountry : undefined}
