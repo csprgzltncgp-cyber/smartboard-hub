@@ -6,6 +6,14 @@ import AccountSmartboard from "./AccountSmartboard";
 /**
  * Dinamikusan választja ki a megfelelő SmartBoard-ot a felhasználó 
  * alapértelmezett SmartBoard beállítása alapján.
+ * 
+ * Saját SmartBoard oldallal rendelkező interfészek:
+ * - Account ✓
+ * - Sales ✓
+ * - Operatív (elkészítendő)
+ * - Pénzügyi (elkészítendő)
+ * - Admin (TODO oldalra megy)
+ * - Digital (TODO oldalra megy)
  */
 const SmartboardRouter = () => {
   const { currentUser } = useAuth();
@@ -21,18 +29,17 @@ const SmartboardRouter = () => {
       return <AccountSmartboard />;
     case "sales":
       return <SalesSmartboard />;
-    case "admin":
-      // Admin felhasználók a TODO (Dashboard) oldalra kerülnek
-      // vagy később Admin SmartBoard-ra
-      return <Dashboard />;
     case "operative":
-      // TODO: Operatív SmartBoard - megadott panelek alapján elkészítendő
+      // Operatív SmartBoard - saját oldal elkészítendő
       return <Dashboard />;
     case "financial":
-      // TODO: Pénzügyi SmartBoard - megadott panelek alapján elkészítendő
+      // Pénzügyi SmartBoard - saját oldal elkészítendő
+      return <Dashboard />;
+    case "admin":
+      // Admin felhasználók a TODO oldalra kerülnek
       return <Dashboard />;
     case "digital":
-      // Digital SmartBoard - egyelőre TODO
+      // Digital SmartBoard - TODO oldalra megy
       return <Dashboard />;
     default:
       // Alapértelmezett: TODO oldal
