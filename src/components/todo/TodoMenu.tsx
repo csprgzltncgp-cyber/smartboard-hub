@@ -8,7 +8,7 @@ const TodoMenu = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const menuItems = [
-    { label: "Beérkezett feladatok", icon: ClipboardList, path: "/dashboard" },
+    { label: "Beérkezett feladatok", icon: ClipboardList, path: "/dashboard/todo" },
     { label: "Kiadott feladatok", icon: ClipboardCopy, path: "/dashboard/todo/issued" },
     { label: "Naptár", icon: Calendar, path: "/dashboard/calendar" },
     { label: "", icon: List, path: "/dashboard/todo/all", iconOnly: true },

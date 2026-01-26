@@ -311,7 +311,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
             size="sm"
           >
             <Building2 className="w-4 h-4" />
-            Bevitelre vár
+            Új érkező
           </Button>
         )}
 
@@ -319,7 +319,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
         {lead.status === 'incoming_company' && (
           <span className="ml-4 inline-flex items-center gap-2 px-3 py-1.5 bg-cgp-teal/20 text-cgp-teal rounded-xl text-sm font-medium">
             <Building2 className="w-4 h-4" />
-            Bevitelre vár
+            Új érkező
           </span>
         )}
       </div>
