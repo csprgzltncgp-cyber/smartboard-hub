@@ -193,10 +193,10 @@ const ContractHoldersTab = ({ year, month, country }: ContractHoldersTabProps) =
                   <TableCell className="text-right">{formatCurrency(ch.revenue)}</TableCell>
                   <TableCell className="text-right">{formatCurrency(ch.cost)}</TableCell>
                   <TableCell className="text-right">{formatCurrency(ch.avgPerConsultation)}</TableCell>
-                  <TableCell className={`text-right font-medium ${ch.profit >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-overdue'}`}>
+                  <TableCell className={`text-right font-medium ${ch.profit >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-lastday'}`}>
                     {formatCurrency(ch.profit)}
                   </TableCell>
-                  <TableCell className={`text-right ${ch.profitMargin >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-overdue'}`}>
+                  <TableCell className={`text-right ${ch.profitMargin >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-lastday'}`}>
                     {ch.profitMargin.toFixed(1)}%
                   </TableCell>
                 </TableRow>
@@ -208,10 +208,10 @@ const ContractHoldersTab = ({ year, month, country }: ContractHoldersTabProps) =
                 <TableCell className="text-right">{formatCurrency(totalRevenue)}</TableCell>
                 <TableCell className="text-right">{formatCurrency(totalCost)}</TableCell>
                 <TableCell className="text-right">{formatCurrency(totalCost / totalConsultations || 0)}</TableCell>
-                <TableCell className={`text-right ${totalProfit >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-overdue'}`}>
+                <TableCell className={`text-right ${totalProfit >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-lastday'}`}>
                   {formatCurrency(totalProfit)}
                 </TableCell>
-                <TableCell className={`text-right ${totalProfit >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-overdue'}`}>
+                <TableCell className={`text-right ${totalProfit >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-lastday'}`}>
                   {totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0}%
                 </TableCell>
               </TableRow>
