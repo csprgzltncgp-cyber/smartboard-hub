@@ -18,6 +18,7 @@ import InputsPage from "./pages/inputs/InputsPage";
 import CrmPage from "./pages/crm/CrmPage";
 import CaseDispatchPage from "./pages/cases/CaseDispatchPage";
 import SalesSmartboard from "./pages/smartboard/SalesSmartboard";
+import AccountSmartboard from "./pages/smartboard/AccountSmartboard";
 import MyClientsPage from "./pages/my-clients/MyClientsPage";
 import ClientActivityPage from "./pages/my-clients/ClientActivityPage";
 
@@ -33,7 +34,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/dashboard" element={<DashboardLayout />}>
-              <Route index element={<Dashboard />} />
+              <Route index element={<AccountSmartboard />} />
+              <Route path="todo" element={<Dashboard />} />
               <Route path="users" element={<UserList />} />
               <Route path="users/new" element={<UserForm />} />
               <Route path="users/:userId/edit" element={<UserForm />} />
@@ -44,6 +46,7 @@ const App = () => (
               <Route path="inputs" element={<InputsPage />} />
               <Route path="crm" element={<CrmPage />} />
               <Route path="smartboard/sales" element={<SalesSmartboard />} />
+              <Route path="smartboard/account" element={<AccountSmartboard />} />
               <Route path="case-dispatch" element={<CaseDispatchPage />} />
               <Route path="my-clients" element={<MyClientsPage />} />
               <Route path="my-clients/:companyId" element={<ClientActivityPage />} />
