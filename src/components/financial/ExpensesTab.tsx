@@ -502,7 +502,7 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
             <Button variant="outline" onClick={() => { setShowAddDialog(false); setEditingMonth(null); }}>
               Mégse
             </Button>
-            <Button onClick={handleSaveExpenses} className="bg-cgp-badge-overdue hover:bg-cgp-badge-overdue/90">
+            <Button onClick={handleSaveExpenses} className="bg-cgp-badge-lastday hover:bg-cgp-badge-lastday/90">
               Mentés
             </Button>
           </DialogFooter>
