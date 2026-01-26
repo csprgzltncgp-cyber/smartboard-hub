@@ -24,26 +24,31 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
   // Check if we have data
   const hasData = (revenues && revenues.length > 0) || (expenses && expenses.length > 0);
 
-  // Seed mock data function
+  // Seed mock data function - only for 2025
   const seedMockData = async () => {
+    if (year === 2026) {
+      toast.error('2026-ra nem tölthetők be mock adatok');
+      return;
+    }
+    
     try {
-      // Generate and insert revenue data
-      const revenueData = generateMockContractHolderRevenue(year);
+      // Generate and insert revenue data for 2025
+      const revenueData = generateMockContractHolderRevenue(2025);
       const { error: revenueError } = await supabase
         .from('contract_holder_revenue')
         .upsert(revenueData, { onConflict: 'year,month,contract_holder,country_id' });
       
       if (revenueError) throw revenueError;
 
-      // Generate and insert expense data
-      const expenseData = generateMockMonthlyExpenses(year);
+      // Generate and insert expense data for 2025
+      const expenseData = generateMockMonthlyExpenses(2025);
       const { error: expenseError } = await supabase
         .from('monthly_expenses')
         .upsert(expenseData, { onConflict: 'year,month,category,custom_category_name' });
 
       if (expenseError) throw expenseError;
 
-      toast.success(`${year} éves mock adatok betöltve`);
+      toast.success('2025 éves mock adatok betöltve');
       refetch();
     } catch (error) {
       console.error(error);
@@ -149,9 +154,11 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
         <p className="text-muted-foreground mb-6">
           A {year}. évre még nincsenek pénzügyi adatok rögzítve.
         </p>
-        <Button onClick={seedMockData} className="rounded-xl">
-          Mock adatok betöltése ({year})
-        </Button>
+        {year !== 2026 && (
+          <Button onClick={seedMockData} className="rounded-xl">
+            Mock adatok betöltése (2025)
+          </Button>
+        )}
       </div>
     );
   }
