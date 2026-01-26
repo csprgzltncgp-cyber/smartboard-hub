@@ -69,7 +69,7 @@ const pathToSmartboardMenuMap: Record<string, string[]> = {
   "/dashboard/feedback": ["admin_all"],
   
   // Always visible
-  "/dashboard": [], // TODO page - always visible
+  "/dashboard/todo": [], // TODO page - always visible
 };
 
 // Get all enabled menu item IDs for a user
