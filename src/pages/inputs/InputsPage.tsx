@@ -39,6 +39,7 @@ type InputType = "text" | "integer" | "double" | "date" | "select" | "multiple-l
 interface DropdownOption {
   id: number;
   value: string;
+  translations?: { [lang: string]: string };
 }
 
 interface CaseInput {
@@ -152,6 +153,7 @@ const InputsPage = () => {
   const [translationDialogOpen, setTranslationDialogOpen] = useState(false);
   const [selectedInput, setSelectedInput] = useState<CaseInput | null>(null);
   const [translations, setTranslations] = useState<{ [lang: string]: string }>({});
+  const [optionTranslations, setOptionTranslations] = useState<{ [optionId: number]: { [lang: string]: string } }>({});
 
   const handlePersonalDataToggle = (id: number, checked: boolean) => {
     setInputs(inputs.map(input => 
@@ -196,14 +198,36 @@ const InputsPage = () => {
   const openTranslationDialog = (input: CaseInput) => {
     setSelectedInput(input);
     setTranslations(input.translations || { hu: input.name, en: "", de: "" });
+    
+    // Initialize option translations
+    if (input.options) {
+      const optTrans: { [optionId: number]: { [lang: string]: string } } = {};
+      input.options.forEach(opt => {
+        optTrans[opt.id] = opt.translations || { hu: opt.value, en: "", de: "" };
+      });
+      setOptionTranslations(optTrans);
+    } else {
+      setOptionTranslations({});
+    }
+    
     setTranslationDialogOpen(true);
   };
 
   const saveTranslations = () => {
     if (selectedInput) {
-      setInputs(inputs.map(input =>
-        input.id === selectedInput.id ? { ...input, translations } : input
-      ));
+      setInputs(inputs.map(input => {
+        if (input.id === selectedInput.id) {
+          return {
+            ...input,
+            translations,
+            options: input.options?.map(opt => ({
+              ...opt,
+              translations: optionTranslations[opt.id] || opt.translations
+            }))
+          };
+        }
+        return input;
+      }));
       setTranslationDialogOpen(false);
       setSelectedInput(null);
       toast.success("Fordítások mentve");
@@ -571,25 +595,71 @@ const InputsPage = () => {
 
       {/* Translation Dialog */}
       <Dialog open={translationDialogOpen} onOpenChange={setTranslationDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Fordítások: {selectedInput?.name}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            {languages.map((lang) => (
-              <div key={lang.code} className="space-y-2">
-                <Label htmlFor={lang.code}>{lang.name}</Label>
-                <Input
-                  id={lang.code}
-                  value={translations[lang.code] || ""}
-                  onChange={(e) => setTranslations({
-                    ...translations,
-                    [lang.code]: e.target.value
-                  })}
-                  placeholder={`${lang.name} fordítás...`}
-                />
+          <div className="space-y-6 py-4">
+            {/* Input name translations */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground border-b pb-2">
+                Mező neve
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {languages.map((lang) => (
+                  <div key={lang.code} className="space-y-1">
+                    <Label htmlFor={`name-${lang.code}`} className="text-xs">{lang.name}</Label>
+                    <Input
+                      id={`name-${lang.code}`}
+                      value={translations[lang.code] || ""}
+                      onChange={(e) => setTranslations({
+                        ...translations,
+                        [lang.code]: e.target.value
+                      })}
+                      placeholder={`${lang.name}...`}
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            {/* Dropdown options translations */}
+            {selectedInput?.options && selectedInput.options.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-foreground border-b pb-2">
+                  Opciók fordításai ({selectedInput.options.length} db)
+                </h3>
+                <div className="space-y-4">
+                  {selectedInput.options.map((option, index) => (
+                    <div key={option.id} className="bg-muted/30 rounded-lg p-3 space-y-2">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        {index + 1}. {option.value}
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        {languages.map((lang) => (
+                          <div key={`${option.id}-${lang.code}`} className="space-y-1">
+                            <Label className="text-xs text-muted-foreground">{lang.name}</Label>
+                            <Input
+                              value={optionTranslations[option.id]?.[lang.code] || ""}
+                              onChange={(e) => setOptionTranslations({
+                                ...optionTranslations,
+                                [option.id]: {
+                                  ...(optionTranslations[option.id] || {}),
+                                  [lang.code]: e.target.value
+                                }
+                              })}
+                              placeholder={`${lang.name}...`}
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <Button onClick={saveTranslations} className="w-full rounded-xl">
               <Save className="w-4 h-4 mr-2" />
               Mentés
