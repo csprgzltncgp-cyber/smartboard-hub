@@ -170,7 +170,7 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
       {/* Hero Section - Profitability & Margin - CGP Teal colors */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Profit/Loss - PRIMARY - CGP Teal */}
-        <Card className="border-l-4 border-l-primary">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               {totals?.isProfitable ? (
@@ -197,7 +197,7 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
         </Card>
 
         {/* Profit Margin - Teal Light */}
-        <Card className="border-l-4 border-l-cgp-teal-light">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Percent className="w-4 h-4 text-cgp-teal-light" />
@@ -224,7 +224,7 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
       {/* Revenue & Expenses */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Total Revenue - Green */}
-        <Card className="border-l-4 border-l-cgp-badge-new">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <ArrowDownLeft className="w-4 h-4 text-cgp-badge-new" />
@@ -242,7 +242,7 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
         </Card>
 
         {/* Total Expenses - Orange */}
-        <Card className="border-l-4 border-l-cgp-badge-lastday">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <ArrowUpRight className="w-4 h-4 text-cgp-badge-lastday" />
