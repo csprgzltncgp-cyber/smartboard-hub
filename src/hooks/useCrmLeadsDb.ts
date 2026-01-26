@@ -37,9 +37,8 @@ const mapDbRowToLead = (row: any): CrmLead => {
 // Database status type (subset of LeadStatus that DB accepts)
 type DbLeadStatus = 'lead' | 'offer' | 'deal' | 'signed' | 'incoming_company' | 'cancelled';
 
-// Map CrmLead to database row format
-const mapLeadToDbRow = (lead: CrmLead) => ({
-  id: lead.id,
+// Map CrmLead to database row format (for inserts - no id)
+const mapLeadToDbRowForInsert = (lead: CrmLead) => ({
   company_name: lead.companyName,
   contact_name: lead.contacts?.[0]?.name || null,
   email: lead.contacts?.[0]?.email || null,
@@ -57,6 +56,12 @@ const mapLeadToDbRow = (lead: CrmLead) => ({
   })) as Json,
   contacts: JSON.parse(JSON.stringify(lead.contacts)) as Json,
   meetings: JSON.parse(JSON.stringify(lead.meetings)) as Json,
+});
+
+// Map CrmLead to database row format (for updates - includes id)
+const mapLeadToDbRow = (lead: CrmLead) => ({
+  id: lead.id,
+  ...mapLeadToDbRowForInsert(lead),
 });
 
 // Migrate localStorage data to database
@@ -183,12 +188,18 @@ export const useCrmLeadsDb = () => {
   // Add new lead
   const addLead = useCallback(async (lead: CrmLead) => {
     try {
-      const dbRow = mapLeadToDbRow(lead);
-      const { error: insertError } = await supabase.from('crm_leads').insert(dbRow);
+      const dbRow = mapLeadToDbRowForInsert(lead);
+      const { data: inserted, error: insertError } = await supabase
+        .from('crm_leads')
+        .insert(dbRow)
+        .select()
+        .single();
       
       if (insertError) throw insertError;
       
-      setLeads(prev => [...prev, lead]);
+      // Use the database-generated id
+      const newLead = mapDbRowToLead(inserted);
+      setLeads(prev => [...prev, newLead]);
     } catch (e: any) {
       console.error('[CRM] Failed to add lead:', e);
       setError(e.message);
