@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { ChevronDown, ChevronUp, ArrowUpDown, Building2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { formatCurrency, MONTH_NAMES } from "@/data/financialMockData";
+import { formatCurrency } from "@/data/financialMockData";
 import { CONTRACT_HOLDER_LABELS, CONTRACT_HOLDER_COLORS, ContractHolderType } from "@/types/financial";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -20,6 +20,34 @@ interface ContractHolderExpenseTableProps {
   year: number;
   month?: number;
 }
+
+// Mock company data for each contract holder (same as revenue table)
+const MOCK_COMPANIES: Record<ContractHolderType, Array<{ name: string; costShare: number }>> = {
+  cgp_europe: [
+    { name: "Richter Gedeon Nyrt.", costShare: 0.25 },
+    { name: "MOL Magyar Olaj- és Gázipari Nyrt.", costShare: 0.22 },
+    { name: "OTP Bank Nyrt.", costShare: 0.18 },
+    { name: "Magyar Telekom Nyrt.", costShare: 0.15 },
+    { name: "Bosch Magyarország", costShare: 0.12 },
+    { name: "Egyéb cégek", costShare: 0.08 },
+  ],
+  telus: [
+    { name: "Audi Hungaria Zrt.", costShare: 0.30 },
+    { name: "Mercedes-Benz Manufacturing Hungary Kft.", costShare: 0.28 },
+    { name: "Samsung SDI Magyarország Zrt.", costShare: 0.22 },
+    { name: "Egyéb cégek", costShare: 0.20 },
+  ],
+  telus_wpo: [
+    { name: "Continental Automotive Hungary Kft.", costShare: 0.35 },
+    { name: "Knorr-Bremse Fékrendszerek Kft.", costShare: 0.30 },
+    { name: "Egyéb cégek", costShare: 0.35 },
+  ],
+  compsych: [
+    { name: "IBM Magyarország Kft.", costShare: 0.40 },
+    { name: "Microsoft Magyarország Kft.", costShare: 0.35 },
+    { name: "Egyéb cégek", costShare: 0.25 },
+  ],
+};
 
 type SortDirection = "asc" | "desc";
 
@@ -50,20 +78,16 @@ const ContractHolderExpenseTable = ({ revenues, year, month }: ContractHolderExp
     return result;
   }, [revenues]);
 
-  // Get monthly breakdown for a contract holder
-  const getMonthlyDetails = (holder: ContractHolderType) => {
-    if (!revenues) return [];
-    
-    const holderRevenues = revenues.filter(r => r.contract_holder === holder);
-    const monthlyData = holderRevenues.map(r => ({
-      month: r.month,
-      monthName: MONTH_NAMES[r.month - 1],
-      cost: Number(r.consultation_cost),
-      consultationCount: r.consultation_count,
+  // Get sorted company details for a contract holder
+  const getCompanyDetails = (holder: ContractHolderType) => {
+    const totalCost = costsByHolder[holder] || 0;
+    const companies = MOCK_COMPANIES[holder].map(c => ({
+      ...c,
+      cost: Math.round(totalCost * c.costShare),
     }));
 
     const direction = sortDirection[holder];
-    return monthlyData.sort((a, b) => 
+    return companies.sort((a, b) => 
       direction === "desc" ? b.cost - a.cost : a.cost - b.cost
     );
   };
@@ -122,7 +146,7 @@ const ContractHolderExpenseTable = ({ revenues, year, month }: ContractHolderExp
             const cost = costsByHolder[holder];
             const percentage = totalCosts > 0 ? (cost / totalCosts) * 100 : 0;
             const isExpanded = expandedHolders.has(holder);
-            const monthlyDetails = getMonthlyDetails(holder);
+            const companies = getCompanyDetails(holder);
 
             return (
               <Collapsible key={holder} open={isExpanded} onOpenChange={() => toggleExpand(holder)}>
@@ -157,7 +181,7 @@ const ContractHolderExpenseTable = ({ revenues, year, month }: ContractHolderExp
                   <div className="ml-8 mr-4 mb-2 bg-muted/20 rounded-lg overflow-hidden">
                     {/* Sub-table Header */}
                     <div className="grid grid-cols-12 gap-4 px-4 py-2 bg-muted/30 text-sm text-muted-foreground">
-                      <div className="col-span-5">Hónap</div>
+                      <div className="col-span-7">Cég neve</div>
                       <div className="col-span-3 text-right flex items-center justify-end gap-1">
                         Költség
                         <Button
@@ -172,39 +196,30 @@ const ContractHolderExpenseTable = ({ revenues, year, month }: ContractHolderExp
                           <ArrowUpDown className="h-3 w-3" />
                         </Button>
                       </div>
-                      <div className="col-span-2 text-right">Tanácsadások</div>
                       <div className="col-span-2 text-right">Arány</div>
                     </div>
 
-                    {/* Monthly Rows */}
-                    {monthlyDetails.map((item, idx) => {
-                      const holderTotal = costsByHolder[holder] || 0;
-                      const monthPercentage = holderTotal > 0 ? (item.cost / holderTotal) * 100 : 0;
-                      
-                      return (
-                        <div 
-                          key={idx} 
-                          className="grid grid-cols-12 gap-4 px-4 py-2 text-sm border-t border-border/50 hover:bg-muted/20"
-                        >
-                          <div className="col-span-5 flex items-center gap-2">
-                            <div 
-                              className="w-2 h-2 rounded-full" 
-                              style={{ backgroundColor: CONTRACT_HOLDER_COLORS[holder] }} 
-                            />
-                            {item.monthName}
-                          </div>
-                          <div className="col-span-3 text-right font-medium">
-                            {formatCurrency(item.cost)}
-                          </div>
-                          <div className="col-span-2 text-right text-muted-foreground">
-                            {item.consultationCount} db
-                          </div>
-                          <div className="col-span-2 text-right text-muted-foreground">
-                            {monthPercentage.toFixed(0)}%
-                          </div>
+                    {/* Company Rows */}
+                    {companies.map((company, idx) => (
+                      <div 
+                        key={idx} 
+                        className="grid grid-cols-12 gap-4 px-4 py-2 text-sm border-t border-border/50 hover:bg-muted/20"
+                      >
+                        <div className="col-span-7 flex items-center gap-2">
+                          <div 
+                            className="w-2 h-2 rounded-full" 
+                            style={{ backgroundColor: CONTRACT_HOLDER_COLORS[holder] }} 
+                          />
+                          {company.name}
                         </div>
-                      );
-                    })}
+                        <div className="col-span-3 text-right font-medium">
+                          {formatCurrency(company.cost)}
+                        </div>
+                        <div className="col-span-2 text-right text-muted-foreground">
+                          {(company.costShare * 100).toFixed(0)}%
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </CollapsibleContent>
               </Collapsible>
