@@ -213,11 +213,24 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
+              Összes kiadás
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">
+              {formatCurrency(totalFixedExpenses + totalManualExpenses)}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Fix havi költségek
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-cgp-badge-lastday">
+            <div className="text-2xl font-bold text-primary">
               {formatCurrency(totalFixedExpenses)}
             </div>
           </CardContent>
@@ -230,21 +243,8 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-cgp-badge-lastday">
+            <div className="text-2xl font-bold text-primary">
               {formatCurrency(totalManualExpenses)}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Összes kiadás
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-cgp-badge-lastday">
-              {formatCurrency(totalFixedExpenses + totalManualExpenses)}
             </div>
           </CardContent>
         </Card>
