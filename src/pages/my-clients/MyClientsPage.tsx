@@ -308,6 +308,26 @@ const MyClientsPage = () => {
 
           {/* Filters */}
           <div className="flex items-center gap-3">
+            {/* Country Filter - always visible when multiple countries */}
+            {availableCountries.length > 1 && (
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-muted-foreground" />
+                <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Ország szűrő" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Összes ország</SelectItem>
+                    {availableCountries.map((country) => (
+                      <SelectItem key={country.id} value={country.id}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             {/* Colleague filter - only on team tab */}
             {activeTab === "team-clients" && colleaguesForSelector.length > 0 && (
               <div className="flex items-center gap-2">
@@ -321,26 +341,6 @@ const MyClientsPage = () => {
                     {colleaguesForSelector.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {/* Country Filter */}
-            {availableCountries.length > 1 && (
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-muted-foreground" />
-                <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Ország szűrő" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Összes ország</SelectItem>
-                    {availableCountries.map((country) => (
-                      <SelectItem key={country.id} value={country.id}>
-                        {country.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
