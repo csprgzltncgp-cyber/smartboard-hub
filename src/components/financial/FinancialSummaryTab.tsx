@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFinancialSummary, useUpsertContractHolderRevenue, useUpsertMonthlyExpense } from "@/hooks/useFinancialData";
 import { useContractHolderRevenue, useMonthlyExpenses } from "@/hooks/useFinancialData";
 import { formatCurrency, MONTH_NAMES, generateMockContractHolderRevenue, generateMockMonthlyExpenses } from "@/data/financialMockData";
-import { CONTRACT_HOLDER_LABELS, CONTRACT_HOLDER_COLORS, ContractHolderType } from "@/types/financial";
+import { CONTRACT_HOLDER_LABELS, CONTRACT_HOLDER_COLORS, ContractHolderType, EXPENSE_CATEGORY_LABELS, ExpenseCategory } from "@/types/financial";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,6 +138,39 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
         color: CONTRACT_HOLDER_COLORS[key as ContractHolderType],
       }));
   }, [summaries, month]);
+
+  // Category colors for expense pie chart
+  const CATEGORY_COLORS: Record<ExpenseCategory, string> = {
+    gross_salary: '#eb7e30',
+    corporate_tax: '#00575f',
+    innovation_fee: '#59c6c6',
+    vat: '#91b752',
+    car_tax: '#00575f',
+    local_business_tax: '#91b752',
+    other_costs: '#59c6c6',
+    supplier_invoices: '#eb7e30',
+    custom: '#c0bfbf',
+  };
+
+  // Expense category pie data (from monthly_expenses)
+  const expenseCategoryPieData = useMemo(() => {
+    if (!expenses) return [];
+    
+    const filtered = month ? expenses.filter(e => e.month === month) : expenses;
+    const byCategory: Record<string, number> = {};
+    
+    filtered.forEach(e => {
+      byCategory[e.category] = (byCategory[e.category] || 0) + Number(e.amount);
+    });
+
+    return Object.entries(byCategory)
+      .filter(([_, value]) => value > 0)
+      .map(([key, value]) => ({
+        name: EXPENSE_CATEGORY_LABELS[key as ExpenseCategory],
+        value,
+        color: CATEGORY_COLORS[key as ExpenseCategory],
+      }));
+  }, [expenses, month]);
 
   if (isLoading) {
     return (
@@ -289,7 +322,7 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
       </div>
 
       {/* Pie Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Revenue Distribution Pie Chart */}
         <Card>
           <CardHeader>
@@ -349,6 +382,40 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
             </div>
           </CardContent>
         </Card>
+
+        {/* Expense Category Distribution Pie Chart */}
+        {expenseCategoryPieData.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Költség megoszlás kategóriánként</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={expenseCategoryPieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={90}
+                      paddingAngle={2}
+                      dataKey="value"
+                      label={({ value }) => formatCurrency(value)}
+                      labelLine={false}
+                    >
+                      {expenseCategoryPieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Profit Line Chart */}
