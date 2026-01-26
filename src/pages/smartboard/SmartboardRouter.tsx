@@ -12,7 +12,7 @@ import AccountSmartboard from "./AccountSmartboard";
  * - Sales ✓
  * - Operatív (elkészítendő)
  * - Pénzügyi (elkészítendő)
- * - Admin (TODO oldalra megy)
+ * - Admin (elkészítendő)
  * - Digital (TODO oldalra megy)
  */
 const SmartboardRouter = () => {
@@ -36,7 +36,7 @@ const SmartboardRouter = () => {
       // Pénzügyi SmartBoard - saját oldal elkészítendő
       return <Dashboard />;
     case "admin":
-      // Admin felhasználók a TODO oldalra kerülnek
+      // Admin SmartBoard - saját oldal elkészítendő
       return <Dashboard />;
     case "digital":
       // Digital SmartBoard - TODO oldalra megy
