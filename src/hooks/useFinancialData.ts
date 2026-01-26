@@ -333,7 +333,9 @@ export const useFinancialSummary = (filters: FinancialFilters) => {
           year: filters.year,
           month,
           totalRevenue,
-          totalExpenses: totalCosts,
+          totalExpenses, // Fixed + manual expenses only
+          consultationCosts, // Expert costs separately
+          totalCosts, // For profit calculation
           profit,
           profitMargin,
           isProfitable: profit > 0,

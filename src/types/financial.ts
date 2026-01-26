@@ -92,7 +92,9 @@ export interface MonthlyFinancialSummary {
   year: number;
   month: number;
   totalRevenue: number;
-  totalExpenses: number;
+  totalExpenses: number; // Fixed + manual expenses (without consultation costs)
+  consultationCosts: number; // Expert/consultation costs from contract_holder_revenue
+  totalCosts: number; // totalExpenses + consultationCosts (for profit calculation)
   profit: number;
   profitMargin: number;
   isProfitable: boolean;
