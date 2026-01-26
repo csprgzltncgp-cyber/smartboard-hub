@@ -142,7 +142,7 @@ const ContractHoldersTab = ({ year, month, country }: ContractHoldersTabProps) =
       {/* Summary Cards Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {contractHolderSummary.map(ch => (
-          <Card key={ch.id} className="border-l-4" style={{ borderLeftColor: ch.color }}>
+          <Card key={ch.id}>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">{ch.name}</CardTitle>
             </CardHeader>
