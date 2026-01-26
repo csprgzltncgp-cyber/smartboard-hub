@@ -63,11 +63,13 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
     const filtered = month ? summaries.filter(s => s.month === month) : summaries;
     
     const totalRevenue = filtered.reduce((sum, s) => sum + s.totalRevenue, 0);
-    const totalExpenses = filtered.reduce((sum, s) => sum + s.totalExpenses, 0);
-    const profit = totalRevenue - totalExpenses;
+    const totalExpenses = filtered.reduce((sum, s) => sum + s.totalExpenses, 0); // Fixed + manual only
+    const consultationCosts = filtered.reduce((sum, s) => sum + s.consultationCosts, 0);
+    const totalCosts = filtered.reduce((sum, s) => sum + s.totalCosts, 0); // For profit
+    const profit = totalRevenue - totalCosts;
     const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
     
-    return { totalRevenue, totalExpenses, profit, profitMargin, isProfitable: profit > 0 };
+    return { totalRevenue, totalExpenses, consultationCosts, totalCosts, profit, profitMargin, isProfitable: profit > 0 };
   }, [summaries, month]);
 
   // Chart data for monthly trend - filter by month if selected
