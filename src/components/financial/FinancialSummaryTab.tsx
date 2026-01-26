@@ -78,8 +78,8 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
     }));
   }, [summaries, month]);
 
-  // Contract holder pie data
-  const pieData = useMemo(() => {
+  // Contract holder revenue pie data
+  const revenuePieData = useMemo(() => {
     if (!summaries) return [];
     
     const filtered = month ? summaries.filter(s => s.month === month) : summaries;
@@ -92,6 +92,33 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
 
     filtered.forEach(s => {
       Object.entries(s.revenueByContractHolder).forEach(([key, value]) => {
+        totals[key as ContractHolderType] += value;
+      });
+    });
+
+    return Object.entries(totals)
+      .filter(([_, value]) => value > 0)
+      .map(([key, value]) => ({
+        name: CONTRACT_HOLDER_LABELS[key as ContractHolderType],
+        value,
+        color: CONTRACT_HOLDER_COLORS[key as ContractHolderType],
+      }));
+  }, [summaries, month]);
+
+  // Contract holder expenses pie data (Szakértői költségek = consultation_cost)
+  const expensePieData = useMemo(() => {
+    if (!summaries) return [];
+    
+    const filtered = month ? summaries.filter(s => s.month === month) : summaries;
+    const totals: Record<ContractHolderType, number> = {
+      cgp_europe: 0,
+      telus: 0,
+      telus_wpo: 0,
+      compsych: 0,
+    };
+
+    filtered.forEach(s => {
+      Object.entries(s.consultationCostsByContractHolder).forEach(([key, value]) => {
         totals[key as ContractHolderType] += value;
       });
     });
@@ -225,7 +252,7 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monthly Trend Chart */}
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -250,8 +277,11 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
             </div>
           </CardContent>
         </Card>
+      </div>
 
-        {/* Contract Holder Pie Chart */}
+      {/* Pie Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Revenue Distribution Pie Chart */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Bevétel megoszlás</CardTitle>
@@ -261,7 +291,7 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={pieData}
+                    data={revenuePieData}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -269,7 +299,37 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
                     paddingAngle={2}
                     dataKey="value"
                   >
-                    {pieData.map((entry, index) => (
+                    {revenuePieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Expense Distribution Pie Chart (Szakértői költségek) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Szakértői költségek megoszlása</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={expensePieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {expensePieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
