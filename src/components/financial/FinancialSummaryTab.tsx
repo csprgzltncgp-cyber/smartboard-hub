@@ -1,7 +1,6 @@
 import { useMemo, useEffect } from "react";
 import { TrendingUp, TrendingDown, Minus, ArrowUpRight, ArrowDownLeft, DollarSign, Percent } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { useFinancialSummary, useUpsertContractHolderRevenue, useUpsertMonthlyExpense } from "@/hooks/useFinancialData";
 import { useContractHolderRevenue, useMonthlyExpenses } from "@/hooks/useFinancialData";
 import { formatCurrency, MONTH_NAMES, generateMockContractHolderRevenue, generateMockMonthlyExpenses } from "@/data/financialMockData";
@@ -132,26 +131,26 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
 
   return (
     <div className="space-y-6">
-      {/* Hero Section - Profitability & Margin */}
+      {/* Hero Section - Profitability & Margin - CGP Teal colors */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Profit/Loss - PRIMARY */}
-        <Card className={`border-l-4 ${totals?.isProfitable ? 'border-l-cgp-badge-new' : 'border-l-cgp-badge-overdue'}`}>
+        {/* Profit/Loss - PRIMARY - CGP Teal */}
+        <Card className="border-l-4 border-l-primary">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               {totals?.isProfitable ? (
-                <TrendingUp className="w-4 h-4 text-cgp-badge-new" />
+                <TrendingUp className="w-4 h-4 text-primary" />
               ) : (
-                <TrendingDown className="w-4 h-4 text-cgp-badge-overdue" />
+                <TrendingDown className="w-4 h-4 text-cgp-badge-lastday" />
               )}
               Eredmény
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-3xl font-bold ${totals?.isProfitable ? 'text-cgp-badge-new' : 'text-cgp-badge-overdue'}`}>
+            <div className="text-3xl font-bold text-primary">
               {formatCurrency(totals?.profit || 0)}
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <span className={`text-sm font-semibold px-3 py-1 rounded-lg ${totals?.isProfitable ? 'bg-cgp-badge-new/15 text-cgp-badge-new' : 'bg-cgp-badge-overdue/15 text-cgp-badge-overdue'}`}>
+              <span className={`text-sm font-semibold px-3 py-1 rounded-lg ${totals?.isProfitable ? 'bg-primary/15 text-primary' : 'bg-cgp-badge-lastday/15 text-cgp-badge-lastday'}`}>
                 {totals?.isProfitable ? 'PROFITÁBILIS' : 'VESZTESÉGES'}
               </span>
             </div>
@@ -161,22 +160,24 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
           </CardContent>
         </Card>
 
-        {/* Profit Margin - PRIMARY */}
-        <Card className="border-l-4 border-l-primary">
+        {/* Profit Margin - Teal Light */}
+        <Card className="border-l-4 border-l-cgp-teal-light">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Percent className="w-4 h-4 text-primary" />
+              <Percent className="w-4 h-4 text-cgp-teal-light" />
               Profit margó
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-primary">
+            <div className="text-3xl font-bold text-cgp-teal-light">
               {totals?.profitMargin.toFixed(1)}%
             </div>
-            <Progress 
-              value={Math.max(0, Math.min(100, totals?.profitMargin || 0))} 
-              className="mt-3 h-3"
-            />
+            <div className="w-full bg-gray-200 rounded-full h-3 mt-3">
+              <div 
+                className="bg-cgp-teal-light h-3 rounded-full transition-all"
+                style={{ width: `${Math.max(0, Math.min(100, totals?.profitMargin || 0))}%` }}
+              />
+            </div>
             <p className="text-xs text-muted-foreground mt-2">
               {month ? MONTH_NAMES[month - 1] : `${year} teljes év`}
             </p>
@@ -186,7 +187,7 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
 
       {/* Revenue & Expenses */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Total Revenue */}
+        {/* Total Revenue - Green */}
         <Card className="border-l-4 border-l-cgp-badge-new">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -204,16 +205,16 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
           </CardContent>
         </Card>
 
-        {/* Total Expenses */}
-        <Card className="border-l-4 border-l-cgp-badge-overdue">
+        {/* Total Expenses - Orange */}
+        <Card className="border-l-4 border-l-cgp-badge-lastday">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <ArrowUpRight className="w-4 h-4 text-cgp-badge-overdue" />
+              <ArrowUpRight className="w-4 h-4 text-cgp-badge-lastday" />
               Összes kiadás
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-cgp-badge-overdue">
+            <div className="text-2xl font-bold text-cgp-badge-lastday">
               {formatCurrency(totals?.totalExpenses || 0)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -243,7 +244,7 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
                   />
                   <Legend />
                   <Bar dataKey="Bevétel" fill="#91b752" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Kiadás" fill="#db0b20" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Kiadás" fill="#eb7e30" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
