@@ -539,7 +539,7 @@ const ComparisonTab = ({ year, month, country }: ComparisonTabProps) => {
 
       {/* Saved Comparisons */}
       {comparisons.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-4">
           {comparisons.map(comparison => renderComparisonBar(comparison))}
         </div>
       ) : !isCreating && (
