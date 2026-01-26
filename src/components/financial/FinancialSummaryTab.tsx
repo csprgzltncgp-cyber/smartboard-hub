@@ -401,8 +401,6 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
                       outerRadius={90}
                       paddingAngle={2}
                       dataKey="value"
-                      label={({ value }) => formatCurrency(value)}
-                      labelLine={false}
                     >
                       {expenseCategoryPieData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
