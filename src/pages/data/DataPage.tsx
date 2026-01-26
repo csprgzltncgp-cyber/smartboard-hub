@@ -114,14 +114,14 @@ const DataPage = () => {
           </TabsTrigger>
           <TabsTrigger 
             value="expenses"
-            className="flex items-center gap-2 data-[state=active]:bg-cgp-badge-overdue data-[state=active]:text-white"
+            className="flex items-center gap-2 data-[state=active]:bg-cgp-badge-lastday data-[state=active]:text-white"
           >
             <ArrowUpRight className="w-4 h-4" />
             Kiadások
           </TabsTrigger>
           <TabsTrigger 
             value="contract-holders"
-            className="flex items-center gap-2 data-[state=active]:bg-cgp-link data-[state=active]:text-white"
+            className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             <Users className="w-4 h-4" />
             Tanácsadások száma

@@ -153,7 +153,7 @@ const RevenueTab = ({ year, month, country }: RevenueTabProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[hsl(176,47%,50%)]">
+            <div className="text-2xl font-bold text-cgp-teal-light">
               {formatCurrency(totalManualIncome)}
             </div>
           </CardContent>

@@ -81,10 +81,11 @@ export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategory, string> = {
 
 // Color mappings for charts
 export const CONTRACT_HOLDER_COLORS: Record<ContractHolderType, string> = {
-  cgp_europe: 'hsl(185, 100%, 19%)', // CGP Teal
-  telus: 'hsl(262, 52%, 47%)', // Purple
-  telus_wpo: 'hsl(21, 82%, 55%)', // Orange
-  compsych: 'hsl(211, 100%, 50%)', // Blue
+  // Frontend standard palette only (no purple/blue/red)
+  cgp_europe: '#00575f', // CGP Teal
+  telus: '#59c6c6', // Teal-light
+  telus_wpo: '#eb7e30', // Orange
+  compsych: '#91b752', // Green
 };
 
 export interface MonthlyFinancialSummary {

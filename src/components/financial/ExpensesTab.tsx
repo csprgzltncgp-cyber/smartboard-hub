@@ -26,15 +26,16 @@ interface ExpensesTabProps {
 }
 
 const CATEGORY_COLORS: Record<ExpenseCategory, string> = {
-  gross_salary: 'hsl(355, 91%, 45%)',
-  corporate_tax: 'hsl(21, 82%, 55%)',
-  innovation_fee: 'hsl(262, 52%, 47%)',
-  vat: 'hsl(211, 100%, 50%)',
-  car_tax: 'hsl(185, 100%, 19%)',
-  local_business_tax: 'hsl(90, 38%, 52%)',
-  other_costs: 'hsl(306, 33%, 36%)',
-  supplier_invoices: 'hsl(176, 47%, 50%)',
-  custom: 'hsl(0, 0%, 50%)',
+  // Frontend standard palette only (no red/blue/purple)
+  gross_salary: '#eb7e30',
+  corporate_tax: '#00575f',
+  innovation_fee: '#59c6c6',
+  vat: '#91b752',
+  car_tax: '#00575f',
+  local_business_tax: '#91b752',
+  other_costs: '#59c6c6',
+  supplier_invoices: '#eb7e30',
+  custom: '#c0bfbf',
 };
 
 const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
@@ -198,7 +199,7 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-calibri-bold flex items-center gap-2">
-            <ArrowUpRight className="w-5 h-5 text-cgp-badge-overdue" />
+            <ArrowUpRight className="w-5 h-5 text-cgp-badge-lastday" />
             Kiadások
           </h2>
           <p className="text-muted-foreground text-sm">
@@ -209,14 +210,14 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-cgp-badge-overdue">
+        <Card className="border-l-4 border-l-cgp-badge-lastday">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Fix havi költségek
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-cgp-badge-overdue">
+            <div className="text-2xl font-bold text-cgp-badge-lastday">
               {formatCurrency(totalFixedExpenses)}
             </div>
           </CardContent>
@@ -235,14 +236,14 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-destructive">
+        <Card className="border-l-4 border-l-cgp-badge-lastday">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Összes kiadás
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">
+            <div className="text-2xl font-bold text-cgp-badge-lastday">
               {formatCurrency(totalFixedExpenses + totalManualExpenses)}
             </div>
           </CardContent>
@@ -275,7 +276,7 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
               return (
                 <Card 
                   key={monthNum} 
-                  className={`cursor-pointer hover:shadow-md transition-shadow ${hasData ? 'border-l-4 border-l-cgp-badge-overdue' : 'opacity-60'}`}
+                    className={`cursor-pointer hover:shadow-md transition-shadow ${hasData ? 'border-l-4 border-l-cgp-badge-lastday' : 'opacity-60'}`}
                   onClick={() => handleEditMonth(monthNum)}
                 >
                   <CardHeader className="pb-2">
@@ -285,7 +286,7 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className={`text-lg font-bold ${hasData ? 'text-cgp-badge-overdue' : 'text-muted-foreground'}`}>
+                    <div className={`text-lg font-bold ${hasData ? 'text-cgp-badge-lastday' : 'text-muted-foreground'}`}>
                       {hasData ? formatCurrency(monthTotal) : 'Nincs adat'}
                     </div>
                     {hasData && (
