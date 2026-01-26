@@ -440,7 +440,7 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
                       className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-cgp-badge-overdue" />
+                        <div className="w-2 h-2 rounded-full bg-primary" />
                         <div>
                           <p className="font-medium">{entry.description}</p>
                           <p className="text-sm text-muted-foreground">
@@ -449,7 +449,7 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="font-bold text-cgp-badge-overdue">
+                        <span className="font-bold text-primary">
                           {formatCurrency(Number(entry.amount))}
                         </span>
                         <Button
