@@ -421,7 +421,7 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
               setEditingMonth(null);
               setShowAddDialog(true);
             }} 
-            className="rounded-xl bg-cgp-badge-overdue hover:bg-cgp-badge-overdue/90"
+            className="rounded-xl bg-cgp-badge-lastday hover:bg-cgp-badge-lastday/90"
           >
             <Plus className="w-4 h-4 mr-2" />
             Kiadás hozzáadása
