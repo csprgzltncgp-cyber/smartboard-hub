@@ -142,19 +142,17 @@ const CaseWarningsPanel = ({ warnings }: CaseWarningsPanelProps) => {
 
   return (
     <div id="case-warnings-panel" className="mb-8">
-      {/* Panel Header with Country Selector */}
+      {/* Panel Header with integrated Country Selector */}
       <div className="flex items-end justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="bg-cgp-badge-overdue text-white uppercase text-xl md:text-2xl lg:text-3xl px-6 md:px-8 py-4 md:py-5 rounded-t-[25px] font-calibri-bold flex items-center gap-3">
-            <FileText className="w-6 h-6 md:w-8 md:h-8" />
-            Eset figyelmeztetések: {filteredWarnings.length}
-          </h2>
+        <h2 className="bg-cgp-badge-overdue text-white uppercase text-xl md:text-2xl lg:text-3xl px-6 md:px-8 py-4 md:py-5 rounded-t-[25px] font-calibri-bold flex items-center gap-3">
+          <FileText className="w-6 h-6 md:w-8 md:h-8" />
+          Eset figyelmeztetések: {filteredWarnings.length}
           
-          {/* Country selector next to header */}
-          <div className="flex items-center gap-2 pb-1">
+          {/* Country selector integrated in header */}
+          <div className="flex items-center gap-2 ml-4">
             <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-              <SelectTrigger className="w-[160px] h-9 bg-background border-border text-sm">
-                <Globe className="w-4 h-4 mr-1 text-muted-foreground" />
+              <SelectTrigger className="w-[160px] h-8 bg-white/20 border-white/30 text-white text-sm hover:bg-white/30 [&>svg]:text-white">
+                <Globe className="w-4 h-4 mr-1" />
                 <SelectValue placeholder="Ország" />
               </SelectTrigger>
               <SelectContent>
@@ -170,16 +168,16 @@ const CaseWarningsPanel = ({ warnings }: CaseWarningsPanelProps) => {
             {/* Default indicator */}
             {selectedCountry === defaultCountry && defaultCountry !== 'all' && (
               <span title="Alapértelmezett">
-                <Star className="w-4 h-4 text-cgp-badge-new fill-cgp-badge-new" />
+                <Star className="w-4 h-4 text-white fill-white/50" />
               </span>
             )}
 
             {/* Settings popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" title="Beállítások">
-                  <Settings className="w-4 h-4" />
-                </Button>
+                <button className="p-1.5 rounded hover:bg-white/20 transition-colors" title="Beállítások">
+                  <Settings className="w-4 h-4 text-white" />
+                </button>
               </PopoverTrigger>
               <PopoverContent className="w-72" align="start">
                 <div className="space-y-3">
@@ -210,7 +208,7 @@ const CaseWarningsPanel = ({ warnings }: CaseWarningsPanelProps) => {
               </PopoverContent>
             </Popover>
           </div>
-        </div>
+        </h2>
         
         <button
           onClick={() => navigate("/dashboard/all-cases")}
