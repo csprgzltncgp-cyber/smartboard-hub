@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useMonthlyExpenses, useManualEntries, useContractHolderRevenue, useUpsertMonthlyExpense, useCreateManualEntry, useDeleteMonthlyExpense, useDeleteManualEntry } from "@/hooks/useFinancialData";
 import { formatCurrency, MONTH_NAMES } from "@/data/financialMockData";
-import { EXPENSE_CATEGORY_LABELS, ExpenseCategory } from "@/types/financial";
+import { EXPENSE_CATEGORY_LABELS, ExpenseCategory, CONTRACT_HOLDER_LABELS, CONTRACT_HOLDER_COLORS, ContractHolderType } from "@/types/financial";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import {
   Dialog,
@@ -105,6 +105,24 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
       color: CATEGORY_COLORS[key as ExpenseCategory],
     }));
   }, [expenses]);
+
+  // Consultation costs by contract holder for pie chart
+  const contractHolderPieData = useMemo(() => {
+    if (!revenues) return [];
+    
+    const byHolder: Record<string, number> = {};
+    revenues.forEach(r => {
+      byHolder[r.contract_holder] = (byHolder[r.contract_holder] || 0) + Number(r.consultation_cost);
+    });
+
+    return Object.entries(byHolder)
+      .filter(([_, value]) => value > 0)
+      .map(([key, value]) => ({
+        name: CONTRACT_HOLDER_LABELS[key as ContractHolderType],
+        value,
+        color: CONTRACT_HOLDER_COLORS[key as ContractHolderType],
+      }));
+  }, [revenues]);
 
   // Monthly breakdown chart data
   const chartData = useMemo(() => {
@@ -327,37 +345,72 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
             })}
           </div>
 
-          {/* Expense Category Pie Chart */}
-          {pieData.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Költség megoszlás kategóriánként</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={100}
-                        paddingAngle={2}
-                        dataKey="value"
-                        label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                        labelLine={false}
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {/* Pie Charts Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Expense Category Pie Chart */}
+            {pieData.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Költség megoszlás kategóriánként</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={pieData}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={100}
+                          paddingAngle={2}
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                          labelLine={false}
+                        >
+                          {pieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Contract Holder Consultation Costs Pie Chart */}
+            {contractHolderPieData.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Tanácsadási költségek contract holder szerint</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={contractHolderPieData}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={100}
+                          paddingAngle={2}
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                          labelLine={false}
+                        >
+                          {contractHolderPieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
 
         {/* Manual Expenses Tab */}
