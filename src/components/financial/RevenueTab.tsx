@@ -6,6 +6,7 @@ import { useContractHolderRevenue, useManualEntries, useCreateManualEntry } from
 import { formatCurrency, MONTH_NAMES } from "@/data/financialMockData";
 import { CONTRACT_HOLDER_LABELS, CONTRACT_HOLDER_COLORS, ContractHolderType } from "@/types/financial";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import ContractHolderRevenueTable from "./ContractHolderRevenueTable";
 import {
   Dialog,
   DialogContent,
@@ -201,6 +202,9 @@ const RevenueTab = ({ year, month, country }: RevenueTabProps) => {
           </CardContent>
         </Card>
       )}
+
+      {/* Contract Holder Revenue Summary Table */}
+      <ContractHolderRevenueTable revenues={revenues} year={year} month={month} />
 
       {/* Manual Income Entries List */}
       {incomeEntries.length > 0 && (
