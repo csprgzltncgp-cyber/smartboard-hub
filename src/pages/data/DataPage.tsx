@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, TrendingUp, ArrowDownLeft, ArrowUpRight, Building2, BarChart3 } from "lucide-react";
+import { Calendar, TrendingUp, ArrowDownLeft, ArrowUpRight, Building2, BarChart3, Users } from "lucide-react";
 import { useCountries } from "@/hooks/useActivityPlan";
 import { MONTH_NAMES } from "@/data/financialMockData";
 import FinancialSummaryTab from "@/components/financial/FinancialSummaryTab";
@@ -123,8 +123,8 @@ const DataPage = () => {
             value="contract-holders"
             className="flex items-center gap-2 data-[state=active]:bg-cgp-link data-[state=active]:text-white"
           >
-            <Building2 className="w-4 h-4" />
-            Contract Holderek
+            <Users className="w-4 h-4" />
+            Tanácsadások száma
           </TabsTrigger>
         </TabsList>
 
