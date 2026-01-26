@@ -76,13 +76,17 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
   const chartData = useMemo(() => {
     if (!summaries) return [];
     const filtered = month ? summaries.filter(s => s.month === month) : summaries;
-    return filtered.map(s => ({
-      name: MONTH_NAMES[s.month - 1].substring(0, 3),
-      month: s.month,
-      Bevétel: s.totalRevenue,
-      Kiadás: s.totalExpenses,
-      Profit: s.profit,
-    }));
+    return filtered.map(s => {
+      const profitMargin = s.totalRevenue > 0 ? (s.profit / s.totalRevenue) * 100 : 0;
+      return {
+        name: MONTH_NAMES[s.month - 1].substring(0, 3),
+        month: s.month,
+        Bevétel: s.totalRevenue,
+        Kiadás: s.totalExpenses,
+        Profit: s.profit,
+        'Profit margó': profitMargin,
+      };
+    });
   }, [summaries, month]);
 
   // Contract holder revenue pie data
@@ -575,6 +579,35 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
                   stroke="#00575f"
                   strokeWidth={3}
                   dot={{ fill: '#00575f', strokeWidth: 2 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Profit Margin Line Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Profit margó alakulás</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis 
+                  tickFormatter={(value) => `${value.toFixed(0)}%`}
+                  domain={[0, 'auto']}
+                />
+                <Tooltip formatter={(value: number) => `${value.toFixed(1)}%`} />
+                <Line 
+                  type="monotone" 
+                  dataKey="Profit margó" 
+                  stroke="#59c6c6"
+                  strokeWidth={3}
+                  dot={{ fill: '#59c6c6', strokeWidth: 2 }}
                 />
               </LineChart>
             </ResponsiveContainer>
