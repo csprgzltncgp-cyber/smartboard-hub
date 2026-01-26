@@ -26,7 +26,7 @@ const SmartboardRouter = () => {
       // vagy később Admin SmartBoard-ra
       return <Dashboard />;
     case "operative":
-      // Operatív SmartBoard - egyelőre TODO
+      // TODO: Operatív SmartBoard - megadott panelek alapján elkészítendő
       return <Dashboard />;
     case "financial":
       // Pénzügyi SmartBoard - egyelőre TODO
