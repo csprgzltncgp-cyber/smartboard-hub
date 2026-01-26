@@ -196,21 +196,21 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
           </CardContent>
         </Card>
 
-        {/* Profit Margin - Same colors as Eredmény */}
-        <Card>
+        {/* Profit Margin - Same style as Eredmény */}
+        <Card className={totals?.isProfitable ? 'bg-primary/25' : 'bg-cgp-badge-overdue/25'}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Percent className="w-4 h-4 text-primary" />
+            <CardTitle className={`text-sm font-medium flex items-center gap-2 ${totals?.isProfitable ? 'text-primary' : 'text-cgp-badge-overdue'}`}>
+              <Percent className="w-4 h-4" />
               Profit margó
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-primary">
+            <div className={`text-3xl font-bold ${totals?.isProfitable ? 'text-primary' : 'text-cgp-badge-overdue'}`}>
               {totals?.profitMargin.toFixed(1)}%
             </div>
-            <div className="w-full bg-muted rounded-full h-3 mt-3">
+            <div className="w-full bg-white/50 rounded-full h-3 mt-3">
               <div 
-                className="bg-primary h-3 rounded-full transition-all"
+                className={`h-3 rounded-full transition-all ${totals?.isProfitable ? 'bg-primary' : 'bg-cgp-badge-overdue'}`}
                 style={{ width: `${Math.max(0, Math.min(100, totals?.profitMargin || 0))}%` }}
               />
             </div>
