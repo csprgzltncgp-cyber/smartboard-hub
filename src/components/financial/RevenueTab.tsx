@@ -134,9 +134,9 @@ const RevenueTab = ({ year, month, country }: RevenueTabProps) => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="bg-primary/25">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-primary">
               Összes bevétel
             </CardTitle>
           </CardHeader>
