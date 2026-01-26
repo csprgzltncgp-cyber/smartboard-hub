@@ -94,7 +94,7 @@ const UserList = () => {
           navigate("/dashboard/users/new");
         }}
       >
-        Új felhasználó hozzáadása
+        + Új felhasználó hozzáadása
       </a>
 
       {/* Search */}
