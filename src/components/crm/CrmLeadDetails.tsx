@@ -593,7 +593,7 @@ const CrmLeadDetails = ({ lead, onUpdate, onChangeStatus }: CrmLeadDetailsProps)
                 <ContactIcon className="w-4 h-4 text-primary" />
                 <span className="text-sm text-muted-foreground">{meeting.contactName}</span>
                 <span className="text-sm text-muted-foreground">{meeting.pillars} PILL/{meeting.sessions} SESS</span>
-                {MoodIcon && <div className={cn("p-1 rounded-sm", meeting.mood === 'happy' ? "bg-green-100" : "bg-muted")}><MoodIcon className="w-4 h-4" /></div>}
+                {MoodIcon !== null && <div className={cn("p-1 rounded-sm", meeting.mood === 'happy' ? "bg-green-100" : "bg-muted")}><MoodIcon className="w-4 h-4" /></div>}
                 <button 
                   onClick={() => handleDeleteMeeting(meeting.id)}
                   className="ml-auto p-1 hover:bg-destructive/20 rounded text-muted-foreground hover:text-destructive transition-colors"
