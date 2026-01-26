@@ -132,8 +132,60 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Hero Section - Profitability & Margin */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Profit/Loss - PRIMARY */}
+        <Card className={`border-l-4 ${totals?.isProfitable ? 'border-l-cgp-badge-new' : 'border-l-cgp-badge-overdue'}`}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              {totals?.isProfitable ? (
+                <TrendingUp className="w-4 h-4 text-cgp-badge-new" />
+              ) : (
+                <TrendingDown className="w-4 h-4 text-cgp-badge-overdue" />
+              )}
+              Eredmény
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className={`text-3xl font-bold ${totals?.isProfitable ? 'text-cgp-badge-new' : 'text-cgp-badge-overdue'}`}>
+              {formatCurrency(totals?.profit || 0)}
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className={`text-sm font-semibold px-3 py-1 rounded-lg ${totals?.isProfitable ? 'bg-cgp-badge-new/15 text-cgp-badge-new' : 'bg-cgp-badge-overdue/15 text-cgp-badge-overdue'}`}>
+                {totals?.isProfitable ? 'PROFITÁBILIS' : 'VESZTESÉGES'}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              {month ? MONTH_NAMES[month - 1] : `${year} teljes év`}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Profit Margin - PRIMARY */}
+        <Card className="border-l-4 border-l-primary">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Percent className="w-4 h-4 text-primary" />
+              Profit margó
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-primary">
+              {totals?.profitMargin.toFixed(1)}%
+            </div>
+            <Progress 
+              value={Math.max(0, Math.min(100, totals?.profitMargin || 0))} 
+              className="mt-3 h-3"
+            />
+            <p className="text-xs text-muted-foreground mt-2">
+              {month ? MONTH_NAMES[month - 1] : `${year} teljes év`}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Revenue & Expenses */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Total Revenue */}
         <Card className="border-l-4 border-l-cgp-badge-new">
           <CardHeader className="pb-2">
@@ -169,49 +221,6 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
             </p>
           </CardContent>
         </Card>
-
-        {/* Profit/Loss */}
-        <Card className={`border-l-4 ${totals?.isProfitable ? 'border-l-cgp-badge-new' : 'border-l-cgp-badge-overdue'}`}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              {totals?.isProfitable ? (
-                <TrendingUp className="w-4 h-4 text-cgp-badge-new" />
-              ) : (
-                <TrendingDown className="w-4 h-4 text-cgp-badge-overdue" />
-              )}
-              Eredmény
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${totals?.isProfitable ? 'text-cgp-badge-new' : 'text-cgp-badge-overdue'}`}>
-              {formatCurrency(totals?.profit || 0)}
-            </div>
-            <div className="flex items-center gap-2 mt-1">
-              <span className={`text-xs font-medium px-2 py-0.5 rounded ${totals?.isProfitable ? 'bg-cgp-badge-new/10 text-cgp-badge-new' : 'bg-cgp-badge-overdue/10 text-cgp-badge-overdue'}`}>
-                {totals?.isProfitable ? 'PROFITÁBILIS' : 'VESZTESÉGES'}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Profit Margin */}
-        <Card className="border-l-4 border-l-primary">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Percent className="w-4 h-4 text-primary" />
-              Profit margó
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">
-              {totals?.profitMargin.toFixed(1)}%
-            </div>
-            <Progress 
-              value={Math.max(0, Math.min(100, totals?.profitMargin || 0))} 
-              className="mt-2 h-2"
-            />
-          </CardContent>
-        </Card>
       </div>
 
       {/* Charts Row */}
@@ -233,8 +242,8 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
                     labelFormatter={(label) => `${label}`}
                   />
                   <Legend />
-                  <Bar dataKey="Bevétel" fill="hsl(90, 38%, 52%)" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Kiadás" fill="hsl(355, 91%, 45%)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Bevétel" fill="#91b752" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Kiadás" fill="#db0b20" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -288,9 +297,9 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
                 <Line 
                   type="monotone" 
                   dataKey="Profit" 
-                  stroke="hsl(185, 100%, 19%)" 
+                  stroke="#00575f"
                   strokeWidth={3}
-                  dot={{ fill: 'hsl(185, 100%, 19%)', strokeWidth: 2 }}
+                  dot={{ fill: '#00575f', strokeWidth: 2 }}
                 />
               </LineChart>
             </ResponsiveContainer>
