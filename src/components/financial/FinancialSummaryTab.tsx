@@ -293,6 +293,76 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
         </Card>
       </div>
 
+      {/* Financial Balance Bar */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Pénzügyi mérleg</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const revenue = totals?.totalRevenue || 0;
+            const expenses = totals?.totalExpenses || 0;
+            const total = revenue + expenses;
+            const revenuePercent = total > 0 ? (revenue / total) * 100 : 50;
+            const expensePercent = total > 0 ? (expenses / total) * 100 : 50;
+            
+            return (
+              <div className="space-y-4">
+                {/* Labels */}
+                <div className="flex justify-between items-center text-sm">
+                  <div className="flex items-center gap-2">
+                    <ArrowUpRight className="w-4 h-4 text-cgp-badge-lastday" />
+                    <span className="font-medium text-cgp-badge-lastday">Kiadások</span>
+                    <span className="text-muted-foreground">({expensePercent.toFixed(1)}%)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">({revenuePercent.toFixed(1)}%)</span>
+                    <span className="font-medium text-cgp-badge-new">Bevételek</span>
+                    <ArrowDownLeft className="w-4 h-4 text-cgp-badge-new" />
+                  </div>
+                </div>
+
+                {/* Balance Bar */}
+                <div className="flex h-8 rounded-lg overflow-hidden bg-muted/30">
+                  {/* Expense bar - grows from center to left */}
+                  <div 
+                    className="bg-cgp-badge-lastday flex items-center justify-start transition-all duration-500"
+                    style={{ width: `${expensePercent}%` }}
+                  >
+                    <span className="text-white font-semibold text-sm px-3 truncate">
+                      {formatCurrency(expenses)}
+                    </span>
+                  </div>
+                  {/* Revenue bar - grows from center to right */}
+                  <div 
+                    className="bg-cgp-badge-new flex items-center justify-end transition-all duration-500"
+                    style={{ width: `${revenuePercent}%` }}
+                  >
+                    <span className="text-white font-semibold text-sm px-3 truncate">
+                      {formatCurrency(revenue)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Center indicator */}
+                <div className="flex justify-center">
+                  <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${totals?.isProfitable ? 'bg-primary/20 text-primary' : 'bg-cgp-badge-overdue/20 text-cgp-badge-overdue'}`}>
+                    {totals?.isProfitable ? (
+                      <TrendingUp className="w-4 h-4" />
+                    ) : (
+                      <TrendingDown className="w-4 h-4" />
+                    )}
+                    <span className="font-semibold">
+                      {totals?.isProfitable ? '+' : ''}{formatCurrency(totals?.profit || 0)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </CardContent>
+      </Card>
+
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monthly Trend Chart */}
