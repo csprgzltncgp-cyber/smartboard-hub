@@ -586,7 +586,7 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
             <Button 
               onClick={handleAddManualExpense} 
               disabled={!manualForm.description || !manualForm.amount}
-              className="bg-cgp-badge-overdue hover:bg-cgp-badge-overdue/90"
+              className="bg-cgp-badge-lastday hover:bg-cgp-badge-lastday/90"
             >
               Mentés
             </Button>
