@@ -131,11 +131,11 @@ const ContractHoldersTab = ({ year, month, country }: ContractHoldersTabProps) =
       {/* Header */}
       <div>
         <h2 className="text-xl font-calibri-bold flex items-center gap-2">
-          <Building2 className="w-5 h-5 text-primary" />
-          Contract Holderek
+          <Users className="w-5 h-5 text-primary" />
+          Tanácsadások száma
         </h2>
         <p className="text-muted-foreground text-sm">
-          Bevételek és tanácsadások Contract Holder-enként
+          Tanácsadások és bevételek Contract Holder-enként
         </p>
       </div>
 
@@ -147,13 +147,14 @@ const ContractHoldersTab = ({ year, month, country }: ContractHoldersTabProps) =
               <CardTitle className="text-sm font-medium">{ch.name}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-xl font-bold" style={{ color: ch.color }}>
-                {formatCurrency(ch.revenue)}
+              <div className="text-2xl font-bold" style={{ color: ch.color }}>
+                {formatNumber(ch.consultations)}
               </div>
-              <div className="flex items-center gap-2 mt-1">
-                <Users className="w-3 h-3 text-muted-foreground" />
+              <div className="text-xs text-muted-foreground mb-2">tanácsadás</div>
+              <div className="flex items-center gap-2">
+                <DollarSign className="w-3 h-3 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">
-                  {formatNumber(ch.consultations)} tanácsadás
+                  {formatCurrency(ch.revenue)}
                 </span>
               </div>
             </CardContent>
@@ -171,8 +172,8 @@ const ContractHoldersTab = ({ year, month, country }: ContractHoldersTabProps) =
             <TableHeader>
               <TableRow>
                 <TableHead>Contract Holder</TableHead>
-                <TableHead className="text-right">Bevétel</TableHead>
                 <TableHead className="text-right">Tanácsadások</TableHead>
+                <TableHead className="text-right">Bevétel</TableHead>
                 <TableHead className="text-right">Tanácsadási költség</TableHead>
                 <TableHead className="text-right">Átl. költség/tanácsadás</TableHead>
                 <TableHead className="text-right">Profit</TableHead>
@@ -188,8 +189,8 @@ const ContractHoldersTab = ({ year, month, country }: ContractHoldersTabProps) =
                       {ch.name}
                     </div>
                   </TableCell>
+                  <TableCell className="text-right font-semibold">{formatNumber(ch.consultations)}</TableCell>
                   <TableCell className="text-right">{formatCurrency(ch.revenue)}</TableCell>
-                  <TableCell className="text-right">{formatNumber(ch.consultations)}</TableCell>
                   <TableCell className="text-right">{formatCurrency(ch.cost)}</TableCell>
                   <TableCell className="text-right">{formatCurrency(ch.avgPerConsultation)}</TableCell>
                   <TableCell className={`text-right font-medium ${ch.profit >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-overdue'}`}>
@@ -203,8 +204,8 @@ const ContractHoldersTab = ({ year, month, country }: ContractHoldersTabProps) =
               {/* Total Row */}
               <TableRow className="bg-muted/50 font-bold">
                 <TableCell>Összesen</TableCell>
-                <TableCell className="text-right">{formatCurrency(totalRevenue)}</TableCell>
                 <TableCell className="text-right">{formatNumber(totalConsultations)}</TableCell>
+                <TableCell className="text-right">{formatCurrency(totalRevenue)}</TableCell>
                 <TableCell className="text-right">{formatCurrency(totalCost)}</TableCell>
                 <TableCell className="text-right">{formatCurrency(totalCost / totalConsultations || 0)}</TableCell>
                 <TableCell className={`text-right ${totalProfit >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-overdue'}`}>
@@ -221,22 +222,22 @@ const ContractHoldersTab = ({ year, month, country }: ContractHoldersTabProps) =
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue by Contract Holder */}
+        {/* Consultations Trend - Now first */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <DollarSign className="w-5 h-5" />
-              Havi bevétel alakulás
+              <Users className="w-5 h-5" />
+              Tanácsadások száma havonta
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyData}>
+                <BarChart data={consultationData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(value) => `€${(value / 1000).toFixed(0)}k`} />
-                  <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                  <YAxis />
+                  <Tooltip />
                   <Legend />
                   <Bar dataKey="CGP Europe" fill={CONTRACT_HOLDER_COLORS.cgp_europe} />
                   <Bar dataKey="Telus" fill={CONTRACT_HOLDER_COLORS.telus} />
@@ -248,22 +249,22 @@ const ContractHoldersTab = ({ year, month, country }: ContractHoldersTabProps) =
           </CardContent>
         </Card>
 
-        {/* Consultations Trend */}
+        {/* Revenue Trend - Now second */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              Tanácsadások száma
+              <DollarSign className="w-5 h-5" />
+              Havi bevétel alakulás
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={consultationData}>
+                <LineChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
+                  <YAxis tickFormatter={(value) => `€${(value / 1000).toFixed(0)}k`} />
+                  <Tooltip formatter={(value: number) => formatCurrency(value)} />
                   <Legend />
                   <Line type="monotone" dataKey="CGP Europe" stroke={CONTRACT_HOLDER_COLORS.cgp_europe} strokeWidth={2} />
                   <Line type="monotone" dataKey="Telus" stroke={CONTRACT_HOLDER_COLORS.telus} strokeWidth={2} />
