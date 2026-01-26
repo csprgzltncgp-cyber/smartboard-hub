@@ -353,8 +353,7 @@ const InputsPage = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-calibri-bold text-foreground mb-2 flex items-center gap-2">
-        <ListChecks className="w-6 h-6" />
+      <h1 className="text-2xl font-calibri-bold text-foreground mb-2">
         Inputok
       </h1>
       <a 
