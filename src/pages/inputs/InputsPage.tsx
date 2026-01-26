@@ -16,6 +16,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -154,6 +164,10 @@ const InputsPage = () => {
   const [selectedInput, setSelectedInput] = useState<CaseInput | null>(null);
   const [translations, setTranslations] = useState<{ [lang: string]: string }>({});
   const [optionTranslations, setOptionTranslations] = useState<{ [optionId: number]: { [lang: string]: string } }>({});
+  
+  // Delete confirmation dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [inputToDelete, setInputToDelete] = useState<CaseInput | null>(null);
 
   const handlePersonalDataToggle = (id: number, checked: boolean) => {
     setInputs(inputs.map(input => 
@@ -190,9 +204,18 @@ const InputsPage = () => {
     }
   };
 
-  const deleteInput = (id: number) => {
-    setInputs(inputs.filter(input => input.id !== id));
-    toast.success("Input törölve");
+  const openDeleteDialog = (input: CaseInput) => {
+    setInputToDelete(input);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteInput = () => {
+    if (inputToDelete) {
+      setInputs(inputs.filter(input => input.id !== inputToDelete.id));
+      toast.success("Input törölve");
+      setDeleteDialogOpen(false);
+      setInputToDelete(null);
+    }
   };
 
   const openTranslationDialog = (input: CaseInput) => {
@@ -472,7 +495,7 @@ const InputsPage = () => {
                             variant="ghost"
                             size="sm"
                             className="rounded-xl text-destructive hover:text-destructive"
-                            onClick={() => deleteInput(input.id)}
+                            onClick={() => openDeleteDialog(input)}
                             disabled={input.type === "database"}
                             title="Törlés"
                           >
@@ -664,6 +687,28 @@ const InputsPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Input törlése</AlertDialogTitle>
+            <AlertDialogDescription>
+              Biztosan törölni szeretnéd a(z) "{inputToDelete?.name}" inputot? Ez a művelet nem vonható vissza.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">Mégse</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteInput}
+              className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Törlés
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
