@@ -29,7 +29,7 @@ const SmartboardRouter = () => {
       // TODO: Operatív SmartBoard - megadott panelek alapján elkészítendő
       return <Dashboard />;
     case "financial":
-      // Pénzügyi SmartBoard - egyelőre TODO
+      // TODO: Pénzügyi SmartBoard - megadott panelek alapján elkészítendő
       return <Dashboard />;
     case "digital":
       // Digital SmartBoard - egyelőre TODO
