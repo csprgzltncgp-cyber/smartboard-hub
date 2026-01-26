@@ -1,11 +1,12 @@
-import { useMemo } from "react";
-import { Building2, Users, DollarSign, TrendingUp } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Building2, Users, DollarSign, TrendingUp, ChevronDown, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useContractHolderRevenue } from "@/hooks/useFinancialData";
 import { formatCurrency, formatNumber, MONTH_NAMES } from "@/data/financialMockData";
 import { CONTRACT_HOLDER_LABELS, CONTRACT_HOLDER_COLORS, ContractHolderType } from "@/types/financial";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface ContractHoldersTabProps {
   year: number;
@@ -15,6 +16,67 @@ interface ContractHoldersTabProps {
 
 const ContractHoldersTab = ({ year, month, country }: ContractHoldersTabProps) => {
   const { data: revenues, isLoading } = useContractHolderRevenue({ year, month, country });
+  const [openContractHolders, setOpenContractHolders] = useState<Set<string>>(new Set());
+
+  // Mock companies per contract holder
+  const MOCK_COMPANIES: Record<ContractHolderType, Array<{ name: string; consultationShare: number }>> = {
+    cgp_europe: [
+      { name: "Deutsche Telekom", consultationShare: 0.30 },
+      { name: "Siemens AG", consultationShare: 0.25 },
+      { name: "BMW Group", consultationShare: 0.20 },
+      { name: "Allianz SE", consultationShare: 0.15 },
+      { name: "SAP SE", consultationShare: 0.10 },
+    ],
+    telus: [
+      { name: "Shell Hungary", consultationShare: 0.35 },
+      { name: "Vodafone HU", consultationShare: 0.30 },
+      { name: "Tesco CE", consultationShare: 0.20 },
+      { name: "British Petrol", consultationShare: 0.15 },
+    ],
+    telus_wpo: [
+      { name: "Morgan Stanley", consultationShare: 0.40 },
+      { name: "Goldman Sachs", consultationShare: 0.35 },
+      { name: "JP Morgan", consultationShare: 0.25 },
+    ],
+    compsych: [
+      { name: "Microsoft HU", consultationShare: 0.45 },
+      { name: "Google Hungary", consultationShare: 0.30 },
+      { name: "Amazon Services", consultationShare: 0.25 },
+    ],
+  };
+
+  const toggleContractHolder = (id: string) => {
+    setOpenContractHolders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const getCompanyDetails = (contractHolder: ContractHolderType, holderData: { consultations: number; revenue: number; cost: number; avgPerConsultation: number }) => {
+    const companies = MOCK_COMPANIES[contractHolder];
+    return companies.map(company => {
+      const consultations = Math.round(holderData.consultations * company.consultationShare);
+      const revenue = holderData.revenue * company.consultationShare;
+      const cost = holderData.cost * company.consultationShare;
+      const profit = revenue - cost;
+      const profitMargin = revenue > 0 ? (profit / revenue) * 100 : 0;
+      return {
+        name: company.name,
+        consultations,
+        revenue,
+        cost,
+        avgPerConsultation: consultations > 0 ? cost / consultations : 0,
+        profit,
+        profitMargin,
+        share: company.consultationShare * 100,
+      };
+    });
+  };
 
   // Aggregate by contract holder
   const contractHolderSummary = useMemo(() => {
@@ -181,26 +243,67 @@ const ContractHoldersTab = ({ year, month, country }: ContractHoldersTabProps) =
               </TableRow>
             </TableHeader>
             <TableBody>
-              {contractHolderSummary.map(ch => (
-                <TableRow key={ch.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ch.color }} />
-                      {ch.name}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right font-semibold">{formatNumber(ch.consultations)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(ch.revenue)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(ch.cost)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(ch.avgPerConsultation)}</TableCell>
-                  <TableCell className={`text-right font-medium ${ch.profit >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-lastday'}`}>
-                    {formatCurrency(ch.profit)}
-                  </TableCell>
-                  <TableCell className={`text-right ${ch.profitMargin >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-lastday'}`}>
-                    {ch.profitMargin.toFixed(1)}%
-                  </TableCell>
-                </TableRow>
-              ))}
+              {contractHolderSummary.map(ch => {
+                const isOpen = openContractHolders.has(ch.id);
+                const companyDetails = getCompanyDetails(ch.id, ch);
+                
+                return (
+                  <Collapsible key={ch.id} open={isOpen} onOpenChange={() => toggleContractHolder(ch.id)} asChild>
+                    <>
+                      <CollapsibleTrigger asChild>
+                        <TableRow className="cursor-pointer hover:bg-muted/50">
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              {isOpen ? (
+                                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                              ) : (
+                                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                              )}
+                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ch.color }} />
+                              {ch.name}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right font-semibold">{formatNumber(ch.consultations)}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(ch.revenue)}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(ch.cost)}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(ch.avgPerConsultation)}</TableCell>
+                          <TableCell className={`text-right font-medium ${ch.profit >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-lastday'}`}>
+                            {formatCurrency(ch.profit)}
+                          </TableCell>
+                          <TableCell className={`text-right ${ch.profitMargin >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-lastday'}`}>
+                            {ch.profitMargin.toFixed(1)}%
+                          </TableCell>
+                        </TableRow>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent asChild>
+                        <>
+                          {companyDetails.map((company, idx) => (
+                            <TableRow key={idx} className="bg-muted/20">
+                              <TableCell className="pl-12">
+                                <div className="flex items-center gap-2">
+                                  <Building2 className="w-4 h-4 text-muted-foreground" />
+                                  <span>{company.name}</span>
+                                  <span className="text-xs text-muted-foreground">({company.share.toFixed(0)}%)</span>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right">{formatNumber(company.consultations)}</TableCell>
+                              <TableCell className="text-right text-muted-foreground">{formatCurrency(company.revenue)}</TableCell>
+                              <TableCell className="text-right text-muted-foreground">{formatCurrency(company.cost)}</TableCell>
+                              <TableCell className="text-right text-muted-foreground">{formatCurrency(company.avgPerConsultation)}</TableCell>
+                              <TableCell className={`text-right ${company.profit >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-lastday'}`}>
+                                {formatCurrency(company.profit)}
+                              </TableCell>
+                              <TableCell className={`text-right ${company.profitMargin >= 0 ? 'text-cgp-badge-new' : 'text-cgp-badge-lastday'}`}>
+                                {company.profitMargin.toFixed(1)}%
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </>
+                      </CollapsibleContent>
+                    </>
+                  </Collapsible>
+                );
+              })}
               {/* Total Row */}
               <TableRow className="bg-muted/50 font-bold">
                 <TableCell>Összesen</TableCell>
