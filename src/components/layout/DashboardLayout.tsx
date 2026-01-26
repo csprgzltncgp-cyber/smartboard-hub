@@ -74,7 +74,7 @@ const allMenuItems: MenuItem[] = [
   { label: "Szakértő keresés", icon: Search, path: "/dashboard/affiliate-search" },
   { label: "Szakértők", icon: Users, path: "/dashboard/settings/experts" },
   { label: "Számlák", icon: FileSpreadsheet, path: "/dashboard/invoices" },
-  { label: "TODO", icon: ClipboardList, path: "/dashboard", badge: 5, badgeColor: "bg-green-500" },
+  { label: "TODO", icon: ClipboardList, path: "/dashboard/todo", badge: 5, badgeColor: "bg-green-500" },
   { label: "Training Dashboard", icon: GraduationCap, path: "/dashboard/settings/training" },
   { label: "Ügyfeleim", icon: Calendar, path: "/dashboard/my-clients" },
   { label: "Városok", icon: MapPin, path: "/dashboard/settings/cities" },
