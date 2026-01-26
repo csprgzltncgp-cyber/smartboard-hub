@@ -210,7 +210,7 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-cgp-badge-lastday">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Fix havi költségek
@@ -223,7 +223,7 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-cgp-badge-lastday">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Egyéb kiadások
@@ -236,7 +236,7 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-cgp-badge-lastday">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Összes kiadás
@@ -276,7 +276,7 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
               return (
                 <Card 
                   key={monthNum} 
-                    className={`cursor-pointer hover:shadow-md transition-shadow ${hasData ? 'border-l-4 border-l-cgp-badge-lastday' : 'opacity-60'}`}
+                    className={`cursor-pointer hover:shadow-md transition-shadow ${hasData ? '' : 'opacity-60'}`}
                   onClick={() => handleEditMonth(monthNum)}
                 >
                   <CardHeader className="pb-2">
