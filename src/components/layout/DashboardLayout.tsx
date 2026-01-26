@@ -468,16 +468,7 @@ const DashboardLayout = () => {
           {/* SmartBoard root - clickable, navigates to user's default SmartBoard */}
           <button 
             onClick={() => {
-              // Find user's default smartboard and navigate to its first menu item
-              const defaultPermission = currentUser?.smartboardPermissions?.find(p => p.isDefault);
-              if (defaultPermission) {
-                const smartboard = SMARTBOARDS.find(sb => sb.id === defaultPermission.smartboardId);
-                if (smartboard && smartboard.menuItems.length > 0) {
-                  navigate(smartboard.menuItems[0].path);
-                  return;
-                }
-              }
-              // Fallback to TODO dashboard
+              // Always navigate to the SmartBoard home (SmartboardRouter handles the correct view)
               navigate("/dashboard");
             }}
             className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
