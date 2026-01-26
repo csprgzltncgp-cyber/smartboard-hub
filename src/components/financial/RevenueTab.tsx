@@ -137,6 +137,19 @@ const RevenueTab = ({ year, month, country }: RevenueTabProps) => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
+              Összes bevétel
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">
+              {formatCurrency(totalContractHolderRevenue + totalManualIncome)}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               Contract Holder bevétel
             </CardTitle>
           </CardHeader>
@@ -156,19 +169,6 @@ const RevenueTab = ({ year, month, country }: RevenueTabProps) => {
           <CardContent>
             <div className="text-2xl font-bold text-cgp-teal-light">
               {formatCurrency(totalManualIncome)}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Összes bevétel
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">
-              {formatCurrency(totalContractHolderRevenue + totalManualIncome)}
             </div>
           </CardContent>
         </Card>
