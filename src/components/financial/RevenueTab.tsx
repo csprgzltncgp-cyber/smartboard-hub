@@ -220,7 +220,7 @@ const RevenueTab = ({ year, month, country }: RevenueTabProps) => {
                   className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-cgp-badge-new" />
+                    <div className="w-2 h-2 rounded-full bg-primary" />
                     <div>
                       <p className="font-medium">{entry.description}</p>
                       <p className="text-sm text-muted-foreground">
@@ -229,7 +229,7 @@ const RevenueTab = ({ year, month, country }: RevenueTabProps) => {
                       </p>
                     </div>
                   </div>
-                  <span className="font-bold text-cgp-badge-new">
+                  <span className="font-bold text-primary">
                     {formatCurrency(Number(entry.amount))}
                   </span>
                 </div>
