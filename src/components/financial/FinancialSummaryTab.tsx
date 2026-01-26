@@ -170,7 +170,7 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
       {/* Hero Section - Profitability & Margin - CGP Teal colors */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Profit/Loss - Teal when profitable, Red when loss */}
-        <Card className={totals?.isProfitable ? 'bg-primary/40' : 'bg-cgp-badge-overdue/40'}>
+        <Card className={totals?.isProfitable ? 'bg-primary/70' : 'bg-cgp-badge-overdue/70'}>
           <CardHeader className="pb-2">
             <CardTitle className={`text-sm font-medium flex items-center gap-2 ${totals?.isProfitable ? 'text-primary' : 'text-cgp-badge-overdue'}`}>
               {totals?.isProfitable ? (
