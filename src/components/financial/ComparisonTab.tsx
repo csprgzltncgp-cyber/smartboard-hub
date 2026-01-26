@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCountries } from "@/hooks/useActivityPlan";
 import { formatCurrency, formatNumber, MONTH_NAMES } from "@/data/financialMockData";
 import { CONTRACT_HOLDER_LABELS, CONTRACT_HOLDER_COLORS, ContractHolderType } from "@/types/financial";
-import { useContractHolderRevenue } from "@/hooks/useFinancialData";
+import { useAllContractHolderRevenue } from "@/hooks/useFinancialData";
 
 // Metric types for comparison
 type MetricType = 'revenue' | 'consultation_count' | 'consultation_cost' | 'profit' | 'profit_margin';
@@ -50,7 +50,7 @@ interface ComparisonTabProps {
 
 const ComparisonTab = ({ year, month, country }: ComparisonTabProps) => {
   const { data: countries } = useCountries();
-  const { data: revenues } = useContractHolderRevenue({ year });
+  const { data: revenues } = useAllContractHolderRevenue(); // Fetch all years for independent comparisons
   
   // Initial mock comparisons
   const initialComparisons: ComparisonItem[] = [
@@ -177,9 +177,10 @@ const ComparisonTab = ({ year, month, country }: ComparisonTabProps) => {
   const calculateValue = (side: ComparisonSide, metric: MetricType): number => {
     if (!revenues) return 0;
     
-    // Filter revenues based on side parameters
+    // Filter revenues based on side parameters - including year
     let filtered = revenues.filter(r => 
       r.contract_holder === side.contractHolder &&
+      r.year === side.year &&
       r.month === side.month
     );
     
