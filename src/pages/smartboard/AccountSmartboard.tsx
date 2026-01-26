@@ -12,6 +12,8 @@ import UsageAlertPanel, { UsageAlertClient } from "@/components/smartboard/Usage
 import LossClientsPanel, { LossClient } from "@/components/smartboard/LossClientsPanel";
 import WeekEventsPanel, { WeekEvent } from "@/components/smartboard/WeekEventsPanel";
 import UpcomingActivityPanel, { UpcomingActivity } from "@/components/smartboard/UpcomingActivityPanel";
+import WorkshopFeedbackPanel from "@/components/smartboard/WorkshopFeedbackPanel";
+import { mockWorkshopFeedbacks } from "@/data/operativeMockData";
 
 // Get first name or nickname from full name
 const getGreetingName = (fullName: string): string => {
@@ -202,6 +204,9 @@ const AccountSmartboard = () => {
 
       {/* Business Breakfast Panel */}
       <UpcomingActivityPanel type="breakfast" items={mockBreakfast} />
+
+      {/* Workshop Feedback Panel */}
+      <WorkshopFeedbackPanel feedbacks={mockWorkshopFeedbacks} />
     </div>
   );
 };
