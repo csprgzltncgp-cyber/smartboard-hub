@@ -169,28 +169,28 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
     <div className="space-y-6">
       {/* Hero Section - Profitability & Margin - CGP Teal colors */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Profit/Loss - PRIMARY - CGP Teal */}
-        <Card>
+        {/* Profit/Loss - Teal when profitable, Red when loss */}
+        <Card className={totals?.isProfitable ? 'bg-primary' : 'bg-cgp-badge-overdue'}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-white/80 flex items-center gap-2">
               {totals?.isProfitable ? (
-                <TrendingUp className="w-4 h-4 text-primary" />
+                <TrendingUp className="w-4 h-4 text-white" />
               ) : (
-                <TrendingDown className="w-4 h-4 text-primary" />
+                <TrendingDown className="w-4 h-4 text-white" />
               )}
               Eredmény
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-primary">
+            <div className="text-3xl font-bold text-white">
               {formatCurrency(totals?.profit || 0)}
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-sm font-semibold px-3 py-1 rounded-lg bg-primary/15 text-primary">
+              <span className="text-sm font-semibold px-3 py-1 rounded-lg bg-white/20 text-white">
                 {totals?.isProfitable ? 'PROFITÁBILIS' : 'VESZTESÉGES'}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-white/70 mt-2">
               {month ? MONTH_NAMES[month - 1] : `${year} teljes év`}
             </p>
           </CardContent>
