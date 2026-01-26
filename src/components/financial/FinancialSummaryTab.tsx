@@ -363,6 +363,76 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
         </CardContent>
       </Card>
 
+      {/* Contract Holder Revenue Distribution Bar */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Bevétel megoszlás contract holder szerint</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const totalRevenue = revenuePieData.reduce((sum, item) => sum + item.value, 0);
+            
+            if (totalRevenue === 0) {
+              return <p className="text-muted-foreground text-center py-4">Nincs bevételi adat</p>;
+            }
+
+            return (
+              <div className="space-y-4">
+                {/* Labels */}
+                <div className="flex flex-wrap justify-center gap-4 text-sm">
+                  {revenuePieData.map((item) => {
+                    const percent = (item.value / totalRevenue) * 100;
+                    return (
+                      <div key={item.name} className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span className="font-medium">{item.name}</span>
+                        <span className="text-muted-foreground">({percent.toFixed(1)}%)</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Distribution Bar */}
+                <div className="flex h-8 rounded-lg overflow-hidden bg-muted/30">
+                  {revenuePieData.map((item) => {
+                    const percent = (item.value / totalRevenue) * 100;
+                    return (
+                      <div 
+                        key={item.name}
+                        className="flex items-center justify-center transition-all duration-500"
+                        style={{ 
+                          width: `${percent}%`, 
+                          backgroundColor: item.color 
+                        }}
+                      >
+                        {percent > 15 && (
+                          <span className="text-white font-semibold text-sm truncate px-2">
+                            {formatCurrency(item.value)}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Total */}
+                <div className="flex justify-center">
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cgp-badge-new/20 text-cgp-badge-new">
+                    <ArrowDownLeft className="w-4 h-4" />
+                    <span className="font-semibold">
+                      Összes: {formatCurrency(totalRevenue)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </CardContent>
+      </Card>
+
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monthly Trend Chart */}
