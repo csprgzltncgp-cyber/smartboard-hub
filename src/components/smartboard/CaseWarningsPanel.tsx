@@ -12,6 +12,24 @@ interface CaseWarningsPanelProps {
   warnings: CaseWarning[];
 }
 
+// Country code to name mapping
+const countryNames: Record<string, string> = {
+  'HU': 'Magyarország',
+  'AT': 'Ausztria',
+  'DE': 'Németország',
+  'SK': 'Szlovákia',
+  'CZ': 'Csehország',
+  'RO': 'Románia',
+  'PL': 'Lengyelország',
+  'HR': 'Horvátország',
+  'SI': 'Szlovénia',
+  'RS': 'Szerbia',
+  'UA': 'Ukrajna',
+  'CH': 'Svájc',
+};
+
+const getCountryName = (code: string): string => countryNames[code] || code;
+
 const warningTabs = [
   { id: 'not_dispatched', label: 'Kiközvetítetlen', icon: UserX, color: 'text-cgp-badge-overdue' },
   { id: '24h', label: '24 óra!', icon: Clock, color: 'text-cgp-badge-lastday' },
@@ -66,7 +84,7 @@ const CaseWarningsPanel = ({ warnings }: CaseWarningsPanelProps) => {
     if (cases.length === 0) {
       return (
         <p className="text-muted-foreground text-center py-8">
-          Nincs ilyen típusú figyelmeztetés{selectedCountry !== 'all' ? ` (${selectedCountry})` : ''}.
+          Nincs ilyen típusú figyelmeztetés{selectedCountry !== 'all' ? ` (${getCountryName(selectedCountry)})` : ''}.
         </p>
       );
     }
@@ -124,15 +142,76 @@ const CaseWarningsPanel = ({ warnings }: CaseWarningsPanelProps) => {
 
   return (
     <div id="case-warnings-panel" className="mb-8">
-      {/* Panel Header */}
+      {/* Panel Header with Country Selector */}
       <div className="flex items-end justify-between">
-        <h2 className="bg-cgp-badge-overdue text-white uppercase text-xl md:text-2xl lg:text-3xl px-6 md:px-8 py-4 md:py-5 rounded-t-[25px] font-calibri-bold flex items-center gap-3">
-          <FileText className="w-6 h-6 md:w-8 md:h-8" />
-          Eset figyelmeztetések: {filteredWarnings.length}
-          {selectedCountry !== 'all' && (
-            <span className="text-base font-normal ml-2">({selectedCountry})</span>
-          )}
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="bg-cgp-badge-overdue text-white uppercase text-xl md:text-2xl lg:text-3xl px-6 md:px-8 py-4 md:py-5 rounded-t-[25px] font-calibri-bold flex items-center gap-3">
+            <FileText className="w-6 h-6 md:w-8 md:h-8" />
+            Eset figyelmeztetések: {filteredWarnings.length}
+          </h2>
+          
+          {/* Country selector next to header */}
+          <div className="flex items-center gap-2 pb-1">
+            <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+              <SelectTrigger className="w-[160px] h-9 bg-background border-border text-sm">
+                <Globe className="w-4 h-4 mr-1 text-muted-foreground" />
+                <SelectValue placeholder="Ország" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Összes ország</SelectItem>
+                {availableCountries.map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {getCountryName(country)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Default indicator */}
+            {selectedCountry === defaultCountry && defaultCountry !== 'all' && (
+              <span title="Alapértelmezett">
+                <Star className="w-4 h-4 text-cgp-badge-new fill-cgp-badge-new" />
+              </span>
+            )}
+
+            {/* Settings popover */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" title="Beállítások">
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72" align="start">
+                <div className="space-y-3">
+                  <h4 className="font-calibri-bold text-sm">Alapértelmezett ország</h4>
+                  <p className="text-xs text-muted-foreground">
+                    A kiválasztott ország jelenik meg automatikusan oldalbetöltéskor.
+                  </p>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm">
+                      {selectedCountry === 'all' ? 'Összes ország' : getCountryName(selectedCountry)}
+                    </span>
+                    <Button 
+                      size="sm" 
+                      onClick={handleSetDefault}
+                      disabled={selectedCountry === defaultCountry}
+                      className="rounded-xl"
+                    >
+                      <Star className="w-4 h-4 mr-1" />
+                      Mentés
+                    </Button>
+                  </div>
+                  {defaultCountry !== 'all' && (
+                    <p className="text-xs text-muted-foreground">
+                      Jelenlegi: <strong>{getCountryName(defaultCountry)}</strong>
+                    </p>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+        
         <button
           onClick={() => navigate("/dashboard/all-cases")}
           className="text-cgp-link hover:text-cgp-link-hover hover:underline pb-2 text-sm"
@@ -143,71 +222,6 @@ const CaseWarningsPanel = ({ warnings }: CaseWarningsPanelProps) => {
 
       {/* Panel Content with Tabs */}
       <div className="bg-cgp-badge-overdue/20 p-6 md:p-8">
-        {/* Country Filter Row */}
-        <div className="flex items-center justify-between gap-4 mb-4 bg-white/70 rounded-xl p-3">
-          <div className="flex items-center gap-3">
-            <Globe className="w-5 h-5 text-muted-foreground" />
-            <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-              <SelectTrigger className="w-[180px] bg-background">
-                <SelectValue placeholder="Válassz országot" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Összes ország</SelectItem>
-                {availableCountries.map((country) => (
-                  <SelectItem key={country} value={country}>
-                    {country}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Default indicator */}
-            {selectedCountry === defaultCountry && defaultCountry !== 'all' && (
-              <span className="flex items-center gap-1 text-xs text-cgp-badge-new bg-cgp-badge-new/20 px-2 py-1 rounded-full">
-                <Star className="w-3 h-3 fill-cgp-badge-new" />
-                Alapértelmezett
-              </span>
-            )}
-          </div>
-
-          {/* Settings popover for default */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2">
-                <Settings className="w-4 h-4" />
-                Beállítások
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-72" align="end">
-              <div className="space-y-3">
-                <h4 className="font-calibri-bold text-sm">Alapértelmezett ország</h4>
-                <p className="text-xs text-muted-foreground">
-                  A kiválasztott ország jelenik meg automatikusan oldalbetöltéskor.
-                </p>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm">
-                    {selectedCountry === 'all' ? 'Összes ország' : selectedCountry}
-                  </span>
-                  <Button 
-                    size="sm" 
-                    onClick={handleSetDefault}
-                    disabled={selectedCountry === defaultCountry}
-                    className="rounded-xl"
-                  >
-                    <Star className="w-4 h-4 mr-1" />
-                    Beállítás alapértelmezettként
-                  </Button>
-                </div>
-                {defaultCountry !== 'all' && (
-                  <p className="text-xs text-muted-foreground">
-                    Jelenlegi alapértelmezett: <strong>{defaultCountry}</strong>
-                  </p>
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-4 flex-wrap h-auto bg-white/50">
             {warningTabs.map((tab) => {
