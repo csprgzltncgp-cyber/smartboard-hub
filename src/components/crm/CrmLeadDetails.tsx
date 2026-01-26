@@ -23,7 +23,9 @@ const getContactTypeIcon = (type: CrmMeeting['contactType']) => {
     case 'email': return Mail;
     case 'video': return Video;
     case 'phone': return Phone;
-    case 'in_person': return MessageSquare;
+    case 'in_person': 
+    case 'personal': return MessageSquare;
+    default: return MessageSquare; // fallback
   }
 };
 

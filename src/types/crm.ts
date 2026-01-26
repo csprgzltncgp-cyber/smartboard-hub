@@ -2,7 +2,7 @@
 
 export type CrmStage = 'lead' | 'offer' | 'deal' | 'signed';
 
-export type ContactType = 'email' | 'video' | 'phone' | 'in_person';
+export type ContactType = 'email' | 'video' | 'phone' | 'in_person' | 'personal';
 
 export type MeetingMood = 'happy' | 'neutral' | 'confused' | 'negative';
 
