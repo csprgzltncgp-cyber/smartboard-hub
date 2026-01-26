@@ -2,6 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Dashboard from "@/pages/Dashboard";
 import SalesSmartboard from "./SalesSmartboard";
 import AccountSmartboard from "./AccountSmartboard";
+import OperativeSmartboard from "./OperativeSmartboard";
 
 /**
  * Dinamikusan választja ki a megfelelő SmartBoard-ot a felhasználó 
@@ -10,7 +11,7 @@ import AccountSmartboard from "./AccountSmartboard";
  * Saját SmartBoard oldallal rendelkező interfészek:
  * - Account ✓
  * - Sales ✓
- * - Operatív (elkészítendő)
+ * - Operatív ✓
  * - Pénzügyi (elkészítendő)
  * - Admin (elkészítendő)
  * - Digital (TODO oldalra megy)
@@ -30,8 +31,7 @@ const SmartboardRouter = () => {
     case "sales":
       return <SalesSmartboard />;
     case "operative":
-      // Operatív SmartBoard - saját oldal elkészítendő
-      return <Dashboard />;
+      return <OperativeSmartboard />;
     case "financial":
       // Pénzügyi SmartBoard - saját oldal elkészítendő
       return <Dashboard />;
