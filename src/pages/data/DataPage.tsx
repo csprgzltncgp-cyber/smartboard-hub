@@ -129,7 +129,7 @@ const DataPage = () => {
           </TabsTrigger>
           <TabsTrigger 
             value="comparison"
-            className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            className="flex items-center gap-2 data-[state=active]:bg-cgp-teal-light data-[state=active]:text-white"
           >
             <Scale className="w-4 h-4" />
             Összehasonlító tábla
