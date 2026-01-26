@@ -134,7 +134,7 @@ const RevenueTab = ({ year, month, country }: RevenueTabProps) => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-cgp-badge-new">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Contract Holder bevétel
@@ -147,7 +147,7 @@ const RevenueTab = ({ year, month, country }: RevenueTabProps) => {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-cgp-teal-light">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Manuális bevételek
@@ -160,7 +160,7 @@ const RevenueTab = ({ year, month, country }: RevenueTabProps) => {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-primary">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Összes bevétel
