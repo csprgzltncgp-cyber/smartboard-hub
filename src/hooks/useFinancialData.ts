@@ -244,20 +244,31 @@ export const useFinancialSummary = (filters: FinancialFilters) => {
   return useQuery({
     queryKey: ['financial-summary', filters],
     queryFn: async () => {
+      // Build queries with country filter support
+      let revenueQuery = supabase
+        .from('contract_holder_revenue')
+        .select('*')
+        .eq('year', filters.year);
+      
+      let entriesQuery = supabase
+        .from('manual_entries')
+        .select('*')
+        .eq('year', filters.year);
+
+      // Apply country filter if specified
+      if (filters.country && filters.country !== 'all') {
+        revenueQuery = revenueQuery.eq('country_id', filters.country);
+        entriesQuery = entriesQuery.eq('country_id', filters.country);
+      }
+
       // Fetch all data in parallel
       const [expensesRes, entriesRes, revenueRes] = await Promise.all([
         supabase
           .from('monthly_expenses')
           .select('*')
           .eq('year', filters.year),
-        supabase
-          .from('manual_entries')
-          .select('*')
-          .eq('year', filters.year),
-        supabase
-          .from('contract_holder_revenue')
-          .select('*')
-          .eq('year', filters.year),
+        entriesQuery,
+        revenueQuery,
       ]);
 
       if (expensesRes.error) throw expensesRes.error;
