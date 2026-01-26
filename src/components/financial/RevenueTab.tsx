@@ -154,7 +154,7 @@ const RevenueTab = ({ year, month, country }: RevenueTabProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-cgp-badge-new">
+            <div className="text-2xl font-bold text-primary">
               {formatCurrency(totalContractHolderRevenue)}
             </div>
           </CardContent>
@@ -167,7 +167,7 @@ const RevenueTab = ({ year, month, country }: RevenueTabProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-cgp-teal-light">
+            <div className="text-2xl font-bold text-primary">
               {formatCurrency(totalManualIncome)}
             </div>
           </CardContent>
