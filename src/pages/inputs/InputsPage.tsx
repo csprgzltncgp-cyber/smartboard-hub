@@ -57,7 +57,7 @@ const inputTypeLabels: Record<InputType, string> = {
   integer: "Egész szám",
   double: "Tizedes szám",
   date: "Dátum",
-  select: "Legördülő",
+  select: "Többválasztós",
   boolean: "Igen/Nem",
   database: "Adatbázisból",
 };
@@ -300,7 +300,7 @@ const InputsPage = () => {
       case "date":
         return <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">Dátum</Badge>;
       case "select":
-        return <Badge variant="outline" className="bg-accent text-accent-foreground border-accent">Legördülő</Badge>;
+        return <Badge variant="outline" className="bg-accent text-accent-foreground border-accent">Többválasztós</Badge>;
       case "boolean":
         return <Badge variant="outline" className="bg-secondary text-secondary-foreground border-secondary">Igen/Nem</Badge>;
       case "database":
@@ -336,7 +336,7 @@ const InputsPage = () => {
       </h1>
       <a 
         href="#" 
-        className="text-link hover:text-link-hover hover:underline text-sm inline-flex items-center gap-1 mb-6"
+        className="text-cgp-link hover:text-cgp-link-hover hover:underline text-sm inline-flex items-center gap-1 mb-6"
         onClick={(e) => {
           e.preventDefault();
           addNewInput();
@@ -410,7 +410,7 @@ const InputsPage = () => {
                           <SelectItem value="integer">Egész szám</SelectItem>
                           <SelectItem value="double">Tizedes szám</SelectItem>
                           <SelectItem value="date">Dátum</SelectItem>
-                          <SelectItem value="select">Legördülő</SelectItem>
+                          <SelectItem value="select">Többválasztós</SelectItem>
                           <SelectItem value="boolean">Igen/Nem</SelectItem>
                         </SelectContent>
                       </Select>
