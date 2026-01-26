@@ -379,8 +379,9 @@ const ComparisonTab = ({ year, month, country }: ComparisonTabProps) => {
     const leftPercent = total > 0 ? (leftValue / total) * 100 : 50;
     const rightPercent = total > 0 ? (rightValue / total) * 100 : 50;
 
-    const leftColor = CONTRACT_HOLDER_COLORS[comparison.left.contractHolder];
-    const rightColor = CONTRACT_HOLDER_COLORS[comparison.right.contractHolder];
+    // Fixed colors: teal for left, light teal for right
+    const leftColor = '#00575f'; // CGP Teal
+    const rightColor = '#59c6c6'; // CGP Teal Light
 
     const getCountryName = (countryId: string | null) => {
       if (!countryId) return 'Összes';
