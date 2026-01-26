@@ -1,0 +1,303 @@
+import { useMemo, useEffect } from "react";
+import { TrendingUp, TrendingDown, Minus, ArrowUpRight, ArrowDownLeft, DollarSign, Percent } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { useFinancialSummary, useUpsertContractHolderRevenue, useUpsertMonthlyExpense } from "@/hooks/useFinancialData";
+import { useContractHolderRevenue, useMonthlyExpenses } from "@/hooks/useFinancialData";
+import { formatCurrency, MONTH_NAMES, generateMockContractHolderRevenue, generateMockMonthlyExpenses } from "@/data/financialMockData";
+import { CONTRACT_HOLDER_LABELS, CONTRACT_HOLDER_COLORS, ContractHolderType } from "@/types/financial";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface FinancialSummaryTabProps {
+  year: number;
+  month?: number;
+  country?: string;
+}
+
+const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps) => {
+  const { data: summaries, isLoading, refetch } = useFinancialSummary({ year, month, country });
+  const { data: revenues } = useContractHolderRevenue({ year });
+  const { data: expenses } = useMonthlyExpenses({ year });
+  
+  // Check if we have data
+  const hasData = (revenues && revenues.length > 0) || (expenses && expenses.length > 0);
+
+  // Seed mock data function
+  const seedMockData = async () => {
+    try {
+      // Generate and insert revenue data
+      const revenueData = generateMockContractHolderRevenue(year);
+      const { error: revenueError } = await supabase
+        .from('contract_holder_revenue')
+        .upsert(revenueData, { onConflict: 'year,month,contract_holder,country_id' });
+      
+      if (revenueError) throw revenueError;
+
+      // Generate and insert expense data
+      const expenseData = generateMockMonthlyExpenses(year);
+      const { error: expenseError } = await supabase
+        .from('monthly_expenses')
+        .upsert(expenseData, { onConflict: 'year,month,category,custom_category_name' });
+
+      if (expenseError) throw expenseError;
+
+      toast.success(`${year} éves mock adatok betöltve`);
+      refetch();
+    } catch (error) {
+      console.error(error);
+      toast.error('Hiba történt az adatok betöltésekor');
+    }
+  };
+  
+  // Calculate totals
+  const totals = useMemo(() => {
+    if (!summaries) return null;
+    
+    const filtered = month ? summaries.filter(s => s.month === month) : summaries;
+    
+    const totalRevenue = filtered.reduce((sum, s) => sum + s.totalRevenue, 0);
+    const totalExpenses = filtered.reduce((sum, s) => sum + s.totalExpenses, 0);
+    const profit = totalRevenue - totalExpenses;
+    const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
+    
+    return { totalRevenue, totalExpenses, profit, profitMargin, isProfitable: profit > 0 };
+  }, [summaries, month]);
+
+  // Chart data for monthly trend
+  const chartData = useMemo(() => {
+    if (!summaries) return [];
+    return summaries.map(s => ({
+      name: MONTH_NAMES[s.month - 1].substring(0, 3),
+      month: s.month,
+      Bevétel: s.totalRevenue,
+      Kiadás: s.totalExpenses,
+      Profit: s.profit,
+    }));
+  }, [summaries]);
+
+  // Contract holder pie data
+  const pieData = useMemo(() => {
+    if (!summaries) return [];
+    
+    const filtered = month ? summaries.filter(s => s.month === month) : summaries;
+    const totals: Record<ContractHolderType, number> = {
+      cgp_europe: 0,
+      telus: 0,
+      telus_wpo: 0,
+      compsych: 0,
+    };
+
+    filtered.forEach(s => {
+      Object.entries(s.revenueByContractHolder).forEach(([key, value]) => {
+        totals[key as ContractHolderType] += value;
+      });
+    });
+
+    return Object.entries(totals)
+      .filter(([_, value]) => value > 0)
+      .map(([key, value]) => ({
+        name: CONTRACT_HOLDER_LABELS[key as ContractHolderType],
+        value,
+        color: CONTRACT_HOLDER_COLORS[key as ContractHolderType],
+      }));
+  }, [summaries, month]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Show seed button if no data
+  if (!hasData) {
+    return (
+      <div className="bg-white rounded-xl border p-12 text-center">
+        <DollarSign className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+        <h3 className="text-xl font-semibold mb-2">Nincs pénzügyi adat</h3>
+        <p className="text-muted-foreground mb-6">
+          A {year}. évre még nincsenek pénzügyi adatok rögzítve.
+        </p>
+        <Button onClick={seedMockData} className="rounded-xl">
+          Mock adatok betöltése ({year})
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Revenue */}
+        <Card className="border-l-4 border-l-cgp-badge-new">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <ArrowDownLeft className="w-4 h-4 text-cgp-badge-new" />
+              Összes bevétel
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-cgp-badge-new">
+              {formatCurrency(totals?.totalRevenue || 0)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {month ? MONTH_NAMES[month - 1] : `${year} teljes év`}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Total Expenses */}
+        <Card className="border-l-4 border-l-cgp-badge-overdue">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <ArrowUpRight className="w-4 h-4 text-cgp-badge-overdue" />
+              Összes kiadás
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-cgp-badge-overdue">
+              {formatCurrency(totals?.totalExpenses || 0)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {month ? MONTH_NAMES[month - 1] : `${year} teljes év`}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Profit/Loss */}
+        <Card className={`border-l-4 ${totals?.isProfitable ? 'border-l-cgp-badge-new' : 'border-l-cgp-badge-overdue'}`}>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              {totals?.isProfitable ? (
+                <TrendingUp className="w-4 h-4 text-cgp-badge-new" />
+              ) : (
+                <TrendingDown className="w-4 h-4 text-cgp-badge-overdue" />
+              )}
+              Eredmény
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${totals?.isProfitable ? 'text-cgp-badge-new' : 'text-cgp-badge-overdue'}`}>
+              {formatCurrency(totals?.profit || 0)}
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`text-xs font-medium px-2 py-0.5 rounded ${totals?.isProfitable ? 'bg-cgp-badge-new/10 text-cgp-badge-new' : 'bg-cgp-badge-overdue/10 text-cgp-badge-overdue'}`}>
+                {totals?.isProfitable ? 'PROFITÁBILIS' : 'VESZTESÉGES'}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Profit Margin */}
+        <Card className="border-l-4 border-l-primary">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Percent className="w-4 h-4 text-primary" />
+              Profit margó
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">
+              {totals?.profitMargin.toFixed(1)}%
+            </div>
+            <Progress 
+              value={Math.max(0, Math.min(100, totals?.profitMargin || 0))} 
+              className="mt-2 h-2"
+            />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Monthly Trend Chart */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-lg">Havi pénzügyi trend</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis tickFormatter={(value) => `€${(value / 1000).toFixed(0)}k`} />
+                  <Tooltip 
+                    formatter={(value: number) => formatCurrency(value)}
+                    labelFormatter={(label) => `${label}`}
+                  />
+                  <Legend />
+                  <Bar dataKey="Bevétel" fill="hsl(90, 38%, 52%)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Kiadás" fill="hsl(355, 91%, 45%)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Contract Holder Pie Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Bevétel megoszlás</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Profit Line Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Profit alakulás</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis tickFormatter={(value) => `€${(value / 1000).toFixed(0)}k`} />
+                <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                <Line 
+                  type="monotone" 
+                  dataKey="Profit" 
+                  stroke="hsl(185, 100%, 19%)" 
+                  strokeWidth={3}
+                  dot={{ fill: 'hsl(185, 100%, 19%)', strokeWidth: 2 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default FinancialSummaryTab;
