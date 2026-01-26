@@ -66,17 +66,18 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
     return { totalRevenue, totalExpenses, profit, profitMargin, isProfitable: profit > 0 };
   }, [summaries, month]);
 
-  // Chart data for monthly trend
+  // Chart data for monthly trend - filter by month if selected
   const chartData = useMemo(() => {
     if (!summaries) return [];
-    return summaries.map(s => ({
+    const filtered = month ? summaries.filter(s => s.month === month) : summaries;
+    return filtered.map(s => ({
       name: MONTH_NAMES[s.month - 1].substring(0, 3),
       month: s.month,
       Bevétel: s.totalRevenue,
       Kiadás: s.totalExpenses,
       Profit: s.profit,
     }));
-  }, [summaries]);
+  }, [summaries, month]);
 
   // Contract holder pie data
   const pieData = useMemo(() => {
