@@ -1,4 +1,4 @@
-import { ListChecks, Plus, Globe, Database, Lock } from "lucide-react";
+import { ListChecks, Plus, Globe, Database, Lock, Pencil, Trash2, Save, X } from "lucide-react";
 import { useState } from "react";
 import {
   Table,
@@ -15,11 +15,18 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
 type InputType = "text" | "dropdown" | "database";
 
@@ -70,6 +77,9 @@ const languages = [
 
 const InputsPage = () => {
   const [inputs, setInputs] = useState<CaseInput[]>(defaultInputs);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState<{ name: string; type: InputType }>({ name: "", type: "text" });
+  const [translationDialogOpen, setTranslationDialogOpen] = useState(false);
   const [selectedInput, setSelectedInput] = useState<CaseInput | null>(null);
   const [translations, setTranslations] = useState<{ [lang: string]: string }>({});
 
@@ -77,11 +87,38 @@ const InputsPage = () => {
     setInputs(inputs.map(input => 
       input.id === id ? { ...input, isPersonalData: checked } : input
     ));
+    toast.success("Beállítás mentve");
+  };
+
+  const startEditing = (input: CaseInput) => {
+    setEditingId(input.id);
+    setEditForm({ name: input.name, type: input.type });
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditForm({ name: "", type: "text" });
+  };
+
+  const saveEditing = () => {
+    if (editingId && editForm.name.trim()) {
+      setInputs(inputs.map(input =>
+        input.id === editingId ? { ...input, name: editForm.name, type: editForm.type } : input
+      ));
+      setEditingId(null);
+      toast.success("Input mentve");
+    }
+  };
+
+  const deleteInput = (id: number) => {
+    setInputs(inputs.filter(input => input.id !== id));
+    toast.success("Input törölve");
   };
 
   const openTranslationDialog = (input: CaseInput) => {
     setSelectedInput(input);
     setTranslations(input.translations || { hu: input.name, en: "", de: "" });
+    setTranslationDialogOpen(true);
   };
 
   const saveTranslations = () => {
@@ -89,7 +126,9 @@ const InputsPage = () => {
       setInputs(inputs.map(input =>
         input.id === selectedInput.id ? { ...input, translations } : input
       ));
+      setTranslationDialogOpen(false);
       setSelectedInput(null);
+      toast.success("Fordítások mentve");
     }
   };
 
@@ -109,6 +148,19 @@ const InputsPage = () => {
     }
   };
 
+  const addNewInput = () => {
+    const newId = Math.max(...inputs.map(i => i.id)) + 1;
+    const newInput: CaseInput = {
+      id: newId,
+      name: "Új input",
+      type: "text",
+      isPersonalData: false,
+    };
+    setInputs([...inputs, newInput]);
+    startEditing(newInput);
+    toast.success("Új input létrehozva");
+  };
+
   return (
     <div>
       <h1 className="text-2xl font-calibri-bold text-foreground mb-2 flex items-center gap-2">
@@ -117,10 +169,10 @@ const InputsPage = () => {
       </h1>
       <a 
         href="#" 
-        className="text-primary hover:underline text-sm inline-flex items-center gap-1 mb-6"
+        className="text-link hover:text-link-hover hover:underline text-sm inline-flex items-center gap-1 mb-6"
         onClick={(e) => {
           e.preventDefault();
-          // TODO: Navigate to new input creation
+          addNewInput();
         }}
       >
         <Plus className="w-4 h-4" />
@@ -135,7 +187,7 @@ const InputsPage = () => {
               <TableHead>Név</TableHead>
               <TableHead className="w-32">Típus</TableHead>
               <TableHead className="w-40 text-center">3 hónap után törlendő</TableHead>
-              <TableHead className="w-24 text-center">Fordítás</TableHead>
+              <TableHead className="w-32 text-center">Műveletek</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -143,14 +195,40 @@ const InputsPage = () => {
               <TableRow key={input.id} className={input.type === "database" ? "bg-muted/30" : ""}>
                 <TableCell className="text-muted-foreground">{index + 1}</TableCell>
                 <TableCell className="font-medium">
-                  <div className="flex items-center gap-2">
-                    {input.name}
-                    {input.type === "database" && (
-                      <Lock className="w-3.5 h-3.5 text-muted-foreground" />
-                    )}
-                  </div>
+                  {editingId === input.id ? (
+                    <Input
+                      value={editForm.name}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      className="max-w-xs"
+                      autoFocus
+                    />
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      {input.name}
+                      {input.type === "database" && (
+                        <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                      )}
+                    </div>
+                  )}
                 </TableCell>
-                <TableCell>{getTypeBadge(input.type)}</TableCell>
+                <TableCell>
+                  {editingId === input.id ? (
+                    <Select
+                      value={editForm.type}
+                      onValueChange={(value: InputType) => setEditForm({ ...editForm, type: value })}
+                    >
+                      <SelectTrigger className="w-28">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-card border shadow-lg z-50">
+                        <SelectItem value="text">Szöveg</SelectItem>
+                        <SelectItem value="dropdown">Legördülő</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    getTypeBadge(input.type)
+                  )}
+                </TableCell>
                 <TableCell className="text-center">
                   <Switch
                     checked={input.isPersonalData}
@@ -159,43 +237,61 @@ const InputsPage = () => {
                   />
                 </TableCell>
                 <TableCell className="text-center">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="rounded-xl"
-                        onClick={() => openTranslationDialog(input)}
-                        disabled={input.type === "database"}
-                      >
-                        <Globe className="w-4 h-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Fordítások: {selectedInput?.name}</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        {languages.map((lang) => (
-                          <div key={lang.code} className="space-y-2">
-                            <Label htmlFor={lang.code}>{lang.name}</Label>
-                            <Input
-                              id={lang.code}
-                              value={translations[lang.code] || ""}
-                              onChange={(e) => setTranslations({
-                                ...translations,
-                                [lang.code]: e.target.value
-                              })}
-                              placeholder={`${lang.name} fordítás...`}
-                            />
-                          </div>
-                        ))}
-                        <Button onClick={saveTranslations} className="w-full rounded-xl">
-                          Mentés
+                  <div className="flex items-center justify-center gap-1">
+                    {editingId === input.id ? (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="rounded-xl text-primary hover:text-primary"
+                          onClick={saveEditing}
+                        >
+                          <Save className="w-4 h-4" />
                         </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="rounded-xl"
+                          onClick={cancelEditing}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="rounded-xl"
+                          onClick={() => openTranslationDialog(input)}
+                          disabled={input.type === "database"}
+                          title="Fordítások"
+                        >
+                          <Globe className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="rounded-xl"
+                          onClick={() => startEditing(input)}
+                          disabled={input.type === "database"}
+                          title="Szerkesztés"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="rounded-xl text-destructive hover:text-destructive"
+                          onClick={() => deleteInput(input.id)}
+                          disabled={input.type === "database"}
+                          title="Törlés"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -207,6 +303,35 @@ const InputsPage = () => {
         <Lock className="w-3 h-3 inline mr-1" />
         Az adatbázisból érkező inputok (Kért tanácsadás nyelve, Specializáció) nem szerkeszthetők.
       </p>
+
+      {/* Translation Dialog */}
+      <Dialog open={translationDialogOpen} onOpenChange={setTranslationDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Fordítások: {selectedInput?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {languages.map((lang) => (
+              <div key={lang.code} className="space-y-2">
+                <Label htmlFor={lang.code}>{lang.name}</Label>
+                <Input
+                  id={lang.code}
+                  value={translations[lang.code] || ""}
+                  onChange={(e) => setTranslations({
+                    ...translations,
+                    [lang.code]: e.target.value
+                  })}
+                  placeholder={`${lang.name} fordítás...`}
+                />
+              </div>
+            ))}
+            <Button onClick={saveTranslations} className="w-full rounded-xl">
+              <Save className="w-4 h-4 mr-2" />
+              Mentés
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
