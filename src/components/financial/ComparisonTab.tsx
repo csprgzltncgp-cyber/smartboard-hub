@@ -52,7 +52,101 @@ const ComparisonTab = ({ year, month, country }: ComparisonTabProps) => {
   const { data: countries } = useCountries();
   const { data: revenues } = useContractHolderRevenue({ year });
   
-  const [comparisons, setComparisons] = useState<ComparisonItem[]>([]);
+  // Initial mock comparisons
+  const initialComparisons: ComparisonItem[] = [
+    {
+      id: 'mock-1',
+      metric: 'revenue',
+      left: {
+        year: 2025,
+        month: 6,
+        countryId: null,
+        contractHolder: 'cgp_europe',
+        company: null,
+      },
+      right: {
+        year: 2025,
+        month: 6,
+        countryId: null,
+        contractHolder: 'telus',
+        company: null,
+      },
+    },
+    {
+      id: 'mock-2',
+      metric: 'consultation_count',
+      left: {
+        year: 2025,
+        month: 3,
+        countryId: null,
+        contractHolder: 'cgp_europe',
+        company: 'Henkel',
+      },
+      right: {
+        year: 2025,
+        month: 3,
+        countryId: null,
+        contractHolder: 'cgp_europe',
+        company: 'Siemens AG',
+      },
+    },
+    {
+      id: 'mock-3',
+      metric: 'profit',
+      left: {
+        year: 2025,
+        month: 1,
+        countryId: null,
+        contractHolder: 'telus_wpo',
+        company: null,
+      },
+      right: {
+        year: 2025,
+        month: 1,
+        countryId: null,
+        contractHolder: 'compsych',
+        company: null,
+      },
+    },
+    {
+      id: 'mock-4',
+      metric: 'consultation_cost',
+      left: {
+        year: 2025,
+        month: 4,
+        countryId: null,
+        contractHolder: 'cgp_europe',
+        company: 'BMW Group',
+      },
+      right: {
+        year: 2025,
+        month: 4,
+        countryId: null,
+        contractHolder: 'telus',
+        company: 'Shell Hungary',
+      },
+    },
+    {
+      id: 'mock-5',
+      metric: 'profit_margin',
+      left: {
+        year: 2025,
+        month: 5,
+        countryId: null,
+        contractHolder: 'cgp_europe',
+        company: null,
+      },
+      right: {
+        year: 2025,
+        month: 5,
+        countryId: null,
+        contractHolder: 'telus_wpo',
+        company: null,
+      },
+    },
+  ];
+
+  const [comparisons, setComparisons] = useState<ComparisonItem[]>(initialComparisons);
   const [isCreating, setIsCreating] = useState(false);
   
   // New comparison form state
