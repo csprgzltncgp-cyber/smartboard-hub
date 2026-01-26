@@ -170,27 +170,27 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
       {/* Hero Section - Profitability & Margin - CGP Teal colors */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Profit/Loss - Teal when profitable, Red when loss */}
-        <Card className={totals?.isProfitable ? 'bg-primary' : 'bg-cgp-badge-overdue'}>
+        <Card className={totals?.isProfitable ? 'bg-primary/40' : 'bg-cgp-badge-overdue/40'}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-white/80 flex items-center gap-2">
+            <CardTitle className={`text-sm font-medium flex items-center gap-2 ${totals?.isProfitable ? 'text-primary' : 'text-cgp-badge-overdue'}`}>
               {totals?.isProfitable ? (
-                <TrendingUp className="w-4 h-4 text-white" />
+                <TrendingUp className="w-4 h-4" />
               ) : (
-                <TrendingDown className="w-4 h-4 text-white" />
+                <TrendingDown className="w-4 h-4" />
               )}
               Eredmény
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-white">
+            <div className={`text-3xl font-bold ${totals?.isProfitable ? 'text-primary' : 'text-cgp-badge-overdue'}`}>
               {formatCurrency(totals?.profit || 0)}
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-sm font-semibold px-3 py-1 rounded-lg bg-white/20 text-white">
+              <span className={`text-sm font-semibold px-3 py-1 rounded-lg ${totals?.isProfitable ? 'bg-primary/20 text-primary' : 'bg-cgp-badge-overdue/20 text-cgp-badge-overdue'}`}>
                 {totals?.isProfitable ? 'PROFITÁBILIS' : 'VESZTESÉGES'}
               </span>
             </div>
-            <p className="text-xs text-white/70 mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               {month ? MONTH_NAMES[month - 1] : `${year} teljes év`}
             </p>
           </CardContent>
