@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Plus, ArrowUpRight, Trash2, Edit2, Receipt } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useMonthlyExpenses, useManualEntries, useUpsertMonthlyExpense, useCreateManualEntry, useDeleteMonthlyExpense, useDeleteManualEntry } from "@/hooks/useFinancialData";
+import { useMonthlyExpenses, useManualEntries, useContractHolderRevenue, useUpsertMonthlyExpense, useCreateManualEntry, useDeleteMonthlyExpense, useDeleteManualEntry } from "@/hooks/useFinancialData";
 import { formatCurrency, MONTH_NAMES } from "@/data/financialMockData";
 import { EXPENSE_CATEGORY_LABELS, ExpenseCategory } from "@/types/financial";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ExpenseCategorySummaryTable from "./ExpenseCategorySummaryTable";
+import ContractHolderExpenseTable from "./ContractHolderExpenseTable";
 
 interface ExpensesTabProps {
   year: number;
@@ -42,6 +43,7 @@ const CATEGORY_COLORS: Record<ExpenseCategory, string> = {
 const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
   const { data: expenses, isLoading } = useMonthlyExpenses({ year, month });
   const { data: manualEntries } = useManualEntries({ year, month });
+  const { data: revenues } = useContractHolderRevenue({ year, month });
   const upsertExpense = useUpsertMonthlyExpense();
   const createManualEntry = useCreateManualEntry();
   const deleteExpense = useDeleteMonthlyExpense();
@@ -253,6 +255,9 @@ const ExpensesTab = ({ year, month }: ExpensesTabProps) => {
 
       {/* Expense Category Summary Table */}
       <ExpenseCategorySummaryTable expenses={expenses} year={year} month={month} />
+
+      {/* Contract Holder Expense Summary Table */}
+      <ContractHolderExpenseTable revenues={revenues} year={year} month={month} />
 
       {/* Sub-tabs for Fixed vs Manual */}
       <Tabs value={activeSubTab} onValueChange={(v) => setActiveSubTab(v as 'fixed' | 'manual')}>
