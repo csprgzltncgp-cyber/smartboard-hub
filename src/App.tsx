@@ -22,6 +22,7 @@ import AccountSmartboard from "./pages/smartboard/AccountSmartboard";
 import SmartboardRouter from "./pages/smartboard/SmartboardRouter";
 import MyClientsPage from "./pages/my-clients/MyClientsPage";
 import ClientActivityPage from "./pages/my-clients/ClientActivityPage";
+import DataPage from "./pages/data/DataPage";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,8 @@ const App = () => (
               <Route path="case-dispatch" element={<CaseDispatchPage />} />
               <Route path="my-clients" element={<MyClientsPage />} />
               <Route path="my-clients/:companyId" element={<ClientActivityPage />} />
+              <Route path="data" element={<DataPage />} />
+              <Route path="digital/data" element={<DataPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

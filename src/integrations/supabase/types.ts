@@ -270,6 +270,56 @@ export type Database = {
           },
         ]
       }
+      contract_holder_revenue: {
+        Row: {
+          consultation_cost: number
+          consultation_count: number
+          contract_holder: Database["public"]["Enums"]["contract_holder_type"]
+          country_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          month: number
+          revenue: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          consultation_cost?: number
+          consultation_count?: number
+          contract_holder: Database["public"]["Enums"]["contract_holder_type"]
+          country_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          month: number
+          revenue?: number
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          consultation_cost?: number
+          consultation_count?: number
+          contract_holder?: Database["public"]["Enums"]["contract_holder_type"]
+          country_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          month?: number
+          revenue?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_holder_revenue_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       countries: {
         Row: {
           code: string
@@ -338,6 +388,125 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      manual_entries: {
+        Row: {
+          amount: number
+          contract_holder:
+            | Database["public"]["Enums"]["contract_holder_type"]
+            | null
+          country_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string
+          entry_type: Database["public"]["Enums"]["entry_type"]
+          id: string
+          month: number
+          notes: string | null
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          amount: number
+          contract_holder?:
+            | Database["public"]["Enums"]["contract_holder_type"]
+            | null
+          country_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description: string
+          entry_type: Database["public"]["Enums"]["entry_type"]
+          id?: string
+          month: number
+          notes?: string | null
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          amount?: number
+          contract_holder?:
+            | Database["public"]["Enums"]["contract_holder_type"]
+            | null
+          country_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string
+          entry_type?: Database["public"]["Enums"]["entry_type"]
+          id?: string
+          month?: number
+          notes?: string | null
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_entries_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manual_entries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monthly_expenses: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["expense_category"]
+          created_at: string
+          created_by: string | null
+          currency: string
+          custom_category_name: string | null
+          id: string
+          month: number
+          notes: string | null
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          amount?: number
+          category: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          custom_category_name?: string | null
+          id?: string
+          month: number
+          notes?: string | null
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          custom_category_name?: string | null
+          id?: string
+          month?: number
+          notes?: string | null
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_expenses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "app_operators"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_client_assignments: {
         Row: {
@@ -413,6 +582,18 @@ export type Database = {
         | "orientation"
         | "communication_refresh"
         | "other"
+      contract_holder_type: "cgp_europe" | "telus" | "telus_wpo" | "compsych"
+      entry_type: "income" | "expense"
+      expense_category:
+        | "gross_salary"
+        | "corporate_tax"
+        | "innovation_fee"
+        | "vat"
+        | "car_tax"
+        | "local_business_tax"
+        | "other_costs"
+        | "supplier_invoices"
+        | "custom"
       lead_status:
         | "lead"
         | "offer"
@@ -569,6 +750,19 @@ export const Constants = {
         "orientation",
         "communication_refresh",
         "other",
+      ],
+      contract_holder_type: ["cgp_europe", "telus", "telus_wpo", "compsych"],
+      entry_type: ["income", "expense"],
+      expense_category: [
+        "gross_salary",
+        "corporate_tax",
+        "innovation_fee",
+        "vat",
+        "car_tax",
+        "local_business_tax",
+        "other_costs",
+        "supplier_invoices",
+        "custom",
       ],
       lead_status: [
         "lead",
