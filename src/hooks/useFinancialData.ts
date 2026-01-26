@@ -212,6 +212,23 @@ export const useContractHolderRevenue = (filters: FinancialFilters) => {
   });
 };
 
+// All years contract holder revenue - for comparison tab
+export const useAllContractHolderRevenue = () => {
+  return useQuery({
+    queryKey: ['contract-holder-revenue-all'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('contract_holder_revenue')
+        .select('*, countries(name, code)')
+        .order('year', { ascending: true })
+        .order('month', { ascending: true });
+
+      if (error) throw error;
+      return data as (ContractHolderRevenue & { countries?: { name: string; code: string } })[];
+    },
+  });
+};
+
 export const useUpsertContractHolderRevenue = () => {
   const queryClient = useQueryClient();
 
