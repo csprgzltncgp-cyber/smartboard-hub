@@ -311,35 +311,35 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
                 {/* Labels */}
                 <div className="flex justify-between items-center text-sm">
                   <div className="flex items-center gap-2">
-                    <ArrowUpRight className="w-4 h-4 text-cgp-badge-lastday" />
-                    <span className="font-medium text-cgp-badge-lastday">Kiadások</span>
-                    <span className="text-muted-foreground">({expensePercent.toFixed(1)}%)</span>
+                    <ArrowDownLeft className="w-4 h-4 text-cgp-badge-new" />
+                    <span className="font-medium text-cgp-badge-new">Bevételek</span>
+                    <span className="text-muted-foreground">({revenuePercent.toFixed(1)}%)</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">({revenuePercent.toFixed(1)}%)</span>
-                    <span className="font-medium text-cgp-badge-new">Bevételek</span>
-                    <ArrowDownLeft className="w-4 h-4 text-cgp-badge-new" />
+                    <span className="text-muted-foreground">({expensePercent.toFixed(1)}%)</span>
+                    <span className="font-medium text-cgp-badge-lastday">Kiadások</span>
+                    <ArrowUpRight className="w-4 h-4 text-cgp-badge-lastday" />
                   </div>
                 </div>
 
                 {/* Balance Bar */}
                 <div className="flex h-8 rounded-lg overflow-hidden bg-muted/30">
-                  {/* Expense bar - grows from center to left */}
+                  {/* Revenue bar - grows from center to left */}
                   <div 
-                    className="bg-cgp-badge-lastday flex items-center justify-start transition-all duration-500"
-                    style={{ width: `${expensePercent}%` }}
-                  >
-                    <span className="text-white font-semibold text-sm px-3 truncate">
-                      {formatCurrency(expenses)}
-                    </span>
-                  </div>
-                  {/* Revenue bar - grows from center to right */}
-                  <div 
-                    className="bg-cgp-badge-new flex items-center justify-end transition-all duration-500"
+                    className="bg-cgp-badge-new flex items-center justify-start transition-all duration-500"
                     style={{ width: `${revenuePercent}%` }}
                   >
                     <span className="text-white font-semibold text-sm px-3 truncate">
                       {formatCurrency(revenue)}
+                    </span>
+                  </div>
+                  {/* Expense bar - grows from center to right */}
+                  <div 
+                    className="bg-cgp-badge-lastday flex items-center justify-end transition-all duration-500"
+                    style={{ width: `${expensePercent}%` }}
+                  >
+                    <span className="text-white font-semibold text-sm px-3 truncate">
+                      {formatCurrency(expenses)}
                     </span>
                   </div>
                 </div>
