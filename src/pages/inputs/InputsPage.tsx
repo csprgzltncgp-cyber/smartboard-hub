@@ -34,7 +34,8 @@ import {
 import { toast } from "sonner";
 
 // Based on Laravel migration: enum('type', ['integer', 'date', 'double', 'text', 'select', 'multiple-list', 'boolean'])
-type InputType = "text" | "integer" | "double" | "date" | "select" | "multiple-list" | "boolean" | "database";
+// Note: select and multiple-list are combined as "select" (Legördülő) in UI
+type InputType = "text" | "integer" | "double" | "date" | "select" | "boolean" | "database";
 
 interface DropdownOption {
   id: number;
@@ -48,7 +49,7 @@ interface CaseInput {
   type: InputType;
   isPersonalData: boolean;
   translations?: { [lang: string]: string };
-  options?: DropdownOption[]; // For select and multiple-list types
+  options?: DropdownOption[]; // For select type
 }
 
 const inputTypeLabels: Record<InputType, string> = {
@@ -56,8 +57,7 @@ const inputTypeLabels: Record<InputType, string> = {
   integer: "Egész szám",
   double: "Tizedes szám",
   date: "Dátum",
-  select: "Legördülő (egy választás)",
-  "multiple-list": "Legördülő (több választás)",
+  select: "Legördülő",
   boolean: "Igen/Nem",
   database: "Adatbázisból",
 };
@@ -179,8 +179,8 @@ const InputsPage = () => {
           ...input, 
           name: editForm.name, 
           type: editForm.type,
-          // Initialize options array if switching to select/multiple-list
-          options: (editForm.type === "select" || editForm.type === "multiple-list") 
+          // Initialize options array if switching to select
+          options: editForm.type === "select" 
             ? (input.options || []) 
             : undefined
         } : input
@@ -301,8 +301,6 @@ const InputsPage = () => {
         return <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">Dátum</Badge>;
       case "select":
         return <Badge variant="outline" className="bg-accent text-accent-foreground border-accent">Legördülő</Badge>;
-      case "multiple-list":
-        return <Badge variant="outline" className="bg-accent text-accent-foreground border-accent">Többválasztós</Badge>;
       case "boolean":
         return <Badge variant="outline" className="bg-secondary text-secondary-foreground border-secondary">Igen/Nem</Badge>;
       case "database":
@@ -328,7 +326,7 @@ const InputsPage = () => {
     toast.success("Új input létrehozva");
   };
 
-  const hasOptions = (type: InputType) => type === "select" || type === "multiple-list";
+  const hasOptions = (type: InputType) => type === "select";
 
   return (
     <div>
@@ -413,7 +411,6 @@ const InputsPage = () => {
                           <SelectItem value="double">Tizedes szám</SelectItem>
                           <SelectItem value="date">Dátum</SelectItem>
                           <SelectItem value="select">Legördülő</SelectItem>
-                          <SelectItem value="multiple-list">Többválasztós</SelectItem>
                           <SelectItem value="boolean">Igen/Nem</SelectItem>
                         </SelectContent>
                       </Select>
