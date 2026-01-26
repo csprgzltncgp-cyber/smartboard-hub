@@ -142,12 +142,12 @@ const MyClientsPage = () => {
     return teamClients.filter(item => getPlanCount(item.company?.id || "") === 0);
   }, [teamClients, activityPlans]);
   
-  // Get unique countries from the client list
+  // Get unique countries from the UNFILTERED client list (so selector doesn't disappear)
   const availableCountries = useMemo(() => {
-    const baseList = activeTab === "team-clients" ? teamClients : myClients;
-    const countryIds = new Set(baseList.map(item => item.company?.country_id).filter(Boolean));
+    const baseList = activeTab === "team-clients" ? allAssignments : myAssignments;
+    const countryIds = new Set((baseList || []).map(item => item.company?.country_id).filter(Boolean));
     return countries?.filter(c => countryIds.has(c.id)) || [];
-  }, [activeTab, teamClients, myClients, countries]);
+  }, [activeTab, allAssignments, myAssignments, countries]);
 
   if (isLoading) {
     return (
