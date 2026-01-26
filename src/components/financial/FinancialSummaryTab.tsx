@@ -196,21 +196,21 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
           </CardContent>
         </Card>
 
-        {/* Profit Margin - Teal Light */}
+        {/* Profit Margin - Same colors as Eredmény */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Percent className="w-4 h-4 text-cgp-teal-light" />
+              <Percent className="w-4 h-4 text-primary" />
               Profit margó
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-cgp-teal-light">
+            <div className="text-3xl font-bold text-primary">
               {totals?.profitMargin.toFixed(1)}%
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3 mt-3">
+            <div className="w-full bg-muted rounded-full h-3 mt-3">
               <div 
-                className="bg-cgp-teal-light h-3 rounded-full transition-all"
+                className="bg-primary h-3 rounded-full transition-all"
                 style={{ width: `${Math.max(0, Math.min(100, totals?.profitMargin || 0))}%` }}
               />
             </div>
