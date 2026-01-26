@@ -176,7 +176,7 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
               {totals?.isProfitable ? (
                 <TrendingUp className="w-4 h-4 text-primary" />
               ) : (
-                <TrendingDown className="w-4 h-4 text-cgp-badge-lastday" />
+                <TrendingDown className="w-4 h-4 text-primary" />
               )}
               Eredmény
             </CardTitle>
@@ -186,7 +186,7 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
               {formatCurrency(totals?.profit || 0)}
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <span className={`text-sm font-semibold px-3 py-1 rounded-lg ${totals?.isProfitable ? 'bg-primary/15 text-primary' : 'bg-cgp-badge-lastday/15 text-cgp-badge-lastday'}`}>
+              <span className="text-sm font-semibold px-3 py-1 rounded-lg bg-primary/15 text-primary">
                 {totals?.isProfitable ? 'PROFITÁBILIS' : 'VESZTESÉGES'}
               </span>
             </div>
