@@ -855,50 +855,52 @@ const ExpertForm = () => {
               </div>
             </div>
 
-            {/* Kapcsolattartási adatok */}
-            <div className="bg-white rounded-xl border p-6 space-y-4">
-              <h2 className="text-lg font-semibold mb-4">Kapcsolattartási adatok</h2>
+            {/* Kapcsolattartási adatok - csak ha NEM CGP munkatárs */}
+            {!isCgpEmployee && (
+              <div className="bg-white rounded-xl border p-6 space-y-4">
+                <h2 className="text-lg font-semibold mb-4">Kapcsolattartási adatok</h2>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="email@example.com"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>Telefon előhívó</Label>
-                  <Select value={phonePrefix} onValueChange={setPhonePrefix}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Válassz..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PHONE_PREFIXES.map((prefix) => (
-                        <SelectItem key={prefix.code} value={prefix.code}>
-                          {prefix.code} {prefix.dial_code}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="col-span-2 space-y-2">
-                  <Label htmlFor="phoneNumber">Telefonszám</Label>
+                  <Label htmlFor="email">Email *</Label>
                   <Input
-                    id="phoneNumber"
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="XX XXX XXXX"
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="email@example.com"
+                    required
                   />
                 </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Telefon előhívó</Label>
+                    <Select value={phonePrefix} onValueChange={setPhonePrefix}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Válassz..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PHONE_PREFIXES.map((prefix) => (
+                          <SelectItem key={prefix.code} value={prefix.code}>
+                            {prefix.code} {prefix.dial_code}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="col-span-2 space-y-2">
+                    <Label htmlFor="phoneNumber">Telefonszám</Label>
+                    <Input
+                      id="phoneNumber"
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      placeholder="XX XXX XXXX"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Postai cím - csak ha nem CGP munkatárs */}
             {!isCgpEmployee && (
@@ -970,186 +972,191 @@ const ExpertForm = () => {
               </div>
             )}
 
-            {/* Számlázási adatok */}
-            <div className="bg-white rounded-xl border p-6 space-y-4">
-              <h2 className="text-lg font-semibold mb-4">Számlázási adatok</h2>
+            {/* Számlázási adatok - csak ha NEM CGP munkatárs */}
+            {!isCgpEmployee && (
+              <div className="bg-white rounded-xl border p-6 space-y-4">
+                <h2 className="text-lg font-semibold mb-4">Számlázási adatok</h2>
 
-              <div className="space-y-2">
-                <Label>Számlázás típusa</Label>
-                <Select value={invoicingType} onValueChange={setInvoicingType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Válassz típust..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {INVOICING_TYPES.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="space-y-2">
+                  <Label>Számlázás típusa</Label>
+                  <Select value={invoicingType} onValueChange={setInvoicingType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Válassz típust..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {INVOICING_TYPES.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-2">
-                <Label>Pénznem</Label>
-                <Select value={currency} onValueChange={setCurrency}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Válassz pénznemet..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CURRENCIES.map((curr) => (
-                      <SelectItem key={curr.id} value={curr.id}>
-                        {curr.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                <div className="space-y-2">
+                  <Label>Pénznem</Label>
+                  <Select value={currency} onValueChange={setCurrency}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Válassz pénznemet..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCIES.map((curr) => (
+                        <SelectItem key={curr.id} value={curr.id}>
+                          {curr.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              {invoicingType === "normal" && (
-                <>
+                {invoicingType === "normal" && (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="hourlyRate50">Óradíj (50 perc)</Label>
+                        <Input
+                          id="hourlyRate50"
+                          type="number"
+                          value={hourlyRate50}
+                          onChange={(e) => setHourlyRate50(e.target.value)}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="hourlyRate30">Óradíj (30 perc)</Label>
+                        <Input
+                          id="hourlyRate30"
+                          type="number"
+                          value={hourlyRate30}
+                          onChange={(e) => setHourlyRate30(e.target.value)}
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="hourlyRate15">Óradíj (15 perc)</Label>
+                      <Input
+                        id="hourlyRate15"
+                        type="number"
+                        value={hourlyRate15}
+                        onChange={(e) => setHourlyRate15(e.target.value)}
+                        placeholder="0"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {invoicingType === "fixed" && (
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="hourlyRate50">Óradíj (50 perc)</Label>
+                      <Label htmlFor="fixedWage">Fix bér</Label>
                       <Input
-                        id="hourlyRate50"
+                        id="fixedWage"
                         type="number"
-                        value={hourlyRate50}
-                        onChange={(e) => setHourlyRate50(e.target.value)}
+                        value={fixedWage}
+                        onChange={(e) => setFixedWage(e.target.value)}
                         placeholder="0"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="hourlyRate30">Óradíj (30 perc)</Label>
+                      <Label htmlFor="rankingHourlyRate">Rangsorolási óradíj</Label>
                       <Input
-                        id="hourlyRate30"
+                        id="rankingHourlyRate"
                         type="number"
-                        value={hourlyRate30}
-                        onChange={(e) => setHourlyRate30(e.target.value)}
+                        value={rankingHourlyRate}
+                        onChange={(e) => setRankingHourlyRate(e.target.value)}
                         placeholder="0"
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="hourlyRate15">Óradíj (15 perc)</Label>
-                    <Input
-                      id="hourlyRate15"
-                      type="number"
-                      value={hourlyRate15}
-                      onChange={(e) => setHourlyRate15(e.target.value)}
-                      placeholder="0"
-                    />
-                  </div>
-                </>
-              )}
+                )}
 
-              {invoicingType === "fixed" && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fixedWage">Fix bér</Label>
-                    <Input
-                      id="fixedWage"
-                      type="number"
-                      value={fixedWage}
-                      onChange={(e) => setFixedWage(e.target.value)}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="rankingHourlyRate">Rangsorolási óradíj</Label>
-                    <Input
-                      id="rankingHourlyRate"
-                      type="number"
-                      value={rankingHourlyRate}
-                      onChange={(e) => setRankingHourlyRate(e.target.value)}
-                      placeholder="0"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="singleSessionRate">Egyszeri ülés díja</Label>
+                  <Input
+                    id="singleSessionRate"
+                    type="number"
+                    value={singleSessionRate}
+                    onChange={(e) => setSingleSessionRate(e.target.value)}
+                    placeholder="0"
+                  />
                 </div>
-              )}
 
-              <div className="space-y-2">
-                <Label htmlFor="singleSessionRate">Egyszeri ülés díja</Label>
-                <Input
-                  id="singleSessionRate"
-                  type="number"
-                  value={singleSessionRate}
-                  onChange={(e) => setSingleSessionRate(e.target.value)}
-                  placeholder="0"
-                />
-              </div>
+                {/* Extra díjazások */}
+                <div className="space-y-4 pt-4 border-t">
+                  <h3 className="text-md font-medium">Extra díjazások</h3>
+                  
+                  {customInvoiceItems.map((item, index) => (
+                    <div key={item.id || index} className="flex items-center gap-2">
+                      <Input value={item.name} disabled className="flex-1" />
+                      <Input value={countries.find((c) => c.id === item.country_id)?.name || ""} disabled className="w-32" />
+                      <Input value={item.amount} disabled className="w-24" />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCustomInvoiceItems(customInvoiceItems.filter((_, i) => i !== index))}
+                        className="text-destructive hover:text-destructive/80"
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
 
-              {/* Extra díjazások */}
-              <div className="space-y-4 pt-4 border-t">
-                <h3 className="text-md font-medium">Extra díjazások</h3>
-                
-                {customInvoiceItems.map((item, index) => (
-                  <div key={item.id || index} className="flex items-center gap-2">
-                    <Input value={item.name} disabled className="flex-1" />
-                    <Input value={countries.find((c) => c.id === item.country_id)?.name || ""} disabled className="w-32" />
-                    <Input value={item.amount} disabled className="w-24" />
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1 space-y-1">
+                      <Label className="text-xs">Megnevezés</Label>
+                      <Input value={newItemName} onChange={(e) => setNewItemName(e.target.value)} placeholder="Tétel megnevezése" />
+                    </div>
+                    <div className="w-36 space-y-1">
+                      <Label className="text-xs">Ország</Label>
+                      <Select value={newItemCountryId} onValueChange={setNewItemCountryId}>
+                        <SelectTrigger><SelectValue placeholder="Ország" /></SelectTrigger>
+                        <SelectContent>
+                          {countries.map((country) => (
+                            <SelectItem key={country.id} value={country.id}>{country.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="w-24 space-y-1">
+                      <Label className="text-xs">Összeg</Label>
+                      <Input type="number" value={newItemAmount} onChange={(e) => setNewItemAmount(e.target.value)} placeholder="0" />
+                    </div>
                     <Button
                       type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setCustomInvoiceItems(customInvoiceItems.filter((_, i) => i !== index))}
-                      className="text-destructive hover:text-destructive/80"
+                      variant="outline"
+                      onClick={() => {
+                        if (newItemName && newItemCountryId && newItemAmount) {
+                          setCustomInvoiceItems([...customInvoiceItems, { name: newItemName, country_id: newItemCountryId, amount: newItemAmount }]);
+                          setNewItemName("");
+                          setNewItemCountryId("");
+                          setNewItemAmount("");
+                        }
+                      }}
+                      className="text-primary border-primary hover:bg-primary/10"
                     >
-                      ×
+                      + Hozzáad
                     </Button>
                   </div>
-                ))}
-
-                <div className="flex items-end gap-2">
-                  <div className="flex-1 space-y-1">
-                    <Label className="text-xs">Megnevezés</Label>
-                    <Input value={newItemName} onChange={(e) => setNewItemName(e.target.value)} placeholder="Tétel megnevezése" />
-                  </div>
-                  <div className="w-36 space-y-1">
-                    <Label className="text-xs">Ország</Label>
-                    <Select value={newItemCountryId} onValueChange={setNewItemCountryId}>
-                      <SelectTrigger><SelectValue placeholder="Ország" /></SelectTrigger>
-                      <SelectContent>
-                        {countries.map((country) => (
-                          <SelectItem key={country.id} value={country.id}>{country.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="w-24 space-y-1">
-                    <Label className="text-xs">Összeg</Label>
-                    <Input type="number" value={newItemAmount} onChange={(e) => setNewItemAmount(e.target.value)} placeholder="0" />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      if (newItemName && newItemCountryId && newItemAmount) {
-                        setCustomInvoiceItems([...customInvoiceItems, { name: newItemName, country_id: newItemCountryId, amount: newItemAmount }]);
-                        setNewItemName("");
-                        setNewItemCountryId("");
-                        setNewItemAmount("");
-                      }
-                    }}
-                    className="text-primary border-primary hover:bg-primary/10"
-                  >
-                    + Hozzáad
-                  </Button>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Tanácsadási típusok */}
-            <ConsultationTypeSettings
-              settings={consultationSettings}
-              onChange={setConsultationSettings}
-            />
+            {/* Tanácsadási típusok - csak ha NEM CGP munkatárs */}
+            {!isCgpEmployee && (
+              <ConsultationTypeSettings
+                settings={consultationSettings}
+                onChange={setConsultationSettings}
+              />
+            )}
 
             {/* Szakmai adatok */}
             <div className="bg-white rounded-xl border p-6 space-y-4">
               <h2 className="text-lg font-semibold mb-4">Szakmai adatok</h2>
 
-              {isEditMode && expertId && (
+              {/* Fájlfeltöltők - csak ha NEM CGP munkatárs */}
+              {!isCgpEmployee && isEditMode && expertId && (
                 <ExpertFileUpload
                   label="Szerződés szkennelt verziója"
                   expertId={expertId}
@@ -1159,7 +1166,7 @@ const ExpertForm = () => {
                 />
               )}
 
-              {isEditMode && expertId && (
+              {!isCgpEmployee && isEditMode && expertId && (
                 <ExpertFileUpload
                   label="Szakképesítést igazoló dokumentumok szkennelt verziója"
                   expertId={expertId}
