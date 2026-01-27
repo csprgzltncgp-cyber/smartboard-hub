@@ -527,6 +527,7 @@ const ExpertList = () => {
           expertName={selectedExpertForInactivity.expert_type === "company" 
             ? selectedExpertForInactivity.company_name || selectedExpertForInactivity.name 
             : selectedExpertForInactivity.name}
+          onSuccess={fetchData}
         />
       )}
     </div>
