@@ -178,6 +178,7 @@ const ExpertForm = () => {
   const [selectedLanguageSkills, setSelectedLanguageSkills] = useState<string[]>([]);
   const [nativeLanguage, setNativeLanguage] = useState("");
   const [isCrisisPsychologist, setIsCrisisPsychologist] = useState(false);
+  const [isPsychologySelected, setIsPsychologySelected] = useState(false);
   const [maxInprogressCases, setMaxInprogressCases] = useState("");
   const [minInprogressCases, setMinInprogressCases] = useState("");
 
@@ -1198,18 +1199,21 @@ const ExpertForm = () => {
               <HierarchicalSpecializationSelect
                 selectedIds={selectedSpecializations}
                 onChange={setSelectedSpecializations}
+                onPsychologySelectionChange={setIsPsychologySelected}
               />
 
-              <div className="flex items-center space-x-3 p-4 border-2 border-cgp-teal/50 rounded-lg">
-                <Checkbox
-                  id="isCrisisPsychologist"
-                  checked={isCrisisPsychologist}
-                  onCheckedChange={(checked) => setIsCrisisPsychologist(checked as boolean)}
-                />
-                <Label htmlFor="isCrisisPsychologist" className="text-cgp-teal cursor-pointer">
-                  Krízis pszichológus
-                </Label>
-              </div>
+              {isPsychologySelected && (
+                <div className="flex items-center space-x-3 p-4 border-2 border-cgp-teal/50 rounded-lg">
+                  <Checkbox
+                    id="isCrisisPsychologist"
+                    checked={isCrisisPsychologist}
+                    onCheckedChange={(checked) => setIsCrisisPsychologist(checked as boolean)}
+                  />
+                  <Label htmlFor="isCrisisPsychologist" className="text-cgp-teal cursor-pointer">
+                    Krízis pszichológus
+                  </Label>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Anyanyelv</Label>
