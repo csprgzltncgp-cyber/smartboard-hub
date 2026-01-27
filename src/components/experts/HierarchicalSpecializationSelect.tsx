@@ -14,11 +14,13 @@ interface Specialization {
 interface HierarchicalSpecializationSelectProps {
   selectedIds: string[];
   onChange: (ids: string[]) => void;
+  onPsychologySelectionChange?: (isSelected: boolean) => void;
 }
 
 export const HierarchicalSpecializationSelect = ({
   selectedIds,
   onChange,
+  onPsychologySelectionChange,
 }: HierarchicalSpecializationSelectProps) => {
   const [specializations, setSpecializations] = useState<Specialization[]>([]);
   const [expandedParents, setExpandedParents] = useState<Set<string>>(new Set());
@@ -55,9 +57,12 @@ export const HierarchicalSpecializationSelect = ({
   };
 
   // Separate parent categories (parent_id = null) and children
-  const { parentCategories, childrenByParent } = useMemo(() => {
+  const { parentCategories, childrenByParent, psychologyParentId } = useMemo(() => {
     const parents = specializations.filter((s) => s.parent_id === null);
     const children: Record<string, Specialization[]> = {};
+    
+    // Find the "Pszichológia" parent ID
+    const psychologyParent = parents.find((p) => p.name.toLowerCase() === "pszichológia");
     
     specializations.forEach((s) => {
       if (s.parent_id) {
@@ -68,8 +73,20 @@ export const HierarchicalSpecializationSelect = ({
       }
     });
 
-    return { parentCategories: parents, childrenByParent: children };
+    return { 
+      parentCategories: parents, 
+      childrenByParent: children,
+      psychologyParentId: psychologyParent?.id || null
+    };
   }, [specializations]);
+
+  // Notify parent when psychology selection changes
+  useEffect(() => {
+    if (psychologyParentId && onPsychologySelectionChange) {
+      const isPsychologySelected = selectedIds.includes(psychologyParentId);
+      onPsychologySelectionChange(isPsychologySelected);
+    }
+  }, [selectedIds, psychologyParentId, onPsychologySelectionChange]);
 
   const toggleParent = (parentId: string) => {
     const newExpanded = new Set(expandedParents);
