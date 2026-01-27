@@ -1,9 +1,9 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Video, Phone, MessageSquare, User, MapPin, Globe, Image } from "lucide-react";
+import { Video, Phone, MessageSquare, User, MapPin, Globe } from "lucide-react";
+import { EapOnlineImageUpload } from "./EapOnlineImageUpload";
+import { EapOnlineTextFields } from "./EapOnlineTextFields";
 
 export interface ConsultationSettings {
   acceptsPersonalConsultation: boolean;
@@ -14,7 +14,8 @@ export interface ConsultationSettings {
   acceptsOnsiteConsultation: boolean;
   isEapOnlineExpert: boolean;
   eapOnlineImage?: string;
-  eapOnlineDescription?: string;
+  eapOnlineShortDescription?: string;
+  eapOnlineLongDescription?: string;
 }
 
 interface ConsultationTypeSettingsProps {
@@ -157,34 +158,21 @@ export const ConsultationTypeSettings = ({
 
                   {/* EAP Online extra mezők - csak ha be van jelölve */}
                   {settings.isEapOnlineExpert && (
-                    <div className="space-y-4 pt-4 border-t border-cgp-teal/20">
-                      <div className="space-y-2">
-                        <Label className="flex items-center gap-2">
-                          <Image className="w-4 h-4 text-muted-foreground" />
-                          Fénykép URL
-                        </Label>
-                        <Input
-                          value={settings.eapOnlineImage || ""}
-                          onChange={(e) => updateSetting("eapOnlineImage", e.target.value)}
-                          placeholder="https://example.com/photo.jpg"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          A szakértő profilképe az EAP Online felületen
-                        </p>
-                      </div>
+                    <div className="space-y-6 pt-4 border-t border-cgp-teal/20">
+                      <EapOnlineImageUpload
+                        value={settings.eapOnlineImage || ""}
+                        onChange={(value) => updateSetting("eapOnlineImage", value)}
+                        maxSizeKB={500}
+                      />
 
-                      <div className="space-y-2">
-                        <Label>Szakértő bemutatása</Label>
-                        <Textarea
-                          value={settings.eapOnlineDescription || ""}
-                          onChange={(e) => updateSetting("eapOnlineDescription", e.target.value)}
-                          placeholder="Írj egy rövid bemutatkozó szöveget..."
-                          rows={4}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          Ez a szöveg jelenik meg az EAP Online felületen a szakértő profiljában
-                        </p>
-                      </div>
+                      <EapOnlineTextFields
+                        shortDescription={settings.eapOnlineShortDescription || ""}
+                        longDescription={settings.eapOnlineLongDescription || ""}
+                        onShortDescriptionChange={(value) => updateSetting("eapOnlineShortDescription", value)}
+                        onLongDescriptionChange={(value) => updateSetting("eapOnlineLongDescription", value)}
+                        maxShortLength={150}
+                        maxLongLength={1000}
+                      />
                     </div>
                   )}
                 </div>
@@ -262,5 +250,6 @@ export const defaultConsultationSettings: ConsultationSettings = {
   acceptsOnsiteConsultation: false,
   isEapOnlineExpert: false,
   eapOnlineImage: "",
-  eapOnlineDescription: "",
+  eapOnlineShortDescription: "",
+  eapOnlineLongDescription: "",
 };

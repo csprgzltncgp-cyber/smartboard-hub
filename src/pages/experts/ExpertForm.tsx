@@ -274,7 +274,8 @@ const ExpertForm = () => {
           acceptsOnsiteConsultation: (expert as any).accepts_onsite_consultation || false,
           isEapOnlineExpert: expert.is_eap_online_expert || false,
           eapOnlineImage: "",
-          eapOnlineDescription: "",
+          eapOnlineShortDescription: "",
+          eapOnlineLongDescription: "",
         });
 
         // Céges adatok
@@ -405,7 +406,8 @@ const ExpertForm = () => {
               acceptsOnsiteConsultation: (member as any).accepts_onsite_consultation || false,
               // EAP Online extra fields
               eapOnlineImage: "",
-              eapOnlineDescription: "",
+              eapOnlineShortDescription: "",
+              eapOnlineLongDescription: "",
             } as TeamMember;
           })
         );
