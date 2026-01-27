@@ -72,12 +72,11 @@ const ExpertList = () => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCountryIds, setSelectedCountryIds] = useState<string[]>([]);
+  const [selectedCountryIds, setSelectedCountryIds] = useState<string[]>(["all"]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [expertToDelete, setExpertToDelete] = useState<Expert | null>(null);
   const [openCountries, setOpenCountries] = useState<string[]>([]);
-  const [openCompanies, setOpenCompanies] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<"all" | "individual" | "company">("all");
+  const [countryTabs, setCountryTabs] = useState<Record<string, "all" | "individual" | "company">>({});
 
   useEffect(() => {
     fetchData();
@@ -111,35 +110,55 @@ const ExpertList = () => {
     );
   };
 
-  const toggleCompany = (expertId: string) => {
-    setOpenCompanies((prev) =>
-      prev.includes(expertId)
-        ? prev.filter((id) => id !== expertId)
-        : [...prev, expertId]
-    );
+  const getCountryTab = (countryId: string) => countryTabs[countryId] || "all";
+  
+  const setCountryTab = (countryId: string, tab: "all" | "individual" | "company") => {
+    setCountryTabs((prev) => ({ ...prev, [countryId]: tab }));
   };
 
-  const getExpertsByCountry = (countryId: string) => {
-    return filteredExperts.filter((expert) => expert.country_id === countryId && expert.expert_type === "individual");
+  const getExpertsByCountryAndType = (countryId: string, type?: "individual" | "company") => {
+    return experts.filter((expert) => {
+      if (expert.country_id !== countryId) return false;
+      if (type) return expert.expert_type === type;
+      return true;
+    });
   };
 
   const getCompanyExperts = () => {
-    return filteredExperts.filter((expert) => expert.expert_type === "company");
+    return experts.filter((expert) => expert.expert_type === "company");
   };
 
   const getTeamMembersByExpert = (expertId: string) => {
     return teamMembers.filter((m) => m.expert_id === expertId);
   };
 
-  // Filter experts by selected countries
-  const filteredExperts = experts.filter((expert) => {
-    const matchesCountry = selectedCountryIds.length === 0 || selectedCountryIds.includes(expert.country_id || "");
-    if (activeTab === "individual") return matchesCountry && expert.expert_type === "individual";
-    if (activeTab === "company") return matchesCountry && expert.expert_type === "company";
-    return matchesCountry;
-  });
+  // Check if "all" is selected
+  const isAllSelected = selectedCountryIds.includes("all");
+  
+  // Get countries to display
+  const displayedCountries = isAllSelected 
+    ? countries 
+    : countries.filter((c) => selectedCountryIds.includes(c.id));
 
-  const countryOptions = countries.map((c) => ({ id: c.id, label: c.name }));
+  const countryOptions = [
+    { id: "all", label: "Összes ország" },
+    ...countries.map((c) => ({ id: c.id, label: c.name })),
+  ];
+
+  const handleCountryFilterChange = (ids: string[]) => {
+    // If "all" was just selected, clear other selections
+    if (ids.includes("all") && !selectedCountryIds.includes("all")) {
+      setSelectedCountryIds(["all"]);
+    } else if (ids.includes("all") && ids.length > 1) {
+      // If other items selected while "all" is there, remove "all"
+      setSelectedCountryIds(ids.filter((id) => id !== "all"));
+    } else if (ids.length === 0) {
+      // If nothing selected, default to "all"
+      setSelectedCountryIds(["all"]);
+    } else {
+      setSelectedCountryIds(ids);
+    }
+  };
 
   const handleToggleActive = async (expert: Expert) => {
     try {
@@ -341,172 +360,194 @@ const ExpertList = () => {
         + Új szakértő hozzáadása
       </a>
 
-      <div className="max-w-md mb-4">
+      <div className="max-w-md mb-6">
         <MultiSelectField
           label="Ország szűrő"
           options={countryOptions}
           selectedIds={selectedCountryIds}
-          onChange={setSelectedCountryIds}
-          placeholder="Válassz országot (üres = összes)"
+          onChange={handleCountryFilterChange}
+          placeholder="Válassz országot..."
         />
       </div>
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "all" | "individual" | "company")} className="mb-6">
-        <TabsList>
-          <TabsTrigger value="all" className="flex items-center gap-2">
-            Összes
-            <Badge variant="secondary">{filteredExperts.length}</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="individual" className="flex items-center gap-2">
-            <User className="w-4 h-4" />
-            Egyéni
-            <Badge variant="secondary">{filteredExperts.filter((e) => e.expert_type === "individual").length}</Badge>
-          </TabsTrigger>
-          <TabsTrigger value="company" className="flex items-center gap-2">
-            <Building2 className="w-4 h-4" />
+      {/* Cégek szekció - mindig megjelenik ha vannak cégek */}
+      {getCompanyExperts().length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-primary" />
             Cégek
-            <Badge variant="secondary">{filteredExperts.filter((e) => e.expert_type === "company").length}</Badge>
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+            <Badge variant="secondary">{getCompanyExperts().length}</Badge>
+          </h2>
+          <div className="space-y-2">
+            {getCompanyExperts().map((company) => {
+              const members = getTeamMembersByExpert(company.id);
+              const isOpen = openCountries.includes(`company-${company.id}`);
 
-      {selectedCountryIds.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          Kérjük, válassz legalább egy országot a szűrőben.
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {/* Cégek szekció */}
-          {(activeTab === "all" || activeTab === "company") && getCompanyExperts().length > 0 && (
-            <div>
-              <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-primary" />
-                Cégek
-              </h2>
-              <div className="space-y-1">
-                {getCompanyExperts().map((company) => {
-                  const members = getTeamMembersByExpert(company.id);
-                  const isOpen = openCompanies.includes(company.id);
-
-                  return (
-                    <Collapsible key={company.id} open={isOpen} onOpenChange={() => toggleCompany(company.id)}>
-                      <CollapsibleTrigger className="w-full">
-                        <div className="flex items-center justify-between p-4 bg-white border rounded-lg hover:bg-muted/50 cursor-pointer">
-                          <div className="flex items-center gap-3">
-                            <Building2 className="w-5 h-5 text-primary" />
-                            <span className="font-semibold">{company.company_name || company.name}</span>
-                            <Badge variant="outline" className="text-primary border-primary">
-                              <Users className="w-3 h-3 mr-1" />
-                              {members.length} csapattag
-                            </Badge>
-                            {getStatusBadge(company)}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <ExpertActions expert={company} />
-                            {isOpen ? (
-                              <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                            ) : (
-                              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                            )}
-                          </div>
+              return (
+                <Collapsible 
+                  key={company.id} 
+                  open={isOpen} 
+                  onOpenChange={() => toggleCountry(`company-${company.id}`)}
+                >
+                  <CollapsibleTrigger className="w-full">
+                    <div className="flex items-center justify-between p-4 bg-white border rounded-lg hover:bg-muted/50 cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <Building2 className="w-5 h-5 text-primary" />
+                        <span className="font-semibold">{company.company_name || company.name}</span>
+                        <Badge variant="outline" className="text-primary border-primary">
+                          <Users className="w-3 h-3 mr-1" />
+                          {members.length} csapattag
+                        </Badge>
+                        {getStatusBadge(company)}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <ExpertActions expert={company} />
+                        {isOpen ? (
+                          <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                        )}
+                      </div>
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="border-l-2 border-primary ml-4 pl-4 py-2 space-y-2">
+                      {members.length === 0 ? (
+                        <div className="p-3 text-muted-foreground text-sm">
+                          Nincsenek csapattagok
                         </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="border-l-2 border-primary ml-4 pl-4 py-2 space-y-2">
-                          {members.length === 0 ? (
-                            <div className="p-3 text-muted-foreground text-sm">
-                              Nincsenek csapattagok
-                            </div>
-                          ) : (
-                            members.map((member) => (
-                              <div
-                                key={member.id}
-                                className="flex items-center justify-between p-3 bg-white border rounded-lg"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <User className="w-4 h-4 text-muted-foreground" />
-                                  <span className="font-medium">{member.name}</span>
-                                  {member.is_team_leader && (
-                                    <Badge className="bg-primary">Csapatvezető</Badge>
-                                  )}
-                                  {!member.is_active && (
-                                    <Badge variant="secondary">Inaktív</Badge>
-                                  )}
-                                </div>
-                                <span className="text-sm text-muted-foreground">{member.email}</span>
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Egyéni szakértők országonkénti csoportosításban */}
-          {(activeTab === "all" || activeTab === "individual") && (
-            <div>
-              <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                <User className="w-5 h-5 text-primary" />
-                Egyéni szakértők
-              </h2>
-              <div className="space-y-1">
-                {countries
-                  .filter((country) => selectedCountryIds.includes(country.id))
-                  .map((country) => {
-                    const countryExperts = getExpertsByCountry(country.id);
-                    if (countryExperts.length === 0) return null;
-
-                    const isOpen = openCountries.includes(country.id);
-
-                    return (
-                      <Collapsible key={country.id} open={isOpen} onOpenChange={() => toggleCountry(country.id)}>
-                        <CollapsibleTrigger className="w-full">
-                          <div className="flex items-center justify-between p-4 bg-white border rounded-lg hover:bg-muted/50 cursor-pointer">
+                      ) : (
+                        members.map((member) => (
+                          <div
+                            key={member.id}
+                            className="flex items-center justify-between p-3 bg-white border rounded-lg"
+                          >
                             <div className="flex items-center gap-3">
-                              <span className="font-semibold text-primary">{country.name}</span>
-                              <Badge variant="outline">{countryExperts.length} szakértő</Badge>
+                              <User className="w-4 h-4 text-muted-foreground" />
+                              <span className="font-medium">{member.name}</span>
+                              {member.is_team_leader && (
+                                <Badge className="bg-primary">Csapatvezető</Badge>
+                              )}
+                              {!member.is_active && (
+                                <Badge variant="secondary">Inaktív</Badge>
+                              )}
                             </div>
-                            {isOpen ? (
-                              <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                            ) : (
-                              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                            )}
+                            <span className="text-sm text-muted-foreground">{member.email}</span>
                           </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="border-l-2 border-primary ml-4 pl-4 py-2 space-y-2">
-                            {countryExperts.map((expert) => (
-                              <div
-                                key={expert.id}
-                                className="flex items-center justify-between p-3 bg-white border rounded-lg"
-                              >
-                                <span className="font-medium">{expert.name}</span>
-                                <div className="flex items-center gap-2">
-                                  {getStatusBadge(expert)}
-                                  <ExpertActions expert={expert} />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    );
-                  })}
-              </div>
-            </div>
-          )}
-
-          {filteredExperts.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              Nincs szakértő a kiválasztott országokban.
-            </div>
-          )}
+                        ))
+                      )}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              );
+            })}
+          </div>
         </div>
       )}
+
+      {/* Országonkénti szakértők */}
+      <div className="space-y-4">
+        {displayedCountries.map((country) => {
+          const allCountryExperts = getExpertsByCountryAndType(country.id);
+          const individualExperts = getExpertsByCountryAndType(country.id, "individual");
+          const companyExperts = getExpertsByCountryAndType(country.id, "company");
+          
+          if (allCountryExperts.length === 0) return null;
+
+          const currentTab = getCountryTab(country.id);
+          const isOpen = openCountries.includes(country.id);
+
+          return (
+            <Collapsible key={country.id} open={isOpen} onOpenChange={() => toggleCountry(country.id)}>
+              <CollapsibleTrigger className="w-full">
+                <div className="flex items-center justify-between p-4 bg-white border rounded-lg hover:bg-muted/50 cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <span className="font-semibold text-primary text-lg">{country.name}</span>
+                    <Badge variant="outline">{allCountryExperts.length} szakértő</Badge>
+                  </div>
+                  {isOpen ? (
+                    <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                  )}
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="border-l-2 border-primary ml-4 pl-4 py-3">
+                  {/* Országon belüli fülek */}
+                  <Tabs 
+                    value={currentTab} 
+                    onValueChange={(v) => setCountryTab(country.id, v as "all" | "individual" | "company")} 
+                    className="mb-3"
+                  >
+                    <TabsList className="h-8">
+                      <TabsTrigger value="all" className="text-xs px-3 h-7">
+                        Összes
+                        <Badge variant="secondary" className="ml-1 text-xs">{allCountryExperts.length}</Badge>
+                      </TabsTrigger>
+                      <TabsTrigger value="individual" className="text-xs px-3 h-7">
+                        <User className="w-3 h-3 mr-1" />
+                        Egyéni
+                        <Badge variant="secondary" className="ml-1 text-xs">{individualExperts.length}</Badge>
+                      </TabsTrigger>
+                      <TabsTrigger value="company" className="text-xs px-3 h-7">
+                        <Building2 className="w-3 h-3 mr-1" />
+                        Cégek
+                        <Badge variant="secondary" className="ml-1 text-xs">{companyExperts.length}</Badge>
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+
+                  {/* Szakértők listája a kiválasztott fül alapján */}
+                  <div className="space-y-2">
+                    {(currentTab === "all" || currentTab === "individual") && individualExperts.map((expert) => (
+                      <div
+                        key={expert.id}
+                        className="flex items-center justify-between p-3 bg-white border rounded-lg"
+                      >
+                        <div className="flex items-center gap-2">
+                          <User className="w-4 h-4 text-muted-foreground" />
+                          <span className="font-medium">{expert.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {getStatusBadge(expert)}
+                          <ExpertActions expert={expert} />
+                        </div>
+                      </div>
+                    ))}
+                    {(currentTab === "all" || currentTab === "company") && companyExperts.map((expert) => (
+                      <div
+                        key={expert.id}
+                        className="flex items-center justify-between p-3 bg-white border rounded-lg"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-primary" />
+                          <span className="font-medium">{expert.company_name || expert.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {getStatusBadge(expert)}
+                          <ExpertActions expert={expert} />
+                        </div>
+                      </div>
+                    ))}
+                    {allCountryExperts.length === 0 && (
+                      <div className="text-center py-4 text-muted-foreground text-sm">
+                        Nincs szakértő ebben az országban.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          );
+        })}
+
+        {displayedCountries.length === 0 && getCompanyExperts().length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            Nincs megjeleníthető szakértő.
+          </div>
+        )}
+      </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
