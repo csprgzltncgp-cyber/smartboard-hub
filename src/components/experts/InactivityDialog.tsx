@@ -128,7 +128,6 @@ export const InactivityDialog = ({
 
       toast.success("Inaktivitási időszak mentve, szakértő inaktívra állítva");
       onSuccess?.();
-      resetForm();
       fetchExistingPeriods();
     } catch (error) {
       console.error("Error saving inactivity:", error);
@@ -155,10 +154,12 @@ export const InactivityDialog = ({
 
       // If no more inactivity periods, set expert back to active
       if (!remainingPeriods || remainingPeriods.length === 0) {
-        await supabase
+        const { error: activateError } = await supabase
           .from("experts")
           .update({ is_active: true })
           .eq("id", expertId);
+
+        if (activateError) throw activateError;
         
         toast.success("Inaktivitási időszak törölve, szakértő aktiválva");
       } else {
