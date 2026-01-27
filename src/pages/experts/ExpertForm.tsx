@@ -14,6 +14,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { MultiSelectField } from "@/components/experts/MultiSelectField";
 
 interface Country {
   id: string;
@@ -36,6 +37,11 @@ interface LanguageSkill {
   id: string;
   name: string;
   code: string | null;
+}
+
+interface City {
+  id: string;
+  name: string;
 }
 
 // Utcatípusok
@@ -94,6 +100,7 @@ const ExpertForm = () => {
 
   // Referencia adatok
   const [countries, setCountries] = useState<Country[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [specializations, setSpecializations] = useState<Specialization[]>([]);
   const [languageSkills, setLanguageSkills] = useState<LanguageSkill[]>([]);
@@ -142,6 +149,8 @@ const ExpertForm = () => {
 
   // Szakmai adatok
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const [selectedOutsourceCountries, setSelectedOutsourceCountries] = useState<string[]>([]);
   const [selectedCrisisCountries, setSelectedCrisisCountries] = useState<string[]>([]);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>([]);
