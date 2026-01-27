@@ -127,6 +127,18 @@ const ExpertForm = () => {
   const [fixedWage, setFixedWage] = useState("");
   const [rankingHourlyRate, setRankingHourlyRate] = useState("");
   const [singleSessionRate, setSingleSessionRate] = useState("");
+  
+  // Extra díjazások
+  interface CustomInvoiceItem {
+    id?: string;
+    name: string;
+    country_id: string;
+    amount: string;
+  }
+  const [customInvoiceItems, setCustomInvoiceItems] = useState<CustomInvoiceItem[]>([]);
+  const [newItemName, setNewItemName] = useState("");
+  const [newItemCountryId, setNewItemCountryId] = useState("");
+  const [newItemAmount, setNewItemAmount] = useState("");
 
   // Szakmai adatok
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
@@ -232,12 +244,13 @@ const ExpertForm = () => {
       }
 
       // Kapcsolódó adatok
-      const [countriesRes, crisisCountriesRes, permissionsRes, specializationsRes, languageSkillsRes] = await Promise.all([
+      const [countriesRes, crisisCountriesRes, permissionsRes, specializationsRes, languageSkillsRes, customItemsRes] = await Promise.all([
         supabase.from("expert_countries").select("country_id").eq("expert_id", expertId),
         supabase.from("expert_crisis_countries").select("country_id").eq("expert_id", expertId),
         supabase.from("expert_permissions").select("permission_id").eq("expert_id", expertId),
         supabase.from("expert_specializations").select("specialization_id").eq("expert_id", expertId),
         supabase.from("expert_language_skills").select("language_skill_id").eq("expert_id", expertId),
+        supabase.from("custom_invoice_items").select("*").eq("expert_id", expertId),
       ]);
 
       if (countriesRes.data) setSelectedCountries(countriesRes.data.map((c) => c.country_id));
@@ -245,6 +258,14 @@ const ExpertForm = () => {
       if (permissionsRes.data) setSelectedPermissions(permissionsRes.data.map((p) => p.permission_id));
       if (specializationsRes.data) setSelectedSpecializations(specializationsRes.data.map((s) => s.specialization_id));
       if (languageSkillsRes.data) setSelectedLanguageSkills(languageSkillsRes.data.map((l) => l.language_skill_id));
+      if (customItemsRes.data) {
+        setCustomInvoiceItems(customItemsRes.data.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          country_id: item.country_id,
+          amount: item.amount?.toString() || "",
+        })));
+      }
     } catch (error) {
       console.error("Error fetching expert data:", error);
       toast.error("Hiba a szakértő adatainak betöltésekor");
@@ -361,6 +382,19 @@ const ExpertForm = () => {
           );
         }
 
+        // Custom invoice items mentése
+        await supabase.from("custom_invoice_items").delete().eq("expert_id", expertId);
+        if (customInvoiceItems.length > 0) {
+          await supabase.from("custom_invoice_items").insert(
+            customInvoiceItems.map((item) => ({
+              expert_id: expertId,
+              name: item.name,
+              country_id: item.country_id,
+              amount: parseInt(item.amount) || 0,
+            }))
+          );
+        }
+
         toast.success("Szakértő sikeresen frissítve");
       } else {
         // Új szakértő létrehozása
@@ -437,6 +471,18 @@ const ExpertForm = () => {
         if (selectedLanguageSkills.length > 0) {
           await supabase.from("expert_language_skills").insert(
             selectedLanguageSkills.map((languageSkillId) => ({ expert_id: newExpertId, language_skill_id: languageSkillId }))
+          );
+        }
+
+        // Custom invoice items mentése új szakértőhöz
+        if (customInvoiceItems.length > 0) {
+          await supabase.from("custom_invoice_items").insert(
+            customInvoiceItems.map((item) => ({
+              expert_id: newExpertId,
+              name: item.name,
+              country_id: item.country_id,
+              amount: parseInt(item.amount) || 0,
+            }))
           );
         }
 
@@ -736,6 +782,97 @@ const ExpertForm = () => {
               onChange={(e) => setSingleSessionRate(e.target.value)}
               placeholder="0"
             />
+          </div>
+
+          {/* Extra díjazások */}
+          <div className="space-y-4 pt-4 border-t">
+            <h3 className="text-md font-medium">Extra díjazások</h3>
+            
+            {/* Meglévő tételek */}
+            {customInvoiceItems.map((item, index) => (
+              <div key={item.id || index} className="flex items-center gap-2">
+                <Input
+                  value={item.name}
+                  disabled
+                  className="flex-1"
+                />
+                <Input
+                  value={countries.find((c) => c.id === item.country_id)?.name || ""}
+                  disabled
+                  className="w-32"
+                />
+                <Input
+                  value={item.amount}
+                  disabled
+                  className="w-24"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setCustomInvoiceItems(customInvoiceItems.filter((_, i) => i !== index));
+                  }}
+                  className="text-destructive hover:text-destructive/80"
+                >
+                  ×
+                </Button>
+              </div>
+            ))}
+
+            {/* Új tétel hozzáadása */}
+            <div className="flex items-end gap-2">
+              <div className="flex-1 space-y-1">
+                <Label className="text-xs">Megnevezés</Label>
+                <Input
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                  placeholder="Tétel megnevezése"
+                />
+              </div>
+              <div className="w-36 space-y-1">
+                <Label className="text-xs">Ország</Label>
+                <Select value={newItemCountryId} onValueChange={setNewItemCountryId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Ország" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((country) => (
+                      <SelectItem key={country.id} value={country.id}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-24 space-y-1">
+                <Label className="text-xs">Összeg</Label>
+                <Input
+                  type="number"
+                  value={newItemAmount}
+                  onChange={(e) => setNewItemAmount(e.target.value)}
+                  placeholder="0"
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  if (newItemName && newItemCountryId && newItemAmount) {
+                    setCustomInvoiceItems([
+                      ...customInvoiceItems,
+                      { name: newItemName, country_id: newItemCountryId, amount: newItemAmount },
+                    ]);
+                    setNewItemName("");
+                    setNewItemCountryId("");
+                    setNewItemAmount("");
+                  }
+                }}
+                className="text-primary border-primary hover:bg-primary/10"
+              >
+                + Hozzáad
+              </Button>
+            </div>
           </div>
         </div>
 
