@@ -507,26 +507,35 @@ const ExpertList = () => {
                           </div>
                         </div>
                       ))}
-                      {(currentTab === "all" || currentTab === "company") && companyExperts.map((expert) => (
-                        <div
-                          key={expert.id}
-                          className="flex items-center justify-between p-3 bg-white border rounded-lg"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-primary" />
-                            <span className="font-medium">{expert.company_name || expert.name}</span>
+                      {(currentTab === "all" || currentTab === "company") && companyExperts.map((expert) => {
+                        const memberCount = getTeamMembersByExpert(expert.id).length;
+                        return (
+                          <div
+                            key={expert.id}
+                            className="flex items-center justify-between p-3 bg-white border rounded-lg"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Building2 className="w-4 h-4 text-primary" />
+                              <span className="font-medium">{expert.company_name || expert.name}</span>
+                              {memberCount > 0 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  <Users className="w-3 h-3 mr-1" />
+                                  {memberCount} csapattag
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {getStatusBadge(expert)}
+                              {formatInactivityUntil(activeInactivityByExpertId[expert.id]) && (
+                                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                  ({formatInactivityUntil(activeInactivityByExpertId[expert.id])})
+                                </span>
+                              )}
+                              <ExpertActions expert={expert} />
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {getStatusBadge(expert)}
-                            {formatInactivityUntil(activeInactivityByExpertId[expert.id]) && (
-                              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                ({formatInactivityUntil(activeInactivityByExpertId[expert.id])})
-                              </span>
-                            )}
-                            <ExpertActions expert={expert} />
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       {allCountryExperts.length === 0 && (
                         <div className="text-center py-4 text-muted-foreground text-sm">
                           Nincs szakértő ebben az országban.
