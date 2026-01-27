@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -12,6 +13,13 @@ interface Country {
   id: string;
   code: string;
   name: string;
+}
+
+interface CustomInvoiceItem {
+  id?: string;
+  name: string;
+  country_id: string;
+  amount: string;
 }
 
 // Pénznemek
@@ -66,6 +74,14 @@ interface CompanyBillingPanelProps {
   singleSessionRate: string;
   setSingleSessionRate: (value: string) => void;
   countries: Country[];
+  customInvoiceItems: CustomInvoiceItem[];
+  setCustomInvoiceItems: (items: CustomInvoiceItem[]) => void;
+  newItemName: string;
+  setNewItemName: (value: string) => void;
+  newItemCountryId: string;
+  setNewItemCountryId: (value: string) => void;
+  newItemAmount: string;
+  setNewItemAmount: (value: string) => void;
 }
 
 export const CompanyBillingPanel = ({
@@ -100,6 +116,14 @@ export const CompanyBillingPanel = ({
   singleSessionRate,
   setSingleSessionRate,
   countries,
+  customInvoiceItems,
+  setCustomInvoiceItems,
+  newItemName,
+  setNewItemName,
+  newItemCountryId,
+  setNewItemCountryId,
+  newItemAmount,
+  setNewItemAmount,
 }: CompanyBillingPanelProps) => {
   return (
     <div className="bg-white rounded-xl border p-6 space-y-4">
@@ -293,6 +317,65 @@ export const CompanyBillingPanel = ({
             onChange={(e) => setSingleSessionRate(e.target.value)}
             placeholder="0"
           />
+        </div>
+
+        {/* Extra díjazások */}
+        <div className="space-y-4 pt-4 border-t mt-4">
+          <h3 className="text-md font-medium">Extra díjazások</h3>
+          
+          {customInvoiceItems.map((item, index) => (
+            <div key={item.id || index} className="flex items-center gap-2">
+              <Input value={item.name} disabled className="flex-1" />
+              <Input value={countries.find((c) => c.id === item.country_id)?.name || ""} disabled className="w-32" />
+              <Input value={item.amount} disabled className="w-24" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setCustomInvoiceItems(customInvoiceItems.filter((_, i) => i !== index))}
+                className="text-destructive hover:text-destructive/80"
+              >
+                ×
+              </Button>
+            </div>
+          ))}
+
+          <div className="flex items-end gap-2">
+            <div className="flex-1 space-y-1">
+              <Label className="text-xs">Megnevezés</Label>
+              <Input value={newItemName} onChange={(e) => setNewItemName(e.target.value)} placeholder="Tétel megnevezése" />
+            </div>
+            <div className="w-36 space-y-1">
+              <Label className="text-xs">Ország</Label>
+              <Select value={newItemCountryId} onValueChange={setNewItemCountryId}>
+                <SelectTrigger><SelectValue placeholder="Ország" /></SelectTrigger>
+                <SelectContent>
+                  {countries.map((country) => (
+                    <SelectItem key={country.id} value={country.id}>{country.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-24 space-y-1">
+              <Label className="text-xs">Összeg</Label>
+              <Input type="number" value={newItemAmount} onChange={(e) => setNewItemAmount(e.target.value)} placeholder="0" />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                if (newItemName && newItemCountryId && newItemAmount) {
+                  setCustomInvoiceItems([...customInvoiceItems, { name: newItemName, country_id: newItemCountryId, amount: newItemAmount }]);
+                  setNewItemName("");
+                  setNewItemCountryId("");
+                  setNewItemAmount("");
+                }
+              }}
+              className="text-primary border-primary hover:bg-primary/10"
+            >
+              + Extra díjazás hozzáadása
+            </Button>
+          </div>
         </div>
       </div>
     </div>
