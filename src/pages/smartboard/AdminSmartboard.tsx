@@ -6,6 +6,7 @@ import { useActivityPlanEvents, useAllUserClientAssignments } from "@/hooks/useA
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, ArrowDownLeft, ArrowUpRight, Wallet, PieChart, ReceiptText } from "lucide-react";
 import { format, startOfWeek, endOfWeek, parseISO, isWithinInterval, addDays } from "date-fns";
+import { hu } from "date-fns/locale";
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 // Reuse existing panels
@@ -231,7 +232,7 @@ const AdminSmartboard = () => {
         <div className="flex items-end justify-between">
           <h2 className="bg-cgp-badge-new text-white uppercase text-xl md:text-2xl lg:text-3xl px-6 md:px-8 py-4 md:py-5 rounded-t-[25px] font-calibri-bold flex items-center gap-3">
             <Wallet className="w-6 h-6 md:w-8 md:h-8" />
-            Pénzügyi áttekintés - {format(new Date(), "yyyy MMMM")}
+            Pénzügyi áttekintés - {format(new Date(), "yyyy MMMM", { locale: hu })}
           </h2>
         </div>
         <div className="bg-cgp-badge-new/10 p-6 md:p-8">
