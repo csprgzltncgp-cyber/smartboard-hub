@@ -2,10 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   ChevronDown, 
-  ChevronRight, 
-  Search, 
   Trash2, 
-  Power, 
   Lock, 
   Unlock, 
   Pencil, 
@@ -14,10 +11,10 @@ import {
   CheckCircle, 
   XCircle,
   AlertCircle,
-  FileX
+  FileCheck,
+  FileX,
+  Info
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,8 +31,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useExperts } from "@/hooks/useExperts";
 import { Expert, Country } from "@/types/expert";
 import { toast } from "sonner";
@@ -47,31 +42,23 @@ const ExpertList = () => {
     experts, 
     countries, 
     loading, 
-    getExpertsByCountry, 
     toggleExpertActive, 
     toggleExpertLocked,
     cancelExpertContract,
     deleteExpert 
   } = useExperts();
   
-  const [searchTerm, setSearchTerm] = useState("");
   const [expandedCountries, setExpandedCountries] = useState<Set<string>>(new Set());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [cancelContractDialogOpen, setCancelContractDialogOpen] = useState(false);
   const [selectedExpert, setSelectedExpert] = useState<Expert | null>(null);
 
-  // Filter experts by search term
-  const filteredExperts = experts.filter(expert => 
-    expert.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    expert.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Get filtered experts grouped by country
-  const getFilteredExpertsByCountry = () => {
+  // Get experts grouped by country
+  const getExpertsByCountry = () => {
     const grouped: { country: Country; experts: Expert[] }[] = [];
     
     countries.forEach((country) => {
-      const countryExperts = filteredExperts.filter((e) => e.country_id === country.id);
+      const countryExperts = experts.filter((e) => e.country_id === country.id);
       if (countryExperts.length > 0) {
         grouped.push({
           country,
@@ -81,7 +68,7 @@ const ExpertList = () => {
     });
 
     // Add experts without country
-    const noCountryExperts = filteredExperts.filter((e) => !e.country_id);
+    const noCountryExperts = experts.filter((e) => !e.country_id);
     if (noCountryExperts.length > 0) {
       grouped.push({
         country: { id: "no-country", name: "Nincs ország", code: "N/A", created_at: "", updated_at: "" },
@@ -92,7 +79,12 @@ const ExpertList = () => {
     return grouped;
   };
 
-  const toggleCountry = (countryId: string) => {
+  const toggleCountry = (countryId: string, event: React.MouseEvent) => {
+    // Don't toggle if clicking on the mail link
+    if ((event.target as HTMLElement).closest('a.mail-link')) {
+      return;
+    }
+    
     const newExpanded = new Set(expandedCountries);
     if (newExpanded.has(countryId)) {
       newExpanded.delete(countryId);
@@ -153,240 +145,283 @@ const ExpertList = () => {
     );
   }
 
-  const expertsByCountry = getFilteredExpertsByCountry();
+  const expertsByCountry = getExpertsByCountry();
 
   return (
     <TooltipProvider>
-      <div>
+      <div className="m-0">
+        {/* Breadcrumb placeholder */}
+        <div className="text-sm text-muted-foreground mb-2">
+          Beállítások / Szakértők
+        </div>
+
         {/* Page Title */}
-        <h1 className="text-3xl font-calibri-bold mb-2">Szakértők listája</h1>
+        <h1 className="text-2xl font-bold mb-2 pl-0">Szakértők listája</h1>
         
-        {/* Create New Link */}
+        {/* Create New Link - underlined link style like Laravel */}
         <a 
-          href="#" 
-          className="text-cgp-link hover:text-cgp-link-hover hover:underline mb-6 block"
+          href="#"
+          className="text-cgp-link hover:text-cgp-link-hover underline mb-6 block pl-0"
           onClick={(e) => {
             e.preventDefault();
             navigate("/dashboard/settings/experts/new");
           }}
         >
-          + Új szakértő hozzáadása
+          Új szakértő hozzáadása
         </a>
 
-        {/* Search */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            placeholder="Keresés név vagy email alapján..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
-        {/* Country-grouped Expert List */}
-        <div className="space-y-2">
+        {/* Country-grouped Expert List - Laravel style */}
+        <div>
           {expertsByCountry.map(({ country, experts: countryExperts }) => (
-            <Collapsible 
-              key={country.id}
-              open={expandedCountries.has(country.id)}
-              onOpenChange={() => toggleCountry(country.id)}
-            >
-              {/* Country Header */}
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between p-4 bg-cgp-teal text-white rounded-lg cursor-pointer hover:bg-cgp-teal/90 transition-colors">
-                  <div className="flex items-center gap-3">
-                    {expandedCountries.has(country.id) ? (
-                      <ChevronDown className="w-5 h-5" />
-                    ) : (
-                      <ChevronRight className="w-5 h-5" />
-                    )}
-                    <span className="font-calibri-bold text-lg">{country.code}</span>
-                    <Badge variant="secondary" className="bg-white/20 text-white">
-                      {countryExperts.length}
-                    </Badge>
-                  </div>
+            <div key={country.id}>
+              {/* Country Header - Laravel list.css style: .list-element.case-list-in.active */}
+              <div 
+                className={cn(
+                  "flex items-center justify-between py-2.5 px-2.5 cursor-pointer mb-0",
+                  "font-bold mt-2.5",
+                  expandedCountries.has(country.id) 
+                    ? "bg-cgp-list-active text-white" 
+                    : "bg-cgp-list-bg text-foreground"
+                )}
+                onClick={(e) => toggleCountry(country.id, e)}
+              >
+                <div className="flex items-center gap-2">
+                  <span>{country.code}</span>
+                  {/* Mail link */}
                   <a
                     href={`mailto:${getCountryEmails(countryExperts)}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="flex items-center gap-1 text-white/80 hover:text-white text-sm"
+                    className="mail-link flex items-center gap-1 text-current ml-2.5"
                   >
-                    <Mail className="w-4 h-4" />
+                    <Mail className="w-5 h-5 mb-0.5" />
                     Email küldése
                   </a>
                 </div>
-              </CollapsibleTrigger>
+                {/* Caret button */}
+                <button className="bg-transparent border-0 outline-none float-right">
+                  <ChevronDown 
+                    className={cn(
+                      "w-5 h-5 transition-transform",
+                      expandedCountries.has(country.id) ? "rotate-180 text-white" : ""
+                    )} 
+                  />
+                </button>
+              </div>
 
-              {/* Expert List */}
-              <CollapsibleContent>
-                <div className="mt-1 space-y-1">
-                  {countryExperts.map((expert) => (
-                    <div 
-                      key={expert.id}
-                      className={cn(
-                        "flex items-center justify-between p-4 bg-white border rounded-lg",
-                        !expert.is_active && "opacity-60",
-                        expert.contract_canceled && "bg-red-50"
-                      )}
-                    >
-                      {/* Expert Name */}
-                      <div className="flex items-center gap-3">
-                        <span className="font-medium">{expert.name}</span>
-                        {/* Data Status indicator */}
-                        {/* TODO: Check if expert data is complete */}
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                          </TooltipTrigger>
-                          <TooltipContent>Adatok rendben</TooltipContent>
-                        </Tooltip>
-                      </div>
+              {/* Expert List - hidden by default, shown when expanded */}
+              {expandedCountries.has(country.id) && countryExperts.map((expert) => (
+                <div 
+                  key={expert.id}
+                  className={cn(
+                    "py-2.5 px-2.5 bg-cgp-list-bg text-foreground font-bold mt-2.5",
+                    "flex items-center justify-between"
+                  )}
+                  data-country={country.id}
+                >
+                  {/* Expert Name */}
+                  <span>{expert.name}</span>
 
-                      {/* Actions */}
-                      <div className="flex items-center gap-1">
-                        {/* Edit */}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => navigate(`/dashboard/settings/experts/${expert.id}/edit`)}
-                            >
-                              <Pencil className="w-4 h-4 text-cgp-teal" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Szerkesztés</TooltipContent>
-                        </Tooltip>
+                  {/* Actions - float right, Laravel order: Delete, Contract, Active/Inactive, Locked, Edit, LoginAs, DataStatus */}
+                  <div className="flex items-center float-right">
+                    
+                    {/* Delete Button - .delete-button style */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => handleDeleteClick(expert)}
+                          className="bg-transparent border-0 outline-none ml-1.5 text-cgp-delete-purple"
+                        >
+                          <Trash2 className="w-5 h-5 mb-0.5" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>Törlés</TooltipContent>
+                    </Tooltip>
 
-                        {/* Login As */}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleLoginAs(expert)}
-                            >
-                              <LogIn className="w-4 h-4 text-cgp-teal" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Bejelentkezés</TooltipContent>
-                        </Tooltip>
+                    {/* Cancel Contract - .activate-button style */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => !expert.contract_canceled && handleCancelContractClick(expert)}
+                          disabled={expert.contract_canceled}
+                          className={cn(
+                            "bg-transparent border-0 outline-none ml-1.5 flex items-center gap-1",
+                            expert.contract_canceled 
+                              ? "text-destructive" // .deactivated color
+                              : "text-cgp-status-active" // .activate-button default color
+                          )}
+                        >
+                          {expert.contract_canceled ? (
+                            <>
+                              <FileX className="w-5 h-5 mb-0.5" />
+                              <span className="text-sm">Felmondva</span>
+                            </>
+                          ) : (
+                            <>
+                              <FileCheck className="w-5 h-5 mb-0.5" />
+                              <span className="text-sm">Szerződés</span>
+                            </>
+                          )}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {expert.contract_canceled ? "Szerződés felmondva" : "Szerződés felmondása"}
+                      </TooltipContent>
+                    </Tooltip>
 
-                        {/* Pending / Active / Inactive Status */}
-                        {!expert.last_login_at ? (
-                          // Pending - hasn't logged in yet
-                          <div className="flex items-center gap-1">
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300">
-                                  <AlertCircle className="w-3 h-3 mr-1" />
-                                  Függőben
-                                </Badge>
-                              </TooltipTrigger>
-                              <TooltipContent>Még nem jelentkezett be</TooltipContent>
-                            </Tooltip>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleResendEmail(expert)}
-                                >
-                                  <Mail className="w-4 h-4 text-yellow-600" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Email újraküldése</TooltipContent>
-                            </Tooltip>
-                          </div>
-                        ) : (
-                          <>
-                            {/* Lock/Unlock */}
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => toggleExpertLocked(expert.id)}
-                                  disabled={expert.contract_canceled}
-                                >
-                                  {expert.is_locked ? (
-                                    <Lock className="w-4 h-4 text-red-500" />
-                                  ) : (
-                                    <Unlock className="w-4 h-4 text-green-500" />
-                                  )}
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {expert.is_locked ? "Zárolva" : "Feloldva"}
-                              </TooltipContent>
-                            </Tooltip>
-
-                            {/* Active/Inactive */}
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => toggleExpertActive(expert.id)}
-                                  disabled={expert.contract_canceled}
-                                >
-                                  {expert.is_active ? (
-                                    <CheckCircle className="w-4 h-4 text-green-500" />
-                                  ) : (
-                                    <XCircle className="w-4 h-4 text-gray-400" />
-                                  )}
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {expert.is_active ? "Aktív" : "Inaktív"}
-                              </TooltipContent>
-                            </Tooltip>
-                          </>
-                        )}
-
-                        {/* Cancel Contract */}
+                    {/* Status buttons - only shown if expert has logged in */}
+                    {expert.last_login_at ? (
+                      <>
+                        {/* Active/Inactive - .activate-button with .deactivated for inactive */}
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleCancelContractClick(expert)}
+                            <button
+                              onClick={() => toggleExpertActive(expert.id)}
                               disabled={expert.contract_canceled}
-                              className={expert.contract_canceled ? "text-gray-400" : "text-orange-500 hover:text-orange-600"}
+                              className={cn(
+                                "bg-transparent border-0 outline-none ml-1.5 flex items-center gap-1",
+                                !expert.is_active 
+                                  ? "text-destructive" // .deactivated
+                                  : "text-cgp-status-active" // active green
+                              )}
                             >
-                              <FileX className="w-4 h-4" />
-                            </Button>
+                              {expert.is_active ? (
+                                <>
+                                  <CheckCircle className="w-5 h-5 mb-0.5" />
+                                  <span className="text-sm">Aktív</span>
+                                </>
+                              ) : (
+                                <>
+                                  {expert.inactivity ? (
+                                    <Info className="w-5 h-5 mb-0.5" />
+                                  ) : (
+                                    <XCircle className="w-5 h-5 mb-0.5" />
+                                  )}
+                                  <span className="text-sm">Inaktív</span>
+                                </>
+                              )}
+                            </button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            {expert.contract_canceled ? "Szerződés felmondva" : "Szerződés felmondása"}
+                            {expert.is_active ? "Aktív - kattints az inaktiváláshoz" : "Inaktív - kattints az aktiváláshoz"}
+                            {expert.inactivity && ` (Inaktív: ${expert.inactivity.until}-ig)`}
                           </TooltipContent>
                         </Tooltip>
 
-                        {/* Delete */}
+                        {/* Locked/Unlocked */}
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeleteClick(expert)}
-                              className="text-destructive hover:text-destructive"
+                            <button
+                              onClick={() => toggleExpertLocked(expert.id)}
+                              disabled={expert.contract_canceled}
+                              className={cn(
+                                "bg-transparent border-0 outline-none ml-1.5 flex items-center gap-1",
+                                expert.is_locked 
+                                  ? "text-destructive" // .deactivated
+                                  : "text-cgp-status-active" // unlocked green
+                              )}
                             >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                              {expert.is_locked ? (
+                                <>
+                                  <Lock className="w-5 h-5 mb-0.5" />
+                                  <span className="text-sm">Zárolt</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Unlock className="w-5 h-5 mb-0.5" />
+                                  <span className="text-sm">Nyitott</span>
+                                </>
+                              )}
+                            </button>
                           </TooltipTrigger>
-                          <TooltipContent>Törlés</TooltipContent>
+                          <TooltipContent>
+                            {expert.is_locked ? "Zárolt" : "Feloldva"}
+                          </TooltipContent>
                         </Tooltip>
-                      </div>
-                    </div>
-                  ))}
+                      </>
+                    ) : (
+                      /* Pending status - .pending color */
+                      <span className="flex items-center gap-1 ml-1.5 text-cgp-status-pending">
+                        <AlertCircle className="w-5 h-5 mb-0.5" />
+                        <span className="text-sm">Függőben</span>
+                        {/* Resend email button - .mail-resend-button */}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => handleResendEmail(expert)}
+                              className="bg-transparent border-0 outline-none ml-1.5 text-cgp-status-pending"
+                            >
+                              <Mail className="w-5 h-5 mb-0.5" />
+                              <span className="text-sm">Email küldése</span>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>Regisztrációs email újraküldése</TooltipContent>
+                        </Tooltip>
+                      </span>
+                    )}
+
+                    {/* Edit link */}
+                    <a 
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate(`/dashboard/settings/experts/${expert.id}/edit`);
+                      }}
+                      className="flex items-center gap-1 ml-1.5 text-foreground no-underline"
+                    >
+                      <Pencil className="w-5 h-5 mb-0.5" />
+                      <span className="text-sm">Szerkesztés</span>
+                    </a>
+
+                    {/* Login As button - .loginAs style */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => handleLoginAs(expert)}
+                          className="bg-transparent border-0 outline-none ml-1.5 text-foreground flex items-center gap-1"
+                        >
+                          <LogIn className="w-5 h-5 mb-0.5" />
+                          <span className="text-sm">Belépés</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>Bejelentkezés mint szakértő</TooltipContent>
+                    </Tooltip>
+
+                    {/* Data status indicator - missing or ok */}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <a
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            navigate(`/dashboard/settings/experts/${expert.id}/edit`);
+                          }}
+                          className={cn(
+                            "flex items-center gap-1 ml-2",
+                            // TODO: Check if expert data is complete
+                            "text-cgp-status-active" // .activate-button green for OK
+                            // Use "text-destructive" for missing data
+                          )}
+                        >
+                          <CheckCircle className="w-5 h-5 mb-0.5" />
+                          <span className="text-sm">Adatok rendben</span>
+                        </a>
+                      </TooltipTrigger>
+                      <TooltipContent>Szakértői adatok állapota</TooltipContent>
+                    </Tooltip>
+                  </div>
                 </div>
-              </CollapsibleContent>
-            </Collapsible>
+              ))}
+
+              {/* Last element spacing */}
+              {expandedCountries.has(country.id) && countryExperts.length > 0 && (
+                <div className="mb-5" />
+              )}
+            </div>
           ))}
 
           {expertsByCountry.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
-              Nincs találat
+              Nincs szakértő az adatbázisban
             </div>
           )}
         </div>
@@ -395,9 +430,8 @@ const ExpertList = () => {
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Szakértő törlése</AlertDialogTitle>
+              <AlertDialogTitle>Biztosan törölni szeretné?</AlertDialogTitle>
               <AlertDialogDescription>
-                Biztosan törölni szeretnéd <strong>{selectedExpert?.name}</strong> szakértőt?
                 Ez a művelet nem vonható vissza.
               </AlertDialogDescription>
             </AlertDialogHeader>
@@ -407,7 +441,7 @@ const ExpertList = () => {
                 onClick={handleDeleteConfirm}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                Törlés
+                Igen, törlöm!
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -417,9 +451,8 @@ const ExpertList = () => {
         <AlertDialog open={cancelContractDialogOpen} onOpenChange={setCancelContractDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Szerződés felmondása</AlertDialogTitle>
+              <AlertDialogTitle>Biztosan fel szeretné mondani a szerződést?</AlertDialogTitle>
               <AlertDialogDescription>
-                Biztosan fel szeretnéd mondani <strong>{selectedExpert?.name}</strong> szerződését?
                 A szakértő zárolásra kerül és nem fog tudni bejelentkezni.
               </AlertDialogDescription>
             </AlertDialogHeader>
@@ -427,9 +460,9 @@ const ExpertList = () => {
               <AlertDialogCancel>Mégse</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleCancelContractConfirm}
-                className="bg-warning text-warning-foreground hover:bg-warning/90"
+                className="bg-cgp-badge-lastday text-white hover:bg-cgp-badge-lastday/90"
               >
-                Felmondás
+                Igen
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
