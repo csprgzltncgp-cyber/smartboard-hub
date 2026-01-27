@@ -243,16 +243,16 @@ const ExpertList = () => {
 
   const getStatusBadge = (expert: Expert) => {
     if (expert.contract_canceled) {
-      return <Badge className="bg-muted-foreground">Szerződés felmondva</Badge>;
+      return <Badge className="bg-muted-foreground text-white">Szerződés felmondva</Badge>;
     }
     if (!expert.last_login_at) {
-      return <Badge className="bg-warning">Függőben</Badge>;
+      return <Badge className="bg-cgp-badge-new text-white">Függőben</Badge>;
     }
     if (expert.is_locked) {
-      return <Badge className="bg-destructive">Zárolt</Badge>;
+      return <Badge className="bg-destructive text-white">Zárolt</Badge>;
     }
     return (
-      <Badge className={expert.is_active ? "bg-primary" : "bg-muted-foreground"}>
+      <Badge className={expert.is_active ? "bg-primary text-white" : "bg-muted-foreground text-white"}>
         {expert.is_active ? "Aktív" : "Inaktív"}
       </Badge>
     );
