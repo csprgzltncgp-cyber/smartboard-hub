@@ -354,11 +354,6 @@ const ExpertList = () => {
           >
             <Power className={`w-4 h-4 ${expert.is_active ? "text-primary" : "text-muted-foreground"}`} />
           </Button>
-          {formatInactivityUntil(activeInactivityByExpertId[expert.id]) && (
-            <span className="text-xs text-muted-foreground whitespace-nowrap">
-              {formatInactivityUntil(activeInactivityByExpertId[expert.id])}
-            </span>
-          )}
           <Button
             variant="ghost"
             size="icon"
@@ -503,6 +498,11 @@ const ExpertList = () => {
                           </div>
                           <div className="flex items-center gap-2">
                             {getStatusBadge(expert)}
+                            {formatInactivityUntil(activeInactivityByExpertId[expert.id]) && (
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                ({formatInactivityUntil(activeInactivityByExpertId[expert.id])})
+                              </span>
+                            )}
                             <ExpertActions expert={expert} />
                           </div>
                         </div>
@@ -518,6 +518,11 @@ const ExpertList = () => {
                           </div>
                           <div className="flex items-center gap-2">
                             {getStatusBadge(expert)}
+                            {formatInactivityUntil(activeInactivityByExpertId[expert.id]) && (
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                ({formatInactivityUntil(activeInactivityByExpertId[expert.id])})
+                              </span>
+                            )}
                             <ExpertActions expert={expert} />
                           </div>
                         </div>
