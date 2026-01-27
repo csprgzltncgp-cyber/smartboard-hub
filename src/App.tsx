@@ -14,8 +14,6 @@ import UserPermissions from "./pages/users/UserPermissions";
 import OperatorList from "./pages/operators/OperatorList";
 import OperatorForm from "./pages/operators/OperatorForm";
 import OperatorPermissions from "./pages/operators/OperatorPermissions";
-import ExpertList from "./pages/experts/ExpertList";
-import ExpertForm from "./pages/experts/ExpertForm";
 import InputsPage from "./pages/inputs/InputsPage";
 import CrmPage from "./pages/crm/CrmPage";
 import CaseDispatchPage from "./pages/cases/CaseDispatchPage";
@@ -47,9 +45,6 @@ const App = () => (
               <Route path="settings/operators" element={<OperatorList />} />
               <Route path="settings/operators/new" element={<OperatorForm />} />
               <Route path="settings/operators/:operatorId/permissions" element={<OperatorPermissions />} />
-              <Route path="settings/experts" element={<ExpertList />} />
-              <Route path="settings/experts/new" element={<ExpertForm />} />
-              <Route path="settings/experts/:expertId/edit" element={<ExpertForm />} />
               <Route path="inputs" element={<InputsPage />} />
               <Route path="crm" element={<CrmPage />} />
               <Route path="smartboard/sales" element={<SalesSmartboard />} />
