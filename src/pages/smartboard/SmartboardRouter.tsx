@@ -3,6 +3,7 @@ import Dashboard from "@/pages/Dashboard";
 import SalesSmartboard from "./SalesSmartboard";
 import AccountSmartboard from "./AccountSmartboard";
 import OperativeSmartboard from "./OperativeSmartboard";
+import AdminSmartboard from "./AdminSmartboard";
 
 /**
  * Dinamikusan választja ki a megfelelő SmartBoard-ot a felhasználó 
@@ -12,8 +13,8 @@ import OperativeSmartboard from "./OperativeSmartboard";
  * - Account ✓
  * - Sales ✓
  * - Operatív ✓
+ * - Admin ✓
  * - Pénzügyi (elkészítendő)
- * - Admin (elkészítendő)
  * - Digital (TODO oldalra megy)
  */
 const SmartboardRouter = () => {
@@ -32,11 +33,10 @@ const SmartboardRouter = () => {
       return <SalesSmartboard />;
     case "operative":
       return <OperativeSmartboard />;
+    case "admin":
+      return <AdminSmartboard />;
     case "financial":
       // Pénzügyi SmartBoard - saját oldal elkészítendő
-      return <Dashboard />;
-    case "admin":
-      // Admin SmartBoard - saját oldal elkészítendő
       return <Dashboard />;
     case "digital":
       // Digital SmartBoard - TODO oldalra megy
