@@ -208,7 +208,6 @@ export const useExperts = () => {
   // Create expert
   const createExpert = async (data: Partial<Expert>): Promise<string | null> => {
     try {
-      // Ensure required fields are present
       const insertData = {
         name: data.name || "",
         email: data.email || "",
@@ -276,7 +275,111 @@ export const useExperts = () => {
     }
   };
 
-  // Get expert countries
+  // =====================
+  // EXPERT DATA (address, case limits, native language)
+  // =====================
+  const getExpertData = async (expertId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("expert_data")
+        .select("*")
+        .eq("expert_id", expertId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Error fetching expert data:", error);
+      return null;
+    }
+  };
+
+  const updateExpertData = async (expertId: string, data: {
+    post_code?: string;
+    country_id?: string;
+    city_id?: string;
+    street?: string;
+    street_suffix?: string;
+    house_number?: string;
+    native_language?: string;
+    max_inprogress_cases?: number;
+    min_inprogress_cases?: number;
+  }) => {
+    try {
+      // Check if record exists
+      const existing = await getExpertData(expertId);
+      
+      if (existing) {
+        const { error } = await supabase
+          .from("expert_data")
+          .update(data)
+          .eq("expert_id", expertId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("expert_data")
+          .insert({ expert_id: expertId, ...data });
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error("Error updating expert data:", error);
+      throw error;
+    }
+  };
+
+  // =====================
+  // EXPERT INVOICE DATA
+  // =====================
+  const getExpertInvoiceData = async (expertId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("expert_invoice_data")
+        .select("*")
+        .eq("expert_id", expertId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Error fetching expert invoice data:", error);
+      return null;
+    }
+  };
+
+  const updateExpertInvoiceData = async (expertId: string, data: {
+    invoicing_type?: string;
+    currency?: string;
+    hourly_rate_50?: number | null;
+    hourly_rate_30?: number | null;
+    hourly_rate_15?: number | null;
+    fixed_wage?: number | null;
+    ranking_hourly_rate?: number | null;
+    single_session_rate?: number | null;
+  }) => {
+    try {
+      const existing = await getExpertInvoiceData(expertId);
+      
+      if (existing) {
+        const { error } = await supabase
+          .from("expert_invoice_data")
+          .update(data)
+          .eq("expert_id", expertId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("expert_invoice_data")
+          .insert({ expert_id: expertId, ...data });
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error("Error updating expert invoice data:", error);
+      throw error;
+    }
+  };
+
+  // =====================
+  // EXPERT COUNTRIES
+  // =====================
   const getExpertCountries = async (expertId: string): Promise<string[]> => {
     try {
       const { data, error } = await supabase
@@ -292,12 +395,9 @@ export const useExperts = () => {
     }
   };
 
-  // Update expert countries
   const updateExpertCountries = async (expertId: string, countryIds: string[]) => {
     try {
-      // Delete existing
       await supabase.from("expert_countries").delete().eq("expert_id", expertId);
-      // Insert new
       if (countryIds.length > 0) {
         const { error } = await supabase.from("expert_countries").insert(
           countryIds.map((countryId) => ({ expert_id: expertId, country_id: countryId }))
@@ -310,7 +410,42 @@ export const useExperts = () => {
     }
   };
 
-  // Get expert permissions
+  // =====================
+  // EXPERT CRISIS COUNTRIES
+  // =====================
+  const getExpertCrisisCountries = async (expertId: string): Promise<string[]> => {
+    try {
+      const { data, error } = await supabase
+        .from("expert_crisis_countries")
+        .select("country_id")
+        .eq("expert_id", expertId);
+
+      if (error) throw error;
+      return data?.map((d) => d.country_id) || [];
+    } catch (error) {
+      console.error("Error fetching expert crisis countries:", error);
+      return [];
+    }
+  };
+
+  const updateExpertCrisisCountries = async (expertId: string, countryIds: string[]) => {
+    try {
+      await supabase.from("expert_crisis_countries").delete().eq("expert_id", expertId);
+      if (countryIds.length > 0) {
+        const { error } = await supabase.from("expert_crisis_countries").insert(
+          countryIds.map((countryId) => ({ expert_id: expertId, country_id: countryId }))
+        );
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error("Error updating expert crisis countries:", error);
+      throw error;
+    }
+  };
+
+  // =====================
+  // EXPERT PERMISSIONS
+  // =====================
   const getExpertPermissions = async (expertId: string): Promise<string[]> => {
     try {
       const { data, error } = await supabase
@@ -326,12 +461,9 @@ export const useExperts = () => {
     }
   };
 
-  // Update expert permissions
   const updateExpertPermissions = async (expertId: string, permissionIds: string[]) => {
     try {
-      // Delete existing
       await supabase.from("expert_permissions").delete().eq("expert_id", expertId);
-      // Insert new
       if (permissionIds.length > 0) {
         const { error } = await supabase.from("expert_permissions").insert(
           permissionIds.map((permissionId) => ({ expert_id: expertId, permission_id: permissionId }))
@@ -340,6 +472,72 @@ export const useExperts = () => {
       }
     } catch (error) {
       console.error("Error updating expert permissions:", error);
+      throw error;
+    }
+  };
+
+  // =====================
+  // EXPERT SPECIALIZATIONS
+  // =====================
+  const getExpertSpecializations = async (expertId: string): Promise<string[]> => {
+    try {
+      const { data, error } = await supabase
+        .from("expert_specializations")
+        .select("specialization_id")
+        .eq("expert_id", expertId);
+
+      if (error) throw error;
+      return data?.map((d) => d.specialization_id) || [];
+    } catch (error) {
+      console.error("Error fetching expert specializations:", error);
+      return [];
+    }
+  };
+
+  const updateExpertSpecializations = async (expertId: string, specializationIds: string[]) => {
+    try {
+      await supabase.from("expert_specializations").delete().eq("expert_id", expertId);
+      if (specializationIds.length > 0) {
+        const { error } = await supabase.from("expert_specializations").insert(
+          specializationIds.map((specializationId) => ({ expert_id: expertId, specialization_id: specializationId }))
+        );
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error("Error updating expert specializations:", error);
+      throw error;
+    }
+  };
+
+  // =====================
+  // EXPERT LANGUAGE SKILLS
+  // =====================
+  const getExpertLanguageSkills = async (expertId: string): Promise<string[]> => {
+    try {
+      const { data, error } = await supabase
+        .from("expert_language_skills")
+        .select("language_skill_id")
+        .eq("expert_id", expertId);
+
+      if (error) throw error;
+      return data?.map((d) => d.language_skill_id) || [];
+    } catch (error) {
+      console.error("Error fetching expert language skills:", error);
+      return [];
+    }
+  };
+
+  const updateExpertLanguageSkills = async (expertId: string, languageSkillIds: string[]) => {
+    try {
+      await supabase.from("expert_language_skills").delete().eq("expert_id", expertId);
+      if (languageSkillIds.length > 0) {
+        const { error } = await supabase.from("expert_language_skills").insert(
+          languageSkillIds.map((languageSkillId) => ({ expert_id: expertId, language_skill_id: languageSkillId }))
+        );
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error("Error updating expert language skills:", error);
       throw error;
     }
   };
@@ -361,8 +559,18 @@ export const useExperts = () => {
     getExpertById,
     getExpertCountries,
     updateExpertCountries,
+    getExpertCrisisCountries,
+    updateExpertCrisisCountries,
     getExpertPermissions,
     updateExpertPermissions,
+    getExpertSpecializations,
+    updateExpertSpecializations,
+    getExpertLanguageSkills,
+    updateExpertLanguageSkills,
+    getExpertData,
+    updateExpertData,
+    getExpertInvoiceData,
+    updateExpertInvoiceData,
     refetch: fetchAll,
   };
 };
