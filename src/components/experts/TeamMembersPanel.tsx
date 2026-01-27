@@ -32,6 +32,13 @@ const createEmptyTeamMember = (): TeamMember => ({
   minInprogressCases: "0",
   username: "",
   dashboardLanguage: "hu",
+  // Consultation type settings
+  acceptsPersonalConsultation: false,
+  acceptsVideoConsultation: false,
+  acceptsPhoneConsultation: false,
+  acceptsChatConsultation: false,
+  videoConsultationType: "both",
+  acceptsOnsiteConsultation: false,
 });
 
 export const TeamMembersPanel = ({

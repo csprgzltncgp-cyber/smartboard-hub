@@ -16,7 +16,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronRight, Trash2, Crown } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ChevronDown, ChevronRight, Trash2, Crown, Video, Phone, MessageSquare, User, MapPin } from "lucide-react";
 import { MultiSelectField } from "./MultiSelectField";
 
 export interface TeamMember {
@@ -42,6 +43,13 @@ export interface TeamMember {
   // Dashboard data
   username: string;
   dashboardLanguage: string;
+  // Consultation type settings
+  acceptsPersonalConsultation: boolean;
+  acceptsVideoConsultation: boolean;
+  acceptsPhoneConsultation: boolean;
+  acceptsChatConsultation: boolean;
+  videoConsultationType: "eap_online_only" | "operator_only" | "both";
+  acceptsOnsiteConsultation: boolean;
 }
 
 // Telefon előhívók
@@ -306,6 +314,102 @@ export const TeamMemberCard = ({
                     placeholder="0"
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* Tanácsadási típusok */}
+            <div className="space-y-4">
+              <h3 className="text-md font-medium border-b pb-2">Tanácsadási típusok</h3>
+              
+              <p className="text-sm text-muted-foreground">
+                Válaszd ki, milyen típusú tanácsadást vállal a csapattag.
+              </p>
+
+              {/* Személyes tanácsadás */}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/30 transition-colors">
+                  <Checkbox
+                    checked={member.acceptsPersonalConsultation}
+                    onCheckedChange={(checked) => updateField("acceptsPersonalConsultation", checked as boolean)}
+                  />
+                  <User className="w-5 h-5 text-cgp-teal" />
+                  <Label className="cursor-pointer flex-1">Személyes tanácsadás</Label>
+                </div>
+
+                {member.acceptsPersonalConsultation && (
+                  <div className="ml-8 p-3 border border-dashed rounded-lg bg-muted/20">
+                    <div className="flex items-center space-x-3">
+                      <Checkbox
+                        checked={member.acceptsOnsiteConsultation}
+                        onCheckedChange={(checked) => updateField("acceptsOnsiteConsultation", checked as boolean)}
+                      />
+                      <MapPin className="w-4 h-4 text-orange-500" />
+                      <Label className="cursor-pointer text-sm">Vállal helyszíni (on-site) tanácsadást</Label>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Videós tanácsadás */}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/30 transition-colors">
+                  <Checkbox
+                    checked={member.acceptsVideoConsultation}
+                    onCheckedChange={(checked) => updateField("acceptsVideoConsultation", checked as boolean)}
+                  />
+                  <Video className="w-5 h-5 text-cgp-teal" />
+                  <Label className="cursor-pointer flex-1">Videós tanácsadás</Label>
+                </div>
+
+                {member.acceptsVideoConsultation && (
+                  <div className="ml-8 p-3 border border-dashed rounded-lg bg-muted/20">
+                    <Label className="text-sm font-medium mb-3 block">Videós esetek típusa:</Label>
+                    <RadioGroup
+                      value={member.videoConsultationType}
+                      onValueChange={(value) => updateField("videoConsultationType", value as "eap_online_only" | "operator_only" | "both")}
+                      className="space-y-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="eap_online_only" id={`video_eap_only_${index}`} />
+                        <Label htmlFor={`video_eap_only_${index}`} className="cursor-pointer text-sm">
+                          Csak EAP Online esetek
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="operator_only" id={`video_operator_only_${index}`} />
+                        <Label htmlFor={`video_operator_only_${index}`} className="cursor-pointer text-sm">
+                          Csak Operátor által kiközvetített esetek
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="both" id={`video_both_${index}`} />
+                        <Label htmlFor={`video_both_${index}`} className="cursor-pointer text-sm">
+                          Mindkettő
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                )}
+              </div>
+
+              {/* Telefonos tanácsadás */}
+              <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/30 transition-colors">
+                <Checkbox
+                  checked={member.acceptsPhoneConsultation}
+                  onCheckedChange={(checked) => updateField("acceptsPhoneConsultation", checked as boolean)}
+                />
+                <Phone className="w-5 h-5 text-cgp-teal" />
+                <Label className="cursor-pointer flex-1">Telefonos tanácsadás</Label>
+              </div>
+
+              {/* Chat alapú tanácsadás */}
+              <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/30 transition-colors">
+                <Checkbox
+                  checked={member.acceptsChatConsultation}
+                  onCheckedChange={(checked) => updateField("acceptsChatConsultation", checked as boolean)}
+                />
+                <MessageSquare className="w-5 h-5 text-cgp-teal" />
+                <Label className="cursor-pointer flex-1">Szöveges üzenetváltás (Chat) alapú tanácsadás</Label>
               </div>
             </div>
 

@@ -21,6 +21,7 @@ import { CompanyDataPanel } from "@/components/experts/CompanyDataPanel";
 import { CompanyBillingPanel } from "@/components/experts/CompanyBillingPanel";
 import { TeamMembersPanel, createEmptyTeamMember } from "@/components/experts/TeamMembersPanel";
 import { TeamMember } from "@/components/experts/TeamMemberCard";
+import { ConsultationTypeSettings, ConsultationSettings, defaultConsultationSettings } from "@/components/experts/ConsultationTypeSettings";
 
 interface Country {
   id: string;
@@ -182,6 +183,9 @@ const ExpertForm = () => {
   // Dashboard adatok
   const [dashboardLanguage, setDashboardLanguage] = useState("hu");
 
+  // Tanácsadási típusok beállításai
+  const [consultationSettings, setConsultationSettings] = useState<ConsultationSettings>(defaultConsultationSettings);
+
   // === CÉGES ADATOK ===
   const [companyName, setCompanyName] = useState("");
   const [taxNumber, setTaxNumber] = useState("");
@@ -259,6 +263,16 @@ const ExpertForm = () => {
         setIsCgpEmployee(expert.is_cgp_employee || false);
         setIsEapOnlineExpert(expert.is_eap_online_expert || false);
         setIsCrisisPsychologist(expert.crisis_psychologist || false);
+
+        // Tanácsadási típusok betöltése
+        setConsultationSettings({
+          acceptsPersonalConsultation: (expert as any).accepts_personal_consultation || false,
+          acceptsVideoConsultation: (expert as any).accepts_video_consultation || false,
+          acceptsPhoneConsultation: (expert as any).accepts_phone_consultation || false,
+          acceptsChatConsultation: (expert as any).accepts_chat_consultation || false,
+          videoConsultationType: ((expert as any).video_consultation_type as "eap_online_only" | "operator_only" | "both") || "both",
+          acceptsOnsiteConsultation: (expert as any).accepts_onsite_consultation || false,
+        });
 
         // Céges adatok
         setCompanyName(expert.company_name || "");
@@ -379,6 +393,13 @@ const ExpertForm = () => {
               minInprogressCases: "0",
               username: "",
               dashboardLanguage: member.language || "hu",
+              // Consultation type settings
+              acceptsPersonalConsultation: (member as any).accepts_personal_consultation || false,
+              acceptsVideoConsultation: (member as any).accepts_video_consultation || false,
+              acceptsPhoneConsultation: (member as any).accepts_phone_consultation || false,
+              acceptsChatConsultation: (member as any).accepts_chat_consultation || false,
+              videoConsultationType: ((member as any).video_consultation_type as "eap_online_only" | "operator_only" | "both") || "both",
+              acceptsOnsiteConsultation: (member as any).accepts_onsite_consultation || false,
             } as TeamMember;
           })
         );
@@ -428,6 +449,12 @@ const ExpertForm = () => {
             phone_number: expertType === "individual" ? (phoneNumber || null) : null,
             language: dashboardLanguage,
             crisis_psychologist: expertType === "individual" ? isCrisisPsychologist : false,
+            accepts_personal_consultation: expertType === "individual" ? consultationSettings.acceptsPersonalConsultation : false,
+            accepts_video_consultation: expertType === "individual" ? consultationSettings.acceptsVideoConsultation : false,
+            accepts_phone_consultation: expertType === "individual" ? consultationSettings.acceptsPhoneConsultation : false,
+            accepts_chat_consultation: expertType === "individual" ? consultationSettings.acceptsChatConsultation : false,
+            video_consultation_type: expertType === "individual" ? consultationSettings.videoConsultationType : "both",
+            accepts_onsite_consultation: expertType === "individual" ? consultationSettings.acceptsOnsiteConsultation : false,
             company_name: expertType === "company" ? companyName : null,
             tax_number: expertType === "company" ? taxNumber : null,
             company_registration_number: expertType === "company" ? companyRegistrationNumber : null,
@@ -576,6 +603,12 @@ const ExpertForm = () => {
             phone_number: expertType === "individual" ? (phoneNumber || null) : null,
             language: dashboardLanguage,
             crisis_psychologist: expertType === "individual" ? isCrisisPsychologist : false,
+            accepts_personal_consultation: expertType === "individual" ? consultationSettings.acceptsPersonalConsultation : false,
+            accepts_video_consultation: expertType === "individual" ? consultationSettings.acceptsVideoConsultation : false,
+            accepts_phone_consultation: expertType === "individual" ? consultationSettings.acceptsPhoneConsultation : false,
+            accepts_chat_consultation: expertType === "individual" ? consultationSettings.acceptsChatConsultation : false,
+            video_consultation_type: expertType === "individual" ? consultationSettings.videoConsultationType : "both",
+            accepts_onsite_consultation: expertType === "individual" ? consultationSettings.acceptsOnsiteConsultation : false,
             country_id: selectedCountries[0] || null,
             company_name: expertType === "company" ? companyName : null,
             tax_number: expertType === "company" ? taxNumber : null,
@@ -713,6 +746,12 @@ const ExpertForm = () => {
           is_cgp_employee: member.is_cgp_employee,
           is_eap_online_expert: member.is_eap_online_expert,
           language: member.dashboardLanguage,
+          accepts_personal_consultation: member.acceptsPersonalConsultation,
+          accepts_video_consultation: member.acceptsVideoConsultation,
+          accepts_phone_consultation: member.acceptsPhoneConsultation,
+          accepts_chat_consultation: member.acceptsChatConsultation,
+          video_consultation_type: member.videoConsultationType,
+          accepts_onsite_consultation: member.acceptsOnsiteConsultation,
         })
         .select()
         .single();
@@ -1098,6 +1137,12 @@ const ExpertForm = () => {
                 </div>
               </div>
             </div>
+
+            {/* Tanácsadási típusok */}
+            <ConsultationTypeSettings
+              settings={consultationSettings}
+              onChange={setConsultationSettings}
+            />
 
             {/* Szakmai adatok */}
             <div className="bg-white rounded-xl border p-6 space-y-4">

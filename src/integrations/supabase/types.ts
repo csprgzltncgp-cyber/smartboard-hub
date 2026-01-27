@@ -896,6 +896,11 @@ export type Database = {
       }
       expert_team_members: {
         Row: {
+          accepts_chat_consultation: boolean | null
+          accepts_onsite_consultation: boolean | null
+          accepts_personal_consultation: boolean | null
+          accepts_phone_consultation: boolean | null
+          accepts_video_consultation: boolean | null
           created_at: string
           email: string
           expert_id: string
@@ -909,8 +914,14 @@ export type Database = {
           phone_number: string | null
           phone_prefix: string | null
           updated_at: string
+          video_consultation_type: string | null
         }
         Insert: {
+          accepts_chat_consultation?: boolean | null
+          accepts_onsite_consultation?: boolean | null
+          accepts_personal_consultation?: boolean | null
+          accepts_phone_consultation?: boolean | null
+          accepts_video_consultation?: boolean | null
           created_at?: string
           email: string
           expert_id: string
@@ -924,8 +935,14 @@ export type Database = {
           phone_number?: string | null
           phone_prefix?: string | null
           updated_at?: string
+          video_consultation_type?: string | null
         }
         Update: {
+          accepts_chat_consultation?: boolean | null
+          accepts_onsite_consultation?: boolean | null
+          accepts_personal_consultation?: boolean | null
+          accepts_phone_consultation?: boolean | null
+          accepts_video_consultation?: boolean | null
           created_at?: string
           email?: string
           expert_id?: string
@@ -939,6 +956,7 @@ export type Database = {
           phone_number?: string | null
           phone_prefix?: string | null
           updated_at?: string
+          video_consultation_type?: string | null
         }
         Relationships: [
           {
@@ -952,6 +970,11 @@ export type Database = {
       }
       experts: {
         Row: {
+          accepts_chat_consultation: boolean | null
+          accepts_onsite_consultation: boolean | null
+          accepts_personal_consultation: boolean | null
+          accepts_phone_consultation: boolean | null
+          accepts_video_consultation: boolean | null
           billing_address: string | null
           billing_city: string | null
           billing_country_id: string | null
@@ -984,8 +1007,14 @@ export type Database = {
           tax_number: string | null
           updated_at: string
           username: string | null
+          video_consultation_type: string | null
         }
         Insert: {
+          accepts_chat_consultation?: boolean | null
+          accepts_onsite_consultation?: boolean | null
+          accepts_personal_consultation?: boolean | null
+          accepts_phone_consultation?: boolean | null
+          accepts_video_consultation?: boolean | null
           billing_address?: string | null
           billing_city?: string | null
           billing_country_id?: string | null
@@ -1018,8 +1047,14 @@ export type Database = {
           tax_number?: string | null
           updated_at?: string
           username?: string | null
+          video_consultation_type?: string | null
         }
         Update: {
+          accepts_chat_consultation?: boolean | null
+          accepts_onsite_consultation?: boolean | null
+          accepts_personal_consultation?: boolean | null
+          accepts_phone_consultation?: boolean | null
+          accepts_video_consultation?: boolean | null
           billing_address?: string | null
           billing_city?: string | null
           billing_country_id?: string | null
@@ -1052,6 +1087,7 @@ export type Database = {
           tax_number?: string | null
           updated_at?: string
           username?: string | null
+          video_consultation_type?: string | null
         }
         Relationships: [
           {
