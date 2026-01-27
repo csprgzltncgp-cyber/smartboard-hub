@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ChevronDown, ChevronRight, Trash2, Crown, Video, Phone, MessageSquare, User, MapPin, Globe } from "lucide-react";
 import { MultiSelectField } from "./MultiSelectField";
+import { HierarchicalSpecializationSelect } from "./HierarchicalSpecializationSelect";
 import { EapOnlineImageUpload } from "./EapOnlineImageUpload";
 import { EapOnlineTextFields } from "./EapOnlineTextFields";
 
@@ -87,8 +88,6 @@ interface TeamMemberCardProps {
   onSetLeader: (index: number) => void;
   countries: { id: string; name: string }[];
   cities: { id: string; name: string }[];
-  permissions: { id: string; name: string }[];
-  specializations: { id: string; name: string }[];
   languageSkills: { id: string; name: string }[];
 }
 
@@ -100,8 +99,6 @@ export const TeamMemberCard = ({
   onSetLeader,
   countries,
   cities,
-  permissions,
-  specializations,
   languageSkills,
 }: TeamMemberCardProps) => {
   const [isOpen, setIsOpen] = useState(true);
@@ -256,22 +253,9 @@ export const TeamMemberCard = ({
                 badgeColor="teal"
               />
 
-              <MultiSelectField
-                label="Szakterületek"
-                options={permissions.map((p) => ({ id: p.id, label: p.name }))}
-                selectedIds={member.selectedPermissions}
-                onChange={(v) => updateField("selectedPermissions", v)}
-                placeholder="Válassz szakterületet..."
-                badgeColor="teal"
-              />
-
-              <MultiSelectField
-                label="Specializáció"
-                options={specializations.map((s) => ({ id: s.id, label: s.name }))}
+              <HierarchicalSpecializationSelect
                 selectedIds={member.selectedSpecializations}
                 onChange={(v) => updateField("selectedSpecializations", v)}
-                placeholder="Válassz specializációt..."
-                badgeColor="teal"
               />
 
               <div className="space-y-2">
