@@ -1314,6 +1314,14 @@ const ExpertForm = () => {
               singleSessionRate={singleSessionRate}
               setSingleSessionRate={setSingleSessionRate}
               countries={countries}
+              customInvoiceItems={customInvoiceItems}
+              setCustomInvoiceItems={setCustomInvoiceItems}
+              newItemName={newItemName}
+              setNewItemName={setNewItemName}
+              newItemCountryId={newItemCountryId}
+              setNewItemCountryId={setNewItemCountryId}
+              newItemAmount={newItemAmount}
+              setNewItemAmount={setNewItemAmount}
             />
 
             {/* Csapattagok */}
