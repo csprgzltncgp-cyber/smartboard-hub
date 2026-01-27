@@ -89,6 +89,28 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
     });
   }, [summaries, month]);
 
+  // Contract Holder Revenue vs Expenses chart data
+  const contractHolderComparisonData = useMemo(() => {
+    if (!summaries) return [];
+    
+    const filtered = month ? summaries.filter(s => s.month === month) : summaries;
+    const contractHolders: ContractHolderType[] = ['cgp_europe', 'telus', 'telus_wpo', 'compsych'];
+    
+    return contractHolders.map(holder => {
+      const revenue = filtered.reduce((sum, s) => sum + (s.revenueByContractHolder[holder] || 0), 0);
+      const expenses = filtered.reduce((sum, s) => sum + (s.consultationCostsByContractHolder[holder] || 0), 0);
+      const profit = revenue - expenses;
+      
+      return {
+        name: CONTRACT_HOLDER_LABELS[holder],
+        shortName: holder === 'cgp_europe' ? 'CGP' : holder === 'telus_wpo' ? 'T/WPO' : CONTRACT_HOLDER_LABELS[holder],
+        Bevétel: revenue,
+        Kiadás: expenses,
+        Profit: profit,
+        color: CONTRACT_HOLDER_COLORS[holder],
+      };
+    }).filter(item => item.Bevétel > 0 || item.Kiadás > 0);
+  }, [summaries, month]);
   // Contract holder revenue pie data
   const revenuePieData = useMemo(() => {
     if (!summaries) return [];
@@ -454,6 +476,34 @@ const FinancialSummaryTab = ({ year, month, country }: FinancialSummaryTabProps)
                   <Tooltip 
                     formatter={(value: number) => formatCurrency(value)}
                     labelFormatter={(label) => `${label}`}
+                  />
+                  <Legend />
+                  <Bar dataKey="Bevétel" fill="#91b752" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Kiadás" fill="#eb7e30" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Contract Holder Revenue vs Expenses Chart */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-lg">Bevétel vs Kiadás contract holder-enként</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={contractHolderComparisonData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="shortName" />
+                  <YAxis tickFormatter={(value) => `€${(value / 1000).toFixed(0)}k`} />
+                  <Tooltip 
+                    formatter={(value: number, name: string) => [formatCurrency(value), name]}
+                    labelFormatter={(label) => {
+                      const item = contractHolderComparisonData.find(d => d.shortName === label);
+                      return item?.name || label;
+                    }}
                   />
                   <Legend />
                   <Bar dataKey="Bevétel" fill="#91b752" radius={[4, 4, 0, 0]} />
