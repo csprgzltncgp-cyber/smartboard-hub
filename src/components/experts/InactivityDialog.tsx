@@ -174,8 +174,10 @@ export const InactivityDialog = ({
         toast.success("Inaktivitási időszak törölve");
       }
 
-      fetchExistingPeriods();
+      // Close panel after deletion
+      onOpenChange(false);
       onSuccess?.();
+      fetchExistingPeriods();
     } catch (error) {
       toast.error("Hiba történt a törlés során");
     }
