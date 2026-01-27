@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash2, Power, Search, Pencil, Lock, Unlock, FileX, Building2, User, Users } from "lucide-react";
+import { Trash2, Power, Pencil, Lock, Unlock, FileX, Building2, User, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import {
   Table,
   TableBody,
@@ -72,7 +72,7 @@ const ExpertList = () => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCountryIds, setSelectedCountryIds] = useState<string[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [expertToDelete, setExpertToDelete] = useState<Expert | null>(null);
   const [openCountries, setOpenCountries] = useState<string[]>([]);
@@ -120,28 +120,26 @@ const ExpertList = () => {
   };
 
   const getExpertsByCountry = (countryId: string) => {
-    return experts.filter((expert) => expert.country_id === countryId && expert.expert_type === "individual");
+    return filteredExperts.filter((expert) => expert.country_id === countryId && expert.expert_type === "individual");
   };
 
   const getCompanyExperts = () => {
-    return experts.filter((expert) => expert.expert_type === "company");
+    return filteredExperts.filter((expert) => expert.expert_type === "company");
   };
 
   const getTeamMembersByExpert = (expertId: string) => {
     return teamMembers.filter((m) => m.expert_id === expertId);
   };
 
+  // Filter experts by selected countries
   const filteredExperts = experts.filter((expert) => {
-    const matchesSearch =
-      expert.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      expert.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (expert.username?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-      (expert.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
-
-    if (activeTab === "individual") return matchesSearch && expert.expert_type === "individual";
-    if (activeTab === "company") return matchesSearch && expert.expert_type === "company";
-    return matchesSearch;
+    const matchesCountry = selectedCountryIds.length === 0 || selectedCountryIds.includes(expert.country_id || "");
+    if (activeTab === "individual") return matchesCountry && expert.expert_type === "individual";
+    if (activeTab === "company") return matchesCountry && expert.expert_type === "company";
+    return matchesCountry;
   });
+
+  const countryOptions = countries.map((c) => ({ id: c.id, label: c.name }));
 
   const handleToggleActive = async (expert: Expert) => {
     try {
@@ -330,7 +328,7 @@ const ExpertList = () => {
 
   return (
     <div>
-      <h1 className="text-3xl font-calibri-bold mb-2">Szakértők listája</h1>
+      <h1 className="text-3xl font-calibri-bold mb-2">Szakértők</h1>
       
       <a
         href="#"
@@ -343,13 +341,13 @@ const ExpertList = () => {
         + Új szakértő hozzáadása
       </a>
 
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-        <Input
-          placeholder="Keresés név, email, felhasználónév vagy cégnév alapján..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
+      <div className="max-w-md mb-4">
+        <MultiSelectField
+          label="Ország szűrő"
+          options={countryOptions}
+          selectedIds={selectedCountryIds}
+          onChange={setSelectedCountryIds}
+          placeholder="Válassz országot (üres = összes)"
         />
       </div>
 
@@ -357,57 +355,24 @@ const ExpertList = () => {
         <TabsList>
           <TabsTrigger value="all" className="flex items-center gap-2">
             Összes
-            <Badge variant="secondary">{experts.length}</Badge>
+            <Badge variant="secondary">{filteredExperts.length}</Badge>
           </TabsTrigger>
           <TabsTrigger value="individual" className="flex items-center gap-2">
             <User className="w-4 h-4" />
             Egyéni
-            <Badge variant="secondary">{experts.filter((e) => e.expert_type === "individual").length}</Badge>
+            <Badge variant="secondary">{filteredExperts.filter((e) => e.expert_type === "individual").length}</Badge>
           </TabsTrigger>
           <TabsTrigger value="company" className="flex items-center gap-2">
             <Building2 className="w-4 h-4" />
             Cégek
-            <Badge variant="secondary">{experts.filter((e) => e.expert_type === "company").length}</Badge>
+            <Badge variant="secondary">{filteredExperts.filter((e) => e.expert_type === "company").length}</Badge>
           </TabsTrigger>
         </TabsList>
       </Tabs>
 
-      {/* Ha van keresés, táblázatos nézet */}
-      {searchTerm ? (
-        <div className="bg-white rounded-xl border overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead>Név / Cégnév</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead className="text-center">Típus</TableHead>
-                <TableHead className="text-center">Státusz</TableHead>
-                <TableHead className="text-right">Műveletek</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredExperts.map((expert) => (
-                <TableRow key={expert.id} className={!expert.is_active ? "opacity-50" : ""}>
-                  <TableCell className="font-medium">
-                    {expert.expert_type === "company" ? expert.company_name || expert.name : expert.name}
-                  </TableCell>
-                  <TableCell>{expert.email}</TableCell>
-                  <TableCell className="text-center">{getTypeBadge(expert)}</TableCell>
-                  <TableCell className="text-center">{getStatusBadge(expert)}</TableCell>
-                  <TableCell className="text-right">
-                    <ExpertActions expert={expert} />
-                  </TableCell>
-                </TableRow>
-              ))}
-              {filteredExperts.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                    Nincs találat
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+      {selectedCountryIds.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          Kérjük, válassz legalább egy országot a szűrőben.
         </div>
       ) : (
         <div className="space-y-6">
@@ -489,47 +454,55 @@ const ExpertList = () => {
                 Egyéni szakértők
               </h2>
               <div className="space-y-1">
-                {countries.map((country) => {
-                  const countryExperts = getExpertsByCountry(country.id);
-                  if (countryExperts.length === 0) return null;
+                {countries
+                  .filter((country) => selectedCountryIds.includes(country.id))
+                  .map((country) => {
+                    const countryExperts = getExpertsByCountry(country.id);
+                    if (countryExperts.length === 0) return null;
 
-                  const isOpen = openCountries.includes(country.id);
+                    const isOpen = openCountries.includes(country.id);
 
-                  return (
-                    <Collapsible key={country.id} open={isOpen} onOpenChange={() => toggleCountry(country.id)}>
-                      <CollapsibleTrigger className="w-full">
-                        <div className="flex items-center justify-between p-4 bg-white border rounded-lg hover:bg-muted/50 cursor-pointer">
-                          <div className="flex items-center gap-3">
-                            <span className="font-semibold text-primary">{country.code}</span>
-                            <Badge variant="outline">{countryExperts.length} szakértő</Badge>
-                          </div>
-                          {isOpen ? (
-                            <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                          ) : (
-                            <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                          )}
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="border-l-2 border-primary ml-4 pl-4 py-2 space-y-2">
-                          {countryExperts.map((expert) => (
-                            <div
-                              key={expert.id}
-                              className="flex items-center justify-between p-3 bg-white border rounded-lg"
-                            >
-                              <span className="font-medium">{expert.name}</span>
-                              <div className="flex items-center gap-2">
-                                {getStatusBadge(expert)}
-                                <ExpertActions expert={expert} />
-                              </div>
+                    return (
+                      <Collapsible key={country.id} open={isOpen} onOpenChange={() => toggleCountry(country.id)}>
+                        <CollapsibleTrigger className="w-full">
+                          <div className="flex items-center justify-between p-4 bg-white border rounded-lg hover:bg-muted/50 cursor-pointer">
+                            <div className="flex items-center gap-3">
+                              <span className="font-semibold text-primary">{country.name}</span>
+                              <Badge variant="outline">{countryExperts.length} szakértő</Badge>
                             </div>
-                          ))}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  );
-                })}
+                            {isOpen ? (
+                              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                            ) : (
+                              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                            )}
+                          </div>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="border-l-2 border-primary ml-4 pl-4 py-2 space-y-2">
+                            {countryExperts.map((expert) => (
+                              <div
+                                key={expert.id}
+                                className="flex items-center justify-between p-3 bg-white border rounded-lg"
+                              >
+                                <span className="font-medium">{expert.name}</span>
+                                <div className="flex items-center gap-2">
+                                  {getStatusBadge(expert)}
+                                  <ExpertActions expert={expert} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    );
+                  })}
               </div>
+            </div>
+          )}
+
+          {filteredExperts.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              Nincs szakértő a kiválasztott országokban.
             </div>
           )}
         </div>

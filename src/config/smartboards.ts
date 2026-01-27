@@ -55,7 +55,7 @@ export const SMARTBOARDS: SmartboardConfig[] = [
     name: "Operatív",
     description: "Operatív feladatok és esetkezelés",
     menuItems: [
-      { id: "op_experts_list", label: "Szakértők listája", path: "/dashboard/experts" },
+      { id: "op_experts_list", label: "Szakértők", path: "/dashboard/experts" },
       { id: "op_expert_search", label: "Szakértők keresése", path: "/dashboard/expert-search" },
       { id: "op_notifications", label: "Értesítések", path: "/dashboard/notifications" },
       { id: "op_all_cases", label: "Összes eset", path: "/dashboard/all-cases" },
