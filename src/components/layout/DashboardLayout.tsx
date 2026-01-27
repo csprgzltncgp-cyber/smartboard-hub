@@ -140,6 +140,8 @@ const DashboardLayout = () => {
       "/dashboard/users/new": { label: "Új felhasználó regisztrálása", parentPath: "/dashboard/users", parentLabel: "Felhasználók" },
       "/dashboard/settings/operators": { label: "Operátorok" },
       "/dashboard/settings/operators/new": { label: "Új operátor regisztrálása", parentPath: "/dashboard/settings/operators", parentLabel: "Operátorok" },
+      "/dashboard/settings/experts": { label: "Szakértők" },
+      "/dashboard/settings/experts/new": { label: "Új szakértő hozzáadása", parentPath: "/dashboard/settings/experts", parentLabel: "Szakértők" },
     };
 
     // Check for user edit route pattern
@@ -166,6 +168,15 @@ const DashboardLayout = () => {
       return [
         { label: "Operátorok", path: "/dashboard/settings/operators" },
         { label: "Jogosultságok szerkesztése", path: path },
+      ];
+    }
+
+    // Check for expert edit route pattern
+    const expertEditMatch = path.match(/^\/dashboard\/settings\/experts\/([^/]+)\/edit$/);
+    if (expertEditMatch) {
+      return [
+        { label: "Szakértők", path: "/dashboard/settings/experts" },
+        { label: "Szerkesztés", path: path },
       ];
     }
 
