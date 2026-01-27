@@ -45,7 +45,6 @@ interface TeamMemberInactivityDialogProps {
   inactivityPeriods: TeamMemberInactivityPeriod[];
   onAddPeriod: (period: Omit<TeamMemberInactivityPeriod, "id">) => void;
   onRemovePeriod: (id: string) => void;
-  onActivate: () => void;
 }
 
 const REASON_PRESETS = [
@@ -63,7 +62,6 @@ export const TeamMemberInactivityDialog = ({
   inactivityPeriods,
   onAddPeriod,
   onRemovePeriod,
-  onActivate,
 }: TeamMemberInactivityDialogProps) => {
   const [durationType, setDurationType] = useState<"definite" | "indefinite">("definite");
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
@@ -105,7 +103,6 @@ export const TeamMemberInactivityDialog = ({
     onRemovePeriod(id);
     
     if (isLastPeriod) {
-      onActivate();
       toast.success("Inaktivitási időszak törölve, csapattag aktiválva");
     } else {
       toast.success("Inaktivitási időszak törölve");
