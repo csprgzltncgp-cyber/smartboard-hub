@@ -131,13 +131,22 @@ export const TeamMemberCard = ({
       id: crypto.randomUUID(),
     };
     const currentPeriods = member.inactivityPeriods || [];
-    updateField("inactivityPeriods", [...currentPeriods, newPeriod]);
-    updateField("is_active", false);
+
+    // IMPORTANT: egyetlen frissítésben kell módosítani, különben a második update
+    // a régi `member` példányból számol és felülírhatja az első változtatást.
+    onChange(index, {
+      ...member,
+      inactivityPeriods: [...currentPeriods, newPeriod],
+      is_active: false,
+    });
   };
 
   const handleRemoveInactivityPeriod = (id: string) => {
     const currentPeriods = member.inactivityPeriods || [];
-    updateField("inactivityPeriods", currentPeriods.filter(p => p.id !== id));
+    onChange(index, {
+      ...member,
+      inactivityPeriods: currentPeriods.filter((p) => p.id !== id),
+    });
   };
 
   const handleActivate = () => {
