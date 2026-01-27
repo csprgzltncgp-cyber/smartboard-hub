@@ -389,6 +389,51 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_invoice_items: {
+        Row: {
+          amount: number
+          country_id: string
+          created_at: string
+          expert_id: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          country_id: string
+          created_at?: string
+          expert_id: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          country_id?: string
+          created_at?: string
+          expert_id?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_invoice_items_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_invoice_items_expert_id_fkey"
+            columns: ["expert_id"]
+            isOneToOne: false
+            referencedRelation: "experts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expert_countries: {
         Row: {
           country_id: string
