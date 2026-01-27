@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { hu } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { Trash2, Power, Pencil, Lock, Unlock, FileX, Building2, User, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -67,6 +69,11 @@ interface TeamMember {
   expert_id: string;
 }
 
+type ActiveInactivity = {
+  until: string | null;
+  is_indefinite: boolean;
+};
+
 const ExpertList = () => {
   const navigate = useNavigate();
   const [experts, setExperts] = useState<Expert[]>([]);
@@ -80,6 +87,7 @@ const ExpertList = () => {
   const [countryTabs, setCountryTabs] = useState<Record<string, "all" | "individual" | "company">>({});
   const [inactivityDialogOpen, setInactivityDialogOpen] = useState(false);
   const [selectedExpertForInactivity, setSelectedExpertForInactivity] = useState<Expert | null>(null);
+  const [activeInactivityByExpertId, setActiveInactivityByExpertId] = useState<Record<string, ActiveInactivity>>({});
 
   useEffect(() => {
     fetchData();
@@ -88,6 +96,7 @@ const ExpertList = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
+      const nowIso = new Date().toISOString();
       const [expertsRes, countriesRes, teamMembersRes] = await Promise.all([
         supabase.from("experts").select("*").order("name"),
         supabase.from("countries").select("*").order("code"),
@@ -97,11 +106,53 @@ const ExpertList = () => {
       if (expertsRes.data) setExperts(expertsRes.data as Expert[]);
       if (countriesRes.data) setCountries(countriesRes.data);
       if (teamMembersRes.data) setTeamMembers(teamMembersRes.data as TeamMember[]);
+
+      // Fetch currently active inactivity periods to show "eddig" date next to the icon
+      const { data: inactivityRows, error: inactivityError } = await supabase
+        .from("expert_inactivity")
+        .select("expert_id, until, is_indefinite, start_date")
+        .lte("start_date", nowIso)
+        .or(`until.is.null,until.gte.${nowIso}`);
+
+      if (inactivityError) {
+        console.error("Error fetching active inactivity:", inactivityError);
+        setActiveInactivityByExpertId({});
+      } else {
+        const map: Record<string, ActiveInactivity> = {};
+        (inactivityRows ?? []).forEach((row: any) => {
+          const current = map[row.expert_id] as ActiveInactivity | undefined;
+          // Prefer indefinite, otherwise prefer the farthest "until"
+          if (row.is_indefinite) {
+            map[row.expert_id] = { until: null, is_indefinite: true };
+            return;
+          }
+          if (!row.until) return;
+          if (!current) {
+            map[row.expert_id] = { until: row.until, is_indefinite: false };
+            return;
+          }
+          if (current.is_indefinite) return;
+          if (!current.until || new Date(row.until) > new Date(current.until)) {
+            map[row.expert_id] = { until: row.until, is_indefinite: false };
+          }
+        });
+        setActiveInactivityByExpertId(map);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Hiba az adatok betöltésekor");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const formatInactivityUntil = (inactivity: ActiveInactivity | undefined) => {
+    if (!inactivity) return null;
+    if (inactivity.is_indefinite || !inactivity.until) return "Határozatlan";
+    try {
+      return format(new Date(inactivity.until), "yyyy.MM.dd", { locale: hu });
+    } catch {
+      return null;
     }
   };
 
@@ -303,6 +354,11 @@ const ExpertList = () => {
           >
             <Power className={`w-4 h-4 ${expert.is_active ? "text-primary" : "text-muted-foreground"}`} />
           </Button>
+          {formatInactivityUntil(activeInactivityByExpertId[expert.id]) && (
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              {formatInactivityUntil(activeInactivityByExpertId[expert.id])}
+            </span>
+          )}
           <Button
             variant="ghost"
             size="icon"
