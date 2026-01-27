@@ -7,8 +7,6 @@ interface TeamMembersPanelProps {
   setTeamMembers: (members: TeamMember[]) => void;
   countries: { id: string; name: string }[];
   cities: { id: string; name: string }[];
-  permissions: { id: string; name: string }[];
-  specializations: { id: string; name: string }[];
   languageSkills: { id: string; name: string }[];
 }
 
@@ -50,8 +48,6 @@ export const TeamMembersPanel = ({
   setTeamMembers,
   countries,
   cities,
-  permissions,
-  specializations,
   languageSkills,
 }: TeamMembersPanelProps) => {
   const handleAddMember = () => {
@@ -113,8 +109,6 @@ export const TeamMembersPanel = ({
               onSetLeader={handleSetLeader}
               countries={countries}
               cities={cities}
-              permissions={permissions}
-              specializations={specializations}
               languageSkills={languageSkills}
             />
           ))}

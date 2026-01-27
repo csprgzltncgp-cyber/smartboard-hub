@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
+import { HierarchicalSpecializationSelect } from "@/components/experts/HierarchicalSpecializationSelect";
 import { ExpertFileUpload } from "@/components/experts/ExpertFileUpload";
 import { ExpertTypeSwitcher } from "@/components/experts/ExpertTypeSwitcher";
 import { CompanyDataPanel } from "@/components/experts/CompanyDataPanel";
@@ -1194,13 +1195,9 @@ const ExpertForm = () => {
                 badgeColor="orange"
               />
 
-              <MultiSelectField
-                label="Szakterületek"
-                options={permissions.map((p) => ({ id: p.id, label: p.name }))}
-                selectedIds={selectedPermissions}
-                onChange={setSelectedPermissions}
-                placeholder="Válassz szakterületet..."
-                badgeColor="teal"
+              <HierarchicalSpecializationSelect
+                selectedIds={selectedSpecializations}
+                onChange={setSelectedSpecializations}
               />
 
               <div className="flex items-center space-x-3 p-4 border-2 border-cgp-teal/50 rounded-lg">
@@ -1213,15 +1210,6 @@ const ExpertForm = () => {
                   Krízis pszichológus
                 </Label>
               </div>
-
-              <MultiSelectField
-                label="Specializáció"
-                options={specializations.map((s) => ({ id: s.id, label: s.name }))}
-                selectedIds={selectedSpecializations}
-                onChange={setSelectedSpecializations}
-                placeholder="Válassz specializációt..."
-                badgeColor="teal"
-              />
 
               <div className="space-y-2">
                 <Label>Anyanyelv</Label>
@@ -1374,8 +1362,6 @@ const ExpertForm = () => {
               setTeamMembers={setTeamMembers}
               countries={countries}
               cities={cities}
-              permissions={permissions}
-              specializations={specializations}
               languageSkills={languageSkills}
             />
           </>
