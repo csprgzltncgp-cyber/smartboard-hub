@@ -41,6 +41,8 @@ const createEmptyTeamMember = (): TeamMember => ({
   eapOnlineImage: "",
   eapOnlineShortDescription: "",
   eapOnlineLongDescription: "",
+  // Inactivity periods
+  inactivityPeriods: [],
 });
 
 export const TeamMembersPanel = ({

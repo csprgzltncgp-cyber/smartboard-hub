@@ -22,6 +22,15 @@ import { MultiSelectField } from "./MultiSelectField";
 import { HierarchicalSpecializationSelect } from "./HierarchicalSpecializationSelect";
 import { EapOnlineImageUpload } from "./EapOnlineImageUpload";
 import { EapOnlineTextFields } from "./EapOnlineTextFields";
+import { TeamMemberInactivityDialog } from "./TeamMemberInactivityDialog";
+
+export interface TeamMemberInactivityPeriod {
+  id: string;
+  startDate: Date;
+  endDate: Date | null;
+  isIndefinite: boolean;
+  reason: string;
+}
 
 export interface TeamMember {
   id?: string;
@@ -57,6 +66,8 @@ export interface TeamMember {
   eapOnlineImage?: string;
   eapOnlineShortDescription?: string;
   eapOnlineLongDescription?: string;
+  // Inactivity periods
+  inactivityPeriods?: TeamMemberInactivityPeriod[];
 }
 
 // Telefon előhívók
@@ -102,6 +113,7 @@ export const TeamMemberCard = ({
   languageSkills,
 }: TeamMemberCardProps) => {
   const [isOpen, setIsOpen] = useState(true);
+  const [inactivityDialogOpen, setInactivityDialogOpen] = useState(false);
 
   const updateField = <K extends keyof TeamMember>(field: K, value: TeamMember[K]) => {
     onChange(index, { ...member, [field]: value });
@@ -112,6 +124,25 @@ export const TeamMemberCard = ({
   const showEapOnlineExpertOption = 
     member.acceptsVideoConsultation && 
     (member.videoConsultationType === "eap_online_only" || member.videoConsultationType === "both");
+
+  const handleAddInactivityPeriod = (period: Omit<TeamMemberInactivityPeriod, "id">) => {
+    const newPeriod: TeamMemberInactivityPeriod = {
+      ...period,
+      id: crypto.randomUUID(),
+    };
+    const currentPeriods = member.inactivityPeriods || [];
+    updateField("inactivityPeriods", [...currentPeriods, newPeriod]);
+    updateField("is_active", false);
+  };
+
+  const handleRemoveInactivityPeriod = (id: string) => {
+    const currentPeriods = member.inactivityPeriods || [];
+    updateField("inactivityPeriods", currentPeriods.filter(p => p.id !== id));
+  };
+
+  const handleActivate = () => {
+    updateField("is_active", true);
+  };
 
   return (
     <div className={`border rounded-xl ${member.is_team_leader ? "border-cgp-teal border-2" : "border-muted"}`}>
@@ -140,8 +171,8 @@ export const TeamMemberCard = ({
                 type="button"
                 variant="ghost"
                 size="icon"
-                onClick={() => updateField("is_active", !member.is_active)}
-                title={member.is_active ? "Inaktívvá tétel" : "Aktívvá tétel"}
+                onClick={() => setInactivityDialogOpen(true)}
+                title="Inaktivitási időszak kezelése"
               >
                 <Power className={`w-4 h-4 ${member.is_active ? "text-primary" : "text-muted-foreground"}`} />
               </Button>
@@ -471,6 +502,17 @@ export const TeamMemberCard = ({
           </div>
         </CollapsibleContent>
       </Collapsible>
+
+      {/* Inactivity Dialog */}
+      <TeamMemberInactivityDialog
+        open={inactivityDialogOpen}
+        onOpenChange={setInactivityDialogOpen}
+        memberName={member.name || `Csapattag ${index + 1}`}
+        inactivityPeriods={member.inactivityPeriods || []}
+        onAddPeriod={handleAddInactivityPeriod}
+        onRemovePeriod={handleRemoveInactivityPeriod}
+        onActivate={handleActivate}
+      />
     </div>
   );
 };
