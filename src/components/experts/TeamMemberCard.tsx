@@ -27,6 +27,8 @@ export interface TeamMember {
   phone_number: string;
   is_team_leader: boolean;
   is_active: boolean;
+  is_cgp_employee: boolean;
+  is_eap_online_expert: boolean;
   language: string;
   // Professional data
   selectedCountries: string[];
@@ -201,6 +203,22 @@ export const TeamMemberCard = ({
                   onCheckedChange={(checked) => updateField("is_active", checked as boolean)}
                 />
                 <Label className="cursor-pointer">Aktív</Label>
+              </div>
+
+              <div className="flex items-center space-x-3 p-3 border-2 border-cgp-teal/50 rounded-lg">
+                <Checkbox
+                  checked={member.is_cgp_employee}
+                  onCheckedChange={(checked) => updateField("is_cgp_employee", checked as boolean)}
+                />
+                <Label className="text-cgp-teal cursor-pointer">CGP munkatárs</Label>
+              </div>
+
+              <div className="flex items-center space-x-3 p-3 border-2 border-cgp-teal/50 rounded-lg">
+                <Checkbox
+                  checked={member.is_eap_online_expert}
+                  onCheckedChange={(checked) => updateField("is_eap_online_expert", checked as boolean)}
+                />
+                <Label className="text-cgp-teal cursor-pointer">EAP Online Szakértő</Label>
               </div>
             </div>
 
