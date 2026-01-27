@@ -41,7 +41,8 @@ const createEmptyTeamMember = (): TeamMember => ({
   acceptsOnsiteConsultation: false,
   // EAP Online extra fields
   eapOnlineImage: "",
-  eapOnlineDescription: "",
+  eapOnlineShortDescription: "",
+  eapOnlineLongDescription: "",
 });
 
 export const TeamMembersPanel = ({

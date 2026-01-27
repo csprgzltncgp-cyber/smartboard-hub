@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -18,8 +17,10 @@ import {
 } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ChevronDown, ChevronRight, Trash2, Crown, Video, Phone, MessageSquare, User, MapPin, Globe, Image } from "lucide-react";
+import { ChevronDown, ChevronRight, Trash2, Crown, Video, Phone, MessageSquare, User, MapPin, Globe } from "lucide-react";
 import { MultiSelectField } from "./MultiSelectField";
+import { EapOnlineImageUpload } from "./EapOnlineImageUpload";
+import { EapOnlineTextFields } from "./EapOnlineTextFields";
 
 export interface TeamMember {
   id?: string;
@@ -53,7 +54,8 @@ export interface TeamMember {
   acceptsOnsiteConsultation: boolean;
   // EAP Online extra fields
   eapOnlineImage?: string;
-  eapOnlineDescription?: string;
+  eapOnlineShortDescription?: string;
+  eapOnlineLongDescription?: string;
 }
 
 // Telefon előhívók
@@ -407,34 +409,21 @@ export const TeamMemberCard = ({
 
                         {/* EAP Online extra mezők - csak ha be van jelölve */}
                         {member.is_eap_online_expert && (
-                          <div className="space-y-4 pt-4 border-t border-cgp-teal/20">
-                            <div className="space-y-2">
-                              <Label className="flex items-center gap-2">
-                                <Image className="w-4 h-4 text-muted-foreground" />
-                                Fénykép URL
-                              </Label>
-                              <Input
-                                value={member.eapOnlineImage || ""}
-                                onChange={(e) => updateField("eapOnlineImage", e.target.value)}
-                                placeholder="https://example.com/photo.jpg"
-                              />
-                              <p className="text-xs text-muted-foreground">
-                                A szakértő profilképe az EAP Online felületen
-                              </p>
-                            </div>
+                          <div className="space-y-6 pt-4 border-t border-cgp-teal/20">
+                            <EapOnlineImageUpload
+                              value={member.eapOnlineImage || ""}
+                              onChange={(value) => updateField("eapOnlineImage", value)}
+                              maxSizeKB={500}
+                            />
 
-                            <div className="space-y-2">
-                              <Label>Szakértő bemutatása</Label>
-                              <Textarea
-                                value={member.eapOnlineDescription || ""}
-                                onChange={(e) => updateField("eapOnlineDescription", e.target.value)}
-                                placeholder="Írj egy rövid bemutatkozó szöveget..."
-                                rows={4}
-                              />
-                              <p className="text-xs text-muted-foreground">
-                                Ez a szöveg jelenik meg az EAP Online felületen a szakértő profiljában
-                              </p>
-                            </div>
+                            <EapOnlineTextFields
+                              shortDescription={member.eapOnlineShortDescription || ""}
+                              longDescription={member.eapOnlineLongDescription || ""}
+                              onShortDescriptionChange={(value) => updateField("eapOnlineShortDescription", value)}
+                              onLongDescriptionChange={(value) => updateField("eapOnlineLongDescription", value)}
+                              maxShortLength={150}
+                              maxLongLength={1000}
+                            />
                           </div>
                         )}
                       </div>
