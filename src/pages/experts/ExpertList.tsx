@@ -508,7 +508,9 @@ const ExpertList = () => {
                         </div>
                       ))}
                       {(currentTab === "all" || currentTab === "company") && companyExperts.map((expert) => {
-                        const memberCount = getTeamMembersByExpert(expert.id).length;
+                        const members = getTeamMembersByExpert(expert.id);
+                        const memberCount = members.length;
+                        const inactiveCount = members.filter((m) => !m.is_active).length;
                         return (
                           <div
                             key={expert.id}
@@ -521,6 +523,11 @@ const ExpertList = () => {
                                 <Badge variant="secondary" className="text-xs">
                                   <Users className="w-3 h-3 mr-1" />
                                   {memberCount} csapattag
+                                  {inactiveCount > 0 && (
+                                    <span className="ml-1 text-muted-foreground">
+                                      ({inactiveCount} inaktív)
+                                    </span>
+                                  )}
                                 </Badge>
                               )}
                             </div>
