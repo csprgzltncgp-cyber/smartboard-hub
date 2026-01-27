@@ -38,6 +38,13 @@
     --cgp-teal-light: 176 47% 50%;      /* #59c6c6 - Secondary teal */
     --cgp-teal-hover: 185 100% 19%;     /* Active button state */
     
+    /* List Element Colors (from list.css) */
+    --cgp-list-bg: 180 38% 91%;         /* rgb(222,240,241) - List element background */
+    --cgp-list-active-bg: 185 100% 19%; /* rgb(0,87,95) - Active list element */
+    --cgp-status-active: 90 38% 33%;    /* rgb(115,144,52) - Active green */
+    --cgp-status-pending: 56 74% 48%;   /* rgb(212,199,31) - Pending yellow */
+    --cgp-delete-purple: 313 29% 44%;   /* #7c2469 - Delete button purple */
+    
     /* Task Section Colors */
     --cgp-task-today: 176 47% 50%;      /* #59c6c6 - Teal for today section */
     
