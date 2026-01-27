@@ -99,16 +99,20 @@ export const TeamMemberInactivityDialog = ({
   };
 
   const handleDelete = (id: string) => {
+    // Check if this is the last period BEFORE removing
+    const isLastPeriod = inactivityPeriods.length <= 1;
+    
     onRemovePeriod(id);
     
-    // Check if this was the last period
-    if (inactivityPeriods.length <= 1) {
+    if (isLastPeriod) {
       onActivate();
       toast.success("Inaktivitási időszak törölve, csapattag aktiválva");
     } else {
       toast.success("Inaktivitási időszak törölve");
     }
     
+    // Reset form after delete
+    resetForm();
     onOpenChange(false);
   };
 

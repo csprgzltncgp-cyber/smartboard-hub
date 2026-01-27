@@ -172,7 +172,39 @@ export const TeamMemberCard = ({
                 </Badge>
               )}
               {!member.is_active && (
-                <Badge variant="secondary">Inaktív</Badge>
+                <>
+                  <Badge variant="secondary">Inaktív</Badge>
+                  {(() => {
+                    const activeInactivity = (member.inactivityPeriods || []).find(p => {
+                      const now = new Date();
+                      const start = new Date(p.startDate);
+                      if (now < start) return false;
+                      if (p.isIndefinite) return true;
+                      if (p.endDate) {
+                        const end = new Date(p.endDate);
+                        return now <= end;
+                      }
+                      return false;
+                    });
+                    if (activeInactivity?.endDate) {
+                      const endDate = new Date(activeInactivity.endDate);
+                      const formatted = endDate.toLocaleDateString("hu-HU", { year: "numeric", month: "short", day: "numeric" });
+                      return (
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          ({formatted})
+                        </span>
+                      );
+                    }
+                    if (activeInactivity?.isIndefinite) {
+                      return (
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          (Határozatlan)
+                        </span>
+                      );
+                    }
+                    return null;
+                  })()}
+                </>
               )}
             </div>
             <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
