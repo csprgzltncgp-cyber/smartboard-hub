@@ -888,13 +888,77 @@ export type Database = {
           },
         ]
       }
+      expert_team_members: {
+        Row: {
+          created_at: string
+          email: string
+          expert_id: string
+          id: string
+          is_active: boolean | null
+          is_team_leader: boolean | null
+          language: string | null
+          name: string
+          phone_number: string | null
+          phone_prefix: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expert_id: string
+          id?: string
+          is_active?: boolean | null
+          is_team_leader?: boolean | null
+          language?: string | null
+          name: string
+          phone_number?: string | null
+          phone_prefix?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expert_id?: string
+          id?: string
+          is_active?: boolean | null
+          is_team_leader?: boolean | null
+          language?: string | null
+          name?: string
+          phone_number?: string | null
+          phone_prefix?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expert_team_members_expert_id_fkey"
+            columns: ["expert_id"]
+            isOneToOne: false
+            referencedRelation: "experts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experts: {
         Row: {
+          billing_address: string | null
+          billing_city: string | null
+          billing_country_id: string | null
+          billing_email: string | null
+          billing_name: string | null
+          billing_postal_code: string | null
+          billing_tax_number: string | null
+          company_address: string | null
+          company_city: string | null
+          company_country_id: string | null
+          company_name: string | null
+          company_postal_code: string | null
+          company_registration_number: string | null
           contract_canceled: boolean | null
           country_id: string | null
           created_at: string
           crisis_psychologist: boolean | null
           email: string
+          expert_type: Database["public"]["Enums"]["expert_type"]
           id: string
           is_active: boolean | null
           is_cgp_employee: boolean | null
@@ -905,15 +969,30 @@ export type Database = {
           name: string
           phone_number: string | null
           phone_prefix: string | null
+          tax_number: string | null
           updated_at: string
           username: string | null
         }
         Insert: {
+          billing_address?: string | null
+          billing_city?: string | null
+          billing_country_id?: string | null
+          billing_email?: string | null
+          billing_name?: string | null
+          billing_postal_code?: string | null
+          billing_tax_number?: string | null
+          company_address?: string | null
+          company_city?: string | null
+          company_country_id?: string | null
+          company_name?: string | null
+          company_postal_code?: string | null
+          company_registration_number?: string | null
           contract_canceled?: boolean | null
           country_id?: string | null
           created_at?: string
           crisis_psychologist?: boolean | null
           email: string
+          expert_type?: Database["public"]["Enums"]["expert_type"]
           id?: string
           is_active?: boolean | null
           is_cgp_employee?: boolean | null
@@ -924,15 +1003,30 @@ export type Database = {
           name: string
           phone_number?: string | null
           phone_prefix?: string | null
+          tax_number?: string | null
           updated_at?: string
           username?: string | null
         }
         Update: {
+          billing_address?: string | null
+          billing_city?: string | null
+          billing_country_id?: string | null
+          billing_email?: string | null
+          billing_name?: string | null
+          billing_postal_code?: string | null
+          billing_tax_number?: string | null
+          company_address?: string | null
+          company_city?: string | null
+          company_country_id?: string | null
+          company_name?: string | null
+          company_postal_code?: string | null
+          company_registration_number?: string | null
           contract_canceled?: boolean | null
           country_id?: string | null
           created_at?: string
           crisis_psychologist?: boolean | null
           email?: string
+          expert_type?: Database["public"]["Enums"]["expert_type"]
           id?: string
           is_active?: boolean | null
           is_cgp_employee?: boolean | null
@@ -943,10 +1037,25 @@ export type Database = {
           name?: string
           phone_number?: string | null
           phone_prefix?: string | null
+          tax_number?: string | null
           updated_at?: string
           username?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "experts_billing_country_id_fkey"
+            columns: ["billing_country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experts_company_country_id_fkey"
+            columns: ["company_country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "experts_country_id_fkey"
             columns: ["country_id"]
@@ -1135,6 +1244,281 @@ export type Database = {
         }
         Relationships: []
       }
+      team_member_cities: {
+        Row: {
+          city_id: string
+          created_at: string
+          id: string
+          team_member_id: string
+        }
+        Insert: {
+          city_id: string
+          created_at?: string
+          id?: string
+          team_member_id: string
+        }
+        Update: {
+          city_id?: string
+          created_at?: string
+          id?: string
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_member_cities_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_member_cities_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "expert_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_member_countries: {
+        Row: {
+          country_id: string
+          created_at: string
+          id: string
+          team_member_id: string
+        }
+        Insert: {
+          country_id: string
+          created_at?: string
+          id?: string
+          team_member_id: string
+        }
+        Update: {
+          country_id?: string
+          created_at?: string
+          id?: string
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_member_countries_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_member_countries_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "expert_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_member_data: {
+        Row: {
+          city_id: string | null
+          created_at: string
+          house_number: string | null
+          id: string
+          max_inprogress_cases: number | null
+          min_inprogress_cases: number | null
+          native_language: string | null
+          post_code: string | null
+          street: string | null
+          street_suffix: string | null
+          team_member_id: string
+          updated_at: string
+        }
+        Insert: {
+          city_id?: string | null
+          created_at?: string
+          house_number?: string | null
+          id?: string
+          max_inprogress_cases?: number | null
+          min_inprogress_cases?: number | null
+          native_language?: string | null
+          post_code?: string | null
+          street?: string | null
+          street_suffix?: string | null
+          team_member_id: string
+          updated_at?: string
+        }
+        Update: {
+          city_id?: string | null
+          created_at?: string
+          house_number?: string | null
+          id?: string
+          max_inprogress_cases?: number | null
+          min_inprogress_cases?: number | null
+          native_language?: string | null
+          post_code?: string | null
+          street?: string | null
+          street_suffix?: string | null
+          team_member_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_member_data_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_member_data_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: true
+            referencedRelation: "expert_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_member_files: {
+        Row: {
+          created_at: string
+          file_path: string
+          file_type: string
+          filename: string
+          id: string
+          team_member_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          file_type: string
+          filename: string
+          id?: string
+          team_member_id: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          file_type?: string
+          filename?: string
+          id?: string
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_member_files_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "expert_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_member_language_skills: {
+        Row: {
+          created_at: string
+          id: string
+          language_skill_id: string
+          team_member_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language_skill_id: string
+          team_member_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language_skill_id?: string
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_member_language_skills_language_skill_id_fkey"
+            columns: ["language_skill_id"]
+            isOneToOne: false
+            referencedRelation: "language_skills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_member_language_skills_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "expert_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_member_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission_id: string
+          team_member_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission_id: string
+          team_member_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission_id?: string
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_member_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_member_permissions_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "expert_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_member_specializations: {
+        Row: {
+          created_at: string
+          id: string
+          specialization_id: string
+          team_member_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          specialization_id: string
+          team_member_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          specialization_id?: string
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_member_specializations_specialization_id_fkey"
+            columns: ["specialization_id"]
+            isOneToOne: false
+            referencedRelation: "specializations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_member_specializations_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "expert_team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_client_assignments: {
         Row: {
           assigned_at: string
@@ -1221,6 +1605,7 @@ export type Database = {
         | "other_costs"
         | "supplier_invoices"
         | "custom"
+      expert_type: "individual" | "company"
       lead_status:
         | "lead"
         | "offer"
@@ -1391,6 +1776,7 @@ export const Constants = {
         "supplier_invoices",
         "custom",
       ],
+      expert_type: ["individual", "company"],
       lead_status: [
         "lead",
         "offer",
