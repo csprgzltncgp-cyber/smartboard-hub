@@ -143,9 +143,14 @@ export const TeamMemberCard = ({
 
   const handleRemoveInactivityPeriod = (id: string) => {
     const currentPeriods = member.inactivityPeriods || [];
+    const remaining = currentPeriods.filter((p) => p.id !== id);
+
+    // IMPORTANT: egyetlen frissítésben kezeljük a törlést + (szükség esetén) aktiválást,
+    // különben egy későbbi `is_active` update visszaírhatja a régi inactivity listát.
     onChange(index, {
       ...member,
-      inactivityPeriods: currentPeriods.filter((p) => p.id !== id),
+      inactivityPeriods: remaining,
+      is_active: remaining.length === 0 ? true : false,
     });
   };
 
@@ -552,7 +557,6 @@ export const TeamMemberCard = ({
         inactivityPeriods={member.inactivityPeriods || []}
         onAddPeriod={handleAddInactivityPeriod}
         onRemovePeriod={handleRemoveInactivityPeriod}
-        onActivate={handleActivate}
       />
     </div>
   );
