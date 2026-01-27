@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash2, Power, Pencil, Lock, Unlock, FileX, Building2, User, Users, CalendarClock } from "lucide-react";
+import { Trash2, Power, Pencil, Lock, Unlock, FileX, Building2, User, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import {
@@ -298,8 +298,8 @@ const ExpertList = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => handleToggleActive(expert)}
-            title={expert.is_active ? "Deaktiválás" : "Aktiválás"}
+            onClick={() => handleOpenInactivityDialog(expert)}
+            title="Inaktivitási időszak kezelése"
           >
             <Power className={`w-4 h-4 ${expert.is_active ? "text-primary" : "text-muted-foreground"}`} />
           </Button>
@@ -314,14 +314,6 @@ const ExpertList = () => {
             ) : (
               <Unlock className="w-4 h-4 text-muted-foreground" />
             )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleOpenInactivityDialog(expert)}
-            title="Inaktivitási időszak"
-          >
-            <CalendarClock className="w-4 h-4 text-warning" />
           </Button>
         </>
       )}
