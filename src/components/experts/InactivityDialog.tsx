@@ -107,7 +107,8 @@ export const InactivityDialog = ({
 
     setLoading(true);
     try {
-      const { error } = await supabase.from("expert_inactivity").insert({
+      // Insert the inactivity period
+      const { error: insertError } = await supabase.from("expert_inactivity").insert({
         expert_id: expertId,
         start_date: startDate.toISOString(),
         until: durationType === "indefinite" ? null : endDate?.toISOString(),
@@ -115,9 +116,17 @@ export const InactivityDialog = ({
         reason: reason || null,
       });
 
-      if (error) throw error;
+      if (insertError) throw insertError;
 
-      toast.success("Inaktivitási időszak mentve");
+      // Set expert to inactive
+      const { error: updateError } = await supabase
+        .from("experts")
+        .update({ is_active: false })
+        .eq("id", expertId);
+
+      if (updateError) throw updateError;
+
+      toast.success("Inaktivitási időszak mentve, szakértő inaktívra állítva");
       onSuccess?.();
       resetForm();
       fetchExistingPeriods();
@@ -131,15 +140,33 @@ export const InactivityDialog = ({
 
   const handleDelete = async (id: string) => {
     try {
-      const { error } = await supabase
+      const { error: deleteError } = await supabase
         .from("expert_inactivity")
         .delete()
         .eq("id", id);
 
-      if (error) throw error;
+      if (deleteError) throw deleteError;
 
-      toast.success("Inaktivitási időszak törölve");
+      // Check if there are any remaining inactivity periods
+      const { data: remainingPeriods } = await supabase
+        .from("expert_inactivity")
+        .select("id")
+        .eq("expert_id", expertId);
+
+      // If no more inactivity periods, set expert back to active
+      if (!remainingPeriods || remainingPeriods.length === 0) {
+        await supabase
+          .from("experts")
+          .update({ is_active: true })
+          .eq("id", expertId);
+        
+        toast.success("Inaktivitási időszak törölve, szakértő aktiválva");
+      } else {
+        toast.success("Inaktivitási időszak törölve");
+      }
+
       fetchExistingPeriods();
+      onSuccess?.();
     } catch (error) {
       toast.error("Hiba történt a törlés során");
     }
