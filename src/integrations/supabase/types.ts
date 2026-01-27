@@ -895,6 +895,8 @@ export type Database = {
           expert_id: string
           id: string
           is_active: boolean | null
+          is_cgp_employee: boolean | null
+          is_eap_online_expert: boolean | null
           is_team_leader: boolean | null
           language: string | null
           name: string
@@ -908,6 +910,8 @@ export type Database = {
           expert_id: string
           id?: string
           is_active?: boolean | null
+          is_cgp_employee?: boolean | null
+          is_eap_online_expert?: boolean | null
           is_team_leader?: boolean | null
           language?: string | null
           name: string
@@ -921,6 +925,8 @@ export type Database = {
           expert_id?: string
           id?: string
           is_active?: boolean | null
+          is_cgp_employee?: boolean | null
+          is_eap_online_expert?: boolean | null
           is_team_leader?: boolean | null
           language?: string | null
           name?: string

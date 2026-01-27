@@ -19,6 +19,8 @@ const createEmptyTeamMember = (): TeamMember => ({
   phone_number: "",
   is_team_leader: false,
   is_active: true,
+  is_cgp_employee: false,
+  is_eap_online_expert: false,
   language: "hu",
   selectedCountries: [],
   selectedCities: [],

@@ -256,6 +256,8 @@ const ExpertForm = () => {
         setPhonePrefix(expert.phone_prefix || "");
         setPhoneNumber(expert.phone_number || "");
         setDashboardLanguage(expert.language || "hu");
+        setIsCgpEmployee(expert.is_cgp_employee || false);
+        setIsEapOnlineExpert(expert.is_eap_online_expert || false);
         setIsCrisisPsychologist(expert.crisis_psychologist || false);
 
         // Céges adatok
@@ -364,6 +366,8 @@ const ExpertForm = () => {
               phone_number: member.phone_number || "",
               is_team_leader: member.is_team_leader || false,
               is_active: member.is_active ?? true,
+              is_cgp_employee: (member as any).is_cgp_employee || false,
+              is_eap_online_expert: (member as any).is_eap_online_expert || false,
               language: member.language || "hu",
               selectedCountries: memberCountries.data?.map((c) => c.country_id) || [],
               selectedCities: memberCities.data?.map((c) => c.city_id) || [],
@@ -706,6 +710,8 @@ const ExpertForm = () => {
           phone_number: member.phone_number || null,
           is_team_leader: member.is_team_leader,
           is_active: member.is_active,
+          is_cgp_employee: member.is_cgp_employee,
+          is_eap_online_expert: member.is_eap_online_expert,
           language: member.dashboardLanguage,
         })
         .select()
