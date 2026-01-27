@@ -214,13 +214,6 @@ export const TeamMemberCard = ({
                 </div>
               </div>
 
-              <div className="flex items-center space-x-3">
-                <Checkbox
-                  checked={member.is_active}
-                  onCheckedChange={(checked) => updateField("is_active", checked as boolean)}
-                />
-                <Label className="cursor-pointer">Aktív</Label>
-              </div>
 
               <div className="flex items-center space-x-3 p-3 border-2 border-cgp-teal/50 rounded-lg">
                 <Checkbox
