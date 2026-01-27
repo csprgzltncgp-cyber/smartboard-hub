@@ -85,9 +85,13 @@ export const InactivityDialog = ({
       .eq("expert_id", expertId)
       .order("start_date", { ascending: false });
 
-    if (data) {
-      setExistingPeriods(data);
+    if (error) {
+      console.error("Error fetching inactivity periods:", error);
+      setExistingPeriods([]);
+      return;
     }
+
+    setExistingPeriods(data ?? []);
   };
 
   const handleSave = async () => {
@@ -127,8 +131,12 @@ export const InactivityDialog = ({
       if (updateError) throw updateError;
 
       toast.success("Inaktivitási időszak mentve, szakértő inaktívra állítva");
+      // Close panel first to match expected UX
+      onOpenChange(false);
       onSuccess?.();
+      // Keep data in sync for next open
       fetchExistingPeriods();
+      resetForm();
     } catch (error) {
       console.error("Error saving inactivity:", error);
       toast.error("Hiba történt a mentés során");
