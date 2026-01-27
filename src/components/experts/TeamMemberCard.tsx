@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ChevronDown, ChevronRight, Trash2, Crown, Video, Phone, MessageSquare, User, MapPin, Globe } from "lucide-react";
+import { ChevronDown, ChevronRight, Trash2, Crown, Video, Phone, MessageSquare, User, MapPin, Globe, Power } from "lucide-react";
 import { MultiSelectField } from "./MultiSelectField";
 import { HierarchicalSpecializationSelect } from "./HierarchicalSpecializationSelect";
 import { EapOnlineImageUpload } from "./EapOnlineImageUpload";
@@ -136,6 +136,15 @@ export const TeamMemberCard = ({
               )}
             </div>
             <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => updateField("is_active", !member.is_active)}
+                title={member.is_active ? "Inaktívvá tétel" : "Aktívvá tétel"}
+              >
+                <Power className={`w-4 h-4 ${member.is_active ? "text-primary" : "text-muted-foreground"}`} />
+              </Button>
               {!member.is_team_leader && (
                 <Button
                   type="button"
