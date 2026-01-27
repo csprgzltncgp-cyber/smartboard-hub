@@ -74,12 +74,6 @@ export default {
           "task-completed-purple": "hsl(var(--cgp-task-completed-purple))",
           "link": "hsl(var(--cgp-link))",
           "link-hover": "hsl(var(--cgp-link-hover))",
-          // List colors
-          "list-bg": "hsl(var(--cgp-list-bg))",
-          "list-active": "hsl(var(--cgp-list-active-bg))",
-          "status-active": "hsl(var(--cgp-status-active))",
-          "status-pending": "hsl(var(--cgp-status-pending))",
-          "delete-purple": "hsl(var(--cgp-delete-purple))",
         },
       },
       fontFamily: {
