@@ -176,14 +176,16 @@ const ExpertForm = () => {
 
   const fetchReferenceData = async () => {
     try {
-      const [countriesRes, permissionsRes, specializationsRes, languageSkillsRes] = await Promise.all([
-        supabase.from("countries").select("*").order("code"),
+      const [countriesRes, citiesRes, permissionsRes, specializationsRes, languageSkillsRes] = await Promise.all([
+        supabase.from("countries").select("*").order("name"),
+        supabase.from("cities").select("*").order("name"),
         supabase.from("permissions").select("*").order("name"),
         supabase.from("specializations").select("*").order("name"),
         supabase.from("language_skills").select("*").order("name"),
       ]);
 
       if (countriesRes.data) setCountries(countriesRes.data);
+      if (citiesRes.data) setCities(citiesRes.data);
       if (permissionsRes.data) setPermissions(permissionsRes.data);
       if (specializationsRes.data) setSpecializations(specializationsRes.data);
       if (languageSkillsRes.data) setLanguageSkills(languageSkillsRes.data);
@@ -253,8 +255,10 @@ const ExpertForm = () => {
       }
 
       // Kapcsolódó adatok
-      const [countriesRes, crisisCountriesRes, permissionsRes, specializationsRes, languageSkillsRes, customItemsRes] = await Promise.all([
+      const [countriesRes, citiesRes, outsourceCountriesRes, crisisCountriesRes, permissionsRes, specializationsRes, languageSkillsRes, customItemsRes] = await Promise.all([
         supabase.from("expert_countries").select("country_id").eq("expert_id", expertId),
+        supabase.from("expert_cities").select("city_id").eq("expert_id", expertId),
+        supabase.from("expert_outsource_countries").select("country_id").eq("expert_id", expertId),
         supabase.from("expert_crisis_countries").select("country_id").eq("expert_id", expertId),
         supabase.from("expert_permissions").select("permission_id").eq("expert_id", expertId),
         supabase.from("expert_specializations").select("specialization_id").eq("expert_id", expertId),
@@ -263,6 +267,8 @@ const ExpertForm = () => {
       ]);
 
       if (countriesRes.data) setSelectedCountries(countriesRes.data.map((c) => c.country_id));
+      if (citiesRes.data) setSelectedCities(citiesRes.data.map((c) => c.city_id));
+      if (outsourceCountriesRes.data) setSelectedOutsourceCountries(outsourceCountriesRes.data.map((c) => c.country_id));
       if (crisisCountriesRes.data) setSelectedCrisisCountries(crisisCountriesRes.data.map((c) => c.country_id));
       if (permissionsRes.data) setSelectedPermissions(permissionsRes.data.map((p) => p.permission_id));
       if (specializationsRes.data) setSelectedSpecializations(specializationsRes.data.map((s) => s.specialization_id));
@@ -363,6 +369,20 @@ const ExpertForm = () => {
           );
         }
 
+        await supabase.from("expert_cities").delete().eq("expert_id", expertId);
+        if (selectedCities.length > 0) {
+          await supabase.from("expert_cities").insert(
+            selectedCities.map((cityId) => ({ expert_id: expertId, city_id: cityId }))
+          );
+        }
+
+        await supabase.from("expert_outsource_countries").delete().eq("expert_id", expertId);
+        if (selectedOutsourceCountries.length > 0) {
+          await supabase.from("expert_outsource_countries").insert(
+            selectedOutsourceCountries.map((countryId) => ({ expert_id: expertId, country_id: countryId }))
+          );
+        }
+
         await supabase.from("expert_crisis_countries").delete().eq("expert_id", expertId);
         if (selectedCrisisCountries.length > 0) {
           await supabase.from("expert_crisis_countries").insert(
@@ -452,10 +472,22 @@ const ExpertForm = () => {
           single_session_rate: singleSessionRate ? parseFloat(singleSessionRate) : null,
         });
 
-        // Kapcsolódó adatok
+        // Kapcsolódó adatok új szakértőhöz
         if (selectedCountries.length > 0) {
           await supabase.from("expert_countries").insert(
             selectedCountries.map((countryId) => ({ expert_id: newExpertId, country_id: countryId }))
+          );
+        }
+
+        if (selectedCities.length > 0) {
+          await supabase.from("expert_cities").insert(
+            selectedCities.map((cityId) => ({ expert_id: newExpertId, city_id: cityId }))
+          );
+        }
+
+        if (selectedOutsourceCountries.length > 0) {
+          await supabase.from("expert_outsource_countries").insert(
+            selectedOutsourceCountries.map((countryId) => ({ expert_id: newExpertId, country_id: countryId }))
           );
         }
 
@@ -890,24 +922,44 @@ const ExpertForm = () => {
           <h2 className="text-lg font-semibold mb-4">Szakmai adatok</h2>
 
           {/* Országok */}
-          <div className="space-y-2">
-            <Label>Országok</Label>
-            <div className="flex flex-wrap gap-2 p-3 border rounded-lg max-h-40 overflow-y-auto">
-              {countries.map((country) => (
-                <div
-                  key={country.id}
-                  onClick={() => toggleMultiSelect(country.id, selectedCountries, setSelectedCountries)}
-                  className={`px-3 py-1 rounded-full text-sm cursor-pointer transition-colors ${
-                    selectedCountries.includes(country.id)
-                      ? "bg-cgp-teal text-white"
-                      : "bg-muted hover:bg-muted/80"
-                  }`}
-                >
-                  {country.code}
-                </div>
-              ))}
-            </div>
-          </div>
+          <MultiSelectField
+            label="Ország"
+            options={countries.map((c) => ({ id: c.id, label: c.name }))}
+            selectedIds={selectedCountries}
+            onChange={setSelectedCountries}
+            placeholder="Válassz országot..."
+            badgeColor="teal"
+          />
+
+          {/* Városok */}
+          <MultiSelectField
+            label="Város"
+            options={cities.map((c) => ({ id: c.id, label: c.name }))}
+            selectedIds={selectedCities}
+            onChange={setSelectedCities}
+            placeholder="Válassz várost..."
+            badgeColor="teal"
+          />
+
+          {/* WS/CI/O Ország */}
+          <MultiSelectField
+            label="WS/CI/O Ország"
+            options={countries.map((c) => ({ id: c.id, label: c.name }))}
+            selectedIds={selectedOutsourceCountries}
+            onChange={setSelectedOutsourceCountries}
+            placeholder="Válassz célországot..."
+            badgeColor="orange"
+          />
+
+          {/* Szakterületek (Jogosultságok) */}
+          <MultiSelectField
+            label="Szakterületek"
+            options={permissions.map((p) => ({ id: p.id, label: p.name }))}
+            selectedIds={selectedPermissions}
+            onChange={setSelectedPermissions}
+            placeholder="Válassz szakterületet..."
+            badgeColor="teal"
+          />
 
           {/* Krízis pszichológus */}
           <div className="flex items-center space-x-3 p-4 border-2 border-cgp-teal/50 rounded-lg">
@@ -921,67 +973,15 @@ const ExpertForm = () => {
             </Label>
           </div>
 
-          {/* Krízis országok - csak ha krízis pszichológus */}
-          {isCrisisPsychologist && (
-            <div className="space-y-2">
-              <Label>Krízis országok</Label>
-              <div className="flex flex-wrap gap-2 p-3 border rounded-lg max-h-40 overflow-y-auto">
-                {countries.map((country) => (
-                  <div
-                    key={country.id}
-                    onClick={() => toggleMultiSelect(country.id, selectedCrisisCountries, setSelectedCrisisCountries)}
-                    className={`px-3 py-1 rounded-full text-sm cursor-pointer transition-colors ${
-                      selectedCrisisCountries.includes(country.id)
-                        ? "bg-red-500 text-white"
-                        : "bg-muted hover:bg-muted/80"
-                    }`}
-                  >
-                    {country.code}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Jogosultságok */}
-          <div className="space-y-2">
-            <Label>Szakterületek</Label>
-            <div className="flex flex-wrap gap-2 p-3 border rounded-lg max-h-40 overflow-y-auto">
-              {permissions.map((permission) => (
-                <div
-                  key={permission.id}
-                  onClick={() => toggleMultiSelect(permission.id, selectedPermissions, setSelectedPermissions)}
-                  className={`px-3 py-1 rounded-full text-sm cursor-pointer transition-colors ${
-                    selectedPermissions.includes(permission.id)
-                      ? "bg-cgp-teal text-white"
-                      : "bg-muted hover:bg-muted/80"
-                  }`}
-                >
-                  {permission.name}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Specializációk */}
-          <div className="space-y-2">
-            <Label>Specializációk</Label>
-            <div className="flex flex-wrap gap-2 p-3 border rounded-lg max-h-40 overflow-y-auto">
-              {specializations.map((spec) => (
-                <div
-                  key={spec.id}
-                  onClick={() => toggleMultiSelect(spec.id, selectedSpecializations, setSelectedSpecializations)}
-                  className={`px-3 py-1 rounded-full text-sm cursor-pointer transition-colors ${
-                    selectedSpecializations.includes(spec.id)
-                      ? "bg-cgp-teal text-white"
-                      : "bg-muted hover:bg-muted/80"
-                  }`}
-                >
-                  {spec.name}
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Specializációk - csak ha pszichológus */}
+          <MultiSelectField
+            label="Specializáció"
+            options={specializations.map((s) => ({ id: s.id, label: s.name }))}
+            selectedIds={selectedSpecializations}
+            onChange={setSelectedSpecializations}
+            placeholder="Válassz specializációt..."
+            badgeColor="teal"
+          />
 
           {/* Anyanyelv */}
           <div className="space-y-2">
@@ -1001,24 +1001,14 @@ const ExpertForm = () => {
           </div>
 
           {/* Nyelvtudás */}
-          <div className="space-y-2">
-            <Label>Nyelvtudás</Label>
-            <div className="flex flex-wrap gap-2 p-3 border rounded-lg max-h-40 overflow-y-auto">
-              {languageSkills.map((lang) => (
-                <div
-                  key={lang.id}
-                  onClick={() => toggleMultiSelect(lang.id, selectedLanguageSkills, setSelectedLanguageSkills)}
-                  className={`px-3 py-1 rounded-full text-sm cursor-pointer transition-colors ${
-                    selectedLanguageSkills.includes(lang.id)
-                      ? "bg-cgp-teal text-white"
-                      : "bg-muted hover:bg-muted/80"
-                  }`}
-                >
-                  {lang.name}
-                </div>
-              ))}
-            </div>
-          </div>
+          <MultiSelectField
+            label="Nyelvtudás"
+            options={languageSkills.map((l) => ({ id: l.id, label: l.name }))}
+            selectedIds={selectedLanguageSkills}
+            onChange={setSelectedLanguageSkills}
+            placeholder="Válassz nyelveket..."
+            badgeColor="teal"
+          />
 
           {/* Esetek */}
           <div className="grid grid-cols-2 gap-4">
