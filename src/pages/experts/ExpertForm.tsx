@@ -121,7 +121,7 @@ const ExpertForm = () => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [isCgpEmployee, setIsCgpEmployee] = useState(false);
-  const [isEapOnlineExpert, setIsEapOnlineExpert] = useState(false);
+  // Note: isEapOnlineExpert is now managed inside consultationSettings
 
   // Kapcsolattartási adatok
   const [phonePrefix, setPhonePrefix] = useState("");
@@ -261,7 +261,7 @@ const ExpertForm = () => {
         setPhoneNumber(expert.phone_number || "");
         setDashboardLanguage(expert.language || "hu");
         setIsCgpEmployee(expert.is_cgp_employee || false);
-        setIsEapOnlineExpert(expert.is_eap_online_expert || false);
+        // isEapOnlineExpert is now loaded into consultationSettings below
         setIsCrisisPsychologist(expert.crisis_psychologist || false);
 
         // Tanácsadási típusok betöltése
@@ -272,6 +272,9 @@ const ExpertForm = () => {
           acceptsChatConsultation: (expert as any).accepts_chat_consultation || false,
           videoConsultationType: ((expert as any).video_consultation_type as "eap_online_only" | "operator_only" | "both") || "both",
           acceptsOnsiteConsultation: (expert as any).accepts_onsite_consultation || false,
+          isEapOnlineExpert: expert.is_eap_online_expert || false,
+          eapOnlineImage: "",
+          eapOnlineDescription: "",
         });
 
         // Céges adatok
@@ -400,6 +403,9 @@ const ExpertForm = () => {
               acceptsChatConsultation: (member as any).accepts_chat_consultation || false,
               videoConsultationType: ((member as any).video_consultation_type as "eap_online_only" | "operator_only" | "both") || "both",
               acceptsOnsiteConsultation: (member as any).accepts_onsite_consultation || false,
+              // EAP Online extra fields
+              eapOnlineImage: "",
+              eapOnlineDescription: "",
             } as TeamMember;
           })
         );
@@ -449,6 +455,7 @@ const ExpertForm = () => {
             phone_number: expertType === "individual" ? (phoneNumber || null) : null,
             language: dashboardLanguage,
             crisis_psychologist: expertType === "individual" ? isCrisisPsychologist : false,
+            is_eap_online_expert: expertType === "individual" ? consultationSettings.isEapOnlineExpert : false,
             accepts_personal_consultation: expertType === "individual" ? consultationSettings.acceptsPersonalConsultation : false,
             accepts_video_consultation: expertType === "individual" ? consultationSettings.acceptsVideoConsultation : false,
             accepts_phone_consultation: expertType === "individual" ? consultationSettings.acceptsPhoneConsultation : false,
@@ -603,6 +610,7 @@ const ExpertForm = () => {
             phone_number: expertType === "individual" ? (phoneNumber || null) : null,
             language: dashboardLanguage,
             crisis_psychologist: expertType === "individual" ? isCrisisPsychologist : false,
+            is_eap_online_expert: expertType === "individual" ? consultationSettings.isEapOnlineExpert : false,
             accepts_personal_consultation: expertType === "individual" ? consultationSettings.acceptsPersonalConsultation : false,
             accepts_video_consultation: expertType === "individual" ? consultationSettings.acceptsVideoConsultation : false,
             accepts_phone_consultation: expertType === "individual" ? consultationSettings.acceptsPhoneConsultation : false,
@@ -839,17 +847,6 @@ const ExpertForm = () => {
                 />
                 <Label htmlFor="isCgpEmployee" className="text-cgp-teal cursor-pointer">
                   CGP munkatárs
-                </Label>
-              </div>
-
-              <div className="flex items-center space-x-3 p-4 border-2 border-cgp-teal/50 rounded-lg">
-                <Checkbox
-                  id="isEapOnlineExpert"
-                  checked={isEapOnlineExpert}
-                  onCheckedChange={(checked) => setIsEapOnlineExpert(checked as boolean)}
-                />
-                <Label htmlFor="isEapOnlineExpert" className="text-cgp-teal cursor-pointer">
-                  EAP Online Szakértő
                 </Label>
               </div>
             </div>

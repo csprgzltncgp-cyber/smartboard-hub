@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -17,7 +18,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ChevronDown, ChevronRight, Trash2, Crown, Video, Phone, MessageSquare, User, MapPin } from "lucide-react";
+import { ChevronDown, ChevronRight, Trash2, Crown, Video, Phone, MessageSquare, User, MapPin, Globe, Image } from "lucide-react";
 import { MultiSelectField } from "./MultiSelectField";
 
 export interface TeamMember {
@@ -50,6 +51,9 @@ export interface TeamMember {
   acceptsChatConsultation: boolean;
   videoConsultationType: "eap_online_only" | "operator_only" | "both";
   acceptsOnsiteConsultation: boolean;
+  // EAP Online extra fields
+  eapOnlineImage?: string;
+  eapOnlineDescription?: string;
 }
 
 // Telefon előhívók
@@ -103,6 +107,12 @@ export const TeamMemberCard = ({
   const updateField = <K extends keyof TeamMember>(field: K, value: TeamMember[K]) => {
     onChange(index, { ...member, [field]: value });
   };
+
+  // EAP Online expert option is visible when video consultation is enabled
+  // AND video type is "eap_online_only" or "both"
+  const showEapOnlineExpertOption = 
+    member.acceptsVideoConsultation && 
+    (member.videoConsultationType === "eap_online_only" || member.videoConsultationType === "both");
 
   return (
     <div className={`border rounded-xl ${member.is_team_leader ? "border-cgp-teal border-2" : "border-muted"}`}>
@@ -219,14 +229,6 @@ export const TeamMemberCard = ({
                   onCheckedChange={(checked) => updateField("is_cgp_employee", checked as boolean)}
                 />
                 <Label className="text-cgp-teal cursor-pointer">CGP munkatárs</Label>
-              </div>
-
-              <div className="flex items-center space-x-3 p-3 border-2 border-cgp-teal/50 rounded-lg">
-                <Checkbox
-                  checked={member.is_eap_online_expert}
-                  onCheckedChange={(checked) => updateField("is_eap_online_expert", checked as boolean)}
-                />
-                <Label className="text-cgp-teal cursor-pointer">EAP Online Szakértő</Label>
               </div>
             </div>
 
@@ -362,32 +364,81 @@ export const TeamMemberCard = ({
                 </div>
 
                 {member.acceptsVideoConsultation && (
-                  <div className="ml-8 p-3 border border-dashed rounded-lg bg-muted/20">
-                    <Label className="text-sm font-medium mb-3 block">Videós esetek típusa:</Label>
-                    <RadioGroup
-                      value={member.videoConsultationType}
-                      onValueChange={(value) => updateField("videoConsultationType", value as "eap_online_only" | "operator_only" | "both")}
-                      className="space-y-2"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="eap_online_only" id={`video_eap_only_${index}`} />
-                        <Label htmlFor={`video_eap_only_${index}`} className="cursor-pointer text-sm">
-                          Csak EAP Online esetek
-                        </Label>
+                  <div className="ml-8 space-y-4">
+                    <div className="p-3 border border-dashed rounded-lg bg-muted/20">
+                      <Label className="text-sm font-medium mb-3 block">Videós esetek típusa:</Label>
+                      <RadioGroup
+                        value={member.videoConsultationType}
+                        onValueChange={(value) => updateField("videoConsultationType", value as "eap_online_only" | "operator_only" | "both")}
+                        className="space-y-2"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="eap_online_only" id={`video_eap_only_${index}`} />
+                          <Label htmlFor={`video_eap_only_${index}`} className="cursor-pointer text-sm">
+                            Csak EAP Online esetek
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="operator_only" id={`video_operator_only_${index}`} />
+                          <Label htmlFor={`video_operator_only_${index}`} className="cursor-pointer text-sm">
+                            Csak Operátor által kiközvetített esetek
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="both" id={`video_both_${index}`} />
+                          <Label htmlFor={`video_both_${index}`} className="cursor-pointer text-sm">
+                            Mindkettő
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    {/* EAP Online szakértő opció - csak ha EAP Online vagy Mindkettő van kiválasztva */}
+                    {showEapOnlineExpertOption && (
+                      <div className="p-4 border-2 border-cgp-teal/50 rounded-lg bg-cgp-teal/5 space-y-4">
+                        <div className="flex items-center space-x-3">
+                          <Checkbox
+                            checked={member.is_eap_online_expert}
+                            onCheckedChange={(checked) => updateField("is_eap_online_expert", checked as boolean)}
+                          />
+                          <Globe className="w-5 h-5 text-cgp-teal" />
+                          <Label className="cursor-pointer text-cgp-teal font-medium">EAP Online Szakértő</Label>
+                        </div>
+
+                        {/* EAP Online extra mezők - csak ha be van jelölve */}
+                        {member.is_eap_online_expert && (
+                          <div className="space-y-4 pt-4 border-t border-cgp-teal/20">
+                            <div className="space-y-2">
+                              <Label className="flex items-center gap-2">
+                                <Image className="w-4 h-4 text-muted-foreground" />
+                                Fénykép URL
+                              </Label>
+                              <Input
+                                value={member.eapOnlineImage || ""}
+                                onChange={(e) => updateField("eapOnlineImage", e.target.value)}
+                                placeholder="https://example.com/photo.jpg"
+                              />
+                              <p className="text-xs text-muted-foreground">
+                                A szakértő profilképe az EAP Online felületen
+                              </p>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label>Szakértő bemutatása</Label>
+                              <Textarea
+                                value={member.eapOnlineDescription || ""}
+                                onChange={(e) => updateField("eapOnlineDescription", e.target.value)}
+                                placeholder="Írj egy rövid bemutatkozó szöveget..."
+                                rows={4}
+                              />
+                              <p className="text-xs text-muted-foreground">
+                                Ez a szöveg jelenik meg az EAP Online felületen a szakértő profiljában
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="operator_only" id={`video_operator_only_${index}`} />
-                        <Label htmlFor={`video_operator_only_${index}`} className="cursor-pointer text-sm">
-                          Csak Operátor által kiközvetített esetek
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="both" id={`video_both_${index}`} />
-                        <Label htmlFor={`video_both_${index}`} className="cursor-pointer text-sm">
-                          Mindkettő
-                        </Label>
-                      </div>
-                    </RadioGroup>
+                    )}
                   </div>
                 )}
               </div>
