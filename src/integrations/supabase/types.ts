@@ -229,6 +229,35 @@ export type Database = {
         }
         Relationships: []
       }
+      cities: {
+        Row: {
+          country_id: string | null
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          country_id?: string | null
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          country_id?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cities_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address: string | null
@@ -427,6 +456,42 @@ export type Database = {
           },
           {
             foreignKeyName: "custom_invoice_items_expert_id_fkey"
+            columns: ["expert_id"]
+            isOneToOne: false
+            referencedRelation: "experts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expert_cities: {
+        Row: {
+          city_id: string
+          created_at: string
+          expert_id: string
+          id: string
+        }
+        Insert: {
+          city_id: string
+          created_at?: string
+          expert_id: string
+          id?: string
+        }
+        Update: {
+          city_id?: string
+          created_at?: string
+          expert_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expert_cities_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expert_cities_expert_id_fkey"
             columns: ["expert_id"]
             isOneToOne: false
             referencedRelation: "experts"
@@ -711,6 +776,42 @@ export type Database = {
             columns: ["language_skill_id"]
             isOneToOne: false
             referencedRelation: "language_skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expert_outsource_countries: {
+        Row: {
+          country_id: string
+          created_at: string
+          expert_id: string
+          id: string
+        }
+        Insert: {
+          country_id: string
+          created_at?: string
+          expert_id: string
+          id?: string
+        }
+        Update: {
+          country_id?: string
+          created_at?: string
+          expert_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expert_outsource_countries_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expert_outsource_countries_expert_id_fkey"
+            columns: ["expert_id"]
+            isOneToOne: false
+            referencedRelation: "experts"
             referencedColumns: ["id"]
           },
         ]
