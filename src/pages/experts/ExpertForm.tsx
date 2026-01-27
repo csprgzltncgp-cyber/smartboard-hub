@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
-
+import { ExpertFileUpload } from "@/components/experts/ExpertFileUpload";
 interface Country {
   id: string;
   code: string;
@@ -147,6 +147,16 @@ const ExpertForm = () => {
   const [newItemCountryId, setNewItemCountryId] = useState("");
   const [newItemAmount, setNewItemAmount] = useState("");
 
+  // Expert fájlok
+  interface ExpertFile {
+    id: string;
+    filename: string;
+    file_path: string;
+    file_type: string;
+  }
+  const [contractFiles, setContractFiles] = useState<ExpertFile[]>([]);
+  const [certificateFiles, setCertificateFiles] = useState<ExpertFile[]>([]);
+
   // Szakmai adatok
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
@@ -255,7 +265,7 @@ const ExpertForm = () => {
       }
 
       // Kapcsolódó adatok
-      const [countriesRes, citiesRes, outsourceCountriesRes, crisisCountriesRes, permissionsRes, specializationsRes, languageSkillsRes, customItemsRes] = await Promise.all([
+      const [countriesRes, citiesRes, outsourceCountriesRes, crisisCountriesRes, permissionsRes, specializationsRes, languageSkillsRes, customItemsRes, contractFilesRes, certificateFilesRes] = await Promise.all([
         supabase.from("expert_countries").select("country_id").eq("expert_id", expertId),
         supabase.from("expert_cities").select("city_id").eq("expert_id", expertId),
         supabase.from("expert_outsource_countries").select("country_id").eq("expert_id", expertId),
@@ -264,6 +274,8 @@ const ExpertForm = () => {
         supabase.from("expert_specializations").select("specialization_id").eq("expert_id", expertId),
         supabase.from("expert_language_skills").select("language_skill_id").eq("expert_id", expertId),
         supabase.from("custom_invoice_items").select("*").eq("expert_id", expertId),
+        supabase.from("expert_files").select("*").eq("expert_id", expertId).eq("file_type", "contract"),
+        supabase.from("expert_files").select("*").eq("expert_id", expertId).eq("file_type", "certificate"),
       ]);
 
       if (countriesRes.data) setSelectedCountries(countriesRes.data.map((c) => c.country_id));
@@ -281,6 +293,8 @@ const ExpertForm = () => {
           amount: item.amount?.toString() || "",
         })));
       }
+      if (contractFilesRes.data) setContractFiles(contractFilesRes.data);
+      if (certificateFilesRes.data) setCertificateFiles(certificateFilesRes.data);
     } catch (error) {
       console.error("Error fetching expert data:", error);
       toast.error("Hiba a szakértő adatainak betöltésekor");
@@ -920,6 +934,28 @@ const ExpertForm = () => {
         {/* Szakmai adatok */}
         <div className="bg-white rounded-xl border p-6 space-y-4">
           <h2 className="text-lg font-semibold mb-4">Szakmai adatok</h2>
+
+          {/* Szerződés szkennelt verziója */}
+          {isEditMode && expertId && (
+            <ExpertFileUpload
+              label="Szerződés szkennelt verziója"
+              expertId={expertId}
+              fileType="contract"
+              files={contractFiles}
+              onFilesChange={setContractFiles}
+            />
+          )}
+
+          {/* Szakképesítést igazoló dokumentumok */}
+          {isEditMode && expertId && (
+            <ExpertFileUpload
+              label="Szakképesítést igazoló dokumentumok szkennelt verziója"
+              expertId={expertId}
+              fileType="certificate"
+              files={certificateFiles}
+              onFilesChange={setCertificateFiles}
+            />
+          )}
 
           {/* Országok */}
           <MultiSelectField
