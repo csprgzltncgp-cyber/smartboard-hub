@@ -664,22 +664,28 @@ export type Database = {
           created_at: string
           expert_id: string
           id: string
+          is_indefinite: boolean
           reason: string | null
-          until: string
+          start_date: string
+          until: string | null
         }
         Insert: {
           created_at?: string
           expert_id: string
           id?: string
+          is_indefinite?: boolean
           reason?: string | null
-          until: string
+          start_date?: string
+          until?: string | null
         }
         Update: {
           created_at?: string
           expert_id?: string
           id?: string
+          is_indefinite?: boolean
           reason?: string | null
-          until?: string
+          start_date?: string
+          until?: string | null
         }
         Relationships: [
           {

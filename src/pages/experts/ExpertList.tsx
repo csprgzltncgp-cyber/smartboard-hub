@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash2, Power, Pencil, Lock, Unlock, FileX, Building2, User, Users } from "lucide-react";
+import { Trash2, Power, Pencil, Lock, Unlock, FileX, Building2, User, Users, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import {
@@ -36,6 +36,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import { InactivityDialog } from "@/components/experts/InactivityDialog";
 
 interface Expert {
   id: string;
@@ -77,6 +78,8 @@ const ExpertList = () => {
   const [expertToDelete, setExpertToDelete] = useState<Expert | null>(null);
   const [openCountries, setOpenCountries] = useState<string[]>([]);
   const [countryTabs, setCountryTabs] = useState<Record<string, "all" | "individual" | "company">>({});
+  const [inactivityDialogOpen, setInactivityDialogOpen] = useState(false);
+  const [selectedExpertForInactivity, setSelectedExpertForInactivity] = useState<Expert | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -275,6 +278,11 @@ const ExpertList = () => {
     );
   };
 
+  const handleOpenInactivityDialog = (expert: Expert) => {
+    setSelectedExpertForInactivity(expert);
+    setInactivityDialogOpen(true);
+  };
+
   const ExpertActions = ({ expert }: { expert: Expert }) => (
     <div className="flex items-center gap-1">
       <Button
@@ -306,6 +314,14 @@ const ExpertList = () => {
             ) : (
               <Unlock className="w-4 h-4 text-muted-foreground" />
             )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleOpenInactivityDialog(expert)}
+            title="Inaktivitási időszak"
+          >
+            <CalendarClock className="w-4 h-4 text-warning" />
           </Button>
         </>
       )}
@@ -509,6 +525,18 @@ const ExpertList = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Inactivity Dialog */}
+      {selectedExpertForInactivity && (
+        <InactivityDialog
+          open={inactivityDialogOpen}
+          onOpenChange={setInactivityDialogOpen}
+          expertId={selectedExpertForInactivity.id}
+          expertName={selectedExpertForInactivity.expert_type === "company" 
+            ? selectedExpertForInactivity.company_name || selectedExpertForInactivity.name 
+            : selectedExpertForInactivity.name}
+        />
+      )}
     </div>
   );
 };
