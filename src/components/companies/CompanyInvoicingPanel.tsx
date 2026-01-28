@@ -29,7 +29,7 @@ import {
   INVOICE_ITEM_TYPES,
   InvoiceItemType,
 } from "@/types/company";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface Country {
@@ -65,6 +65,12 @@ interface CompanyInvoicingPanelProps {
   // Számla csíkok kezelése (egy cégnek több számlája lehet)
   invoiceSlips?: InvoiceSlip[];
   setInvoiceSlips?: (slips: InvoiceSlip[]) => void;
+  // Aktív ország fül a Számlázás panelen
+  activeInvoicingCountryId?: string;
+  setActiveInvoicingCountryId?: (countryId: string) => void;
+  // Számla csíkok országonként
+  invoiceSlipsPerCountry?: Record<string, InvoiceSlip[]>;
+  setInvoiceSlipsPerCountry?: (slips: Record<string, InvoiceSlip[]>) => void;
   // Legacy - számla sablonok kezelése (backward compatibility)
   invoiceTemplates?: InvoiceTemplate[];
   setInvoiceTemplates?: (templates: InvoiceTemplate[]) => void;
@@ -152,6 +158,10 @@ export const CompanyInvoicingPanel = ({
   setInvoiceCommentsPerCountry,
   invoiceSlips = [],
   setInvoiceSlips,
+  activeInvoicingCountryId = "",
+  setActiveInvoicingCountryId,
+  invoiceSlipsPerCountry = {},
+  setInvoiceSlipsPerCountry,
   invoiceTemplates = [],
   setInvoiceTemplates,
 }: CompanyInvoicingPanelProps) => {
@@ -159,22 +169,51 @@ export const CompanyInvoicingPanel = ({
   
   // Szűrt országok: csak a kiválasztott országok
   const selectedCountries = countries.filter((c) => countryIds.includes(c.id));
-  
+
   // Az aktív fül az első ország legyen alapértelmezetten
   const [activeCountryTab, setActiveCountryTab] = useState<string>("");
   
   // Nyitott csíkok kezelése
   const [openSlipIds, setOpenSlipIds] = useState<string[]>([]);
+
+  const effectiveCountryId = countryDifferentiates.invoicing
+    ? activeInvoicingCountryId || activeCountryTab || selectedCountries[0]?.id || ""
+    : "";
+  const currentCountrySlips: InvoiceSlip[] = effectiveCountryId
+    ? invoiceSlipsPerCountry[effectiveCountryId] || []
+    : [];
+  const activeSlips = countryDifferentiates.invoicing ? currentCountrySlips : invoiceSlips;
+
+  // Új csík hozzáadásakor automatikusan nyissuk ki a legutolsót
+  const prevSlipCountRef = useRef<number>(invoiceSlips.length);
+
+  useEffect(() => {
+    const currentCount = activeSlips.length;
+    const prevCount = prevSlipCountRef.current;
+    prevSlipCountRef.current = currentCount;
+
+    if (currentCount > prevCount) {
+      const lastId = activeSlips[currentCount - 1]?.id;
+      if (!lastId) return;
+      setOpenSlipIds((ids) => (ids.includes(lastId) ? ids : [...ids, lastId]));
+    }
+  }, [activeSlips.length]);
   
   // Frissítsük az aktív fület, ha az országok változnak
   useEffect(() => {
     if (selectedCountries.length > 0 && !activeCountryTab) {
       setActiveCountryTab(selectedCountries[0].id);
+      if (setActiveInvoicingCountryId) {
+        setActiveInvoicingCountryId(selectedCountries[0].id);
+      }
     } else if (selectedCountries.length > 0 && !selectedCountries.find(c => c.id === activeCountryTab)) {
       // Ha az aktuális aktív fül már nem létezik, váltsunk az elsőre
       setActiveCountryTab(selectedCountries[0].id);
+      if (setActiveInvoicingCountryId) {
+        setActiveInvoicingCountryId(selectedCountries[0].id);
+      }
     }
-  }, [selectedCountries, activeCountryTab]);
+  }, [selectedCountries, activeCountryTab, setActiveInvoicingCountryId]);
   const updateDifferentiate = (key: keyof CountryDifferentiate, value: boolean) => {
     setCountryDifferentiates({ ...countryDifferentiates, [key]: value });
   };
@@ -1036,34 +1075,118 @@ export const CompanyInvoicingPanel = ({
               Válassz ki legalább egy országot az Alapadatok panelen a számlázási beállításokhoz.
             </div>
           ) : (
-            <Tabs value={activeCountryTab || selectedCountries[0]?.id} onValueChange={setActiveCountryTab} className="w-full">
-              <TabsList className="w-full justify-start flex-wrap h-auto gap-1 bg-muted/30 p-1">
+            <div className="space-y-6">
+              <Tabs
+                value={activeCountryTab || selectedCountries[0]?.id}
+                onValueChange={(val) => {
+                  setActiveCountryTab(val);
+                  if (setActiveInvoicingCountryId) setActiveInvoicingCountryId(val);
+                  // ország váltáskor ne tartsuk nyitva a másik ország csíkjait
+                  setOpenSlipIds([]);
+                }}
+                className="w-full"
+              >
+                <TabsList className="w-full justify-start flex-wrap h-auto gap-1 bg-muted/30 p-1">
+                  {selectedCountries.map((country) => (
+                    <TabsTrigger
+                      key={country.id}
+                      value={country.id}
+                      className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                    >
+                      {country.name}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
                 {selectedCountries.map((country) => (
-                  <TabsTrigger
-                    key={country.id}
-                    value={country.id}
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                  >
-                    {country.name}
-                  </TabsTrigger>
+                  <TabsContent key={country.id} value={country.id} className="mt-4">
+                    <CountryBillingForm
+                      countryName={country.name}
+                      billingData={getCountryBillingData(country.id)}
+                      setBillingData={(data) => setCountryBillingData(country.id, data)}
+                      invoicingData={getCountryInvoicingData(country.id)}
+                      setInvoicingData={(data) => setCountryInvoicingData(country.id, data)}
+                      invoiceItems={getCountryInvoiceItems(country.id)}
+                      setInvoiceItems={(items) => setCountryInvoiceItems(country.id, items)}
+                      invoiceComments={getCountryInvoiceComments(country.id)}
+                      setInvoiceComments={(comments) => setCountryInvoiceComments(country.id, comments)}
+                    />
+                  </TabsContent>
                 ))}
-              </TabsList>
-              {selectedCountries.map((country) => (
-                <TabsContent key={country.id} value={country.id} className="mt-4">
-                  <CountryBillingForm
-                    countryName={country.name}
-                    billingData={getCountryBillingData(country.id)}
-                    setBillingData={(data) => setCountryBillingData(country.id, data)}
-                    invoicingData={getCountryInvoicingData(country.id)}
-                    setInvoicingData={(data) => setCountryInvoicingData(country.id, data)}
-                    invoiceItems={getCountryInvoiceItems(country.id)}
-                    setInvoiceItems={(items) => setCountryInvoiceItems(country.id, items)}
-                    invoiceComments={getCountryInvoiceComments(country.id)}
-                    setInvoiceComments={(comments) => setCountryInvoiceComments(country.id, comments)}
-                  />
-                </TabsContent>
-              ))}
-            </Tabs>
+              </Tabs>
+
+              {/* Számlacsíkok az aktív országhoz */}
+              <div className="space-y-4 pt-6 border-t">
+                <h3 className="text-sm font-medium text-primary">
+                  Számlára kerülő tételek, megjegyzések
+                </h3>
+
+                {currentCountrySlips.length > 0 ? (
+                  <div className="space-y-4">
+                    {currentCountrySlips.map((slip, index) => (
+                      <InvoiceSlipCard
+                        key={slip.id}
+                        slip={slip}
+                        slipIndex={index}
+                        currency={getCountryInvoicingData(effectiveCountryId).currency}
+                        isOpen={openSlipIds.includes(slip.id)}
+                        onToggle={() => {
+                          setOpenSlipIds((ids) =>
+                            ids.includes(slip.id)
+                              ? ids.filter((id) => id !== slip.id)
+                              : [...ids, slip.id]
+                          );
+                        }}
+                        onUpdate={(updates) => {
+                          if (!setInvoiceSlipsPerCountry || !effectiveCountryId) return;
+                          setInvoiceSlipsPerCountry({
+                            ...invoiceSlipsPerCountry,
+                            [effectiveCountryId]: currentCountrySlips.map((s) =>
+                              s.id === slip.id ? { ...s, ...updates } : s
+                            ),
+                          });
+                        }}
+                        onUpdateItems={(items) => {
+                          if (!setInvoiceSlipsPerCountry || !effectiveCountryId) return;
+                          setInvoiceSlipsPerCountry({
+                            ...invoiceSlipsPerCountry,
+                            [effectiveCountryId]: currentCountrySlips.map((s) =>
+                              s.id === slip.id ? { ...s, items } : s
+                            ),
+                          });
+                        }}
+                        onUpdateComments={(comments) => {
+                          if (!setInvoiceSlipsPerCountry || !effectiveCountryId) return;
+                          setInvoiceSlipsPerCountry({
+                            ...invoiceSlipsPerCountry,
+                            [effectiveCountryId]: currentCountrySlips.map((s) =>
+                              s.id === slip.id ? { ...s, comments } : s
+                            ),
+                          });
+                        }}
+                        onDelete={
+                          index > 0
+                            ? () => {
+                                if (!setInvoiceSlipsPerCountry || !effectiveCountryId) return;
+                                setInvoiceSlipsPerCountry({
+                                  ...invoiceSlipsPerCountry,
+                                  [effectiveCountryId]: currentCountrySlips.filter(
+                                    (s) => s.id !== slip.id
+                                  ),
+                                });
+                              }
+                            : undefined
+                        }
+                        isFirst={index === 0}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-muted-foreground text-sm">
+                    Még nincs számlacsík. Használd az „Új számla hozzáadása” gombot.
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
       )}
