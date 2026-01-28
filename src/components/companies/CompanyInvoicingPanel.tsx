@@ -919,21 +919,31 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
           </div>
         </div>
 
-        {/* Checkboxok sor */}
-        <div className="flex flex-wrap gap-4">
+        {/* Opciók sor */}
+        <div className="flex flex-wrap gap-6 pt-1">
           {isWorkshopOrCrisis && (
-            <DifferentPerCountryToggle
-              label="Activity ID megjelenik"
-              checked={item.show_activity_id}
-              onChange={(checked) => onUpdate({ show_activity_id: checked })}
-            />
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id={`activity-id-${item.id}`}
+                checked={item.show_activity_id}
+                onCheckedChange={(checked) => onUpdate({ show_activity_id: !!checked })}
+              />
+              <Label htmlFor={`activity-id-${item.id}`} className="text-sm font-normal text-muted-foreground cursor-pointer">
+                Activity ID megjelenik
+              </Label>
+            </div>
           )}
           {(isMultiplication || isContractHolder) && (
-            <DifferentPerCountryToggle
-              label="Tételesen"
-              checked={item.show_by_item}
-              onChange={(checked) => onUpdate({ show_by_item: checked })}
-            />
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id={`by-item-${item.id}`}
+                checked={item.show_by_item}
+                onCheckedChange={(checked) => onUpdate({ show_by_item: !!checked })}
+              />
+              <Label htmlFor={`by-item-${item.id}`} className="text-sm font-normal text-muted-foreground cursor-pointer">
+                Tételesen
+              </Label>
+            </div>
           )}
         </div>
 
