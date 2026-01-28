@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -882,96 +883,65 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
   const bgColor = !item.item_type ? "bg-purple-100/50" : "bg-primary/10";
 
   return (
-    <div className={cn("rounded-lg p-4 space-y-4 relative", bgColor)}>
-      {/* Akció ikonok - jobb felső sarok */}
-      <div className="absolute top-2 right-2 flex items-center gap-0.5">
-        {(isMultiplication || isAmount) && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onUpdate({ with_timestamp: !item.with_timestamp })}
-            className={cn("h-7 w-7 p-0", item.with_timestamp ? "text-primary" : "text-muted-foreground/50")}
-            title="Időbélyeg"
-          >
-            <Calendar className="h-3.5 w-3.5" fill={item.with_timestamp ? "currentColor" : "none"} />
-          </Button>
-        )}
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowComment(!showComment)}
-          className={cn("h-7 w-7 p-0", showComment ? "text-primary" : "text-muted-foreground/50")}
-          title="Megjegyzés"
-        >
-          <MessageSquare className="h-3.5 w-3.5" fill={showComment ? "currentColor" : "none"} />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={onRemove}
-          className="h-7 w-7 p-0 text-destructive/70 hover:text-destructive"
-          title="Törlés"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
-      </div>
+    <div className={cn("rounded-lg p-4", bgColor)}>
+      <div className="flex gap-4">
+        {/* Tartalom */}
+        <div className="min-w-0 flex-1 space-y-4">
+          {/* Első sor: Tétel neve, Típus, checkboxok */}
+          <div className="flex items-start gap-4">
+            {/* Tétel megnevezése */}
+            <div className="flex-1 space-y-2">
+              <Input
+                value={item.item_name}
+                onChange={(e) => onUpdate({ item_name: e.target.value })}
+                placeholder="Tétel megnevezése"
+              />
+            </div>
 
-      {/* Első sor: Tétel neve, Típus, checkboxok */}
-      <div className="flex items-start gap-4 pr-24">
-        {/* Tétel megnevezése */}
-        <div className="flex-1 space-y-2">
-          <Input
-            value={item.item_name}
-            onChange={(e) => onUpdate({ item_name: e.target.value })}
-            placeholder="Tétel megnevezése"
-          />
-        </div>
+            {/* Típus választó */}
+            <div className="w-48 space-y-2">
+              <Select
+                value={item.item_type || "none"}
+                onValueChange={(val) =>
+                  onUpdate({ item_type: val === "none" ? "multiplication" : (val as InvoiceItemType) })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Input" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Kérjük, válasszon</SelectItem>
+                  {INVOICE_ITEM_TYPES.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        {/* Típus választó */}
-        <div className="w-48 space-y-2">
-          <Select
-            value={item.item_type || "none"}
-            onValueChange={(val) => onUpdate({ item_type: val === "none" ? "multiplication" : val as InvoiceItemType })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Input" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Kérjük, válasszon</SelectItem>
-              {INVOICE_ITEM_TYPES.map((type) => (
-                <SelectItem key={type.id} value={type.id}>
-                  {type.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+            {/* Activity ID checkbox - csak workshop/crisis/other-activity esetén */}
+            {isWorkshopOrCrisis && (
+              <DifferentPerCountryToggle
+                label="Activity ID megjelenik"
+                checked={item.show_activity_id}
+                onChange={(checked) => onUpdate({ show_activity_id: checked })}
+              />
+            )}
 
-        {/* Activity ID checkbox - csak workshop/crisis/other-activity esetén */}
-        {isWorkshopOrCrisis && (
-          <DifferentPerCountryToggle
-            label="Activity ID megjelenik"
-            checked={item.show_activity_id}
-            onChange={(checked) => onUpdate({ show_activity_id: checked })}
-          />
-        )}
+            {/* Tételesen checkbox - szorzás vagy contract holder esetén */}
+            {(isMultiplication || isContractHolder) && (
+              <DifferentPerCountryToggle
+                label="Tételesen"
+                checked={item.show_by_item}
+                onChange={(checked) => onUpdate({ show_by_item: checked })}
+              />
+            )}
+          </div>
 
-        {/* Tételesen checkbox - szorzás vagy contract holder esetén */}
-        {(isMultiplication || isContractHolder) && (
-          <DifferentPerCountryToggle
-            label="Tételesen"
-            checked={item.show_by_item}
-            onChange={(checked) => onUpdate({ show_by_item: checked })}
-          />
-        )}
-      </div>
-
-      {/* Képlet beállítása - szorzás vagy contract holder esetén */}
-      {needsVolumeAndAmount && (
-        <div className="space-y-4">
+          {/* Képlet beállítása - szorzás vagy contract holder esetén */}
+          {needsVolumeAndAmount && (
+            <div className="space-y-4">
           {/* Létszám sor */}
           <div className="space-y-2">
             <span className="text-sm text-muted-foreground">Létszám</span>
@@ -1062,12 +1032,12 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
               </div>
             </div>
           </div>
-        </div>
-      )}
+            </div>
+          )}
 
-      {/* Csak összeg - amount típusnál */}
-      {needsAmountOnly && (
-        <div className="space-y-2">
+          {/* Csak összeg - amount típusnál */}
+          {needsAmountOnly && (
+            <div className="space-y-2">
           <span className="text-sm text-muted-foreground">Összeg megadása</span>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             {/* Összeg mező neve (szerkeszthető) */}
@@ -1111,8 +1081,60 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
             onChange={(e) => onUpdate({ comment: e.target.value || null })}
             placeholder="Megjegyzés a tételhez..."
           />
+            </div>
+          )}
+
+          {/* Megjegyzés mező */}
+          {showComment && (
+            <div className="space-y-2">
+              <Label className="text-sm">Megjegyzés</Label>
+              <Textarea
+                value={item.comment || ""}
+                onChange={(e) => onUpdate({ comment: e.target.value || null })}
+                placeholder="Megjegyzés..."
+              />
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Akciók: panel a panelben, jobb oldal, függőlegesen */}
+        <div className="shrink-0">
+          <div className="rounded-lg border bg-background/60 p-1 flex flex-col items-center gap-1">
+            {(isMultiplication || isAmount) && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => onUpdate({ with_timestamp: !item.with_timestamp })}
+                className={cn("h-10 w-10", item.with_timestamp ? "text-primary" : "text-muted-foreground")}
+                title="Időbélyeg"
+              >
+                <Calendar className="h-5 w-5" fill={item.with_timestamp ? "currentColor" : "none"} />
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowComment(!showComment)}
+              className={cn("h-10 w-10", showComment ? "text-primary" : "text-muted-foreground")}
+              title="Megjegyzés"
+            >
+              <MessageSquare className="h-5 w-5" fill={showComment ? "currentColor" : "none"} />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={onRemove}
+              className="h-10 w-10 text-destructive hover:text-destructive"
+              title="Törlés"
+            >
+              <Trash2 className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
