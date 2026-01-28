@@ -882,9 +882,45 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
   const bgColor = !item.item_type ? "bg-purple-100/50" : "bg-primary/10";
 
   return (
-    <div className={cn("rounded-lg p-4 space-y-4", bgColor)}>
-      {/* Első sor: Tétel neve, Típus, Activity ID checkbox, Törlés/Megjegyzés/Naptár ikonok */}
-      <div className="flex items-start gap-4">
+    <div className={cn("rounded-lg p-4 space-y-4 relative", bgColor)}>
+      {/* Akció ikonok - jobb felső sarok */}
+      <div className="absolute top-2 right-2 flex items-center gap-0.5">
+        {(isMultiplication || isAmount) && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onUpdate({ with_timestamp: !item.with_timestamp })}
+            className={cn("h-7 w-7 p-0", item.with_timestamp ? "text-primary" : "text-muted-foreground/50")}
+            title="Időbélyeg"
+          >
+            <Calendar className="h-3.5 w-3.5" fill={item.with_timestamp ? "currentColor" : "none"} />
+          </Button>
+        )}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowComment(!showComment)}
+          className={cn("h-7 w-7 p-0", showComment ? "text-primary" : "text-muted-foreground/50")}
+          title="Megjegyzés"
+        >
+          <MessageSquare className="h-3.5 w-3.5" fill={showComment ? "currentColor" : "none"} />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={onRemove}
+          className="h-7 w-7 p-0 text-destructive/70 hover:text-destructive"
+          title="Törlés"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+
+      {/* Első sor: Tétel neve, Típus, checkboxok */}
+      <div className="flex items-start gap-4 pr-24">
         {/* Tétel megnevezése */}
         <div className="flex-1 space-y-2">
           <Input
@@ -931,42 +967,6 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
             onChange={(checked) => onUpdate({ show_by_item: checked })}
           />
         )}
-
-        {/* Ikon gombok - vízszintes elrendezés */}
-        <div className="flex items-center gap-1">
-          {(isMultiplication || isAmount) && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => onUpdate({ with_timestamp: !item.with_timestamp })}
-              className={cn("h-8 w-8", item.with_timestamp ? "text-primary" : "text-primary/50")}
-              title="Időbélyeg"
-            >
-              <Calendar className="h-4 w-4" fill={item.with_timestamp ? "currentColor" : "none"} />
-            </Button>
-          )}
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowComment(!showComment)}
-            className={cn("h-8 w-8", showComment ? "text-primary" : "text-primary/50")}
-            title="Megjegyzés"
-          >
-            <MessageSquare className="h-4 w-4" fill={showComment ? "currentColor" : "none"} />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onRemove}
-            className="text-destructive h-8 w-8"
-            title="Törlés"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
 
       {/* Képlet beállítása - szorzás vagy contract holder esetén */}
