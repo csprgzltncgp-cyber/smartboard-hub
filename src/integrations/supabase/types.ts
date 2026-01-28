@@ -261,29 +261,411 @@ export type Database = {
       companies: {
         Row: {
           address: string | null
+          connected_company_id: string | null
           contact_email: string | null
           contact_phone: string | null
+          contract_holder_type: string | null
           country_id: string
+          created_at: string
+          id: string
+          lead_account_user_id: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          connected_company_id?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          contract_holder_type?: string | null
+          country_id: string
+          created_at?: string
+          id?: string
+          lead_account_user_id?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          connected_company_id?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          contract_holder_type?: string | null
+          country_id?: string
+          created_at?: string
+          id?: string
+          lead_account_user_id?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "companies_connected_company_id_fkey"
+            columns: ["connected_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companies_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companies_lead_account_user_id_fkey"
+            columns: ["lead_account_user_id"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_billing_data: {
+        Row: {
+          billing_address: string | null
+          billing_city: string | null
+          billing_country_id: string | null
+          billing_frequency: number | null
+          billing_name: string | null
+          billing_postal_code: string | null
+          company_id: string
+          contact_holder_name: string | null
+          country_id: string | null
+          created_at: string
+          currency: string | null
+          custom_email_subject: string | null
+          eu_tax_number: string | null
+          id: string
+          invoice_language: string | null
+          invoice_online_url: string | null
+          payment_deadline: number | null
+          post_address: string | null
+          post_city: string | null
+          post_country_id: string | null
+          post_postal_code: string | null
+          send_invoice_by_email: boolean | null
+          send_invoice_by_post: boolean | null
+          show_contact_holder_name_on_post: boolean | null
+          tax_number: string | null
+          updated_at: string
+          upload_invoice_online: boolean | null
+          vat_rate: number | null
+        }
+        Insert: {
+          billing_address?: string | null
+          billing_city?: string | null
+          billing_country_id?: string | null
+          billing_frequency?: number | null
+          billing_name?: string | null
+          billing_postal_code?: string | null
+          company_id: string
+          contact_holder_name?: string | null
+          country_id?: string | null
+          created_at?: string
+          currency?: string | null
+          custom_email_subject?: string | null
+          eu_tax_number?: string | null
+          id?: string
+          invoice_language?: string | null
+          invoice_online_url?: string | null
+          payment_deadline?: number | null
+          post_address?: string | null
+          post_city?: string | null
+          post_country_id?: string | null
+          post_postal_code?: string | null
+          send_invoice_by_email?: boolean | null
+          send_invoice_by_post?: boolean | null
+          show_contact_holder_name_on_post?: boolean | null
+          tax_number?: string | null
+          updated_at?: string
+          upload_invoice_online?: boolean | null
+          vat_rate?: number | null
+        }
+        Update: {
+          billing_address?: string | null
+          billing_city?: string | null
+          billing_country_id?: string | null
+          billing_frequency?: number | null
+          billing_name?: string | null
+          billing_postal_code?: string | null
+          company_id?: string
+          contact_holder_name?: string | null
+          country_id?: string | null
+          created_at?: string
+          currency?: string | null
+          custom_email_subject?: string | null
+          eu_tax_number?: string | null
+          id?: string
+          invoice_language?: string | null
+          invoice_online_url?: string | null
+          payment_deadline?: number | null
+          post_address?: string | null
+          post_city?: string | null
+          post_country_id?: string | null
+          post_postal_code?: string | null
+          send_invoice_by_email?: boolean | null
+          send_invoice_by_post?: boolean | null
+          show_contact_holder_name_on_post?: boolean | null
+          tax_number?: string | null
+          updated_at?: string
+          upload_invoice_online?: boolean | null
+          vat_rate?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_billing_data_billing_country_id_fkey"
+            columns: ["billing_country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_billing_data_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_billing_data_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_billing_data_post_country_id_fkey"
+            columns: ["post_country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_billing_emails: {
+        Row: {
+          billing_data_id: string
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          billing_data_id: string
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          billing_data_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_billing_emails_billing_data_id_fkey"
+            columns: ["billing_data_id"]
+            isOneToOne: false
+            referencedRelation: "company_billing_data"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_countries: {
+        Row: {
+          company_id: string
+          country_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          company_id: string
+          country_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          company_id?: string
+          country_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_countries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_countries_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_country_differentiates: {
+        Row: {
+          company_id: string
+          contract_date: boolean
+          contract_holder: boolean
+          created_at: string
+          id: string
+          invoicing: boolean
+          org_id: boolean
+          reporting: boolean
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          contract_date?: boolean
+          contract_holder?: boolean
+          created_at?: string
+          id?: string
+          invoicing?: boolean
+          org_id?: boolean
+          reporting?: boolean
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          contract_date?: boolean
+          contract_holder?: boolean
+          created_at?: string
+          id?: string
+          invoicing?: boolean
+          org_id?: boolean
+          reporting?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_country_differentiates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_country_settings: {
+        Row: {
+          company_id: string
+          contract_date: string | null
+          contract_end_date: string | null
+          country_id: string
+          created_at: string
+          id: string
+          org_id: string | null
+          reporting_data: Json | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          contract_date?: string | null
+          contract_end_date?: string | null
+          country_id: string
+          created_at?: string
+          id?: string
+          org_id?: string | null
+          reporting_data?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          contract_date?: string | null
+          contract_end_date?: string | null
+          country_id?: string
+          created_at?: string
+          id?: string
+          org_id?: string | null
+          reporting_data?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_country_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_country_settings_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_invoice_comments: {
+        Row: {
+          comment: string
+          company_id: string
+          country_id: string | null
+          created_at: string
+          id: string
+        }
+        Insert: {
+          comment: string
+          company_id: string
+          country_id?: string | null
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          comment?: string
+          company_id?: string
+          country_id?: string | null
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_invoice_comments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_invoice_comments_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_invoice_items: {
+        Row: {
+          amount: number
+          company_id: string
+          country_id: string | null
           created_at: string
           id: string
           name: string
           updated_at: string
         }
         Insert: {
-          address?: string | null
-          contact_email?: string | null
-          contact_phone?: string | null
-          country_id: string
+          amount?: number
+          company_id: string
+          country_id?: string | null
           created_at?: string
           id?: string
           name: string
           updated_at?: string
         }
         Update: {
-          address?: string | null
-          contact_email?: string | null
-          contact_phone?: string | null
-          country_id?: string
+          amount?: number
+          company_id?: string
+          country_id?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -291,7 +673,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "companies_country_id_fkey"
+            foreignKeyName: "company_invoice_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_invoice_items_country_id_fkey"
             columns: ["country_id"]
             isOneToOne: false
             referencedRelation: "countries"

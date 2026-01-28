@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Plus } from "lucide-react";
+import { ArrowLeft, Save, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { CompanyBasicDataPanel } from "@/components/companies/CompanyBasicDataPanel";
@@ -18,54 +18,43 @@ import {
   InvoiceItem,
   InvoiceComment,
 } from "@/types/company";
+import { useCompaniesDb } from "@/hooks/useCompaniesDb";
+import { useAppUsersDb } from "@/hooks/useAppUsersDb";
 
-// Mock adatok
-const mockCountries = [
-  { id: "hu", code: "HU", name: "Magyarország" },
-  { id: "cz", code: "CZ", name: "Csehország" },
-  { id: "sk", code: "SK", name: "Szlovákia" },
-  { id: "pl", code: "PL", name: "Lengyelország" },
-  { id: "ro", code: "RO", name: "Románia" },
-  { id: "rs", code: "RS", name: "Szerbia" },
-];
-
+// Mock contract holders (until we have a proper table)
 const mockContractHolders: ContractHolder[] = [
-  { id: "1", name: "Lifeworks" },
+  { id: "1", name: "Telus" },
   { id: "2", name: "CGP" },
-  { id: "3", name: "Compsych" },
-  { id: "4", name: "Optum" },
-  { id: "5", name: "Pulso" },
-  { id: "6", name: "VPO Telus" },
-];
-
-const mockAccountAdmins: AccountAdmin[] = [
-  { id: "1", name: "Kiss Anna" },
-  { id: "2", name: "Nagy Péter" },
-  { id: "3", name: "Szabó Mária" },
-];
-
-// Mock kapcsolt cégek
-const mockConnectedCompanies = [
-  { id: "c1", name: "Anyacég Kft." },
-  { id: "c2", name: "Partner Zrt." },
-  { id: "c3", name: "Leányvállalat Bt." },
 ];
 
 const CompanyForm = () => {
   const navigate = useNavigate();
   const { companyId } = useParams<{ companyId: string }>();
   const isEditMode = Boolean(companyId);
+  
+  const { 
+    countries, 
+    companies, 
+    getCompanyById, 
+    createCompany, 
+    updateCompany, 
+    loading: companiesLoading 
+  } = useCompaniesDb();
+  
+  const { users } = useAppUsersDb();
+
+  const [formLoading, setFormLoading] = useState(isEditMode);
 
   // Alapadatok
-  const [name, setName] = useState(isEditMode ? "Magyar Telekom Nyrt." : "");
+  const [name, setName] = useState("");
   const [active, setActive] = useState(true);
-  const [countryIds, setCountryIds] = useState<string[]>(isEditMode ? ["hu"] : []);
-  const [contractHolderId, setContractHolderId] = useState<string | null>(isEditMode ? "2" : null);
+  const [countryIds, setCountryIds] = useState<string[]>([]);
+  const [contractHolderId, setContractHolderId] = useState<string | null>(null);
   const [orgId, setOrgId] = useState<string | null>(null);
-  const [contractStart, setContractStart] = useState<string | null>(isEditMode ? "2023-01-01" : null);
-  const [contractEnd, setContractEnd] = useState<string | null>(isEditMode ? "2025-12-31" : null);
+  const [contractStart, setContractStart] = useState<string | null>(null);
+  const [contractEnd, setContractEnd] = useState<string | null>(null);
   const [contractReminderEmail, setContractReminderEmail] = useState<string | null>(null);
-  const [leadAccountId, setLeadAccountId] = useState<string | null>(isEditMode ? "1" : null);
+  const [leadAccountId, setLeadAccountId] = useState<string | null>(null);
   const [connectedCompanyId, setConnectedCompanyId] = useState<string | null>(null);
 
   // Országonként különböző beállítások
@@ -90,145 +79,11 @@ const CompanyForm = () => {
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [crisisInterventions, setCrisisInterventions] = useState<CrisisIntervention[]>([]);
 
-  // Számlázási adatok - mock adatokkal edit módban
-  const [billingData, setBillingData] = useState<BillingData | null>(
-    isEditMode
-      ? {
-          id: "bd-1",
-          company_id: companyId || "",
-          country_id: null,
-          admin_identifier: "TLK-2024",
-          name: "Magyar Telekom Nyrt.",
-          is_name_shown: true,
-          country: "Magyarország",
-          postal_code: "1013",
-          city: "Budapest",
-          street: "Krisztina krt.",
-          house_number: "55.",
-          is_address_shown: true,
-          po_number: "PO-123456",
-          is_po_number_shown: true,
-          is_po_number_changing: false,
-          is_po_number_required: true,
-          tax_number: "12345678-2-41",
-          community_tax_number: "HU12345678",
-          is_tax_number_shown: true,
-          group_id: "GRP-001",
-          payment_deadline: 30,
-          is_payment_deadline_shown: true,
-          invoicing_inactive: false,
-          invoicing_inactive_from: null,
-          invoicing_inactive_to: null,
-        }
-      : null
-  );
-  const [invoicingData, setInvoicingData] = useState<InvoicingData | null>(
-    isEditMode
-      ? {
-          id: "inv-1",
-          company_id: companyId || "",
-          country_id: null,
-          billing_frequency: "monthly",
-          invoice_language: "hu",
-          currency: "huf",
-          vat_rate: 27,
-          inside_eu: true,
-          outside_eu: false,
-          send_invoice_by_post: false,
-          send_completion_certificate_by_post: false,
-          post_code: null,
-          city: null,
-          street: null,
-          house_number: null,
-          send_invoice_by_email: true,
-          send_completion_certificate_by_email: true,
-          custom_email_subject: null,
-          invoice_emails: ["szamlazas@telekom.hu"],
-          upload_invoice_online: false,
-          invoice_online_url: null,
-          upload_completion_certificate_online: false,
-          completion_certificate_online_url: null,
-          contact_holder_name: "Pénzügyi Osztály",
-          show_contact_holder_name_on_post: false,
-        }
-      : null
-  );
-  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>(
-    isEditMode
-      ? [
-          {
-            id: "item-1",
-            invoicing_data_id: "inv-1",
-            item_name: "EAP szolgáltatás",
-            item_type: "multiplication",
-            amount_name: "Egységár",
-            amount_value: "15000",
-            volume_name: "Létszám",
-            volume_value: "12",
-            is_amount_changing: false,
-            is_volume_changing: false,
-            show_by_item: true,
-            show_activity_id: false,
-            with_timestamp: true,
-            comment: null,
-            data_request_email: null,
-            data_request_salutation: null,
-          },
-          {
-            id: "item-2",
-            invoicing_data_id: "inv-1",
-            item_name: "Workshop díj",
-            item_type: "workshop",
-            amount_name: null,
-            amount_value: null,
-            volume_name: null,
-            volume_value: null,
-            is_amount_changing: false,
-            is_volume_changing: false,
-            show_by_item: false,
-            show_activity_id: true,
-            with_timestamp: false,
-            comment: null,
-            data_request_email: null,
-            data_request_salutation: null,
-          },
-          {
-            id: "item-3",
-            invoicing_data_id: "inv-1",
-            item_name: "Krízisintervenció",
-            item_type: "crisis",
-            amount_name: null,
-            amount_value: null,
-            volume_name: null,
-            volume_value: null,
-            is_amount_changing: false,
-            is_volume_changing: false,
-            show_by_item: false,
-            show_activity_id: true,
-            with_timestamp: false,
-            comment: null,
-            data_request_email: null,
-            data_request_salutation: null,
-          },
-        ]
-      : []
-  );
-  const [invoiceComments, setInvoiceComments] = useState<InvoiceComment[]>(
-    isEditMode
-      ? [
-          {
-            id: "comment-1",
-            invoicing_data_id: "inv-1",
-            comment: "Fizetési határidő 30 nap",
-          },
-          {
-            id: "comment-2",
-            invoicing_data_id: "inv-1",
-            comment: "Közösségi adószám: HU12345678",
-          },
-        ]
-      : []
-  );
+  // Számlázási adatok
+  const [billingData, setBillingData] = useState<BillingData | null>(null);
+  const [invoicingData, setInvoicingData] = useState<InvoicingData | null>(null);
+  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
+  const [invoiceComments, setInvoiceComments] = useState<InvoiceComment[]>([]);
 
   // Országonkénti számlázási adatok
   const [billingDataPerCountry, setBillingDataPerCountry] = useState<Record<string, BillingData>>({});
@@ -236,7 +91,51 @@ const CompanyForm = () => {
   const [invoiceItemsPerCountry, setInvoiceItemsPerCountry] = useState<Record<string, InvoiceItem[]>>({});
   const [invoiceCommentsPerCountry, setInvoiceCommentsPerCountry] = useState<Record<string, InvoiceComment[]>>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Load company data in edit mode
+  useEffect(() => {
+    const loadCompany = async () => {
+      if (!isEditMode || !companyId) return;
+      
+      setFormLoading(true);
+      const company = await getCompanyById(companyId);
+      
+      if (company) {
+        setName(company.name);
+        setActive(company.active);
+        setCountryIds(company.country_ids);
+        setContractHolderId(company.contract_holder_id);
+        setOrgId(company.org_id);
+        setContractStart(company.contract_start);
+        setContractEnd(company.contract_end);
+        setContractReminderEmail(company.contract_reminder_email);
+        setLeadAccountId(company.lead_account_id);
+        setConnectedCompanyId(company.connected_company_id);
+        setCountryDifferentiates(company.countryDifferentiates);
+        setCountrySettings(company.countrySettings);
+        setBillingData(company.billingData);
+        setInvoicingData(company.invoicingData);
+        setInvoiceItems(company.invoiceItems);
+        setInvoiceComments(company.invoiceComments);
+      }
+      
+      setFormLoading(false);
+    };
+    
+    loadCompany();
+  }, [isEditMode, companyId, getCompanyById]);
+
+  // Account admins from users
+  const accountAdmins: AccountAdmin[] = users.map(u => ({
+    id: u.id,
+    name: u.name,
+  }));
+
+  // Connected companies (other companies)
+  const connectedCompanies = companies
+    .filter(c => c.id !== companyId)
+    .map(c => ({ id: c.id, name: c.name }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!name.trim()) {
@@ -249,9 +148,45 @@ const CompanyForm = () => {
       return;
     }
 
-    // Mock save
-    toast.success(isEditMode ? "Cég frissítve" : "Cég létrehozva");
-    navigate("/dashboard/settings/companies");
+    try {
+      if (isEditMode && companyId) {
+        const success = await updateCompany(companyId, {
+          name,
+          countryIds,
+          contractHolderType: contractHolderId === "2" ? "cgp" : contractHolderId === "1" ? "telus" : null,
+          connectedCompanyId,
+          leadAccountUserId: leadAccountId,
+          countryDifferentiates,
+          billingData: billingData || undefined,
+          invoicingData: invoicingData || undefined,
+        });
+        
+        if (success) {
+          toast.success("Cég frissítve");
+          navigate("/dashboard/settings/companies");
+        } else {
+          toast.error("Hiba történt a mentés során");
+        }
+      } else {
+        const newCompany = await createCompany({
+          name,
+          countryIds,
+          contractHolderType: contractHolderId === "2" ? "cgp" : contractHolderId === "1" ? "telus" : null,
+          connectedCompanyId,
+          leadAccountUserId: leadAccountId,
+        });
+        
+        if (newCompany) {
+          toast.success("Cég létrehozva");
+          navigate("/dashboard/settings/companies");
+        } else {
+          toast.error("Hiba történt a létrehozás során");
+        }
+      }
+    } catch (error) {
+      console.error("Save error:", error);
+      toast.error("Hiba történt a mentés során");
+    }
   };
 
   const handleSetNewPassword = () => {
@@ -261,6 +196,15 @@ const CompanyForm = () => {
   const handleAddInvoiceList = () => {
     toast.info("Új számlázási lista hozzáadása - fejlesztés alatt");
   };
+
+  if (companiesLoading || formLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Betöltés...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -274,7 +218,7 @@ const CompanyForm = () => {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-2xl font-semibold">
-          {isEditMode ? name : "Új cég hozzáadása"}
+          {isEditMode ? name || "Cég szerkesztése" : "Új cég hozzáadása"}
         </h1>
       </div>
 
@@ -304,10 +248,10 @@ const CompanyForm = () => {
             setConnectedCompanyId={setConnectedCompanyId}
             countryDifferentiates={countryDifferentiates}
             setCountryDifferentiates={setCountryDifferentiates}
-            countries={mockCountries}
+            countries={countries}
             contractHolders={mockContractHolders}
-            accountAdmins={mockAccountAdmins}
-            connectedCompanies={mockConnectedCompanies}
+            accountAdmins={accountAdmins}
+            connectedCompanies={connectedCompanies}
             clientUsername={clientUsername}
             setClientUsername={setClientUsername}
             clientLanguageId={clientLanguageId}
@@ -322,12 +266,12 @@ const CompanyForm = () => {
           <div className="bg-card border rounded-lg p-6">
             <CompanyCountrySettingsPanel
               countryIds={countryIds}
-              countries={mockCountries}
+              countries={countries}
               countrySettings={countrySettings}
               setCountrySettings={setCountrySettings}
               countryDifferentiates={countryDifferentiates}
               contractHolders={mockContractHolders}
-              accountAdmins={mockAccountAdmins}
+              accountAdmins={accountAdmins}
               globalContractHolderId={contractHolderId}
               workshops={workshops}
               setWorkshops={setWorkshops}
@@ -352,7 +296,7 @@ const CompanyForm = () => {
               invoiceComments={invoiceComments}
               setInvoiceComments={setInvoiceComments}
               countryIds={countryIds}
-              countries={mockCountries}
+              countries={countries}
               billingDataPerCountry={billingDataPerCountry}
               setBillingDataPerCountry={setBillingDataPerCountry}
               invoicingDataPerCountry={invoicingDataPerCountry}

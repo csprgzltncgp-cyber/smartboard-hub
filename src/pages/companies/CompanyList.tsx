@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash2, Pencil, Building2, ChevronDown, ChevronRight, Link2 } from "lucide-react";
+import { Trash2, Pencil, Building2, ChevronDown, ChevronRight, Link2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -21,105 +21,11 @@ import {
 } from "@/components/ui/collapsible";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import { Company } from "@/types/company";
-
-// Mock adatok
-const mockCountries = [
-  { id: "hu", code: "HU", name: "Magyarország" },
-  { id: "cz", code: "CZ", name: "Csehország" },
-  { id: "sk", code: "SK", name: "Szlovákia" },
-  { id: "pl", code: "PL", name: "Lengyelország" },
-  { id: "ro", code: "RO", name: "Románia" },
-  { id: "rs", code: "RS", name: "Szerbia" },
-];
-
-const mockCompanies: Company[] = [
-  {
-    id: "1",
-    name: "Magyar Telekom Nyrt.",
-    active: true,
-    country_ids: ["hu"],
-    contract_holder_id: "2",
-    org_id: null,
-    contract_start: "2023-01-01",
-    contract_end: "2025-12-31",
-    contract_reminder_email: "hr@telekom.hu",
-    lead_account_id: "1",
-    is_connected: true,
-    connected_company_id: null,
-    created_at: "2023-01-01",
-    updated_at: "2024-01-15",
-  },
-  {
-    id: "2",
-    name: "OTP Bank Nyrt.",
-    active: true,
-    country_ids: ["hu", "ro", "rs"],
-    contract_holder_id: "2",
-    org_id: null,
-    contract_start: "2022-06-01",
-    contract_end: "2024-05-31",
-    contract_reminder_email: null,
-    lead_account_id: "2",
-    is_connected: false,
-    connected_company_id: null,
-    created_at: "2022-06-01",
-    updated_at: "2024-02-20",
-  },
-  {
-    id: "3",
-    name: "Škoda Auto a.s.",
-    active: true,
-    country_ids: ["cz", "sk"],
-    contract_holder_id: "1",
-    org_id: "SKODA-001",
-    contract_start: null,
-    contract_end: null,
-    contract_reminder_email: null,
-    lead_account_id: null,
-    is_connected: false,
-    connected_company_id: null,
-    created_at: "2023-03-15",
-    updated_at: "2024-01-10",
-  },
-  {
-    id: "4",
-    name: "PKO Bank Polski",
-    active: true,
-    country_ids: ["pl"],
-    contract_holder_id: "1",
-    org_id: "PKO-PL-002",
-    contract_start: null,
-    contract_end: null,
-    contract_reminder_email: null,
-    lead_account_id: null,
-    is_connected: true,
-    connected_company_id: "1",
-    created_at: "2023-05-01",
-    updated_at: "2024-03-01",
-  },
-  {
-    id: "5",
-    name: "Erste Bank Hungary Zrt.",
-    active: false,
-    country_ids: ["hu"],
-    contract_holder_id: "2",
-    org_id: null,
-    contract_start: "2021-01-01",
-    contract_end: "2023-12-31",
-    contract_reminder_email: null,
-    lead_account_id: "1",
-    is_connected: false,
-    connected_company_id: null,
-    created_at: "2021-01-01",
-    updated_at: "2023-12-31",
-  },
-];
+import { useCompaniesDb } from "@/hooks/useCompaniesDb";
 
 const CompanyList = () => {
   const navigate = useNavigate();
-  const [companies, setCompanies] = useState<Company[]>(mockCompanies);
-  const [countries] = useState(mockCountries);
-  const [loading, setLoading] = useState(false);
+  const { companies, countries, loading, deleteCompany, fetchCompanies } = useCompaniesDb();
   const [selectedCountryIds, setSelectedCountryIds] = useState<string[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [companyToDelete, setCompanyToDelete] = useState<Company | null>(null);
@@ -187,10 +93,14 @@ const CompanyList = () => {
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (companyToDelete) {
-      setCompanies((prev) => prev.filter((c) => c.id !== companyToDelete.id));
-      toast.success(`${companyToDelete.name} törölve`);
+      const success = await deleteCompany(companyToDelete.id);
+      if (success) {
+        toast.success(`${companyToDelete.name} törölve`);
+      } else {
+        toast.error("Hiba történt a törlés során");
+      }
       setCompanyToDelete(null);
     }
     setDeleteDialogOpen(false);
@@ -200,6 +110,15 @@ const CompanyList = () => {
     e.stopPropagation();
     navigate(`/dashboard/settings/companies/${companyId}/edit`);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Cégek betöltése...</span>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -235,8 +154,23 @@ const CompanyList = () => {
         </div>
       )}
 
+      {/* Üres állapot - nincs cég */}
+      {selectedCountryIds.length > 0 && companies.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground">
+          <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p>Még nincs cég az adatbázisban</p>
+          <Button
+            variant="link"
+            onClick={() => navigate("/dashboard/settings/companies/new")}
+            className="mt-2"
+          >
+            Hozd létre az elsőt
+          </Button>
+        </div>
+      )}
+
       {/* Tartalom betöltve - országonkénti csoportosítás */}
-      {selectedCountryIds.length > 0 && (
+      {selectedCountryIds.length > 0 && companies.length > 0 && (
         <div className="space-y-2">
           {displayedCountries.map((country) => {
             const countryCompanies = companiesByCountry[country.id] || [];
