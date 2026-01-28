@@ -943,55 +943,67 @@ export const CompanyInvoicingPanel = ({
             {/* Ha van több számla csík, azokat jelenítjük meg */}
             {invoiceSlips.length > 0 ? (
               <div className="space-y-4">
-                {invoiceSlips.map((slip, index) => (
-                  <InvoiceSlipCard
-                    key={slip.id}
-                    slip={slip}
-                    slipIndex={index}
-                    currency={currentInvoicingData.currency}
-                    isOpen={openSlipIds.includes(slip.id)}
-                    onToggle={() => {
-                      if (openSlipIds.includes(slip.id)) {
-                        setOpenSlipIds(openSlipIds.filter(id => id !== slip.id));
-                      } else {
-                        setOpenSlipIds([...openSlipIds, slip.id]);
-                      }
-                    }}
-                    onUpdate={(updates) => {
-                      if (setInvoiceSlips) {
-                        setInvoiceSlips(
-                          invoiceSlips.map((s) =>
-                            s.id === slip.id ? { ...s, ...updates } : s
-                          )
-                        );
-                      }
-                    }}
-                    onUpdateItems={(items) => {
-                      if (setInvoiceSlips) {
-                        setInvoiceSlips(
-                          invoiceSlips.map((s) =>
-                            s.id === slip.id ? { ...s, items } : s
-                          )
-                        );
-                      }
-                    }}
-                    onUpdateComments={(comments) => {
-                      if (setInvoiceSlips) {
-                        setInvoiceSlips(
-                          invoiceSlips.map((s) =>
-                            s.id === slip.id ? { ...s, comments } : s
-                          )
-                        );
-                      }
-                    }}
-                    onDelete={index > 0 ? () => {
-                      if (setInvoiceSlips) {
-                        setInvoiceSlips(invoiceSlips.filter((s) => s.id !== slip.id));
-                      }
-                    } : undefined}
-                    isFirst={index === 0}
-                  />
-                ))}
+                {invoiceSlips.map((slip, index) => {
+                  // Más csíkokban használt exkluzív típusok kiszámítása
+                  const usedExclusiveTypes = invoiceSlips
+                    .filter((s) => s.id !== slip.id)
+                    .flatMap((s) => s.items)
+                    .map((item) => item.item_type)
+                    .filter((t): t is InvoiceItemType =>
+                      ["workshop", "crisis", "other-activity"].includes(t)
+                    );
+
+                  return (
+                    <InvoiceSlipCard
+                      key={slip.id}
+                      slip={slip}
+                      slipIndex={index}
+                      currency={currentInvoicingData.currency}
+                      isOpen={openSlipIds.includes(slip.id)}
+                      onToggle={() => {
+                        if (openSlipIds.includes(slip.id)) {
+                          setOpenSlipIds(openSlipIds.filter(id => id !== slip.id));
+                        } else {
+                          setOpenSlipIds([...openSlipIds, slip.id]);
+                        }
+                      }}
+                      onUpdate={(updates) => {
+                        if (setInvoiceSlips) {
+                          setInvoiceSlips(
+                            invoiceSlips.map((s) =>
+                              s.id === slip.id ? { ...s, ...updates } : s
+                            )
+                          );
+                        }
+                      }}
+                      onUpdateItems={(items) => {
+                        if (setInvoiceSlips) {
+                          setInvoiceSlips(
+                            invoiceSlips.map((s) =>
+                              s.id === slip.id ? { ...s, items } : s
+                            )
+                          );
+                        }
+                      }}
+                      onUpdateComments={(comments) => {
+                        if (setInvoiceSlips) {
+                          setInvoiceSlips(
+                            invoiceSlips.map((s) =>
+                              s.id === slip.id ? { ...s, comments } : s
+                            )
+                          );
+                        }
+                      }}
+                      onDelete={index > 0 ? () => {
+                        if (setInvoiceSlips) {
+                          setInvoiceSlips(invoiceSlips.filter((s) => s.id !== slip.id));
+                        }
+                      } : undefined}
+                      isFirst={index === 0}
+                      usedExclusiveTypes={usedExclusiveTypes}
+                    />
+                  );
+                })}
               </div>
             ) : (
               <>
@@ -1122,63 +1134,75 @@ export const CompanyInvoicingPanel = ({
 
                 {currentCountrySlips.length > 0 ? (
                   <div className="space-y-4">
-                    {currentCountrySlips.map((slip, index) => (
-                      <InvoiceSlipCard
-                        key={slip.id}
-                        slip={slip}
-                        slipIndex={index}
-                        currency={getCountryInvoicingData(effectiveCountryId).currency}
-                        isOpen={openSlipIds.includes(slip.id)}
-                        onToggle={() => {
-                          setOpenSlipIds((ids) =>
-                            ids.includes(slip.id)
-                              ? ids.filter((id) => id !== slip.id)
-                              : [...ids, slip.id]
-                          );
-                        }}
-                        onUpdate={(updates) => {
-                          if (!setInvoiceSlipsPerCountry || !effectiveCountryId) return;
-                          setInvoiceSlipsPerCountry({
-                            ...invoiceSlipsPerCountry,
-                            [effectiveCountryId]: currentCountrySlips.map((s) =>
-                              s.id === slip.id ? { ...s, ...updates } : s
-                            ),
-                          });
-                        }}
-                        onUpdateItems={(items) => {
-                          if (!setInvoiceSlipsPerCountry || !effectiveCountryId) return;
-                          setInvoiceSlipsPerCountry({
-                            ...invoiceSlipsPerCountry,
-                            [effectiveCountryId]: currentCountrySlips.map((s) =>
-                              s.id === slip.id ? { ...s, items } : s
-                            ),
-                          });
-                        }}
-                        onUpdateComments={(comments) => {
-                          if (!setInvoiceSlipsPerCountry || !effectiveCountryId) return;
-                          setInvoiceSlipsPerCountry({
-                            ...invoiceSlipsPerCountry,
-                            [effectiveCountryId]: currentCountrySlips.map((s) =>
-                              s.id === slip.id ? { ...s, comments } : s
-                            ),
-                          });
-                        }}
-                        onDelete={
-                          index > 0
-                            ? () => {
-                                if (!setInvoiceSlipsPerCountry || !effectiveCountryId) return;
-                                setInvoiceSlipsPerCountry({
-                                  ...invoiceSlipsPerCountry,
-                                  [effectiveCountryId]: currentCountrySlips.filter(
-                                    (s) => s.id !== slip.id
-                                  ),
-                                });
-                              }
-                            : undefined
-                        }
-                        isFirst={index === 0}
-                      />
-                    ))}
+                    {currentCountrySlips.map((slip, index) => {
+                      // Más csíkokban használt exkluzív típusok kiszámítása
+                      const usedExclusiveTypes = currentCountrySlips
+                        .filter((s) => s.id !== slip.id)
+                        .flatMap((s) => s.items)
+                        .map((item) => item.item_type)
+                        .filter((t): t is InvoiceItemType =>
+                          ["workshop", "crisis", "other-activity"].includes(t)
+                        );
+
+                      return (
+                        <InvoiceSlipCard
+                          key={slip.id}
+                          slip={slip}
+                          slipIndex={index}
+                          currency={getCountryInvoicingData(effectiveCountryId).currency}
+                          isOpen={openSlipIds.includes(slip.id)}
+                          onToggle={() => {
+                            setOpenSlipIds((ids) =>
+                              ids.includes(slip.id)
+                                ? ids.filter((id) => id !== slip.id)
+                                : [...ids, slip.id]
+                            );
+                          }}
+                          onUpdate={(updates) => {
+                            if (!setInvoiceSlipsPerCountry || !effectiveCountryId) return;
+                            setInvoiceSlipsPerCountry({
+                              ...invoiceSlipsPerCountry,
+                              [effectiveCountryId]: currentCountrySlips.map((s) =>
+                                s.id === slip.id ? { ...s, ...updates } : s
+                              ),
+                            });
+                          }}
+                          onUpdateItems={(items) => {
+                            if (!setInvoiceSlipsPerCountry || !effectiveCountryId) return;
+                            setInvoiceSlipsPerCountry({
+                              ...invoiceSlipsPerCountry,
+                              [effectiveCountryId]: currentCountrySlips.map((s) =>
+                                s.id === slip.id ? { ...s, items } : s
+                              ),
+                            });
+                          }}
+                          onUpdateComments={(comments) => {
+                            if (!setInvoiceSlipsPerCountry || !effectiveCountryId) return;
+                            setInvoiceSlipsPerCountry({
+                              ...invoiceSlipsPerCountry,
+                              [effectiveCountryId]: currentCountrySlips.map((s) =>
+                                s.id === slip.id ? { ...s, comments } : s
+                              ),
+                            });
+                          }}
+                          onDelete={
+                            index > 0
+                              ? () => {
+                                  if (!setInvoiceSlipsPerCountry || !effectiveCountryId) return;
+                                  setInvoiceSlipsPerCountry({
+                                    ...invoiceSlipsPerCountry,
+                                    [effectiveCountryId]: currentCountrySlips.filter(
+                                      (s) => s.id !== slip.id
+                                    ),
+                                  });
+                                }
+                              : undefined
+                          }
+                          isFirst={index === 0}
+                          usedExclusiveTypes={usedExclusiveTypes}
+                        />
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-muted-foreground text-sm">

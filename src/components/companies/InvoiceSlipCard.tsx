@@ -43,6 +43,9 @@ export interface InvoiceSlip {
   comments: InvoiceComment[];
 }
 
+// Exkluzív típusok, amelyek csak egy csíkban lehetnek
+export const EXCLUSIVE_ITEM_TYPES: InvoiceItemType[] = ["workshop", "crisis", "other-activity"];
+
 interface InvoiceSlipCardProps {
   slip: InvoiceSlip;
   slipIndex: number;
@@ -54,6 +57,8 @@ interface InvoiceSlipCardProps {
   onUpdateComments: (comments: InvoiceComment[]) => void;
   onDelete?: () => void;
   isFirst?: boolean; // Az első csík nem törölhető
+  // Más csíkokban már használt exkluzív típusok (workshop, crisis, other-activity)
+  usedExclusiveTypes?: InvoiceItemType[];
 }
 
 export const InvoiceSlipCard = ({
@@ -67,6 +72,7 @@ export const InvoiceSlipCard = ({
   onUpdateComments,
   onDelete,
   isFirst = false,
+  usedExclusiveTypes = [],
 }: InvoiceSlipCardProps) => {
   const [editingIdentifier, setEditingIdentifier] = useState(false);
   const [newIdentifier, setNewIdentifier] = useState(slip.admin_identifier || "");
@@ -269,16 +275,28 @@ export const InvoiceSlipCard = ({
           {/* Tételek */}
           {slip.items.length > 0 && (
             <div className="space-y-3">
-              {slip.items.map((item, index) => (
-                <SlipInvoiceItemRow
-                  key={item.id}
-                  item={item}
-                  index={index}
-                  currency={currency}
-                  onUpdate={(updates) => updateItem(item.id, updates)}
-                  onRemove={() => removeItem(item.id)}
-                />
-              ))}
+              {slip.items.map((item, index) => {
+                // Az ebben a csíkban használt exkluzív típusok (a jelenlegi tétel kivételével)
+                const usedInThisSlip = slip.items
+                  .filter((i) => i.id !== item.id)
+                  .map((i) => i.item_type)
+                  .filter((t): t is InvoiceItemType =>
+                    EXCLUSIVE_ITEM_TYPES.includes(t as InvoiceItemType)
+                  );
+
+                return (
+                  <SlipInvoiceItemRow
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    currency={currency}
+                    onUpdate={(updates) => updateItem(item.id, updates)}
+                    onRemove={() => removeItem(item.id)}
+                    usedExclusiveTypes={usedExclusiveTypes}
+                    usedInThisSlip={usedInThisSlip}
+                  />
+                );
+              })}
             </div>
           )}
 
@@ -345,6 +363,10 @@ interface SlipInvoiceItemRowProps {
   currency?: string | null;
   onUpdate: (updates: Partial<InvoiceItem>) => void;
   onRemove: () => void;
+  // Más csíkokban már használt exkluzív típusok - ezeket nem lehet választani
+  usedExclusiveTypes?: InvoiceItemType[];
+  // Ebben a csíkban már használt exkluzív típusok (a jelenlegi tétel kivételével)
+  usedInThisSlip?: InvoiceItemType[];
 }
 
 const SlipInvoiceItemRow = ({
@@ -353,6 +375,8 @@ const SlipInvoiceItemRow = ({
   currency,
   onUpdate,
   onRemove,
+  usedExclusiveTypes = [],
+  usedInThisSlip = [],
 }: SlipInvoiceItemRowProps) => {
   const [showComment, setShowComment] = useState(!!item.comment);
 
@@ -403,11 +427,25 @@ const SlipInvoiceItemRow = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">Kérjük, válasszon</SelectItem>
-                {INVOICE_ITEM_TYPES.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
-                    {type.name}
-                  </SelectItem>
-                ))}
+                {INVOICE_ITEM_TYPES.map((type) => {
+                  // Ha ez exkluzív típus és már használva van máshol, tiltjuk
+                  const isExclusive = EXCLUSIVE_ITEM_TYPES.includes(type.id as InvoiceItemType);
+                  const isUsedElsewhere = usedExclusiveTypes.includes(type.id as InvoiceItemType);
+                  const isUsedInSlip = usedInThisSlip.includes(type.id as InvoiceItemType);
+                  const isDisabled = isExclusive && (isUsedElsewhere || isUsedInSlip);
+                  
+                  return (
+                    <SelectItem 
+                      key={type.id} 
+                      value={type.id}
+                      disabled={isDisabled}
+                      className={isDisabled ? "opacity-50" : ""}
+                    >
+                      {type.name}
+                      {isDisabled && " (már használva)"}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
