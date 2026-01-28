@@ -480,6 +480,8 @@ export const useCompaniesDb = () => {
       countryDifferentiates: CountryDifferentiate;
       billingData: Partial<BillingData>;
       invoicingData: Partial<InvoicingData>;
+      invoiceItems: InvoiceItem[];
+      invoiceComments: InvoiceComment[];
     }>
   ): Promise<boolean> => {
     try {
@@ -584,6 +586,61 @@ export const useCompaniesDb = () => {
           await supabase
             .from('company_billing_data')
             .insert(billingUpsert);
+        }
+      }
+
+      // Update invoice items (global - where country_id is null)
+      if (data.invoiceItems !== undefined) {
+        // Delete existing items (global)
+        await supabase
+          .from('company_invoice_items')
+          .delete()
+          .eq('company_id', id)
+          .is('country_id', null);
+        
+        // Insert new items
+        if (data.invoiceItems.length > 0) {
+          const itemsToInsert = data.invoiceItems.map(item => ({
+            company_id: id,
+            country_id: null,
+            name: item.item_name,
+            amount: parseFloat(item.amount_value || '0') || 0,
+          }));
+          
+          const { error: itemsError } = await supabase
+            .from('company_invoice_items')
+            .insert(itemsToInsert);
+          
+          if (itemsError) {
+            console.error('[Companies] Failed to insert invoice items:', itemsError);
+          }
+        }
+      }
+
+      // Update invoice comments (global - where country_id is null)
+      if (data.invoiceComments !== undefined) {
+        // Delete existing comments (global)
+        await supabase
+          .from('company_invoice_comments')
+          .delete()
+          .eq('company_id', id)
+          .is('country_id', null);
+        
+        // Insert new comments
+        if (data.invoiceComments.length > 0) {
+          const commentsToInsert = data.invoiceComments.map(comment => ({
+            company_id: id,
+            country_id: null,
+            comment: comment.comment,
+          }));
+          
+          const { error: commentsError } = await supabase
+            .from('company_invoice_comments')
+            .insert(commentsToInsert);
+          
+          if (commentsError) {
+            console.error('[Companies] Failed to insert invoice comments:', commentsError);
+          }
         }
       }
 
