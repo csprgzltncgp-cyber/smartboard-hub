@@ -1033,7 +1033,7 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
           {/* PEPM sor */}
           <div className="space-y-2">
             <span className="text-sm text-muted-foreground">PEPM</span>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
               {/* PEPM mező neve (szerkeszthető) */}
               <Input
                 value={item.amount_name || "PEPM"}
@@ -1041,35 +1041,22 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
                 placeholder="PEPM"
               />
 
-              {/* PEPM érték - sárga ha változó */}
-              {item.is_amount_changing ? (
-                <div className="bg-amber-500 text-amber-50 h-10 flex items-center justify-center rounded-lg text-sm">
-                  PEPM a 'Számlázás' fül alatt!
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={item.amount_value || ""}
-                    onChange={(e) => onUpdate({ amount_value: e.target.value || null })}
-                    placeholder="Érték"
-                    className="flex-1"
-                  />
-                  {currency && (
-                    <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-                      {currency}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Változó toggle */}
-              <DifferentPerCountryToggle
-                label="Változó"
-                checked={item.is_amount_changing}
-                onChange={(checked) => onUpdate({ is_amount_changing: checked })}
-              />
+              {/* PEPM érték + devizanem */}
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={item.amount_value || ""}
+                  onChange={(e) => onUpdate({ amount_value: e.target.value || null })}
+                  placeholder="Érték"
+                  className="flex-1"
+                />
+                {currency && (
+                  <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                    {currency}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
