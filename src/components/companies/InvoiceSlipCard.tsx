@@ -224,8 +224,8 @@ export const InvoiceSlipCard = ({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Törlés gomb - csak ha nem az első */}
-          {!isFirst && onDelete && (
+          {/* Törlés gomb - csak ha van onDelete callback (a szülő dönti el, hogy törölhető-e) */}
+          {onDelete && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
