@@ -141,14 +141,14 @@ export const CompanyBasicDataPanel = ({
         <div className="space-y-2">
           <Label>Kapcsolt cég</Label>
           <Select
-            value={connectedCompanyId || ""}
-            onValueChange={(val) => setConnectedCompanyId(val || null)}
+            value={connectedCompanyId || "none"}
+            onValueChange={(val) => setConnectedCompanyId(val === "none" ? null : val)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Válasszon..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Nincs</SelectItem>
+              <SelectItem value="none">Nincs</SelectItem>
               {connectedCompanies.map((company) => (
                 <SelectItem key={company.id} value={company.id}>
                   {company.name}
