@@ -959,37 +959,6 @@ export const CompanyInvoicingPanel = ({
               </Button>
             </div>
 
-            {/* További számlázási sablonok megjelenítése */}
-            {invoiceTemplates.length > 0 && (
-              <div className="border-t pt-4 mt-4">
-                <h4 className="text-sm font-medium text-primary mb-4">További számla sablonok ({invoiceTemplates.length})</h4>
-                <div className="space-y-4">
-                  {invoiceTemplates.map((template) => (
-                    <InvoiceTemplateCard
-                      key={template.id}
-                      template={template}
-                      currency={currentInvoicingData.currency}
-                      onUpdate={(updates) => {
-                        if (setInvoiceTemplates) {
-                          setInvoiceTemplates(
-                            invoiceTemplates.map((t) =>
-                              t.id === template.id ? { ...t, ...updates } : t
-                            )
-                          );
-                        }
-                      }}
-                      onDelete={() => {
-                        if (setInvoiceTemplates) {
-                          setInvoiceTemplates(
-                            invoiceTemplates.filter((t) => t.id !== template.id)
-                          );
-                        }
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}
@@ -1031,6 +1000,38 @@ export const CompanyInvoicingPanel = ({
               ))}
             </Tabs>
           )}
+        </div>
+      )}
+
+      {/* További számlázási sablonok megjelenítése - mindig látható */}
+      {invoiceTemplates.length > 0 && (
+        <div className="border-t pt-4 mt-4">
+          <h4 className="text-sm font-medium text-primary mb-4">További számla sablonok ({invoiceTemplates.length})</h4>
+          <div className="space-y-4">
+            {invoiceTemplates.map((template) => (
+              <InvoiceTemplateCard
+                key={template.id}
+                template={template}
+                currency={currentInvoicingData.currency}
+                onUpdate={(updates) => {
+                  if (setInvoiceTemplates) {
+                    setInvoiceTemplates(
+                      invoiceTemplates.map((t) =>
+                        t.id === template.id ? { ...t, ...updates } : t
+                      )
+                    );
+                  }
+                }}
+                onDelete={() => {
+                  if (setInvoiceTemplates) {
+                    setInvoiceTemplates(
+                      invoiceTemplates.filter((t) => t.id !== template.id)
+                    );
+                  }
+                }}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
