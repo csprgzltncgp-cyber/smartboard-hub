@@ -345,6 +345,8 @@ const CompanyForm = () => {
               setInvoiceItems={setInvoiceItems}
               invoiceComments={invoiceComments}
               setInvoiceComments={setInvoiceComments}
+              countryIds={countryIds}
+              countries={mockCountries}
             />
           </div>
         )}
