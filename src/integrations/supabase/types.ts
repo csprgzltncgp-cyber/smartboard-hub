@@ -611,6 +611,7 @@ export type Database = {
           country_id: string | null
           created_at: string
           id: string
+          template_id: string | null
         }
         Insert: {
           comment: string
@@ -618,6 +619,7 @@ export type Database = {
           country_id?: string | null
           created_at?: string
           id?: string
+          template_id?: string | null
         }
         Update: {
           comment?: string
@@ -625,6 +627,7 @@ export type Database = {
           country_id?: string | null
           created_at?: string
           id?: string
+          template_id?: string | null
         }
         Relationships: [
           {
@@ -641,6 +644,13 @@ export type Database = {
             referencedRelation: "countries"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "company_invoice_comments_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "company_invoice_templates"
+            referencedColumns: ["id"]
+          },
         ]
       }
       company_invoice_items: {
@@ -651,6 +661,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          template_id: string | null
           updated_at: string
         }
         Insert: {
@@ -660,6 +671,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          template_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -669,6 +681,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          template_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -681,6 +694,118 @@ export type Database = {
           },
           {
             foreignKeyName: "company_invoice_items_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_invoice_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "company_invoice_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_invoice_templates: {
+        Row: {
+          admin_identifier: string | null
+          city: string | null
+          community_tax_number: string | null
+          company_id: string
+          country: string | null
+          country_id: string | null
+          created_at: string
+          group_id: string | null
+          house_number: string | null
+          id: string
+          invoicing_inactive: boolean | null
+          invoicing_inactive_from: string | null
+          invoicing_inactive_to: string | null
+          is_address_shown: boolean | null
+          is_name_shown: boolean | null
+          is_payment_deadline_shown: boolean | null
+          is_po_number_changing: boolean | null
+          is_po_number_required: boolean | null
+          is_po_number_shown: boolean | null
+          is_tax_number_shown: boolean | null
+          name: string
+          payment_deadline: number | null
+          po_number: string | null
+          postal_code: string | null
+          street: string | null
+          tax_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_identifier?: string | null
+          city?: string | null
+          community_tax_number?: string | null
+          company_id: string
+          country?: string | null
+          country_id?: string | null
+          created_at?: string
+          group_id?: string | null
+          house_number?: string | null
+          id?: string
+          invoicing_inactive?: boolean | null
+          invoicing_inactive_from?: string | null
+          invoicing_inactive_to?: string | null
+          is_address_shown?: boolean | null
+          is_name_shown?: boolean | null
+          is_payment_deadline_shown?: boolean | null
+          is_po_number_changing?: boolean | null
+          is_po_number_required?: boolean | null
+          is_po_number_shown?: boolean | null
+          is_tax_number_shown?: boolean | null
+          name?: string
+          payment_deadline?: number | null
+          po_number?: string | null
+          postal_code?: string | null
+          street?: string | null
+          tax_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_identifier?: string | null
+          city?: string | null
+          community_tax_number?: string | null
+          company_id?: string
+          country?: string | null
+          country_id?: string | null
+          created_at?: string
+          group_id?: string | null
+          house_number?: string | null
+          id?: string
+          invoicing_inactive?: boolean | null
+          invoicing_inactive_from?: string | null
+          invoicing_inactive_to?: string | null
+          is_address_shown?: boolean | null
+          is_name_shown?: boolean | null
+          is_payment_deadline_shown?: boolean | null
+          is_po_number_changing?: boolean | null
+          is_po_number_required?: boolean | null
+          is_po_number_shown?: boolean | null
+          is_tax_number_shown?: boolean | null
+          name?: string
+          payment_deadline?: number | null
+          po_number?: string | null
+          postal_code?: string | null
+          street?: string | null
+          tax_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_invoice_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_invoice_templates_country_id_fkey"
             columns: ["country_id"]
             isOneToOne: false
             referencedRelation: "countries"
