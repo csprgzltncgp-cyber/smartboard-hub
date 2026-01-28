@@ -518,28 +518,15 @@ const SlipInvoiceItemRow = ({
                 <Label className="text-xs text-muted-foreground">
                   PEPM érték ({currency?.toUpperCase() || "---"})
                 </Label>
-                {item.is_amount_changing ? (
-                  <div className="bg-amber-500 text-amber-50 h-10 flex items-center justify-center rounded-lg text-sm">
-                    Összeg a 'Számlázás' fül alatt!
-                  </div>
-                ) : (
-                  <Input
-                    type="number"
-                    value={item.amount_value || ""}
-                    onChange={(e) =>
-                      onUpdate({ amount_value: e.target.value || null })
-                    }
-                    placeholder="Összeg"
-                  />
-                )}
+                <Input
+                  type="number"
+                  value={item.amount_value || ""}
+                  onChange={(e) =>
+                    onUpdate({ amount_value: e.target.value || null })
+                  }
+                  placeholder="Összeg"
+                />
               </div>
-              <DifferentPerCountryToggle
-                label="Változó"
-                checked={item.is_amount_changing}
-                onChange={(checked) =>
-                  onUpdate({ is_amount_changing: checked })
-                }
-              />
             </div>
           </div>
         )}
