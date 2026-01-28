@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Trash2, MessageSquare, Calendar } from "lucide-react";
 import { DifferentPerCountryToggle } from "./DifferentPerCountryToggle";
 import { CountryBillingForm } from "./CountryBillingForm";
+import { InvoiceSlipCard, InvoiceSlip } from "./InvoiceSlipCard";
 import {
   CountryDifferentiate,
   BillingData,
@@ -61,7 +62,10 @@ interface CompanyInvoicingPanelProps {
   setInvoiceItemsPerCountry?: (items: Record<string, InvoiceItem[]>) => void;
   invoiceCommentsPerCountry?: Record<string, InvoiceComment[]>;
   setInvoiceCommentsPerCountry?: (comments: Record<string, InvoiceComment[]>) => void;
-  // Számla sablonok kezelése
+  // Számla csíkok kezelése (egy cégnek több számlája lehet)
+  invoiceSlips?: InvoiceSlip[];
+  setInvoiceSlips?: (slips: InvoiceSlip[]) => void;
+  // Legacy - számla sablonok kezelése (backward compatibility)
   invoiceTemplates?: InvoiceTemplate[];
   setInvoiceTemplates?: (templates: InvoiceTemplate[]) => void;
 }
@@ -146,6 +150,8 @@ export const CompanyInvoicingPanel = ({
   setInvoiceItemsPerCountry,
   invoiceCommentsPerCountry = {},
   setInvoiceCommentsPerCountry,
+  invoiceSlips = [],
+  setInvoiceSlips,
   invoiceTemplates = [],
   setInvoiceTemplates,
 }: CompanyInvoicingPanelProps) => {
@@ -156,6 +162,9 @@ export const CompanyInvoicingPanel = ({
   
   // Az aktív fül az első ország legyen alapértelmezetten
   const [activeCountryTab, setActiveCountryTab] = useState<string>("");
+  
+  // Nyitott csíkok kezelése
+  const [openSlipIds, setOpenSlipIds] = useState<string[]>([]);
   
   // Frissítsük az aktív fület, ha az országok változnak
   useEffect(() => {
@@ -892,73 +901,129 @@ export const CompanyInvoicingPanel = ({
               Számlára kerülő tételek, megjegyzések
             </h3>
 
-            {/* Meglévő tételek */}
-            {invoiceItems.length > 0 && (
-              <div className="space-y-3">
-                {invoiceItems.map((item, index) => (
-                  <InvoiceItemRow
-                    key={item.id}
-                    item={item}
-                    index={index}
+            {/* Ha van több számla csík, azokat jelenítjük meg */}
+            {invoiceSlips.length > 0 ? (
+              <div className="space-y-4">
+                {invoiceSlips.map((slip, index) => (
+                  <InvoiceSlipCard
+                    key={slip.id}
+                    slip={slip}
+                    slipIndex={index}
                     currency={currentInvoicingData.currency}
-                    onUpdate={(updates) => updateInvoiceItem(item.id, updates)}
-                    onRemove={() => removeInvoiceItem(item.id)}
+                    isOpen={openSlipIds.includes(slip.id)}
+                    onToggle={() => {
+                      if (openSlipIds.includes(slip.id)) {
+                        setOpenSlipIds(openSlipIds.filter(id => id !== slip.id));
+                      } else {
+                        setOpenSlipIds([...openSlipIds, slip.id]);
+                      }
+                    }}
+                    onUpdate={(updates) => {
+                      if (setInvoiceSlips) {
+                        setInvoiceSlips(
+                          invoiceSlips.map((s) =>
+                            s.id === slip.id ? { ...s, ...updates } : s
+                          )
+                        );
+                      }
+                    }}
+                    onUpdateItems={(items) => {
+                      if (setInvoiceSlips) {
+                        setInvoiceSlips(
+                          invoiceSlips.map((s) =>
+                            s.id === slip.id ? { ...s, items } : s
+                          )
+                        );
+                      }
+                    }}
+                    onUpdateComments={(comments) => {
+                      if (setInvoiceSlips) {
+                        setInvoiceSlips(
+                          invoiceSlips.map((s) =>
+                            s.id === slip.id ? { ...s, comments } : s
+                          )
+                        );
+                      }
+                    }}
+                    onDelete={index > 0 ? () => {
+                      if (setInvoiceSlips) {
+                        setInvoiceSlips(invoiceSlips.filter((s) => s.id !== slip.id));
+                      }
+                    } : undefined}
+                    isFirst={index === 0}
                   />
                 ))}
               </div>
-            )}
-
-            {/* Meglévő megjegyzések */}
-            {invoiceComments.length > 0 && (
-              <div className="space-y-3">
-                <Label>Megjegyzések (Nem jelenik meg a számlán)</Label>
-                {invoiceComments.map((comment) => (
-                  <div key={comment.id} className="flex items-center gap-2">
-                    <Input
-                      value={comment.comment}
-                      onChange={(e) => updateInvoiceComment(comment.id, e.target.value)}
-                      placeholder="Megjegyzés"
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeInvoiceComment(comment.id)}
-                      className="text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+            ) : (
+              <>
+                {/* Eredeti megjelenítés, ha még nincs csík */}
+                {invoiceItems.length > 0 && (
+                  <div className="space-y-3">
+                    {invoiceItems.map((item, index) => (
+                      <InvoiceItemRow
+                        key={item.id}
+                        item={item}
+                        index={index}
+                        currency={currentInvoicingData.currency}
+                        onUpdate={(updates) => updateInvoiceItem(item.id, updates)}
+                        onRemove={() => removeInvoiceItem(item.id)}
+                      />
+                    ))}
                   </div>
-                ))}
-              </div>
+                )}
+
+                {/* Meglévő megjegyzések */}
+                {invoiceComments.length > 0 && (
+                  <div className="space-y-3">
+                    <Label>Megjegyzések (Nem jelenik meg a számlán)</Label>
+                    {invoiceComments.map((comment) => (
+                      <div key={comment.id} className="flex items-center gap-2">
+                        <Input
+                          value={comment.comment}
+                          onChange={(e) => updateInvoiceComment(comment.id, e.target.value)}
+                          placeholder="Megjegyzés"
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeInvoiceComment(comment.id)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Gombok egymás mellett */}
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addInvoiceItem}
+                    className="text-primary"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Tétel hozzáadása
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addInvoiceComment}
+                    className="text-primary"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Megjegyzés hozzáadása
+                  </Button>
+                </div>
+              </>
             )}
-
-            {/* Gombok egymás mellett */}
-            <div className="flex flex-wrap gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addInvoiceItem}
-                className="text-primary"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Tétel hozzáadása
-              </Button>
-
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addInvoiceComment}
-                className="text-primary"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Megjegyzés hozzáadása
-              </Button>
-            </div>
-
           </div>
         </div>
       )}
@@ -1003,37 +1068,6 @@ export const CompanyInvoicingPanel = ({
         </div>
       )}
 
-      {/* További számlázási sablonok megjelenítése - mindig látható */}
-      {invoiceTemplates.length > 0 && (
-        <div className="border-t pt-4 mt-4">
-          <h4 className="text-sm font-medium text-primary mb-4">További számla sablonok ({invoiceTemplates.length})</h4>
-          <div className="space-y-4">
-            {invoiceTemplates.map((template) => (
-              <InvoiceTemplateCard
-                key={template.id}
-                template={template}
-                currency={currentInvoicingData.currency}
-                onUpdate={(updates) => {
-                  if (setInvoiceTemplates) {
-                    setInvoiceTemplates(
-                      invoiceTemplates.map((t) =>
-                        t.id === template.id ? { ...t, ...updates } : t
-                      )
-                    );
-                  }
-                }}
-                onDelete={() => {
-                  if (setInvoiceTemplates) {
-                    setInvoiceTemplates(
-                      invoiceTemplates.filter((t) => t.id !== template.id)
-                    );
-                  }
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -1306,195 +1340,6 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
           <Trash2 className="h-5 w-5" />
         </Button>
       </div>
-    </div>
-  );
-};
-
-// InvoiceTemplateCard komponens - egy sablon kártya megjelenítéséhez
-interface InvoiceTemplateCardProps {
-  template: InvoiceTemplate;
-  currency?: string | null;
-  onUpdate: (updates: Partial<InvoiceTemplate>) => void;
-  onDelete: () => void;
-}
-
-const InvoiceTemplateCard = ({ template, currency, onUpdate, onDelete }: InvoiceTemplateCardProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [editingIdentifier, setEditingIdentifier] = useState(false);
-  const [newIdentifier, setNewIdentifier] = useState(template.admin_identifier || "");
-
-  // Típus címkék meghatározása
-  const hasWorkshop = template.items.some((i) => i.item_type === "workshop");
-  const hasCrisis = template.items.some((i) => i.item_type === "crisis");
-  const hasOther = template.items.some((i) => i.item_type === "other-activity");
-  const labels: string[] = [];
-  if (hasWorkshop) labels.push("WS");
-  if (hasCrisis) labels.push("CI");
-  if (hasOther) labels.push("O");
-
-  const saveIdentifier = () => {
-    onUpdate({ admin_identifier: newIdentifier });
-    setEditingIdentifier(false);
-  };
-
-  return (
-    <div className="border rounded-lg overflow-hidden">
-      {/* Fejléc sor */}
-      <div
-        className={cn(
-          "flex items-center justify-between p-3 cursor-pointer transition-colors",
-          isOpen ? "bg-primary/10" : "bg-muted/30 hover:bg-muted/50"
-        )}
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <div className="flex items-center gap-3">
-          {/* Azonosító - szerkeszthető */}
-          {editingIdentifier ? (
-            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-              <Input
-                value={newIdentifier}
-                onChange={(e) => setNewIdentifier(e.target.value)}
-                className="h-8 w-40"
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") saveIdentifier();
-                  if (e.key === "Escape") setEditingIdentifier(false);
-                }}
-              />
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={saveIdentifier}
-              >
-                OK
-              </Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <span className="font-medium">
-                {template.admin_identifier || template.name || "Nincs azonosító"}
-              </span>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="h-6 w-6"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditingIdentifier(true);
-                  setNewIdentifier(template.admin_identifier || "");
-                }}
-              >
-                <MessageSquare className="h-3 w-3" />
-              </Button>
-            </div>
-          )}
-
-          {/* Típus címkék */}
-          {labels.length > 0 && (
-            <span className="text-primary text-sm font-medium">
-              {labels.join("/")}
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            className="text-destructive"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (confirm("Biztosan törölni szeretnéd ezt a sablont?")) {
-                onDelete();
-              }
-            }}
-          >
-            <Trash2 className="h-4 w-4 mr-1" />
-            Törlés
-          </Button>
-        </div>
-      </div>
-
-      {/* Tartalom - ha nyitva van */}
-      {isOpen && (
-        <div className="p-4 border-t space-y-4">
-          {/* Számlázási név */}
-          <div className="space-y-2">
-            <Label>Számlázási név</Label>
-            <Input
-              value={template.name || ""}
-              onChange={(e) => onUpdate({ name: e.target.value || null })}
-              placeholder="Számlázási név"
-            />
-          </div>
-
-          {/* Számlázási cím */}
-          <div className="space-y-2">
-            <Label>Számlázási cím</Label>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-              <Input
-                value={template.country || ""}
-                onChange={(e) => onUpdate({ country: e.target.value || null })}
-                placeholder="Célország"
-              />
-              <Input
-                value={template.postal_code || ""}
-                onChange={(e) => onUpdate({ postal_code: e.target.value || null })}
-                placeholder="Irányítószám"
-              />
-              <Input
-                value={template.city || ""}
-                onChange={(e) => onUpdate({ city: e.target.value || null })}
-                placeholder="Város"
-              />
-              <Input
-                value={template.street || ""}
-                onChange={(e) => onUpdate({ street: e.target.value || null })}
-                placeholder="Utca, házszám"
-              />
-            </div>
-          </div>
-
-          {/* Adószám */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Adószám</Label>
-              <Input
-                value={template.tax_number || ""}
-                onChange={(e) => onUpdate({ tax_number: e.target.value || null })}
-                placeholder="Adószám"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Közösségi adószám</Label>
-              <Input
-                value={template.community_tax_number || ""}
-                onChange={(e) => onUpdate({ community_tax_number: e.target.value || null })}
-                placeholder="Közösségi adószám"
-              />
-            </div>
-          </div>
-
-          {/* Tételek */}
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-primary">Számlára kerülő tételek</h4>
-            <div className="space-y-2">
-              {template.items.map((item, index) => (
-                <div key={item.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded">
-                  <span className="text-sm">{index + 1}.</span>
-                  <span className="font-medium">{item.item_name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    ({INVOICE_ITEM_TYPES.find(t => t.id === item.item_type)?.name || item.item_type})
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
