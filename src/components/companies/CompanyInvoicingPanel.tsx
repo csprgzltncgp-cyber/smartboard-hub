@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Trash2, MessageSquare, Calendar } from "lucide-react";
 import { DifferentPerCountryToggle } from "./DifferentPerCountryToggle";
 import {
@@ -28,6 +29,12 @@ import {
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
+interface Country {
+  id: string;
+  code: string;
+  name: string;
+}
+
 interface CompanyInvoicingPanelProps {
   countryDifferentiates: CountryDifferentiate;
   setCountryDifferentiates: (diff: CountryDifferentiate) => void;
@@ -39,6 +46,18 @@ interface CompanyInvoicingPanelProps {
   setInvoiceItems: (items: InvoiceItem[]) => void;
   invoiceComments: InvoiceComment[];
   setInvoiceComments: (comments: InvoiceComment[]) => void;
+  // Új propok országonkénti számlázáshoz
+  countryIds: string[];
+  countries: Country[];
+  // Országonkénti adatok
+  billingDataPerCountry?: Record<string, BillingData>;
+  setBillingDataPerCountry?: (data: Record<string, BillingData>) => void;
+  invoicingDataPerCountry?: Record<string, InvoicingData>;
+  setInvoicingDataPerCountry?: (data: Record<string, InvoicingData>) => void;
+  invoiceItemsPerCountry?: Record<string, InvoiceItem[]>;
+  setInvoiceItemsPerCountry?: (items: Record<string, InvoiceItem[]>) => void;
+  invoiceCommentsPerCountry?: Record<string, InvoiceComment[]>;
+  setInvoiceCommentsPerCountry?: (comments: Record<string, InvoiceComment[]>) => void;
 }
 
 // Alapértelmezett BillingData
@@ -110,9 +129,22 @@ export const CompanyInvoicingPanel = ({
   setInvoiceItems,
   invoiceComments,
   setInvoiceComments,
+  countryIds,
+  countries,
+  billingDataPerCountry = {},
+  setBillingDataPerCountry,
+  invoicingDataPerCountry = {},
+  setInvoicingDataPerCountry,
+  invoiceItemsPerCountry = {},
+  setInvoiceItemsPerCountry,
+  invoiceCommentsPerCountry = {},
+  setInvoiceCommentsPerCountry,
 }: CompanyInvoicingPanelProps) => {
   const [emails, setEmails] = useState<string[]>(invoicingData?.invoice_emails || [""]);
+  const [activeCountryTab, setActiveCountryTab] = useState<string>(countryIds[0] || "");
 
+  // Szűrt országok: csak a kiválasztott országok
+  const selectedCountries = countries.filter((c) => countryIds.includes(c.id));
   const updateDifferentiate = (key: keyof CountryDifferentiate, value: boolean) => {
     setCountryDifferentiates({ ...countryDifferentiates, [key]: value });
   };
@@ -853,6 +885,105 @@ export const CompanyInvoicingPanel = ({
               </Button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Ha országonként különböző, fülek jelennek meg */}
+      {countryDifferentiates.invoicing && (
+        <div className="space-y-4">
+          {selectedCountries.length === 0 ? (
+            <div className="text-muted-foreground text-sm p-4 border rounded-lg bg-muted/30">
+              Válassz ki legalább egy országot az Alapadatok panelen a számlázási beállításokhoz.
+            </div>
+          ) : (
+            <Tabs value={activeCountryTab || selectedCountries[0]?.id} onValueChange={setActiveCountryTab} className="w-full">
+              <TabsList className="w-full justify-start flex-wrap h-auto gap-1 bg-muted/30 p-1">
+                {selectedCountries.map((country) => (
+                  <TabsTrigger
+                    key={country.id}
+                    value={country.id}
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  >
+                    {country.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              {selectedCountries.map((country) => (
+                <TabsContent key={country.id} value={country.id} className="mt-4">
+                  <div className="space-y-4 border-l-2 border-primary/20 pl-4 ml-2">
+                    <div className="text-sm text-muted-foreground">
+                      <span className="font-medium text-foreground">{country.name}</span> számlázási beállításai
+                    </div>
+                    {/* Placeholder: Országspecifikus form mezők ide kerülnek */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Számlázási név</Label>
+                        <Input placeholder={`${country.name} számlázási név`} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Devizanem</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Válassz devizanemet" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CURRENCIES.map((curr) => (
+                              <SelectItem key={curr.id} value={curr.id}>
+                                {curr.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>ÁFA kulcs</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Válassz ÁFA kulcsot" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {VAT_RATES.map((rate) => (
+                              <SelectItem key={rate.id} value={rate.id}>
+                                {rate.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Számlázási gyakoriság</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Válassz gyakoriságot" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {BILLING_FREQUENCIES.map((freq) => (
+                              <SelectItem key={freq.id} value={freq.id}>
+                                {freq.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Adószám</Label>
+                      <Input placeholder="Adószám" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Számlázási cím</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <Input placeholder="Irányítószám" />
+                        <Input placeholder="Város" />
+                        <Input placeholder="Utca" />
+                        <Input placeholder="Házszám" />
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+              ))}
+            </Tabs>
+          )}
         </div>
       )}
     </div>
