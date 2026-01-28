@@ -932,26 +932,8 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
           />
         )}
 
-        {/* Ikon gombok */}
-        <div className="flex flex-col gap-1 items-center">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onRemove}
-            className="text-primary h-8 w-8"
-          >
-            <Trash2 className="h-5 w-5" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowComment(!showComment)}
-            className={cn("h-8 w-8", showComment ? "text-primary" : "text-primary/50")}
-          >
-            <MessageSquare className="h-5 w-5" fill={showComment ? "currentColor" : "none"} />
-          </Button>
+        {/* Ikon gombok - vízszintes elrendezés */}
+        <div className="flex items-center gap-1">
           {(isMultiplication || isAmount) && (
             <Button
               type="button"
@@ -959,10 +941,31 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
               size="icon"
               onClick={() => onUpdate({ with_timestamp: !item.with_timestamp })}
               className={cn("h-8 w-8", item.with_timestamp ? "text-primary" : "text-primary/50")}
+              title="Időbélyeg"
             >
-              <Calendar className="h-5 w-5" fill={item.with_timestamp ? "currentColor" : "none"} />
+              <Calendar className="h-4 w-4" fill={item.with_timestamp ? "currentColor" : "none"} />
             </Button>
           )}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowComment(!showComment)}
+            className={cn("h-8 w-8", showComment ? "text-primary" : "text-primary/50")}
+            title="Megjegyzés"
+          >
+            <MessageSquare className="h-4 w-4" fill={showComment ? "currentColor" : "none"} />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onRemove}
+            className="text-destructive h-8 w-8"
+            title="Törlés"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
