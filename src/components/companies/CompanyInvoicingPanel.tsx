@@ -793,6 +793,7 @@ export const CompanyInvoicingPanel = ({
                     key={item.id}
                     item={item}
                     index={index}
+                    currency={currentInvoicingData.currency}
                     onUpdate={(updates) => updateInvoiceItem(item.id, updates)}
                     onRemove={() => removeInvoiceItem(item.id)}
                   />
@@ -861,11 +862,12 @@ export const CompanyInvoicingPanel = ({
 interface InvoiceItemRowProps {
   item: InvoiceItem;
   index: number;
+  currency?: string | null;
   onUpdate: (updates: Partial<InvoiceItem>) => void;
   onRemove: () => void;
 }
 
-const InvoiceItemRow = ({ item, index, onUpdate, onRemove }: InvoiceItemRowProps) => {
+const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceItemRowProps) => {
   const [showComment, setShowComment] = useState(!!item.comment);
   
   // A típus meghatározza, milyen mezők jelennek meg
@@ -1028,9 +1030,9 @@ const InvoiceItemRow = ({ item, index, onUpdate, onRemove }: InvoiceItemRowProps
             </div>
           )}
 
-          {/* PEPM (egységár) sor */}
+          {/* PEPM sor */}
           <div className="space-y-2">
-            <span className="text-sm text-muted-foreground">Egységár (PEPM)</span>
+            <span className="text-sm text-muted-foreground">PEPM</span>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
               {/* PEPM mező neve (szerkeszthető) */}
               <Input
@@ -1045,13 +1047,21 @@ const InvoiceItemRow = ({ item, index, onUpdate, onRemove }: InvoiceItemRowProps
                   PEPM a 'Számlázás' fül alatt!
                 </div>
               ) : (
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={item.amount_value || ""}
-                  onChange={(e) => onUpdate({ amount_value: e.target.value || null })}
-                  placeholder="Egységár érték"
-                />
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={item.amount_value || ""}
+                    onChange={(e) => onUpdate({ amount_value: e.target.value || null })}
+                    placeholder="Érték"
+                    className="flex-1"
+                  />
+                  {currency && (
+                    <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                      {currency}
+                    </span>
+                  )}
+                </div>
               )}
 
               {/* Változó toggle */}
