@@ -13,7 +13,10 @@ import {
   AccountAdmin,
   Workshop,
   CrisisIntervention,
+  BillingData,
   InvoicingData,
+  InvoiceItem,
+  InvoiceComment,
 } from "@/types/company";
 
 // Mock adatok
@@ -41,6 +44,13 @@ const mockAccountAdmins: AccountAdmin[] = [
   { id: "3", name: "Szabó Mária" },
 ];
 
+// Mock kapcsolt cégek
+const mockConnectedCompanies = [
+  { id: "c1", name: "Anyacég Kft." },
+  { id: "c2", name: "Partner Zrt." },
+  { id: "c3", name: "Leányvállalat Bt." },
+];
+
 const CompanyForm = () => {
   const navigate = useNavigate();
   const { companyId } = useParams<{ companyId: string }>();
@@ -56,6 +66,7 @@ const CompanyForm = () => {
   const [contractEnd, setContractEnd] = useState<string | null>(isEditMode ? "2025-12-31" : null);
   const [contractReminderEmail, setContractReminderEmail] = useState<string | null>(null);
   const [leadAccountId, setLeadAccountId] = useState<string | null>(isEditMode ? "1" : null);
+  const [connectedCompanyId, setConnectedCompanyId] = useState<string | null>(null);
 
   // Országonként különböző beállítások
   const [countryDifferentiates, setCountryDifferentiates] = useState<CountryDifferentiate>({
@@ -80,7 +91,10 @@ const CompanyForm = () => {
   const [crisisInterventions, setCrisisInterventions] = useState<CrisisIntervention[]>([]);
 
   // Számlázási adatok
+  const [billingData, setBillingData] = useState<BillingData | null>(null);
   const [invoicingData, setInvoicingData] = useState<InvoicingData | null>(null);
+  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
+  const [invoiceComments, setInvoiceComments] = useState<InvoiceComment[]>([]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,11 +160,14 @@ const CompanyForm = () => {
             setContractReminderEmail={setContractReminderEmail}
             leadAccountId={leadAccountId}
             setLeadAccountId={setLeadAccountId}
+            connectedCompanyId={connectedCompanyId}
+            setConnectedCompanyId={setConnectedCompanyId}
             countryDifferentiates={countryDifferentiates}
             setCountryDifferentiates={setCountryDifferentiates}
             countries={mockCountries}
             contractHolders={mockContractHolders}
             accountAdmins={mockAccountAdmins}
+            connectedCompanies={mockConnectedCompanies}
             clientUsername={clientUsername}
             setClientUsername={setClientUsername}
             clientLanguageId={clientLanguageId}
@@ -186,8 +203,14 @@ const CompanyForm = () => {
             <CompanyInvoicingPanel
               countryDifferentiates={countryDifferentiates}
               setCountryDifferentiates={setCountryDifferentiates}
+              billingData={billingData}
+              setBillingData={setBillingData}
               invoicingData={invoicingData}
               setInvoicingData={setInvoicingData}
+              invoiceItems={invoiceItems}
+              setInvoiceItems={setInvoiceItems}
+              invoiceComments={invoiceComments}
+              setInvoiceComments={setInvoiceComments}
             />
           </div>
         )}
