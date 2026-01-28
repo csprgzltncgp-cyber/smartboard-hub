@@ -77,6 +77,7 @@ export interface BillingData {
   admin_identifier: string | null;
   name: string | null;
   is_name_shown: boolean;
+  country: string | null; // Célország
   postal_code: string | null;
   city: string | null;
   street: string | null;
@@ -106,7 +107,6 @@ export interface InvoicingData {
   invoice_language: string | null;
   currency: string | null;
   vat_rate: number | null;
-  tehk: boolean; // AHK - Áfa hatályán kívül
   inside_eu: boolean;
   outside_eu: boolean;
   send_invoice_by_post: boolean;
@@ -127,19 +127,28 @@ export interface InvoicingData {
   show_contact_holder_name_on_post: boolean;
 }
 
-// Invoice Item - Számlára kerülő tétel
+// Invoice Item - Számlára kerülő tétel (Laravel referencia alapján)
 export interface InvoiceItem {
   id: string;
   invoicing_data_id: string;
   item_name: string;
   item_type: InvoiceItemType;
-  amount: number | null;
-  volume: number | null;
+  // Szorzás/Összeg mezők
+  amount_name: string | null;
+  amount_value: string | null;
+  volume_name: string | null;
+  volume_value: string | null;
   is_amount_changing: boolean;
   is_volume_changing: boolean;
+  // Beállítások
   show_by_item: boolean;
-  is_required: boolean;
   show_activity_id: boolean;
+  with_timestamp: boolean;
+  // Megjegyzés
+  comment: string | null;
+  // Adatbekérés (ha változó)
+  data_request_email: string | null;
+  data_request_salutation: string | null;
 }
 
 export type InvoiceItemType =

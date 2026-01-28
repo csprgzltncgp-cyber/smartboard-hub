@@ -1,4 +1,3 @@
-import { forwardRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, MessageSquare, Calendar } from "lucide-react";
 import { DifferentPerCountryToggle } from "./DifferentPerCountryToggle";
 import {
   CountryDifferentiate,
@@ -49,6 +48,7 @@ const getDefaultBillingData = (): BillingData => ({
   admin_identifier: null,
   name: null,
   is_name_shown: true,
+  country: null,
   postal_code: null,
   city: null,
   street: null,
@@ -78,7 +78,6 @@ const getDefaultInvoicingData = (): InvoicingData => ({
   invoice_language: null,
   currency: null,
   vat_rate: null,
-  tehk: false,
   inside_eu: false,
   outside_eu: false,
   send_invoice_by_post: false,
@@ -154,14 +153,19 @@ export const CompanyInvoicingPanel = ({
       id: `new-item-${Date.now()}`,
       invoicing_data_id: invoicingData?.id || "new",
       item_name: "",
-      item_type: "amount",
-      amount: null,
-      volume: null,
+      item_type: "multiplication",
+      amount_name: null,
+      amount_value: null,
+      volume_name: null,
+      volume_value: null,
       is_amount_changing: false,
       is_volume_changing: false,
       show_by_item: false,
-      is_required: false,
       show_activity_id: false,
+      with_timestamp: true,
+      comment: null,
+      data_request_email: null,
+      data_request_salutation: null,
     };
     setInvoiceItems([...invoiceItems, newItem]);
   };
@@ -220,103 +224,105 @@ export const CompanyInvoicingPanel = ({
       {/* Ha nem országonként különböző, itt jelennek meg a számlázási beállítások */}
       {!countryDifferentiates.invoicing && (
         <div className="space-y-6 border-l-2 border-primary/20 pl-4 ml-2">
+          {/* === INAKTÍV MEZŐ - LEGFELÜL === */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <DifferentPerCountryToggle
+              label="Inaktív"
+              checked={currentBillingData.invoicing_inactive}
+              onChange={(checked) => {
+                updateBillingData({ 
+                  invoicing_inactive: checked,
+                  invoicing_inactive_from: checked ? new Date().toISOString().split('T')[0] : null,
+                  invoicing_inactive_to: checked ? currentBillingData.invoicing_inactive_to : null
+                });
+              }}
+            />
+            {currentBillingData.invoicing_inactive && (
+              <>
+                <div className="space-y-2">
+                  <Label>Eddig a dátumig</Label>
+                  <Input
+                    type="date"
+                    value={currentBillingData.invoicing_inactive_to || ""}
+                    onChange={(e) =>
+                      updateBillingData({ invoicing_inactive_to: e.target.value || null })
+                    }
+                    className={cn(
+                      !currentBillingData.invoicing_inactive_to && "border-red-500"
+                    )}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-10"
+                >
+                  Mentés
+                </Button>
+              </>
+            )}
+          </div>
+
           {/* === SZÁMLÁZÁSI ADATOK === */}
-          <h3 className="text-sm font-medium text-primary">Számlázási adatok</h3>
+          <div className={cn(currentBillingData.invoicing_inactive && "opacity-50 pointer-events-none")}>
+            <h3 className="text-sm font-medium text-primary">Számlázási adatok</h3>
 
-          {/* Számlázási név és Adószám */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
+            {/* Számlázási név */}
+            <div className="grid grid-cols-1 gap-4 mt-4">
+              <div className="space-y-2">
                 <Label>Számlázási név</Label>
-                <div className="flex items-center gap-2 text-xs">
-                  <Checkbox
-                    checked={currentBillingData.is_name_shown}
-                    onCheckedChange={(checked) =>
-                      updateBillingData({ is_name_shown: checked as boolean })
-                    }
-                  />
-                  <span className="text-muted-foreground">Megjelenik a számlán</span>
-                </div>
-              </div>
-              <Input
-                value={currentBillingData.name || ""}
-                onChange={(e) => updateBillingData({ name: e.target.value || null })}
-                placeholder="Számlázási név"
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Adószám</Label>
-                <div className="flex items-center gap-2 text-xs">
-                  <Checkbox
-                    checked={currentBillingData.is_tax_number_shown}
-                    onCheckedChange={(checked) =>
-                      updateBillingData({ is_tax_number_shown: checked as boolean })
-                    }
-                  />
-                  <span className="text-muted-foreground">Megjelenik a számlán</span>
-                </div>
-              </div>
-              <Input
-                value={currentBillingData.tax_number || ""}
-                onChange={(e) => updateBillingData({ tax_number: e.target.value || null })}
-                placeholder="Adószám"
-              />
-            </div>
-          </div>
-
-          {/* Közösségi adószám és Group ID */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Közösségi adószám</Label>
-              <Input
-                value={currentBillingData.community_tax_number || ""}
-                onChange={(e) =>
-                  updateBillingData({ community_tax_number: e.target.value || null })
-                }
-                placeholder="Közösségi adószám"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Group ID</Label>
-              <Input
-                value={currentBillingData.group_id || ""}
-                onChange={(e) => updateBillingData({ group_id: e.target.value || null })}
-                placeholder="Group ID"
-              />
-            </div>
-          </div>
-
-          {/* Számlázási cím */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>Számlázási cím</Label>
-              <div className="flex items-center gap-2 text-xs">
-                <Checkbox
-                  checked={currentBillingData.is_address_shown}
-                  onCheckedChange={(checked) =>
-                    updateBillingData({ is_address_shown: checked as boolean })
-                  }
-                />
-                <span className="text-muted-foreground">Megjelenik a számlán</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-2">
                 <Input
-                  value={currentBillingData.city || ""}
-                  onChange={(e) => updateBillingData({ city: e.target.value || null })}
-                  placeholder="Város"
+                  value={currentBillingData.name || ""}
+                  onChange={(e) => updateBillingData({ name: e.target.value || null })}
+                  placeholder="Számlázási név"
                 />
               </div>
-              <div>
+            </div>
+
+            {/* Számlázási cím - Célország */}
+            <div className="space-y-2 mt-4">
+              <div className="flex items-center justify-between">
+                <Label>Számlázási cím</Label>
+                <div className="flex items-center gap-2 text-xs">
+                  <Checkbox
+                    checked={currentBillingData.is_address_shown}
+                    onCheckedChange={(checked) =>
+                      updateBillingData({ is_address_shown: checked as boolean })
+                    }
+                  />
+                  <span className="text-muted-foreground">Megjelenik a számlán</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div className="md:col-span-2">
+                  <Input
+                    value={currentBillingData.country || ""}
+                    onChange={(e) => updateBillingData({ country: e.target.value || null })}
+                    placeholder="Célország"
+                  />
+                </div>
+                <div>
+                  <Input
+                    value={currentBillingData.postal_code || ""}
+                    onChange={(e) => updateBillingData({ postal_code: e.target.value || null })}
+                    placeholder="Irányítószám"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Input
+                    value={currentBillingData.city || ""}
+                    onChange={(e) => updateBillingData({ city: e.target.value || null })}
+                    placeholder="Város"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                   value={currentBillingData.street || ""}
                   onChange={(e) => updateBillingData({ street: e.target.value || null })}
                   placeholder="Utca"
                 />
-              </div>
-              <div>
                 <Input
                   value={currentBillingData.house_number || ""}
                   onChange={(e) => updateBillingData({ house_number: e.target.value || null })}
@@ -324,143 +330,98 @@ export const CompanyInvoicingPanel = ({
                 />
               </div>
             </div>
-          </div>
 
-          {/* Irányítószám */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label>Irányítószám</Label>
-              <Input
-                value={currentBillingData.postal_code || ""}
-                onChange={(e) => updateBillingData({ postal_code: e.target.value || null })}
-                placeholder="Irányítószám"
-              />
-            </div>
-          </div>
-
-          {/* PO szám - speciális logika */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
+            {/* PO szám - Változó toggle (mint az Országonként különböző) */}
+            <div className="space-y-2 mt-4">
               <Label>PO szám</Label>
-              <div className="flex items-center gap-4 text-xs">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={currentBillingData.is_po_number_shown}
-                    onCheckedChange={(checked) =>
-                      updateBillingData({ is_po_number_shown: checked as boolean })
-                    }
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              {currentBillingData.is_po_number_changing ? (
+                  <div className="md:col-span-2 bg-amber-500 text-amber-50 h-12 flex items-center justify-center rounded-lg">
+                    PO szám a 'Számlázás' fül alatt!
+                  </div>
+                ) : (
+                  <Input
+                    value={currentBillingData.po_number || ""}
+                    onChange={(e) => updateBillingData({ po_number: e.target.value || null })}
+                    placeholder="PO szám"
+                    className="md:col-span-2"
                   />
-                  <span className="text-muted-foreground">Tételesen</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={currentBillingData.is_po_number_changing}
-                    onCheckedChange={(checked) =>
-                      updateBillingData({ is_po_number_changing: checked as boolean })
-                    }
-                  />
-                  <span className="text-muted-foreground">Változó</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={currentBillingData.is_po_number_required}
-                    onCheckedChange={(checked) =>
-                      updateBillingData({ is_po_number_required: checked as boolean })
-                    }
-                  />
-                  <span className="text-muted-foreground">Kötelező</span>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                value={currentBillingData.po_number || ""}
-                onChange={(e) => updateBillingData({ po_number: e.target.value || null })}
-                placeholder="PO szám"
-                disabled={currentBillingData.is_po_number_changing}
-                className={cn(
-                  currentBillingData.is_po_number_changing && "bg-yellow-100 border-yellow-300"
                 )}
-              />
-              {currentBillingData.is_po_number_changing && (
-                <span className="text-xs text-yellow-600 self-center">
-                  PO szám a 'Számlázás' fül alatt!
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Fizetési határidő */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Fizetési határidő</Label>
-                <div className="flex items-center gap-2 text-xs">
-                  <Checkbox
-                    checked={currentBillingData.is_payment_deadline_shown}
-                    onCheckedChange={(checked) =>
-                      updateBillingData({ is_payment_deadline_shown: checked as boolean })
-                    }
-                  />
-                  <span className="text-muted-foreground">Megjelenik a számlán</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  value={currentBillingData.payment_deadline || ""}
-                  onChange={(e) =>
-                    updateBillingData({
-                      payment_deadline: e.target.value ? parseInt(e.target.value) : null,
-                    })
+                <DifferentPerCountryToggle
+                  label="Változó"
+                  checked={currentBillingData.is_po_number_changing}
+                  onChange={(checked) =>
+                    updateBillingData({ is_po_number_changing: checked })
                   }
-                  placeholder="30"
-                  className="w-24"
                 />
-                <span className="text-sm text-muted-foreground">nap</span>
               </div>
             </div>
-          </div>
 
-          {/* Inaktív számlázás */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                checked={currentBillingData.invoicing_inactive}
-                onCheckedChange={(checked) =>
-                  updateBillingData({ invoicing_inactive: checked as boolean })
-                }
-              />
-              <Label>Inaktív</Label>
+            {/* Adószám */}
+            <div className="grid grid-cols-1 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label>Adószám</Label>
+                <Input
+                  value={currentBillingData.tax_number || ""}
+                  onChange={(e) => updateBillingData({ tax_number: e.target.value || null })}
+                  placeholder="Adószám"
+                />
+              </div>
             </div>
-            {currentBillingData.invoicing_inactive && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6">
-                <div className="space-y-2">
-                  <Label>Inaktív ettől</Label>
+
+            {/* Közösségi adószám */}
+            <div className="grid grid-cols-1 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label>Közösségi adószám</Label>
+                <Input
+                  value={currentBillingData.community_tax_number || ""}
+                  onChange={(e) =>
+                    updateBillingData({ community_tax_number: e.target.value || null })
+                  }
+                  placeholder="Közösségi adószám"
+                />
+              </div>
+            </div>
+
+            {/* Csoport azonosító */}
+            <div className="grid grid-cols-1 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label>Csoport azonosító</Label>
+                <Input
+                  value={currentBillingData.group_id || ""}
+                  onChange={(e) => updateBillingData({ group_id: e.target.value || null })}
+                  placeholder="Csoport azonosító"
+                />
+              </div>
+            </div>
+
+            {/* Fizetési határidő */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label>Fizetési határidő</Label>
+                <div className="flex items-center gap-2">
                   <Input
-                    type="date"
-                    value={currentBillingData.invoicing_inactive_from || ""}
+                    type="number"
+                    value={currentBillingData.payment_deadline || ""}
                     onChange={(e) =>
-                      updateBillingData({ invoicing_inactive_from: e.target.value || null })
+                      updateBillingData({
+                        payment_deadline: e.target.value ? parseInt(e.target.value) : null,
+                      })
                     }
+                    placeholder="30"
+                    className="w-24"
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label>Inaktív eddig</Label>
-                  <Input
-                    type="date"
-                    value={currentBillingData.invoicing_inactive_to || ""}
-                    onChange={(e) =>
-                      updateBillingData({ invoicing_inactive_to: e.target.value || null })
-                    }
-                  />
+                  <span className="text-sm text-muted-foreground">nap</span>
                 </div>
               </div>
-            )}
+            </div>
           </div>
 
           {/* === SZÁMLÁZÁSI BEÁLLÍTÁSOK === */}
-          <div className="border-t pt-6">
+          <div className={cn(
+            "border-t pt-6",
+            currentBillingData.invoicing_inactive && "opacity-50 pointer-events-none"
+          )}>
             <h3 className="text-sm font-medium text-primary mb-4">Számlázási beállítások</h3>
 
             {/* Számlázási gyakoriság, nyelv, pénznem, ÁFA */}
@@ -468,15 +429,16 @@ export const CompanyInvoicingPanel = ({
               <div className="space-y-2">
                 <Label>Számlázási gyakoriság</Label>
                 <Select
-                  value={currentInvoicingData.billing_frequency || ""}
+                  value={currentInvoicingData.billing_frequency || "none"}
                   onValueChange={(val) =>
-                    updateInvoicingData({ billing_frequency: (val as any) || null })
+                    updateInvoicingData({ billing_frequency: val === "none" ? null : (val as any) })
                   }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Válasszon..." />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Válasszon...</SelectItem>
                     {BILLING_FREQUENCIES.map((freq) => (
                       <SelectItem key={freq.id} value={freq.id}>
                         {freq.name}
@@ -488,13 +450,14 @@ export const CompanyInvoicingPanel = ({
               <div className="space-y-2">
                 <Label>Számla nyelve</Label>
                 <Select
-                  value={currentInvoicingData.invoice_language || ""}
-                  onValueChange={(val) => updateInvoicingData({ invoice_language: val || null })}
+                  value={currentInvoicingData.invoice_language || "none"}
+                  onValueChange={(val) => updateInvoicingData({ invoice_language: val === "none" ? null : val })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Válasszon..." />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Válasszon...</SelectItem>
                     {INVOICE_LANGUAGES.map((lang) => (
                       <SelectItem key={lang.id} value={lang.id}>
                         {lang.name}
@@ -506,13 +469,14 @@ export const CompanyInvoicingPanel = ({
               <div className="space-y-2">
                 <Label>Devizanem</Label>
                 <Select
-                  value={currentInvoicingData.currency || ""}
-                  onValueChange={(val) => updateInvoicingData({ currency: val || null })}
+                  value={currentInvoicingData.currency || "none"}
+                  onValueChange={(val) => updateInvoicingData({ currency: val === "none" ? null : val })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Válasszon..." />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Válasszon...</SelectItem>
                     {CURRENCIES.map((curr) => (
                       <SelectItem key={curr.id} value={curr.id}>
                         {curr.name}
@@ -524,15 +488,16 @@ export const CompanyInvoicingPanel = ({
               <div className="space-y-2">
                 <Label>ÁFA kulcs</Label>
                 <Select
-                  value={currentInvoicingData.vat_rate?.toString() || ""}
+                  value={currentInvoicingData.vat_rate?.toString() || "none"}
                   onValueChange={(val) =>
-                    updateInvoicingData({ vat_rate: val ? parseFloat(val) : null })
+                    updateInvoicingData({ vat_rate: val === "none" ? null : parseFloat(val) })
                   }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Válasszon..." />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Válasszon...</SelectItem>
                     {VAT_RATES.map((vat) => (
                       <SelectItem key={vat.id} value={vat.id}>
                         {vat.name}
@@ -543,24 +508,14 @@ export const CompanyInvoicingPanel = ({
               </div>
             </div>
 
-            {/* AHK és EU beállítások */}
+            {/* EU beállítások */}
             <div className="flex flex-wrap gap-6 mt-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="tehk"
-                  checked={currentInvoicingData.tehk}
-                  onCheckedChange={(checked) =>
-                    updateInvoicingData({ tehk: checked as boolean })
-                  }
-                />
-                <Label htmlFor="tehk">AHK (Áfa hatályán kívül)</Label>
-              </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="inside-eu"
                   checked={currentInvoicingData.inside_eu}
                   onCheckedChange={(checked) =>
-                    updateInvoicingData({ inside_eu: checked as boolean })
+                    updateInvoicingData({ inside_eu: checked as boolean, outside_eu: checked ? false : currentInvoicingData.outside_eu })
                   }
                 />
                 <Label htmlFor="inside-eu">EU-n belüli</Label>
@@ -570,7 +525,7 @@ export const CompanyInvoicingPanel = ({
                   id="outside-eu"
                   checked={currentInvoicingData.outside_eu}
                   onCheckedChange={(checked) =>
-                    updateInvoicingData({ outside_eu: checked as boolean })
+                    updateInvoicingData({ outside_eu: checked as boolean, inside_eu: checked ? false : currentInvoicingData.inside_eu })
                   }
                 />
                 <Label htmlFor="outside-eu">EU-n kívüli</Label>
@@ -579,7 +534,10 @@ export const CompanyInvoicingPanel = ({
           </div>
 
           {/* Küldési beállítások */}
-          <div className="border-t pt-6 space-y-4">
+          <div className={cn(
+            "border-t pt-6 space-y-4",
+            currentBillingData.invoicing_inactive && "opacity-50 pointer-events-none"
+          )}>
             <h4 className="text-sm font-medium">Küldési beállítások</h4>
 
             {/* Számla küldés */}
@@ -830,7 +788,10 @@ export const CompanyInvoicingPanel = ({
           </div>
 
           {/* === SZÁMLÁRA KERÜLŐ TÉTELEK, MEGJEGYZÉSEK === */}
-          <div className="border-t pt-6 space-y-4">
+          <div className={cn(
+            "border-t pt-6 space-y-4",
+            currentBillingData.invoicing_inactive && "opacity-50 pointer-events-none"
+          )}>
             <h3 className="text-sm font-medium text-primary">
               Számlára kerülő tételek, megjegyzések
             </h3>
@@ -907,7 +868,7 @@ export const CompanyInvoicingPanel = ({
   );
 };
 
-// Invoice Item Row komponens
+// Invoice Item Row komponens - Laravel referencia alapján
 interface InvoiceItemRowProps {
   item: InvoiceItem;
   index: number;
@@ -916,43 +877,51 @@ interface InvoiceItemRowProps {
 }
 
 const InvoiceItemRow = ({ item, index, onUpdate, onRemove }: InvoiceItemRowProps) => {
-  return (
-    <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
-      <div className="flex items-start justify-between">
-        <span className="text-sm font-medium text-muted-foreground">{index + 1}. tétel</span>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={onRemove}
-          className="text-destructive h-8 w-8"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
+  const [showComment, setShowComment] = useState(!!item.comment);
+  
+  // A típus meghatározza, milyen mezők jelennek meg
+  const isMultiplication = item.item_type === "multiplication";
+  const isAmount = item.item_type === "amount";
+  const isWorkshopOrCrisis = ["workshop", "crisis", "other-activity"].includes(item.item_type);
+  const isContractHolder = item.item_type.startsWith("optum-") || item.item_type.startsWith("compsych-");
+  const needsVolumeAndAmount = isMultiplication || isContractHolder;
+  const needsAmountOnly = isAmount;
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+  // Háttérszín a típus alapján
+  const bgColor = !item.item_type ? "bg-purple-100/50" : "bg-primary/10";
+
+  return (
+    <div className={cn("rounded-lg p-4 space-y-4", bgColor)}>
+      {/* Első sor: Tétel neve, Típus, Activity ID checkbox, Törlés/Megjegyzés/Naptár ikonok */}
+      <div className="flex items-start gap-4">
         {/* Tétel megnevezése */}
-        <div className="space-y-2">
-          <Label>Tétel megnevezése</Label>
-          <Input
-            value={item.item_name}
-            onChange={(e) => onUpdate({ item_name: e.target.value })}
-            placeholder="Tétel megnevezése"
-          />
+        <div className="flex-1 space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="bg-cgp-dark text-white p-2 rounded">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+            </div>
+            <Input
+              value={item.item_name}
+              onChange={(e) => onUpdate({ item_name: e.target.value })}
+              placeholder="Tétel megnevezése"
+              className="bg-cgp-dark text-white placeholder:text-white/70 border-0"
+            />
+          </div>
         </div>
 
-        {/* Tétel típusa */}
-        <div className="space-y-2">
-          <Label>Típus</Label>
+        {/* Típus választó */}
+        <div className="w-48 space-y-2">
           <Select
-            value={item.item_type}
-            onValueChange={(val) => onUpdate({ item_type: val as InvoiceItemType })}
+            value={item.item_type || "none"}
+            onValueChange={(val) => onUpdate({ item_type: val === "none" ? "multiplication" : val as InvoiceItemType })}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Válasszon..." />
+              <SelectValue placeholder="Input" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="none">Kérjük, válasszon</SelectItem>
               {INVOICE_ITEM_TYPES.map((type) => (
                 <SelectItem key={type.id} value={type.id}>
                   {type.name}
@@ -961,87 +930,219 @@ const InvoiceItemRow = ({ item, index, onUpdate, onRemove }: InvoiceItemRowProps
             </SelectContent>
           </Select>
         </div>
+
+        {/* Activity ID checkbox - csak workshop/crisis/other-activity esetén */}
+        {isWorkshopOrCrisis && (
+          <DifferentPerCountryToggle
+            label="Activity ID megjelenik"
+            checked={item.show_activity_id}
+            onChange={(checked) => onUpdate({ show_activity_id: checked })}
+          />
+        )}
+
+        {/* Tételesen checkbox - szorzás vagy contract holder esetén */}
+        {(isMultiplication || isContractHolder) && (
+          <DifferentPerCountryToggle
+            label="Tételesen"
+            checked={item.show_by_item}
+            onChange={(checked) => onUpdate({ show_by_item: checked })}
+          />
+        )}
+
+        {/* Ikon gombok */}
+        <div className="flex flex-col gap-1 items-center">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onRemove}
+            className="text-primary h-8 w-8"
+          >
+            <Trash2 className="h-5 w-5" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowComment(!showComment)}
+            className={cn("h-8 w-8", showComment ? "text-primary" : "text-primary/50")}
+          >
+            <MessageSquare className="h-5 w-5" fill={showComment ? "currentColor" : "none"} />
+          </Button>
+          {(isMultiplication || isAmount) && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onUpdate({ with_timestamp: !item.with_timestamp })}
+              className={cn("h-8 w-8", item.with_timestamp ? "text-primary" : "text-primary/50")}
+            >
+              <Calendar className="h-5 w-5" fill={item.with_timestamp ? "currentColor" : "none"} />
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* Összeg és Mennyiség - csak ha szükséges */}
-      {(item.item_type === "amount" || item.item_type === "multiplication") && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>Összeg</Label>
-              <div className="flex items-center gap-2 text-xs">
-                <Checkbox
-                  checked={item.is_amount_changing}
-                  onCheckedChange={(checked) =>
-                    onUpdate({ is_amount_changing: checked as boolean })
-                  }
-                />
-                <span className="text-muted-foreground">Változó</span>
+      {/* Képlet beállítása - szorzás vagy contract holder esetén */}
+      {needsVolumeAndAmount && (
+        <div className="space-y-2">
+          <span className="text-sm text-primary">Képlet beállítása</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            {/* Mennyiség név */}
+            <div className="flex items-center gap-2">
+              <div className="bg-white p-2 rounded border">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
               </div>
+              <Input
+                value={item.volume_name || ""}
+                onChange={(e) => onUpdate({ volume_name: e.target.value || null })}
+                placeholder="Mennyiség"
+              />
             </div>
-            <Input
-              type="number"
-              value={item.amount || ""}
-              onChange={(e) =>
-                onUpdate({ amount: e.target.value ? parseFloat(e.target.value) : null })
-              }
-              placeholder="Összeg"
-              disabled={item.is_amount_changing}
-              className={cn(item.is_amount_changing && "bg-yellow-100 border-yellow-300")}
-            />
+
+            {/* Mennyiség érték - sárga ha változó */}
+            {item.is_volume_changing ? (
+              <div className="bg-amber-500 text-amber-50 h-10 flex items-center justify-center rounded-lg text-sm">
+                Me. a 'Számlázás' fül alatt!
+              </div>
+            ) : (
+              <Input
+                value={item.volume_value || ""}
+                onChange={(e) => onUpdate({ volume_value: e.target.value || null })}
+                placeholder={isContractHolder ? "Automatikus kitöltés" : "Érték"}
+                disabled={isContractHolder}
+                className={cn(isContractHolder && "opacity-50")}
+              />
+            )}
+
+            {/* Változó toggle - csak szorzás esetén */}
+            {isMultiplication && (
+              <DifferentPerCountryToggle
+                label="Változó"
+                checked={item.is_volume_changing}
+                onChange={(checked) => onUpdate({ is_volume_changing: checked })}
+              />
+            )}
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>Mennyiség</Label>
-              <div className="flex items-center gap-2 text-xs">
-                <Checkbox
-                  checked={item.is_volume_changing}
-                  onCheckedChange={(checked) =>
-                    onUpdate({ is_volume_changing: checked as boolean })
-                  }
+          {/* Adatbekérés email - ha változó */}
+          {item.is_volume_changing && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div className="space-y-2">
+                <Label className="text-sm">Email cím adatbekéréshez</Label>
+                <Input
+                  type="email"
+                  value={item.data_request_email || ""}
+                  onChange={(e) => onUpdate({ data_request_email: e.target.value || null })}
+                  placeholder="email@ceg.hu"
                 />
-                <span className="text-muted-foreground">Változó</span>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm">Megszólítás</Label>
+                <Input
+                  value={item.data_request_salutation || ""}
+                  onChange={(e) => onUpdate({ data_request_salutation: e.target.value || null })}
+                  placeholder="Tisztelt..."
+                />
               </div>
             </div>
-            <Input
-              type="number"
-              value={item.volume || ""}
-              onChange={(e) =>
-                onUpdate({ volume: e.target.value ? parseFloat(e.target.value) : null })
-              }
-              placeholder="Mennyiség"
-              disabled={item.is_volume_changing}
-              className={cn(item.is_volume_changing && "bg-yellow-100 border-yellow-300")}
+          )}
+
+          {/* Összeg sor */}
+          <span className="text-sm text-primary mt-4 block">Összeg megadása</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            {/* Összeg név */}
+            <div className="flex items-center gap-2">
+              <div className="bg-white p-2 rounded border">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </div>
+              <Input
+                value={item.amount_name || ""}
+                onChange={(e) => onUpdate({ amount_name: e.target.value || null })}
+                placeholder="Összeg"
+              />
+            </div>
+
+            {/* Összeg érték - sárga ha változó */}
+            {item.is_amount_changing ? (
+              <div className="bg-amber-500 text-amber-50 h-10 flex items-center justify-center rounded-lg text-sm">
+                Összeg a 'Számlázás' fül alatt!
+              </div>
+            ) : (
+              <Input
+                value={item.amount_value || ""}
+                onChange={(e) => onUpdate({ amount_value: e.target.value || null })}
+                placeholder="Érték"
+              />
+            )}
+
+            {/* Változó toggle */}
+            <DifferentPerCountryToggle
+              label="Változó"
+              checked={item.is_amount_changing}
+              onChange={(checked) => onUpdate({ is_amount_changing: checked })}
             />
           </div>
         </div>
       )}
 
-      {/* Egyéb beállítások */}
-      <div className="flex flex-wrap gap-6">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            checked={item.show_by_item}
-            onCheckedChange={(checked) => onUpdate({ show_by_item: checked as boolean })}
-          />
-          <Label className="text-sm">Tételesen</Label>
+      {/* Csak összeg - amount típusnál */}
+      {needsAmountOnly && (
+        <div className="space-y-2">
+          <span className="text-sm text-primary">Összeg megadása</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            {/* Összeg név */}
+            <div className="flex items-center gap-2">
+              <div className="bg-white p-2 rounded border">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </div>
+              <Input
+                value={item.amount_name || ""}
+                onChange={(e) => onUpdate({ amount_name: e.target.value || null })}
+                placeholder="Összeg"
+              />
+            </div>
+
+            {/* Összeg érték - sárga ha változó */}
+            {item.is_amount_changing ? (
+              <div className="bg-amber-500 text-amber-50 h-10 flex items-center justify-center rounded-lg text-sm">
+                Összeg a 'Számlázás' fül alatt!
+              </div>
+            ) : (
+              <Input
+                value={item.amount_value || ""}
+                onChange={(e) => onUpdate({ amount_value: e.target.value || null })}
+                placeholder="Érték"
+              />
+            )}
+
+            {/* Változó toggle */}
+            <DifferentPerCountryToggle
+              label="Változó"
+              checked={item.is_amount_changing}
+              onChange={(checked) => onUpdate({ is_amount_changing: checked })}
+            />
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            checked={item.is_required}
-            onCheckedChange={(checked) => onUpdate({ is_required: checked as boolean })}
+      )}
+
+      {/* Megjegyzés mező - ha megnyitott */}
+      {showComment && (
+        <div className="space-y-2">
+          <Label className="text-sm">Megjegyzés</Label>
+          <Input
+            value={item.comment || ""}
+            onChange={(e) => onUpdate({ comment: e.target.value || null })}
+            placeholder="Megjegyzés a tételhez..."
           />
-          <Label className="text-sm">Kötelező</Label>
         </div>
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            checked={item.show_activity_id}
-            onCheckedChange={(checked) => onUpdate({ show_activity_id: checked as boolean })}
-          />
-          <Label className="text-sm">Activity ID megjelenik</Label>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
