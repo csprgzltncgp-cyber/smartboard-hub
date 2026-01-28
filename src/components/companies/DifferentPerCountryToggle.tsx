@@ -26,16 +26,13 @@ export const DifferentPerCountryToggle = ({
         type="button"
         onClick={() => !disabled && onChange(!checked)}
         disabled={disabled}
-        className={cn(
-          "w-10 h-10 flex items-center justify-center border-l-2 border-primary -mr-3 -my-2",
-          checked ? "bg-primary" : "bg-transparent"
-        )}
-      >
-        {checked ? (
-          <Check className="h-5 w-5 text-primary-foreground" />
-        ) : (
-          <X className="h-5 w-5 text-muted-foreground" />
-        )}
+          className="w-10 h-10 flex items-center justify-center border-l-2 border-primary -mr-3 -my-2"
+        >
+          {checked ? (
+            <Check className="h-5 w-5 text-cgp-teal" />
+          ) : (
+            <X className="h-5 w-5 text-muted-foreground" />
+          )}
       </button>
     </label>
   );
