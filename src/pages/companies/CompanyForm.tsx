@@ -201,7 +201,95 @@ const CompanyForm = () => {
   };
 
   const handleAddInvoiceList = () => {
-    toast.info("Új számlázási lista hozzáadása - fejlesztés alatt");
+    const newTemplateId = `new-template-${Date.now()}`;
+    const newTemplate: InvoiceTemplate = {
+      id: newTemplateId,
+      company_id: companyId || "new",
+      country_id: countryDifferentiates.invoicing && countryIds.length > 0 ? countryIds[0] : null,
+      admin_identifier: null,
+      name: "Új számlázási adatok",
+      is_name_shown: true,
+      country: null,
+      postal_code: null,
+      city: null,
+      street: null,
+      house_number: null,
+      is_address_shown: true,
+      po_number: null,
+      is_po_number_shown: true,
+      is_po_number_changing: false,
+      is_po_number_required: true,
+      tax_number: null,
+      community_tax_number: null,
+      is_tax_number_shown: true,
+      group_id: null,
+      payment_deadline: 30,
+      is_payment_deadline_shown: true,
+      invoicing_inactive: false,
+      invoicing_inactive_from: null,
+      invoicing_inactive_to: null,
+      // Alapértelmezett tételek a Laravel logika szerint
+      items: [
+        {
+          id: `new-item-${Date.now()}-1`,
+          invoicing_data_id: newTemplateId,
+          item_name: "Workshop",
+          item_type: "workshop",
+          amount_name: null,
+          amount_value: null,
+          volume_name: null,
+          volume_value: null,
+          is_amount_changing: false,
+          is_volume_changing: false,
+          show_by_item: false,
+          show_activity_id: true,
+          with_timestamp: false,
+          comment: null,
+          data_request_email: null,
+          data_request_salutation: null,
+        },
+        {
+          id: `new-item-${Date.now()}-2`,
+          invoicing_data_id: newTemplateId,
+          item_name: "Krízisintervenció",
+          item_type: "crisis",
+          amount_name: null,
+          amount_value: null,
+          volume_name: null,
+          volume_value: null,
+          is_amount_changing: false,
+          is_volume_changing: false,
+          show_by_item: false,
+          show_activity_id: true,
+          with_timestamp: false,
+          comment: null,
+          data_request_email: null,
+          data_request_salutation: null,
+        },
+        {
+          id: `new-item-${Date.now()}-3`,
+          invoicing_data_id: newTemplateId,
+          item_name: "Egyéb tevékenység",
+          item_type: "other-activity",
+          amount_name: null,
+          amount_value: null,
+          volume_name: null,
+          volume_value: null,
+          is_amount_changing: false,
+          is_volume_changing: false,
+          show_by_item: false,
+          show_activity_id: true,
+          with_timestamp: false,
+          comment: null,
+          data_request_email: null,
+          data_request_salutation: null,
+        },
+      ],
+      comments: [],
+    };
+    
+    setInvoiceTemplates([...invoiceTemplates, newTemplate]);
+    toast.success("Új számlázási sablon létrehozva");
   };
 
   if (companiesLoading || formLoading) {
