@@ -572,7 +572,7 @@ const SlipInvoiceItemRow = ({
         {/* Összeg típus */}
         {needsAmountOnly && (
           <div className="space-y-4 pt-2 border-t">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">
                   Összeg mező neve
@@ -589,28 +589,15 @@ const SlipInvoiceItemRow = ({
                 <Label className="text-xs text-muted-foreground">
                   Összeg ({currency?.toUpperCase() || "---"})
                 </Label>
-                {item.is_amount_changing ? (
-                  <div className="bg-amber-500 text-amber-50 h-10 flex items-center justify-center rounded-lg text-sm">
-                    Összeg a 'Számlázás' fül alatt!
-                  </div>
-                ) : (
-                  <Input
-                    type="number"
-                    value={item.amount_value || ""}
-                    onChange={(e) =>
-                      onUpdate({ amount_value: e.target.value || null })
-                    }
-                    placeholder="Összeg"
-                  />
-                )}
+                <Input
+                  type="number"
+                  value={item.amount_value || ""}
+                  onChange={(e) =>
+                    onUpdate({ amount_value: e.target.value || null })
+                  }
+                  placeholder="Összeg"
+                />
               </div>
-              <DifferentPerCountryToggle
-                label="Változó"
-                checked={item.is_amount_changing}
-                onChange={(checked) =>
-                  onUpdate({ is_amount_changing: checked })
-                }
-              />
             </div>
           </div>
         )}
