@@ -142,10 +142,22 @@ export const CompanyInvoicingPanel = ({
   setInvoiceCommentsPerCountry,
 }: CompanyInvoicingPanelProps) => {
   const [emails, setEmails] = useState<string[]>(invoicingData?.invoice_emails || [""]);
-  const [activeCountryTab, setActiveCountryTab] = useState<string>(countryIds[0] || "");
-
+  
   // Szűrt országok: csak a kiválasztott országok
   const selectedCountries = countries.filter((c) => countryIds.includes(c.id));
+  
+  // Az aktív fül az első ország legyen alapértelmezetten
+  const [activeCountryTab, setActiveCountryTab] = useState<string>("");
+  
+  // Frissítsük az aktív fület, ha az országok változnak
+  useEffect(() => {
+    if (selectedCountries.length > 0 && !activeCountryTab) {
+      setActiveCountryTab(selectedCountries[0].id);
+    } else if (selectedCountries.length > 0 && !selectedCountries.find(c => c.id === activeCountryTab)) {
+      // Ha az aktuális aktív fül már nem létezik, váltsunk az elsőre
+      setActiveCountryTab(selectedCountries[0].id);
+    }
+  }, [selectedCountries, activeCountryTab]);
   const updateDifferentiate = (key: keyof CountryDifferentiate, value: boolean) => {
     setCountryDifferentiates({ ...countryDifferentiates, [key]: value });
   };
