@@ -159,6 +159,8 @@ const CompanyForm = () => {
           countryDifferentiates,
           billingData: billingData || undefined,
           invoicingData: invoicingData || undefined,
+          invoiceItems: invoiceItems,
+          invoiceComments: invoiceComments,
         });
         
         if (success) {
