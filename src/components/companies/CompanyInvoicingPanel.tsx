@@ -850,21 +850,9 @@ export const CompanyInvoicingPanel = ({
               </div>
             )}
 
-            {/* Tétel hozzáadása gomb */}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addInvoiceItem}
-              className="text-primary"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Tétel hozzáadása
-            </Button>
-
             {/* Meglévő megjegyzések */}
             {invoiceComments.length > 0 && (
-              <div className="space-y-3 mt-4">
+              <div className="space-y-3">
                 <Label>Megjegyzések</Label>
                 {invoiceComments.map((comment) => (
                   <div key={comment.id} className="flex items-center gap-2">
@@ -888,17 +876,30 @@ export const CompanyInvoicingPanel = ({
               </div>
             )}
 
-            {/* Megjegyzés hozzáadása gomb */}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addInvoiceComment}
-              className="text-primary"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Megjegyzés hozzáadása
-            </Button>
+            {/* Gombok egymás mellett */}
+            <div className="flex flex-wrap gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addInvoiceItem}
+                className="text-primary"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Tétel hozzáadása
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addInvoiceComment}
+                className="text-primary"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Megjegyzés hozzáadása
+              </Button>
+            </div>
           </div>
         </div>
       )}

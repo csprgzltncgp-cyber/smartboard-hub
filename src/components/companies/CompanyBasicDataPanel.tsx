@@ -162,7 +162,6 @@ export const CompanyBasicDataPanel = ({
       {/* Országok */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
         <div className="space-y-2">
-          <Label>Országok</Label>
           <MultiSelectField
             label="Országok"
             options={countryOptions}
