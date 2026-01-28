@@ -93,6 +93,12 @@ const CompanyForm = () => {
   const [invoiceItemsPerCountry, setInvoiceItemsPerCountry] = useState<Record<string, InvoiceItem[]>>({});
   const [invoiceCommentsPerCountry, setInvoiceCommentsPerCountry] = useState<Record<string, InvoiceComment[]>>({});
 
+  // Aktív ország fül a Számlázás panelen (ha országonként különböző)
+  const [activeInvoicingCountryId, setActiveInvoicingCountryId] = useState<string>("");
+
+  // Számla csíkok országonként (ha országonként különböző)
+  const [invoiceSlipsPerCountry, setInvoiceSlipsPerCountry] = useState<Record<string, InvoiceSlip[]>>({});
+
   // Számla csíkok (egy cégnek több számlája lehet)
   const [invoiceSlips, setInvoiceSlips] = useState<InvoiceSlip[]>([]);
   
@@ -205,151 +211,151 @@ const CompanyForm = () => {
   };
 
   const handleAddInvoiceList = () => {
-    // Ha még nincs csík, az első csík az eredeti tételekből jön létre
+    const now = Date.now();
+
+    const makeDefaultSlipItems = (slipId: string): InvoiceItem[] => [
+      {
+        id: `new-item-${now}-ws`,
+        invoicing_data_id: slipId,
+        item_name: "Workshop",
+        item_type: "workshop",
+        amount_name: null,
+        amount_value: null,
+        volume_name: null,
+        volume_value: null,
+        is_amount_changing: false,
+        is_volume_changing: false,
+        show_by_item: false,
+        show_activity_id: true,
+        with_timestamp: false,
+        comment: null,
+        data_request_email: null,
+        data_request_salutation: null,
+      },
+      {
+        id: `new-item-${now}-crisis`,
+        invoicing_data_id: slipId,
+        item_name: "Krízisintervenció",
+        item_type: "crisis",
+        amount_name: null,
+        amount_value: null,
+        volume_name: null,
+        volume_value: null,
+        is_amount_changing: false,
+        is_volume_changing: false,
+        show_by_item: false,
+        show_activity_id: true,
+        with_timestamp: false,
+        comment: null,
+        data_request_email: null,
+        data_request_salutation: null,
+      },
+      {
+        id: `new-item-${now}-other`,
+        invoicing_data_id: slipId,
+        item_name: "Egyéb tevékenység",
+        item_type: "other-activity",
+        amount_name: null,
+        amount_value: null,
+        volume_name: null,
+        volume_value: null,
+        is_amount_changing: false,
+        is_volume_changing: false,
+        show_by_item: false,
+        show_activity_id: true,
+        with_timestamp: false,
+        comment: null,
+        data_request_email: null,
+        data_request_salutation: null,
+      },
+    ];
+
+    // === Országonként különböző számlázás esetén: az aktív ország alá adjuk a csíkot ===
+    if (countryDifferentiates.invoicing) {
+      const countryId = activeInvoicingCountryId || countryIds[0];
+      if (!countryId) {
+        toast.error("Nincs kiválasztott ország");
+        return;
+      }
+
+      const currentSlips = invoiceSlipsPerCountry[countryId] || [];
+      const currentItems = invoiceItemsPerCountry[countryId] || [];
+      const currentComments = invoiceCommentsPerCountry[countryId] || [];
+
+      if (currentSlips.length === 0) {
+        const firstSlip: InvoiceSlip = {
+          id: `slip-1-${now}`,
+          admin_identifier: "Számla #1",
+          items: currentItems.length > 0 ? [...currentItems] : [],
+          comments: currentComments.length > 0 ? [...currentComments] : [],
+        };
+
+        const secondSlipId = `slip-2-${now}`;
+        const secondSlip: InvoiceSlip = {
+          id: secondSlipId,
+          admin_identifier: null,
+          items: makeDefaultSlipItems(secondSlipId),
+          comments: [],
+        };
+
+        setInvoiceSlipsPerCountry({
+          ...invoiceSlipsPerCountry,
+          [countryId]: [firstSlip, secondSlip],
+        });
+
+        // az eredeti per-country listákat kiürítjük, mert most már a csíkokban vannak
+        setInvoiceItemsPerCountry({ ...invoiceItemsPerCountry, [countryId]: [] });
+        setInvoiceCommentsPerCountry({ ...invoiceCommentsPerCountry, [countryId]: [] });
+      } else {
+        const newSlipId = `slip-${currentSlips.length + 1}-${now}`;
+        const newSlip: InvoiceSlip = {
+          id: newSlipId,
+          admin_identifier: null,
+          items: makeDefaultSlipItems(newSlipId),
+          comments: [],
+        };
+
+        setInvoiceSlipsPerCountry({
+          ...invoiceSlipsPerCountry,
+          [countryId]: [...currentSlips, newSlip],
+        });
+      }
+
+      toast.success("Új számla csík létrehozva");
+      return;
+    }
+
+    // === Nem országonként különböző: globális csíkok ===
     if (invoiceSlips.length === 0) {
       const firstSlip: InvoiceSlip = {
-        id: `slip-1-${Date.now()}`,
+        id: `slip-1-${now}`,
         admin_identifier: "Számla #1",
         items: invoiceItems.length > 0 ? [...invoiceItems] : [],
         comments: invoiceComments.length > 0 ? [...invoiceComments] : [],
       };
-      
-      // Második csík - üres, default 3 tétellel a Laravel logika szerint
-      const secondSlipId = `slip-2-${Date.now()}`;
+
+      const secondSlipId = `slip-2-${now}`;
       const secondSlip: InvoiceSlip = {
         id: secondSlipId,
         admin_identifier: null,
-        items: [
-          {
-            id: `new-item-${Date.now()}-ws`,
-            invoicing_data_id: secondSlipId,
-            item_name: "Workshop",
-            item_type: "workshop",
-            amount_name: null,
-            amount_value: null,
-            volume_name: null,
-            volume_value: null,
-            is_amount_changing: false,
-            is_volume_changing: false,
-            show_by_item: false,
-            show_activity_id: true,
-            with_timestamp: false,
-            comment: null,
-            data_request_email: null,
-            data_request_salutation: null,
-          },
-          {
-            id: `new-item-${Date.now()}-crisis`,
-            invoicing_data_id: secondSlipId,
-            item_name: "Krízisintervenció",
-            item_type: "crisis",
-            amount_name: null,
-            amount_value: null,
-            volume_name: null,
-            volume_value: null,
-            is_amount_changing: false,
-            is_volume_changing: false,
-            show_by_item: false,
-            show_activity_id: true,
-            with_timestamp: false,
-            comment: null,
-            data_request_email: null,
-            data_request_salutation: null,
-          },
-          {
-            id: `new-item-${Date.now()}-other`,
-            invoicing_data_id: secondSlipId,
-            item_name: "Egyéb tevékenység",
-            item_type: "other-activity",
-            amount_name: null,
-            amount_value: null,
-            volume_name: null,
-            volume_value: null,
-            is_amount_changing: false,
-            is_volume_changing: false,
-            show_by_item: false,
-            show_activity_id: true,
-            with_timestamp: false,
-            comment: null,
-            data_request_email: null,
-            data_request_salutation: null,
-          },
-        ],
+        items: makeDefaultSlipItems(secondSlipId),
         comments: [],
       };
-      
+
       setInvoiceSlips([firstSlip, secondSlip]);
-      // Töröljük az eredeti tételeket, mert most már a csíkokban vannak
       setInvoiceItems([]);
       setInvoiceComments([]);
     } else {
-      // Ha már van csík, hozzáadunk egy újat
-      const newSlipId = `slip-${invoiceSlips.length + 1}-${Date.now()}`;
+      const newSlipId = `slip-${invoiceSlips.length + 1}-${now}`;
       const newSlip: InvoiceSlip = {
         id: newSlipId,
         admin_identifier: null,
-        items: [
-          {
-            id: `new-item-${Date.now()}-ws`,
-            invoicing_data_id: newSlipId,
-            item_name: "Workshop",
-            item_type: "workshop",
-            amount_name: null,
-            amount_value: null,
-            volume_name: null,
-            volume_value: null,
-            is_amount_changing: false,
-            is_volume_changing: false,
-            show_by_item: false,
-            show_activity_id: true,
-            with_timestamp: false,
-            comment: null,
-            data_request_email: null,
-            data_request_salutation: null,
-          },
-          {
-            id: `new-item-${Date.now()}-crisis`,
-            invoicing_data_id: newSlipId,
-            item_name: "Krízisintervenció",
-            item_type: "crisis",
-            amount_name: null,
-            amount_value: null,
-            volume_name: null,
-            volume_value: null,
-            is_amount_changing: false,
-            is_volume_changing: false,
-            show_by_item: false,
-            show_activity_id: true,
-            with_timestamp: false,
-            comment: null,
-            data_request_email: null,
-            data_request_salutation: null,
-          },
-          {
-            id: `new-item-${Date.now()}-other`,
-            invoicing_data_id: newSlipId,
-            item_name: "Egyéb tevékenység",
-            item_type: "other-activity",
-            amount_name: null,
-            amount_value: null,
-            volume_name: null,
-            volume_value: null,
-            is_amount_changing: false,
-            is_volume_changing: false,
-            show_by_item: false,
-            show_activity_id: true,
-            with_timestamp: false,
-            comment: null,
-            data_request_email: null,
-            data_request_salutation: null,
-          },
-        ],
+        items: makeDefaultSlipItems(newSlipId),
         comments: [],
       };
-      
       setInvoiceSlips([...invoiceSlips, newSlip]);
     }
-    
+
     toast.success("Új számla csík létrehozva");
   };
 
@@ -464,6 +470,10 @@ const CompanyForm = () => {
               setInvoiceCommentsPerCountry={setInvoiceCommentsPerCountry}
               invoiceSlips={invoiceSlips}
               setInvoiceSlips={setInvoiceSlips}
+                activeInvoicingCountryId={activeInvoicingCountryId}
+                setActiveInvoicingCountryId={setActiveInvoicingCountryId}
+                invoiceSlipsPerCountry={invoiceSlipsPerCountry}
+                setInvoiceSlipsPerCountry={setInvoiceSlipsPerCountry}
               invoiceTemplates={invoiceTemplates}
               setInvoiceTemplates={setInvoiceTemplates}
             />
