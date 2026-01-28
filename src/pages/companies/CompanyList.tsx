@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash2, Pencil, ListChecks, Building2, ChevronDown, ChevronRight, Link2, Users } from "lucide-react";
+import { Trash2, Pencil, Building2, ChevronDown, ChevronRight, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -196,11 +196,6 @@ const CompanyList = () => {
     navigate(`/dashboard/settings/companies/${companyId}/edit`);
   };
 
-  const handleInputsClick = (companyId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigate(`/dashboard/settings/companies/${companyId}/inputs`);
-  };
-
   return (
     <div>
       <h1 className="text-3xl font-calibri-bold mb-2">Cégek</h1>
@@ -269,7 +264,6 @@ const CompanyList = () => {
                       key={`${country.id}-${company.id}`}
                       company={company}
                       onEdit={handleEditClick}
-                      onInputs={handleInputsClick}
                       onDelete={handleDeleteClick}
                     />
                   ))}
@@ -309,11 +303,10 @@ const CompanyList = () => {
 interface CompanyRowProps {
   company: Company;
   onEdit: (id: string, e: React.MouseEvent) => void;
-  onInputs: (id: string, e: React.MouseEvent) => void;
   onDelete: (company: Company, e: React.MouseEvent) => void;
 }
 
-const CompanyRow = ({ company, onEdit, onInputs, onDelete }: CompanyRowProps) => {
+const CompanyRow = ({ company, onEdit, onDelete }: CompanyRowProps) => {
   return (
     <div className="flex items-center justify-between p-3 bg-white border rounded-lg hover:bg-accent/50 transition-colors">
       <div className="flex items-center gap-3">
@@ -333,15 +326,6 @@ const CompanyRow = ({ company, onEdit, onInputs, onDelete }: CompanyRowProps) =>
         )}
       </div>
       <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => onInputs(company.id, e)}
-          className="text-primary hover:text-primary"
-        >
-          <ListChecks className="h-4 w-4 mr-1" />
-          Inputok
-        </Button>
         <Button
           variant="ghost"
           size="sm"
