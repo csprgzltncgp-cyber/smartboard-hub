@@ -994,7 +994,7 @@ export const CompanyInvoicingPanel = ({
                           );
                         }
                       }}
-                      onDelete={index > 0 ? () => {
+                      onDelete={invoiceSlips.length > 1 ? () => {
                         if (setInvoiceSlips) {
                           setInvoiceSlips(invoiceSlips.filter((s) => s.id !== slip.id));
                         }
@@ -1186,7 +1186,7 @@ export const CompanyInvoicingPanel = ({
                             });
                           }}
                           onDelete={
-                            index > 0
+                            currentCountrySlips.length > 1
                               ? () => {
                                   if (!setInvoiceSlipsPerCountry || !effectiveCountryId) return;
                                   setInvoiceSlipsPerCountry({
