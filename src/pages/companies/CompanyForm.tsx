@@ -3,9 +3,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { CompanyBasicDataPanel } from "@/components/companies/CompanyBasicDataPanel";
+import { CollapsiblePanel } from "@/components/companies/panels/CollapsiblePanel";
+import { SingleCountryBasicDataPanel } from "@/components/companies/panels/SingleCountryBasicDataPanel";
+import { MultiCountryBasicDataPanel } from "@/components/companies/panels/MultiCountryBasicDataPanel";
 import { CompanyCountrySettingsPanel } from "@/components/companies/CompanyCountrySettingsPanel";
 import { CompanyInvoicingPanel } from "@/components/companies/CompanyInvoicingPanel";
+import { CompanyTabContainer, CompanyTab } from "@/components/companies/tabs/CompanyTabContainer";
+import { OnboardingTabContent } from "@/components/companies/tabs/OnboardingTabContent";
+import { InputsTabContent } from "@/components/companies/tabs/InputsTabContent";
+import { NotesTabContent } from "@/components/companies/tabs/NotesTabContent";
+import { StatisticsTabContent } from "@/components/companies/tabs/StatisticsTabContent";
+import { ClientDashboardTabContent } from "@/components/companies/tabs/ClientDashboardTabContent";
 import { InvoiceSlip } from "@/components/companies/InvoiceSlipCard";
 import {
   CountryDifferentiate,
@@ -77,6 +85,9 @@ const CompanyForm = () => {
   const [clientLanguageId, setClientLanguageId] = useState<string | null>(null);
   const [hasClientPassword, setHasClientPassword] = useState(false);
 
+  // Létszám (csak 1 országnál globális)
+  const [headCount, setHeadCount] = useState<number | null>(null);
+
   // Workshops és Krízisintervenciók
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [crisisInterventions, setCrisisInterventions] = useState<CrisisIntervention[]>([]);
@@ -104,6 +115,12 @@ const CompanyForm = () => {
   
   // Számla sablonok (legacy - backward compatibility)
   const [invoiceTemplates, setInvoiceTemplates] = useState<InvoiceTemplate[]>([]);
+
+  // Kontextusfüggő fülek állapota
+  const [isNewcomer, setIsNewcomer] = useState(false); // CRM-ből érkezik
+  const [hasInputs, setHasInputs] = useState(false); // TODO: DB check
+  const [hasNotes, setHasNotes] = useState(false); // TODO: DB check  
+  const [hasStatistics, setHasStatistics] = useState(true); // TODO: DB check
 
   // Load company data in edit mode
   useEffect(() => {
@@ -149,6 +166,11 @@ const CompanyForm = () => {
     .filter(c => c.id !== companyId)
     .map(c => ({ id: c.id, name: c.name }));
 
+  // Dinamikus layout: 1 ország = panelek, több ország = fülek
+  const isSingleCountry = countryIds.length <= 1;
+  const isMultiCountry = countryIds.length > 1;
+  const isCGP = contractHolderId === "2";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -164,7 +186,6 @@ const CompanyForm = () => {
 
     try {
       if (isEditMode && companyId) {
-        // Mindig küldjük el a billing és invoicing adatokat, hogy a változások mentődjenek
         const success = await updateCompany(companyId, {
           name,
           countryIds,
@@ -234,7 +255,6 @@ const CompanyForm = () => {
       },
     ];
 
-    // === Országonként különböző számlázás esetén: az aktív ország alá adjuk a csíkot ===
     if (countryDifferentiates.invoicing) {
       const countryId = activeInvoicingCountryId || countryIds[0];
       if (!countryId) {
@@ -267,7 +287,6 @@ const CompanyForm = () => {
           [countryId]: [firstSlip, secondSlip],
         });
 
-        // az eredeti per-country listákat kiürítjük, mert most már a csíkokban vannak
         setInvoiceItemsPerCountry({ ...invoiceItemsPerCountry, [countryId]: [] });
         setInvoiceCommentsPerCountry({ ...invoiceCommentsPerCountry, [countryId]: [] });
       } else {
@@ -289,7 +308,6 @@ const CompanyForm = () => {
       return;
     }
 
-    // === Nem országonként különböző: globális csíkok ===
     if (invoiceSlips.length === 0) {
       const firstSlip: InvoiceSlip = {
         id: `slip-1-${now}`,
@@ -332,6 +350,219 @@ const CompanyForm = () => {
     );
   }
 
+  // === SINGLE COUNTRY LAYOUT (3 összecsukható panel) ===
+  const renderSingleCountryLayout = () => (
+    <div className="space-y-4">
+      {/* Alapadatok panel */}
+      <CollapsiblePanel title="Alapadatok">
+        <SingleCountryBasicDataPanel
+          name={name}
+          setName={setName}
+          active={active}
+          setActive={setActive}
+          countryIds={countryIds}
+          setCountryIds={setCountryIds}
+          contractHolderId={contractHolderId}
+          setContractHolderId={setContractHolderId}
+          orgId={orgId}
+          setOrgId={setOrgId}
+          contractStart={contractStart}
+          setContractStart={setContractStart}
+          contractEnd={contractEnd}
+          setContractEnd={setContractEnd}
+          contractReminderEmail={contractReminderEmail}
+          setContractReminderEmail={setContractReminderEmail}
+          connectedCompanyId={connectedCompanyId}
+          setConnectedCompanyId={setConnectedCompanyId}
+          countries={countries}
+          contractHolders={mockContractHolders}
+          connectedCompanies={connectedCompanies}
+          headCount={headCount}
+          setHeadCount={setHeadCount}
+          workshops={workshops}
+          setWorkshops={setWorkshops}
+          crisisInterventions={crisisInterventions}
+          setCrisisInterventions={setCrisisInterventions}
+          clientUsername={clientUsername}
+          setClientUsername={setClientUsername}
+          clientLanguageId={clientLanguageId}
+          setClientLanguageId={setClientLanguageId}
+          hasClientPassword={hasClientPassword}
+          onSetNewPassword={handleSetNewPassword}
+        />
+      </CollapsiblePanel>
+
+      {/* Számlázás panel (csak CGP) */}
+      {(isCGP || !contractHolderId) && (
+        <CollapsiblePanel title="Számlázás">
+          <CompanyInvoicingPanel
+            countryDifferentiates={countryDifferentiates}
+            setCountryDifferentiates={setCountryDifferentiates}
+            billingData={billingData}
+            setBillingData={setBillingData}
+            invoicingData={invoicingData}
+            setInvoicingData={setInvoicingData}
+            invoiceItems={invoiceItems}
+            setInvoiceItems={setInvoiceItems}
+            invoiceComments={invoiceComments}
+            setInvoiceComments={setInvoiceComments}
+            countryIds={countryIds}
+            countries={countries}
+            companyId={companyId || "new"}
+            billingDataPerCountry={billingDataPerCountry}
+            setBillingDataPerCountry={setBillingDataPerCountry}
+            invoicingDataPerCountry={invoicingDataPerCountry}
+            setInvoicingDataPerCountry={setInvoicingDataPerCountry}
+            invoiceItemsPerCountry={invoiceItemsPerCountry}
+            setInvoiceItemsPerCountry={setInvoiceItemsPerCountry}
+            invoiceCommentsPerCountry={invoiceCommentsPerCountry}
+            setInvoiceCommentsPerCountry={setInvoiceCommentsPerCountry}
+            invoiceSlips={invoiceSlips}
+            setInvoiceSlips={setInvoiceSlips}
+            activeInvoicingCountryId={activeInvoicingCountryId}
+            setActiveInvoicingCountryId={setActiveInvoicingCountryId}
+            invoiceSlipsPerCountry={invoiceSlipsPerCountry}
+            setInvoiceSlipsPerCountry={setInvoiceSlipsPerCountry}
+            invoiceTemplates={invoiceTemplates}
+            setInvoiceTemplates={setInvoiceTemplates}
+          />
+        </CollapsiblePanel>
+      )}
+
+      {/* Tételek & Megjegyzések - jelenleg része a Számlázásnak, de később külön lehet */}
+    </div>
+  );
+
+  // === MULTI COUNTRY LAYOUT (fülek) ===
+  const renderMultiCountryLayout = () => {
+    const tabs: CompanyTab[] = [
+      {
+        id: "basic",
+        label: "Alapadatok",
+        visible: true,
+        content: (
+          <MultiCountryBasicDataPanel
+            name={name}
+            setName={setName}
+            active={active}
+            setActive={setActive}
+            countryIds={countryIds}
+            setCountryIds={setCountryIds}
+            contractHolderId={contractHolderId}
+            setContractHolderId={setContractHolderId}
+            orgId={orgId}
+            setOrgId={setOrgId}
+            contractStart={contractStart}
+            setContractStart={setContractStart}
+            contractEnd={contractEnd}
+            setContractEnd={setContractEnd}
+            contractReminderEmail={contractReminderEmail}
+            setContractReminderEmail={setContractReminderEmail}
+            connectedCompanyId={connectedCompanyId}
+            setConnectedCompanyId={setConnectedCompanyId}
+            countryDifferentiates={countryDifferentiates}
+            setCountryDifferentiates={setCountryDifferentiates}
+            countries={countries}
+            contractHolders={mockContractHolders}
+            connectedCompanies={connectedCompanies}
+          />
+        ),
+      },
+      {
+        id: "countries",
+        label: "Országok",
+        visible: true,
+        content: (
+          <CompanyCountrySettingsPanel
+            countryIds={countryIds}
+            countries={countries}
+            countrySettings={countrySettings}
+            setCountrySettings={setCountrySettings}
+            countryDifferentiates={countryDifferentiates}
+            contractHolders={mockContractHolders}
+            accountAdmins={accountAdmins}
+            globalContractHolderId={contractHolderId}
+            workshops={workshops}
+            setWorkshops={setWorkshops}
+            crisisInterventions={crisisInterventions}
+            setCrisisInterventions={setCrisisInterventions}
+          />
+        ),
+      },
+      {
+        id: "client-dashboard",
+        label: "Client Dashboard",
+        visible: isCGP || !contractHolderId,
+        content: <ClientDashboardTabContent companyId={companyId || "new"} countryIds={countryIds} />,
+      },
+      {
+        id: "invoicing",
+        label: "Számlázás",
+        visible: isCGP || !contractHolderId,
+        content: (
+          <CompanyInvoicingPanel
+            countryDifferentiates={countryDifferentiates}
+            setCountryDifferentiates={setCountryDifferentiates}
+            billingData={billingData}
+            setBillingData={setBillingData}
+            invoicingData={invoicingData}
+            setInvoicingData={setInvoicingData}
+            invoiceItems={invoiceItems}
+            setInvoiceItems={setInvoiceItems}
+            invoiceComments={invoiceComments}
+            setInvoiceComments={setInvoiceComments}
+            countryIds={countryIds}
+            countries={countries}
+            companyId={companyId || "new"}
+            billingDataPerCountry={billingDataPerCountry}
+            setBillingDataPerCountry={setBillingDataPerCountry}
+            invoicingDataPerCountry={invoicingDataPerCountry}
+            setInvoicingDataPerCountry={setInvoicingDataPerCountry}
+            invoiceItemsPerCountry={invoiceItemsPerCountry}
+            setInvoiceItemsPerCountry={setInvoiceItemsPerCountry}
+            invoiceCommentsPerCountry={invoiceCommentsPerCountry}
+            setInvoiceCommentsPerCountry={setInvoiceCommentsPerCountry}
+            invoiceSlips={invoiceSlips}
+            setInvoiceSlips={setInvoiceSlips}
+            activeInvoicingCountryId={activeInvoicingCountryId}
+            setActiveInvoicingCountryId={setActiveInvoicingCountryId}
+            invoiceSlipsPerCountry={invoiceSlipsPerCountry}
+            setInvoiceSlipsPerCountry={setInvoiceSlipsPerCountry}
+            invoiceTemplates={invoiceTemplates}
+            setInvoiceTemplates={setInvoiceTemplates}
+          />
+        ),
+      },
+      // Kontextusfüggő fülek
+      {
+        id: "onboarding",
+        label: "Bevezetés",
+        visible: isNewcomer,
+        content: <OnboardingTabContent companyId={companyId || "new"} />,
+      },
+      {
+        id: "inputs",
+        label: "Inputok",
+        visible: hasInputs,
+        content: <InputsTabContent companyId={companyId || "new"} />,
+      },
+      {
+        id: "notes",
+        label: "Feljegyzések",
+        visible: hasNotes,
+        content: <NotesTabContent companyId={companyId || "new"} />,
+      },
+      {
+        id: "statistics",
+        label: "Statisztikák",
+        visible: hasStatistics,
+        content: <StatisticsTabContent companyId={companyId || "new"} />,
+      },
+    ];
+
+    return <CompanyTabContainer tabs={tabs} defaultTab="basic" />;
+  };
+
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
@@ -349,100 +580,8 @@ const CompanyForm = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Alapadatok panel */}
-        <div className="bg-card border rounded-lg p-6">
-          <CompanyBasicDataPanel
-            name={name}
-            setName={setName}
-            active={active}
-            setActive={setActive}
-            countryIds={countryIds}
-            setCountryIds={setCountryIds}
-            contractHolderId={contractHolderId}
-            setContractHolderId={setContractHolderId}
-            orgId={orgId}
-            setOrgId={setOrgId}
-            contractStart={contractStart}
-            setContractStart={setContractStart}
-            contractEnd={contractEnd}
-            setContractEnd={setContractEnd}
-            contractReminderEmail={contractReminderEmail}
-            setContractReminderEmail={setContractReminderEmail}
-            leadAccountId={leadAccountId}
-            setLeadAccountId={setLeadAccountId}
-            connectedCompanyId={connectedCompanyId}
-            setConnectedCompanyId={setConnectedCompanyId}
-            countryDifferentiates={countryDifferentiates}
-            setCountryDifferentiates={setCountryDifferentiates}
-            countries={countries}
-            contractHolders={mockContractHolders}
-            accountAdmins={accountAdmins}
-            connectedCompanies={connectedCompanies}
-            clientUsername={clientUsername}
-            setClientUsername={setClientUsername}
-            clientLanguageId={clientLanguageId}
-            setClientLanguageId={setClientLanguageId}
-            hasClientPassword={hasClientPassword}
-            onSetNewPassword={handleSetNewPassword}
-          />
-        </div>
-
-        {/* Ország beállítások panel */}
-        {countryIds.length > 0 && (
-          <div className="bg-card border rounded-lg p-6">
-            <CompanyCountrySettingsPanel
-              countryIds={countryIds}
-              countries={countries}
-              countrySettings={countrySettings}
-              setCountrySettings={setCountrySettings}
-              countryDifferentiates={countryDifferentiates}
-              contractHolders={mockContractHolders}
-              accountAdmins={accountAdmins}
-              globalContractHolderId={contractHolderId}
-              workshops={workshops}
-              setWorkshops={setWorkshops}
-              crisisInterventions={crisisInterventions}
-              setCrisisInterventions={setCrisisInterventions}
-            />
-          </div>
-        )}
-
-        {/* Számlázás panel (csak CGP esetén) */}
-        {(contractHolderId === "2" || !contractHolderId) && (
-          <div className="bg-card border rounded-lg p-6">
-            <CompanyInvoicingPanel
-              countryDifferentiates={countryDifferentiates}
-              setCountryDifferentiates={setCountryDifferentiates}
-              billingData={billingData}
-              setBillingData={setBillingData}
-              invoicingData={invoicingData}
-              setInvoicingData={setInvoicingData}
-              invoiceItems={invoiceItems}
-              setInvoiceItems={setInvoiceItems}
-              invoiceComments={invoiceComments}
-              setInvoiceComments={setInvoiceComments}
-              countryIds={countryIds}
-              countries={countries}
-              companyId={companyId || "new"}
-              billingDataPerCountry={billingDataPerCountry}
-              setBillingDataPerCountry={setBillingDataPerCountry}
-              invoicingDataPerCountry={invoicingDataPerCountry}
-              setInvoicingDataPerCountry={setInvoicingDataPerCountry}
-              invoiceItemsPerCountry={invoiceItemsPerCountry}
-              setInvoiceItemsPerCountry={setInvoiceItemsPerCountry}
-              invoiceCommentsPerCountry={invoiceCommentsPerCountry}
-              setInvoiceCommentsPerCountry={setInvoiceCommentsPerCountry}
-              invoiceSlips={invoiceSlips}
-              setInvoiceSlips={setInvoiceSlips}
-                activeInvoicingCountryId={activeInvoicingCountryId}
-                setActiveInvoicingCountryId={setActiveInvoicingCountryId}
-                invoiceSlipsPerCountry={invoiceSlipsPerCountry}
-                setInvoiceSlipsPerCountry={setInvoiceSlipsPerCountry}
-              invoiceTemplates={invoiceTemplates}
-              setInvoiceTemplates={setInvoiceTemplates}
-            />
-          </div>
-        )}
+        {/* Dinamikus layout az országok száma alapján */}
+        {isSingleCountry ? renderSingleCountryLayout() : renderMultiCountryLayout()}
 
         {/* Műveletek */}
         <div className="flex items-center gap-4">
@@ -451,7 +590,7 @@ const CompanyForm = () => {
             Mentés
           </Button>
 
-          {contractHolderId === "2" && (
+          {(isCGP || !contractHolderId) && (
             <Button
               type="button"
               variant="outline"
