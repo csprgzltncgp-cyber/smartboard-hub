@@ -148,7 +148,7 @@ export const CountryBillingForm = ({
       is_volume_changing: false,
       show_by_item: false,
       show_activity_id: false,
-      with_timestamp: true,
+      with_timestamp: false,
       comment: null,
       data_request_email: null,
       data_request_salutation: null,
