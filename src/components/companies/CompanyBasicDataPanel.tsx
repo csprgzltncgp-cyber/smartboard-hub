@@ -11,6 +11,11 @@ import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import { DifferentPerCountryToggle } from "./DifferentPerCountryToggle";
 import { CountryDifferentiate, AccountAdmin, ContractHolder } from "@/types/company";
 
+interface ConnectedCompany {
+  id: string;
+  name: string;
+}
+
 interface CompanyBasicDataPanelProps {
   name: string;
   setName: (name: string) => void;
@@ -30,11 +35,14 @@ interface CompanyBasicDataPanelProps {
   setContractReminderEmail: (email: string | null) => void;
   leadAccountId: string | null;
   setLeadAccountId: (id: string | null) => void;
+  connectedCompanyId: string | null;
+  setConnectedCompanyId: (id: string | null) => void;
   countryDifferentiates: CountryDifferentiate;
   setCountryDifferentiates: (diff: CountryDifferentiate) => void;
   countries: Array<{ id: string; code: string; name: string }>;
   contractHolders: ContractHolder[];
   accountAdmins: AccountAdmin[];
+  connectedCompanies: ConnectedCompany[];
   // Client Dashboard settings (csak ha CGP és reporting nincs country-nként)
   clientUsername: string;
   setClientUsername: (username: string) => void;
@@ -63,11 +71,14 @@ export const CompanyBasicDataPanel = ({
   setContractReminderEmail,
   leadAccountId,
   setLeadAccountId,
+  connectedCompanyId,
+  setConnectedCompanyId,
   countryDifferentiates,
   setCountryDifferentiates,
   countries,
   contractHolders,
   accountAdmins,
+  connectedCompanies,
   clientUsername,
   setClientUsername,
   clientLanguageId,
@@ -122,6 +133,29 @@ export const CompanyBasicDataPanel = ({
             placeholder="Cégnév"
             required
           />
+        </div>
+      </div>
+
+      {/* Kapcsolt cég */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+        <div className="space-y-2">
+          <Label>Kapcsolt cég</Label>
+          <Select
+            value={connectedCompanyId || ""}
+            onValueChange={(val) => setConnectedCompanyId(val || null)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Válasszon..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Nincs</SelectItem>
+              {connectedCompanies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {company.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
