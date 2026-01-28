@@ -224,29 +224,6 @@ const CountrySettingsCard = ({
       </CollapsibleTrigger>
 
       <CollapsibleContent className="space-y-4 p-4 border border-t-0 rounded-b-lg bg-background">
-        {/* Account (csak CGP esetén) */}
-        {isCGP && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Account</Label>
-              <Select
-                value={settings.activity_plan_user_id || ""}
-                onValueChange={(val) => onUpdate({ activity_plan_user_id: val || null })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Válasszon..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {accountAdmins.map((admin) => (
-                    <SelectItem key={admin.id} value={admin.id}>
-                      {admin.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        )}
 
         {/* Szerződéshordozó - ha országonként különböző */}
         {countryDifferentiates.contract_holder && (
