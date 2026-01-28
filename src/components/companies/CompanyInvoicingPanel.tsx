@@ -883,93 +883,90 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
   const bgColor = !item.item_type ? "bg-purple-100/50" : "bg-primary/10";
 
   return (
-    <div className={cn("rounded-lg p-4", bgColor)}>
-      <div className="flex gap-4">
-        {/* Tartalom */}
-        <div className="min-w-0 flex-1 space-y-4">
-          {/* Első sor: Tétel neve, Típus, checkboxok */}
-          <div className="flex items-start gap-4">
-            {/* Tétel megnevezése */}
-            <div className="flex-1 space-y-2">
-              <Input
-                value={item.item_name}
-                onChange={(e) => onUpdate({ item_name: e.target.value })}
-                placeholder="Tétel megnevezése"
-              />
-            </div>
-
-            {/* Típus választó */}
-            <div className="w-48 space-y-2">
-              <Select
-                value={item.item_type || "none"}
-                onValueChange={(val) =>
-                  onUpdate({ item_type: val === "none" ? "multiplication" : (val as InvoiceItemType) })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Input" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Kérjük, válasszon</SelectItem>
-                  {INVOICE_ITEM_TYPES.map((type) => (
-                    <SelectItem key={type.id} value={type.id}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Activity ID checkbox - csak workshop/crisis/other-activity esetén */}
-            {isWorkshopOrCrisis && (
-              <DifferentPerCountryToggle
-                label="Activity ID megjelenik"
-                checked={item.show_activity_id}
-                onChange={(checked) => onUpdate({ show_activity_id: checked })}
-              />
-            )}
-
-            {/* Tételesen checkbox - szorzás vagy contract holder esetén */}
-            {(isMultiplication || isContractHolder) && (
-              <DifferentPerCountryToggle
-                label="Tételesen"
-                checked={item.show_by_item}
-                onChange={(checked) => onUpdate({ show_by_item: checked })}
-              />
-            )}
+    <div className="flex gap-3 items-stretch">
+      {/* Fő panel - tartalom */}
+      <div className={cn("flex-1 rounded-lg p-4 space-y-4", bgColor)}>
+        {/* Első sor: Tétel neve + Típus */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Tétel megnevezése</Label>
+            <Input
+              value={item.item_name}
+              onChange={(e) => onUpdate({ item_name: e.target.value })}
+              placeholder="Tétel megnevezése"
+            />
           </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Típus</Label>
+            <Select
+              value={item.item_type || "none"}
+              onValueChange={(val) =>
+                onUpdate({ item_type: val === "none" ? "multiplication" : (val as InvoiceItemType) })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Kérjük, válasszon" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Kérjük, válasszon</SelectItem>
+                {INVOICE_ITEM_TYPES.map((type) => (
+                  <SelectItem key={type.id} value={type.id}>
+                    {type.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
-          {/* Képlet beállítása - szorzás vagy contract holder esetén */}
-          {needsVolumeAndAmount && (
-            <div className="space-y-4">
-          {/* Létszám sor */}
-          <div className="space-y-2">
-            <span className="text-sm text-muted-foreground">Létszám</span>
+        {/* Checkboxok sor */}
+        <div className="flex flex-wrap gap-4">
+          {isWorkshopOrCrisis && (
+            <DifferentPerCountryToggle
+              label="Activity ID megjelenik"
+              checked={item.show_activity_id}
+              onChange={(checked) => onUpdate({ show_activity_id: checked })}
+            />
+          )}
+          {(isMultiplication || isContractHolder) && (
+            <DifferentPerCountryToggle
+              label="Tételesen"
+              checked={item.show_by_item}
+              onChange={(checked) => onUpdate({ show_by_item: checked })}
+            />
+          )}
+        </div>
+
+        {/* Szorzás: Létszám + PEPM */}
+        {needsVolumeAndAmount && (
+          <div className="space-y-4 pt-2 border-t">
+            {/* Létszám sor */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-              {/* Létszám mező neve (szerkeszthető) */}
-              <Input
-                value={item.volume_name || "Munkavállalói létszám"}
-                onChange={(e) => onUpdate({ volume_name: e.target.value || null })}
-                placeholder="Munkavállalói létszám"
-              />
-
-              {/* Létszám érték - sárga ha változó */}
-              {item.is_volume_changing ? (
-                <div className="bg-amber-500 text-amber-50 h-10 flex items-center justify-center rounded-lg text-sm">
-                  Létszám a 'Számlázás' fül alatt!
-                </div>
-              ) : (
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Létszám mező neve</Label>
                 <Input
-                  type="number"
-                  value={item.volume_value || ""}
-                  onChange={(e) => onUpdate({ volume_value: e.target.value || null })}
-                  placeholder={isContractHolder ? "Automatikus kitöltés" : "Létszám érték"}
-                  disabled={isContractHolder}
-                  className={cn(isContractHolder && "opacity-50")}
+                  value={item.volume_name || "Munkavállalói létszám"}
+                  onChange={(e) => onUpdate({ volume_name: e.target.value || null })}
+                  placeholder="Munkavállalói létszám"
                 />
-              )}
-
-              {/* Változó toggle - csak szorzás esetén */}
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Létszám érték</Label>
+                {item.is_volume_changing ? (
+                  <div className="bg-amber-500 text-amber-50 h-10 flex items-center justify-center rounded-lg text-sm">
+                    Létszám a 'Számlázás' fül alatt!
+                  </div>
+                ) : (
+                  <Input
+                    type="number"
+                    value={item.volume_value || ""}
+                    onChange={(e) => onUpdate({ volume_value: e.target.value || null })}
+                    placeholder={isContractHolder ? "Automatikus" : "Érték"}
+                    disabled={isContractHolder}
+                    className={cn(isContractHolder && "opacity-50")}
+                  />
+                )}
+              </div>
               {isMultiplication && (
                 <DifferentPerCountryToggle
                   label="Változó"
@@ -978,162 +975,147 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
                 />
               )}
             </div>
-          </div>
 
-          {/* Adatbekérés email - ha változó */}
-          {item.is_volume_changing && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-              <div className="space-y-2">
-                <Label className="text-sm">Email cím adatbekéréshez</Label>
+            {/* Adatbekérés email - ha változó */}
+            {item.is_volume_changing && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Email cím adatbekéréshez</Label>
+                  <Input
+                    type="email"
+                    value={item.data_request_email || ""}
+                    onChange={(e) => onUpdate({ data_request_email: e.target.value || null })}
+                    placeholder="email@ceg.hu"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Megszólítás</Label>
+                  <Input
+                    value={item.data_request_salutation || ""}
+                    onChange={(e) => onUpdate({ data_request_salutation: e.target.value || null })}
+                    placeholder="Tisztelt..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* PEPM sor */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">PEPM mező neve</Label>
                 <Input
-                  type="email"
-                  value={item.data_request_email || ""}
-                  onChange={(e) => onUpdate({ data_request_email: e.target.value || null })}
-                  placeholder="email@ceg.hu"
+                  value={item.amount_name || "PEPM"}
+                  onChange={(e) => onUpdate({ amount_name: e.target.value || null })}
+                  placeholder="PEPM"
                 />
               </div>
-              <div className="space-y-2">
-                <Label className="text-sm">Megszólítás</Label>
-                <Input
-                  value={item.data_request_salutation || ""}
-                  onChange={(e) => onUpdate({ data_request_salutation: e.target.value || null })}
-                  placeholder="Tisztelt..."
-                />
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">PEPM érték</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={item.amount_value || ""}
+                    onChange={(e) => onUpdate({ amount_value: e.target.value || null })}
+                    placeholder="Érték"
+                    className="flex-1"
+                  />
+                  {currency && (
+                    <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                      {currency}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* PEPM sor */}
-          <div className="space-y-2">
-            <span className="text-sm text-muted-foreground">PEPM</span>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-              {/* PEPM mező neve (szerkeszthető) */}
-              <Input
-                value={item.amount_name || "PEPM"}
-                onChange={(e) => onUpdate({ amount_name: e.target.value || null })}
-                placeholder="PEPM"
-              />
-
-              {/* PEPM érték + devizanem */}
-              <div className="flex items-center gap-2">
+        {/* Csak összeg - amount típusnál */}
+        {needsAmountOnly && (
+          <div className="space-y-4 pt-2 border-t">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Összeg mező neve</Label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  value={item.amount_value || ""}
-                  onChange={(e) => onUpdate({ amount_value: e.target.value || null })}
-                  placeholder="Érték"
-                  className="flex-1"
+                  value={item.amount_name || "Összeg"}
+                  onChange={(e) => onUpdate({ amount_name: e.target.value || null })}
+                  placeholder="Összeg"
                 />
-                {currency && (
-                  <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-                    {currency}
-                  </span>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs text-muted-foreground">Összeg érték</Label>
+                {item.is_amount_changing ? (
+                  <div className="bg-amber-500 text-amber-50 h-10 flex items-center justify-center rounded-lg text-sm">
+                    Összeg a 'Számlázás' fül alatt!
+                  </div>
+                ) : (
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={item.amount_value || ""}
+                    onChange={(e) => onUpdate({ amount_value: e.target.value || null })}
+                    placeholder="Összeg érték"
+                  />
                 )}
               </div>
-            </div>
-          </div>
-            </div>
-          )}
-
-          {/* Csak összeg - amount típusnál */}
-          {needsAmountOnly && (
-            <div className="space-y-2">
-          <span className="text-sm text-muted-foreground">Összeg megadása</span>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            {/* Összeg mező neve (szerkeszthető) */}
-            <Input
-              value={item.amount_name || "Összeg"}
-              onChange={(e) => onUpdate({ amount_name: e.target.value || null })}
-              placeholder="Összeg"
-            />
-
-            {/* Összeg érték - sárga ha változó */}
-            {item.is_amount_changing ? (
-              <div className="bg-amber-500 text-amber-50 h-10 flex items-center justify-center rounded-lg text-sm">
-                Összeg a 'Számlázás' fül alatt!
-              </div>
-            ) : (
-              <Input
-                type="number"
-                step="0.01"
-                value={item.amount_value || ""}
-                onChange={(e) => onUpdate({ amount_value: e.target.value || null })}
-                placeholder="Összeg érték"
-              />
-            )}
-
-            {/* Változó toggle */}
-            <DifferentPerCountryToggle
-              label="Változó"
-              checked={item.is_amount_changing}
-              onChange={(checked) => onUpdate({ is_amount_changing: checked })}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Megjegyzés mező - ha megnyitott */}
-      {showComment && (
-        <div className="space-y-2">
-          <Label className="text-sm">Megjegyzés</Label>
-          <Input
-            value={item.comment || ""}
-            onChange={(e) => onUpdate({ comment: e.target.value || null })}
-            placeholder="Megjegyzés a tételhez..."
-          />
-            </div>
-          )}
-
-          {/* Megjegyzés mező */}
-          {showComment && (
-            <div className="space-y-2">
-              <Label className="text-sm">Megjegyzés</Label>
-              <Textarea
-                value={item.comment || ""}
-                onChange={(e) => onUpdate({ comment: e.target.value || null })}
-                placeholder="Megjegyzés..."
+              <DifferentPerCountryToggle
+                label="Változó"
+                checked={item.is_amount_changing}
+                onChange={(checked) => onUpdate({ is_amount_changing: checked })}
               />
             </div>
-          )}
-        </div>
-
-        {/* Akciók: panel a panelben, jobb oldal, függőlegesen */}
-        <div className="shrink-0">
-          <div className="rounded-lg border bg-background/60 p-1 flex flex-col items-center gap-1">
-            {(isMultiplication || isAmount) && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => onUpdate({ with_timestamp: !item.with_timestamp })}
-                className={cn("h-10 w-10", item.with_timestamp ? "text-primary" : "text-muted-foreground")}
-                title="Időbélyeg"
-              >
-                <Calendar className="h-5 w-5" fill={item.with_timestamp ? "currentColor" : "none"} />
-              </Button>
-            )}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowComment(!showComment)}
-              className={cn("h-10 w-10", showComment ? "text-primary" : "text-muted-foreground")}
-              title="Megjegyzés"
-            >
-              <MessageSquare className="h-5 w-5" fill={showComment ? "currentColor" : "none"} />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={onRemove}
-              className="h-10 w-10 text-destructive hover:text-destructive"
-              title="Törlés"
-            >
-              <Trash2 className="h-5 w-5" />
-            </Button>
           </div>
-        </div>
+        )}
+
+        {/* Megjegyzés mező */}
+        {showComment && (
+          <div className="space-y-1 pt-2 border-t">
+            <Label className="text-xs text-muted-foreground">Megjegyzés</Label>
+            <Textarea
+              value={item.comment || ""}
+              onChange={(e) => onUpdate({ comment: e.target.value || null })}
+              placeholder="Megjegyzés a tételhez..."
+              rows={2}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Akció panel - külön, jobb oldalon */}
+      <div className="shrink-0 flex flex-col gap-1 rounded-lg border bg-muted/30 p-1.5">
+        {(isMultiplication || isAmount) && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => onUpdate({ with_timestamp: !item.with_timestamp })}
+            className={cn("h-9 w-9", item.with_timestamp ? "text-primary bg-primary/10" : "text-muted-foreground")}
+            title="Időbélyeg"
+          >
+            <Calendar className="h-5 w-5" fill={item.with_timestamp ? "currentColor" : "none"} />
+          </Button>
+        )}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={() => setShowComment(!showComment)}
+          className={cn("h-9 w-9", showComment ? "text-primary bg-primary/10" : "text-muted-foreground")}
+          title="Megjegyzés"
+        >
+          <MessageSquare className="h-5 w-5" fill={showComment ? "currentColor" : "none"} />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onRemove}
+          className="h-9 w-9 text-destructive hover:bg-destructive/10"
+          title="Törlés"
+        >
+          <Trash2 className="h-5 w-5" />
+        </Button>
       </div>
     </div>
   );
