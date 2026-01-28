@@ -90,11 +90,130 @@ const CompanyForm = () => {
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [crisisInterventions, setCrisisInterventions] = useState<CrisisIntervention[]>([]);
 
-  // Számlázási adatok
-  const [billingData, setBillingData] = useState<BillingData | null>(null);
-  const [invoicingData, setInvoicingData] = useState<InvoicingData | null>(null);
-  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
-  const [invoiceComments, setInvoiceComments] = useState<InvoiceComment[]>([]);
+  // Számlázási adatok - mock adatokkal edit módban
+  const [billingData, setBillingData] = useState<BillingData | null>(
+    isEditMode
+      ? {
+          id: "bd-1",
+          company_id: companyId || "",
+          country_id: null,
+          admin_identifier: "TLK-2024",
+          name: "Magyar Telekom Nyrt.",
+          is_name_shown: true,
+          postal_code: "1013",
+          city: "Budapest",
+          street: "Krisztina krt.",
+          house_number: "55.",
+          is_address_shown: true,
+          po_number: "PO-123456",
+          is_po_number_shown: true,
+          is_po_number_changing: false,
+          is_po_number_required: true,
+          tax_number: "12345678-2-41",
+          community_tax_number: "HU12345678",
+          is_tax_number_shown: true,
+          group_id: "GRP-001",
+          payment_deadline: 30,
+          is_payment_deadline_shown: true,
+          invoicing_inactive: false,
+          invoicing_inactive_from: null,
+          invoicing_inactive_to: null,
+        }
+      : null
+  );
+  const [invoicingData, setInvoicingData] = useState<InvoicingData | null>(
+    isEditMode
+      ? {
+          id: "inv-1",
+          company_id: companyId || "",
+          country_id: null,
+          billing_frequency: "monthly",
+          invoice_language: "hungarian",
+          currency: "HUF",
+          vat_rate: 27,
+          tehk: false,
+          inside_eu: true,
+          outside_eu: false,
+          send_invoice_by_post: false,
+          send_completion_certificate_by_post: false,
+          post_code: null,
+          city: null,
+          street: null,
+          house_number: null,
+          send_invoice_by_email: true,
+          send_completion_certificate_by_email: true,
+          custom_email_subject: null,
+          invoice_emails: ["szamlazas@telekom.hu"],
+          upload_invoice_online: false,
+          invoice_online_url: null,
+          upload_completion_certificate_online: false,
+          completion_certificate_online_url: null,
+          contact_holder_name: "Pénzügyi Osztály",
+          show_contact_holder_name_on_post: false,
+        }
+      : null
+  );
+  const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>(
+    isEditMode
+      ? [
+          {
+            id: "item-1",
+            invoicing_data_id: "inv-1",
+            item_name: "EAP szolgáltatás",
+            item_type: "multiplication",
+            amount: 15000,
+            volume: 12,
+            is_amount_changing: false,
+            is_volume_changing: false,
+            show_by_item: true,
+            is_required: true,
+            show_activity_id: false,
+          },
+          {
+            id: "item-2",
+            invoicing_data_id: "inv-1",
+            item_name: "Workshop díj",
+            item_type: "workshop",
+            amount: 250000,
+            volume: null,
+            is_amount_changing: true,
+            is_volume_changing: false,
+            show_by_item: false,
+            is_required: false,
+            show_activity_id: true,
+          },
+          {
+            id: "item-3",
+            invoicing_data_id: "inv-1",
+            item_name: "Krízisintervenció",
+            item_type: "crisis",
+            amount: 180000,
+            volume: null,
+            is_amount_changing: false,
+            is_volume_changing: true,
+            show_by_item: true,
+            is_required: false,
+            show_activity_id: true,
+          },
+        ]
+      : []
+  );
+  const [invoiceComments, setInvoiceComments] = useState<InvoiceComment[]>(
+    isEditMode
+      ? [
+          {
+            id: "comment-1",
+            invoicing_data_id: "inv-1",
+            comment: "Fizetési határidő 30 nap",
+          },
+          {
+            id: "comment-2",
+            invoicing_data_id: "inv-1",
+            comment: "Közösségi adószám: HU12345678",
+          },
+        ]
+      : []
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

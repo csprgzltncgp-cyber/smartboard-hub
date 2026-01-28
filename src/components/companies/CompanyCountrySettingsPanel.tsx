@@ -208,8 +208,10 @@ const CountrySettingsCard = ({
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
         <div
-          className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
-            isOpen ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80"
+          className={`flex items-center justify-between p-3 cursor-pointer transition-colors ${
+            isOpen 
+              ? "bg-primary text-primary-foreground rounded-t-lg" 
+              : "bg-muted hover:bg-muted/80 rounded-lg"
           }`}
         >
           <span className="font-medium">{country.code}</span>
@@ -221,7 +223,7 @@ const CountrySettingsCard = ({
         </div>
       </CollapsibleTrigger>
 
-      <CollapsibleContent className="space-y-4 p-4 border rounded-b-lg -mt-1">
+      <CollapsibleContent className="space-y-4 p-4 border border-t-0 rounded-b-lg bg-background">
         {/* Account (csak CGP esetén) */}
         {isCGP && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
