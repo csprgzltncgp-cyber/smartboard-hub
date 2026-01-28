@@ -99,29 +99,6 @@ export const CompanyBasicDataPanel = ({
     <div className="space-y-6">
       <h2 className="text-lg font-semibold">Alapadatok</h2>
 
-      {/* Lead Account (csak CGP esetén) */}
-      {isCGP && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-          <div className="space-y-2">
-            <Label>Lead Account</Label>
-            <Select
-              value={leadAccountId || ""}
-              onValueChange={(val) => setLeadAccountId(val || null)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Válasszon..." />
-              </SelectTrigger>
-              <SelectContent>
-                {accountAdmins.map((admin) => (
-                  <SelectItem key={admin.id} value={admin.id}>
-                    {admin.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      )}
 
       {/* Cégnév */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
