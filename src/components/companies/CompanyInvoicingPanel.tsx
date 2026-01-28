@@ -1090,7 +1090,7 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
             variant="ghost"
             size="icon"
             onClick={() => onUpdate({ with_timestamp: !item.with_timestamp })}
-            className={cn("h-9 w-9", item.with_timestamp ? "text-primary bg-primary/10" : "text-muted-foreground")}
+            className={cn("h-9 w-9 text-cgp-teal/40 hover:text-cgp-teal hover:bg-cgp-teal/10", item.with_timestamp && "text-cgp-teal bg-cgp-teal/10")}
             title="Időbélyeg"
           >
             <Calendar className="h-5 w-5" fill={item.with_timestamp ? "currentColor" : "none"} />
@@ -1101,7 +1101,7 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
           variant="ghost"
           size="icon"
           onClick={() => setShowComment(!showComment)}
-          className={cn("h-9 w-9 hover:text-cgp-teal hover:bg-cgp-teal/10", showComment ? "text-cgp-teal bg-cgp-teal/10" : "text-cgp-teal/40")}
+          className={cn("h-9 w-9 text-cgp-teal/40 hover:text-cgp-teal hover:bg-cgp-teal/10", showComment && "text-cgp-teal bg-cgp-teal/10")}
           title="Megjegyzés"
         >
           <MessageSquare className="h-5 w-5" fill={showComment ? "currentColor" : "none"} />
