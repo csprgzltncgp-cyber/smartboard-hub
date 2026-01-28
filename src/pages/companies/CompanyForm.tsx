@@ -390,6 +390,13 @@ const CompanyForm = () => {
           hasClientPassword={hasClientPassword}
           onSetNewPassword={handleSetNewPassword}
         />
+        {/* Mentés gomb az Alapadatok panelben */}
+        <div className="flex justify-end mt-6 pt-4 border-t">
+          <Button type="submit" className="rounded-xl">
+            <Save className="h-4 w-4 mr-2" />
+            Mentés
+          </Button>
+        </div>
       </CollapsiblePanel>
 
       {/* Számlázás panel (csak CGP) */}
@@ -426,10 +433,24 @@ const CompanyForm = () => {
             invoiceTemplates={invoiceTemplates}
             setInvoiceTemplates={setInvoiceTemplates}
           />
+          {/* Mentés és Új számla gombok a Számlázás panelben */}
+          <div className="flex items-center gap-4 mt-6 pt-4 border-t">
+            <Button type="submit" className="rounded-xl">
+              <Save className="h-4 w-4 mr-2" />
+              Mentés
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddInvoiceList}
+              className="rounded-xl"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Új számla hozzáadása
+            </Button>
+          </div>
         </CollapsiblePanel>
       )}
-
-      {/* Tételek & Megjegyzések - jelenleg része a Számlázásnak, de később külön lehet */}
     </div>
   );
 
@@ -583,25 +604,27 @@ const CompanyForm = () => {
         {/* Dinamikus layout az országok száma alapján */}
         {isSingleCountry ? renderSingleCountryLayout() : renderMultiCountryLayout()}
 
-        {/* Műveletek */}
-        <div className="flex items-center gap-4">
-          <Button type="submit" className="rounded-xl">
-            <Save className="h-4 w-4 mr-2" />
-            Mentés
-          </Button>
-
-          {(isCGP || !contractHolderId) && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleAddInvoiceList}
-              className="rounded-xl"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Új számla hozzáadása
+        {/* Műveletek - csak multi-country layout esetén jelennek meg itt */}
+        {!isSingleCountry && (
+          <div className="flex items-center gap-4">
+            <Button type="submit" className="rounded-xl">
+              <Save className="h-4 w-4 mr-2" />
+              Mentés
             </Button>
-          )}
-        </div>
+
+            {(isCGP || !contractHolderId) && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAddInvoiceList}
+                className="rounded-xl"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Új számla hozzáadása
+              </Button>
+            )}
+          </div>
+        )}
       </form>
     </div>
   );
