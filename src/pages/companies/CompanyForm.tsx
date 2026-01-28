@@ -150,6 +150,7 @@ const CompanyForm = () => {
 
     try {
       if (isEditMode && companyId) {
+        // Mindig küldjük el a billing és invoicing adatokat, hogy a változások mentődjenek
         const success = await updateCompany(companyId, {
           name,
           countryIds,
@@ -157,8 +158,8 @@ const CompanyForm = () => {
           connectedCompanyId,
           leadAccountUserId: leadAccountId,
           countryDifferentiates,
-          billingData: billingData || undefined,
-          invoicingData: invoicingData || undefined,
+          billingData: billingData ?? {},
+          invoicingData: invoicingData ?? {},
           invoiceItems: invoiceItems,
           invoiceComments: invoiceComments,
         });

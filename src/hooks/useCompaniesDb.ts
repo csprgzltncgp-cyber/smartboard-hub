@@ -535,8 +535,8 @@ export const useCompaniesDb = () => {
           }, { onConflict: 'company_id' });
       }
 
-      // Update billing data
-      if (data.billingData || data.invoicingData) {
+      // Update billing data - always create/update if either billingData or invoicingData exists (even empty objects trigger this)
+      if (data.billingData !== undefined || data.invoicingData !== undefined) {
         const billingUpsert: any = {
           company_id: id,
           country_id: null,
