@@ -364,17 +364,19 @@ export const CompanyInvoicingPanel = ({
         <h2 className="text-lg font-semibold">Számlázás</h2>
       </div>
 
-      {/* Országonként különböző számlázás */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-        <div className="space-y-2">
-          <Label className="text-muted-foreground">Számlázás</Label>
-          <Input value="Számlázás" disabled className="bg-muted" />
+      {/* Országonként különböző számlázás - csak több ország esetén */}
+      {countryIds.length > 1 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div className="space-y-2">
+            <Label className="text-muted-foreground">Számlázás</Label>
+            <Input value="Számlázás" disabled className="bg-muted" />
+          </div>
+          <DifferentPerCountryToggle
+            checked={countryDifferentiates.invoicing}
+            onChange={(checked) => updateDifferentiate("invoicing", checked)}
+          />
         </div>
-        <DifferentPerCountryToggle
-          checked={countryDifferentiates.invoicing}
-          onChange={(checked) => updateDifferentiate("invoicing", checked)}
-        />
-      </div>
+      )}
 
       {/* Ha nem országonként különböző, itt jelennek meg a számlázási beállítások */}
       {!countryDifferentiates.invoicing && (
