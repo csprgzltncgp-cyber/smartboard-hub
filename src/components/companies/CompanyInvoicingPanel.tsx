@@ -282,18 +282,7 @@ export const CompanyInvoicingPanel = ({
 
             {/* Számlázási cím - Célország */}
             <div className="space-y-2 mt-4">
-              <div className="flex items-center justify-between">
-                <Label>Számlázási cím</Label>
-                <div className="flex items-center gap-2 text-xs">
-                  <Checkbox
-                    checked={currentBillingData.is_address_shown}
-                    onCheckedChange={(checked) =>
-                      updateBillingData({ is_address_shown: checked as boolean })
-                    }
-                  />
-                  <span className="text-muted-foreground">Megjelenik a számlán</span>
-                </div>
-              </div>
+              <Label>Számlázási cím</Label>
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div className="md:col-span-2">
                   <Input
@@ -896,19 +885,11 @@ const InvoiceItemRow = ({ item, index, onUpdate, onRemove }: InvoiceItemRowProps
       <div className="flex items-start gap-4">
         {/* Tétel megnevezése */}
         <div className="flex-1 space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="bg-cgp-dark text-white p-2 rounded">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-            </div>
-            <Input
-              value={item.item_name}
-              onChange={(e) => onUpdate({ item_name: e.target.value })}
-              placeholder="Tétel megnevezése"
-              className="bg-cgp-dark text-white placeholder:text-white/70 border-0"
-            />
-          </div>
+          <Input
+            value={item.item_name}
+            onChange={(e) => onUpdate({ item_name: e.target.value })}
+            placeholder="Tétel megnevezése"
+          />
         </div>
 
         {/* Típus választó */}
@@ -985,46 +966,43 @@ const InvoiceItemRow = ({ item, index, onUpdate, onRemove }: InvoiceItemRowProps
 
       {/* Képlet beállítása - szorzás vagy contract holder esetén */}
       {needsVolumeAndAmount && (
-        <div className="space-y-2">
-          <span className="text-sm text-primary">Képlet beállítása</span>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            {/* Mennyiség név */}
-            <div className="flex items-center gap-2">
-              <div className="bg-white p-2 rounded border">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </div>
+        <div className="space-y-4">
+          {/* Létszám sor */}
+          <div className="space-y-2">
+            <span className="text-sm text-muted-foreground">Létszám</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              {/* Létszám mező neve (szerkeszthető) */}
               <Input
-                value={item.volume_name || ""}
+                value={item.volume_name || "Munkavállalói létszám"}
                 onChange={(e) => onUpdate({ volume_name: e.target.value || null })}
-                placeholder="Mennyiség"
+                placeholder="Munkavállalói létszám"
               />
+
+              {/* Létszám érték - sárga ha változó */}
+              {item.is_volume_changing ? (
+                <div className="bg-amber-500 text-amber-50 h-10 flex items-center justify-center rounded-lg text-sm">
+                  Létszám a 'Számlázás' fül alatt!
+                </div>
+              ) : (
+                <Input
+                  type="number"
+                  value={item.volume_value || ""}
+                  onChange={(e) => onUpdate({ volume_value: e.target.value || null })}
+                  placeholder={isContractHolder ? "Automatikus kitöltés" : "Létszám érték"}
+                  disabled={isContractHolder}
+                  className={cn(isContractHolder && "opacity-50")}
+                />
+              )}
+
+              {/* Változó toggle - csak szorzás esetén */}
+              {isMultiplication && (
+                <DifferentPerCountryToggle
+                  label="Változó"
+                  checked={item.is_volume_changing}
+                  onChange={(checked) => onUpdate({ is_volume_changing: checked })}
+                />
+              )}
             </div>
-
-            {/* Mennyiség érték - sárga ha változó */}
-            {item.is_volume_changing ? (
-              <div className="bg-amber-500 text-amber-50 h-10 flex items-center justify-center rounded-lg text-sm">
-                Me. a 'Számlázás' fül alatt!
-              </div>
-            ) : (
-              <Input
-                value={item.volume_value || ""}
-                onChange={(e) => onUpdate({ volume_value: e.target.value || null })}
-                placeholder={isContractHolder ? "Automatikus kitöltés" : "Érték"}
-                disabled={isContractHolder}
-                className={cn(isContractHolder && "opacity-50")}
-              />
-            )}
-
-            {/* Változó toggle - csak szorzás esetén */}
-            {isMultiplication && (
-              <DifferentPerCountryToggle
-                label="Változó"
-                checked={item.is_volume_changing}
-                onChange={(checked) => onUpdate({ is_volume_changing: checked })}
-              />
-            )}
           </div>
 
           {/* Adatbekérés email - ha változó */}
@@ -1050,42 +1028,39 @@ const InvoiceItemRow = ({ item, index, onUpdate, onRemove }: InvoiceItemRowProps
             </div>
           )}
 
-          {/* Összeg sor */}
-          <span className="text-sm text-primary mt-4 block">Összeg megadása</span>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            {/* Összeg név */}
-            <div className="flex items-center gap-2">
-              <div className="bg-white p-2 rounded border">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </div>
+          {/* PEPM (egységár) sor */}
+          <div className="space-y-2">
+            <span className="text-sm text-muted-foreground">Egységár (PEPM)</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              {/* PEPM mező neve (szerkeszthető) */}
               <Input
-                value={item.amount_name || ""}
+                value={item.amount_name || "PEPM"}
                 onChange={(e) => onUpdate({ amount_name: e.target.value || null })}
-                placeholder="Összeg"
+                placeholder="PEPM"
+              />
+
+              {/* PEPM érték - sárga ha változó */}
+              {item.is_amount_changing ? (
+                <div className="bg-amber-500 text-amber-50 h-10 flex items-center justify-center rounded-lg text-sm">
+                  PEPM a 'Számlázás' fül alatt!
+                </div>
+              ) : (
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={item.amount_value || ""}
+                  onChange={(e) => onUpdate({ amount_value: e.target.value || null })}
+                  placeholder="Egységár érték"
+                />
+              )}
+
+              {/* Változó toggle */}
+              <DifferentPerCountryToggle
+                label="Változó"
+                checked={item.is_amount_changing}
+                onChange={(checked) => onUpdate({ is_amount_changing: checked })}
               />
             </div>
-
-            {/* Összeg érték - sárga ha változó */}
-            {item.is_amount_changing ? (
-              <div className="bg-amber-500 text-amber-50 h-10 flex items-center justify-center rounded-lg text-sm">
-                Összeg a 'Számlázás' fül alatt!
-              </div>
-            ) : (
-              <Input
-                value={item.amount_value || ""}
-                onChange={(e) => onUpdate({ amount_value: e.target.value || null })}
-                placeholder="Érték"
-              />
-            )}
-
-            {/* Változó toggle */}
-            <DifferentPerCountryToggle
-              label="Változó"
-              checked={item.is_amount_changing}
-              onChange={(checked) => onUpdate({ is_amount_changing: checked })}
-            />
           </div>
         </div>
       )}
@@ -1093,21 +1068,14 @@ const InvoiceItemRow = ({ item, index, onUpdate, onRemove }: InvoiceItemRowProps
       {/* Csak összeg - amount típusnál */}
       {needsAmountOnly && (
         <div className="space-y-2">
-          <span className="text-sm text-primary">Összeg megadása</span>
+          <span className="text-sm text-muted-foreground">Összeg megadása</span>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            {/* Összeg név */}
-            <div className="flex items-center gap-2">
-              <div className="bg-white p-2 rounded border">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </div>
-              <Input
-                value={item.amount_name || ""}
-                onChange={(e) => onUpdate({ amount_name: e.target.value || null })}
-                placeholder="Összeg"
-              />
-            </div>
+            {/* Összeg mező neve (szerkeszthető) */}
+            <Input
+              value={item.amount_name || "Összeg"}
+              onChange={(e) => onUpdate({ amount_name: e.target.value || null })}
+              placeholder="Összeg"
+            />
 
             {/* Összeg érték - sárga ha változó */}
             {item.is_amount_changing ? (
@@ -1116,9 +1084,11 @@ const InvoiceItemRow = ({ item, index, onUpdate, onRemove }: InvoiceItemRowProps
               </div>
             ) : (
               <Input
+                type="number"
+                step="0.01"
                 value={item.amount_value || ""}
                 onChange={(e) => onUpdate({ amount_value: e.target.value || null })}
-                placeholder="Érték"
+                placeholder="Összeg érték"
               />
             )}
 
