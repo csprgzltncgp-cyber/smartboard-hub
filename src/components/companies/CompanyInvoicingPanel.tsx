@@ -1101,7 +1101,7 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
           variant="ghost"
           size="icon"
           onClick={() => setShowComment(!showComment)}
-          className={cn("h-9 w-9", showComment ? "text-primary bg-primary/10" : "text-muted-foreground")}
+          className={cn("h-9 w-9", showComment ? "text-cgp-teal bg-cgp-teal/10" : "text-cgp-teal/40")}
           title="Megjegyzés"
         >
           <MessageSquare className="h-5 w-5" fill={showComment ? "currentColor" : "none"} />
