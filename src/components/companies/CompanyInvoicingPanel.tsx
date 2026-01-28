@@ -20,6 +20,7 @@ import {
   InvoicingData,
   InvoiceItem,
   InvoiceComment,
+  InvoiceTemplate,
   BILLING_FREQUENCIES,
   CURRENCIES,
   VAT_RATES,
@@ -50,6 +51,7 @@ interface CompanyInvoicingPanelProps {
   // Új propok országonkénti számlázáshoz
   countryIds: string[];
   countries: Country[];
+  companyId: string;
   // Országonkénti adatok
   billingDataPerCountry?: Record<string, BillingData>;
   setBillingDataPerCountry?: (data: Record<string, BillingData>) => void;
@@ -59,6 +61,9 @@ interface CompanyInvoicingPanelProps {
   setInvoiceItemsPerCountry?: (items: Record<string, InvoiceItem[]>) => void;
   invoiceCommentsPerCountry?: Record<string, InvoiceComment[]>;
   setInvoiceCommentsPerCountry?: (comments: Record<string, InvoiceComment[]>) => void;
+  // Számla sablonok kezelése
+  invoiceTemplates?: InvoiceTemplate[];
+  setInvoiceTemplates?: (templates: InvoiceTemplate[]) => void;
 }
 
 // Alapértelmezett BillingData
@@ -132,6 +137,7 @@ export const CompanyInvoicingPanel = ({
   setInvoiceComments,
   countryIds,
   countries,
+  companyId,
   billingDataPerCountry = {},
   setBillingDataPerCountry,
   invoicingDataPerCountry = {},
@@ -140,6 +146,8 @@ export const CompanyInvoicingPanel = ({
   setInvoiceItemsPerCountry,
   invoiceCommentsPerCountry = {},
   setInvoiceCommentsPerCountry,
+  invoiceTemplates = [],
+  setInvoiceTemplates,
 }: CompanyInvoicingPanelProps) => {
   const [emails, setEmails] = useState<string[]>(invoicingData?.invoice_emails || [""]);
   
@@ -949,6 +957,116 @@ export const CompanyInvoicingPanel = ({
                 <Plus className="h-4 w-4 mr-1" />
                 Megjegyzés hozzáadása
               </Button>
+            </div>
+
+            {/* Új számla hozzáadása - új sablon létrehozása */}
+            <div className="border-t pt-4 mt-4">
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                onClick={() => {
+                  // Új sablon létrehozása az aktuális tételek/megjegyzések lemásolásával
+                  if (setInvoiceTemplates) {
+                    const newTemplate: InvoiceTemplate = {
+                      id: `new-template-${Date.now()}`,
+                      company_id: companyId,
+                      country_id: null,
+                      admin_identifier: `Számla sablon #${invoiceTemplates.length + 2}`,
+                      name: billingData?.name || "",
+                      is_name_shown: true,
+                      country: billingData?.country || null,
+                      postal_code: billingData?.postal_code || null,
+                      city: billingData?.city || null,
+                      street: billingData?.street || null,
+                      house_number: billingData?.house_number || null,
+                      is_address_shown: true,
+                      po_number: null,
+                      is_po_number_shown: true,
+                      is_po_number_changing: false,
+                      is_po_number_required: true,
+                      tax_number: billingData?.tax_number || null,
+                      community_tax_number: billingData?.community_tax_number || null,
+                      is_tax_number_shown: true,
+                      group_id: billingData?.group_id || null,
+                      payment_deadline: 30,
+                      is_payment_deadline_shown: true,
+                      invoicing_inactive: false,
+                      invoicing_inactive_from: null,
+                      invoicing_inactive_to: null,
+                      // Automatikusan 3 alap tétel
+                      items: [
+                        {
+                          id: `ws-${Date.now()}`,
+                          invoicing_data_id: `new-template-${Date.now()}`,
+                          item_name: "Workshop",
+                          item_type: "workshop",
+                          amount_name: null,
+                          amount_value: null,
+                          volume_name: null,
+                          volume_value: null,
+                          is_amount_changing: false,
+                          is_volume_changing: false,
+                          show_by_item: false,
+                          show_activity_id: true,
+                          with_timestamp: false,
+                          comment: null,
+                          data_request_email: null,
+                          data_request_salutation: null,
+                        },
+                        {
+                          id: `crisis-${Date.now()}`,
+                          invoicing_data_id: `new-template-${Date.now()}`,
+                          item_name: "Krízisintervenció",
+                          item_type: "crisis",
+                          amount_name: null,
+                          amount_value: null,
+                          volume_name: null,
+                          volume_value: null,
+                          is_amount_changing: false,
+                          is_volume_changing: false,
+                          show_by_item: false,
+                          show_activity_id: true,
+                          with_timestamp: false,
+                          comment: null,
+                          data_request_email: null,
+                          data_request_salutation: null,
+                        },
+                        {
+                          id: `other-${Date.now()}`,
+                          invoicing_data_id: `new-template-${Date.now()}`,
+                          item_name: "Egyéb tevékenység",
+                          item_type: "other-activity",
+                          amount_name: null,
+                          amount_value: null,
+                          volume_name: null,
+                          volume_value: null,
+                          is_amount_changing: false,
+                          is_volume_changing: false,
+                          show_by_item: false,
+                          show_activity_id: true,
+                          with_timestamp: false,
+                          comment: null,
+                          data_request_email: null,
+                          data_request_salutation: null,
+                        },
+                      ],
+                      comments: [],
+                    };
+                    setInvoiceTemplates([...invoiceTemplates, newTemplate]);
+                  }
+                }}
+                className="rounded-xl"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Új számla hozzáadása
+              </Button>
+              
+              {invoiceTemplates.length > 0 && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  {invoiceTemplates.length} további számla sablon létezik
+                </p>
+              )}
             </div>
           </div>
         </div>

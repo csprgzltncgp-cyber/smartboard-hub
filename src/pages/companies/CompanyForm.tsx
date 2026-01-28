@@ -17,6 +17,7 @@ import {
   InvoicingData,
   InvoiceItem,
   InvoiceComment,
+  InvoiceTemplate,
 } from "@/types/company";
 import { useCompaniesDb } from "@/hooks/useCompaniesDb";
 import { useAppUsersDb } from "@/hooks/useAppUsersDb";
@@ -90,6 +91,9 @@ const CompanyForm = () => {
   const [invoicingDataPerCountry, setInvoicingDataPerCountry] = useState<Record<string, InvoicingData>>({});
   const [invoiceItemsPerCountry, setInvoiceItemsPerCountry] = useState<Record<string, InvoiceItem[]>>({});
   const [invoiceCommentsPerCountry, setInvoiceCommentsPerCountry] = useState<Record<string, InvoiceComment[]>>({});
+
+  // Számla sablonok (többsablonos számlázás)
+  const [invoiceTemplates, setInvoiceTemplates] = useState<InvoiceTemplate[]>([]);
 
   // Load company data in edit mode
   useEffect(() => {
@@ -300,6 +304,7 @@ const CompanyForm = () => {
               setInvoiceComments={setInvoiceComments}
               countryIds={countryIds}
               countries={countries}
+              companyId={companyId || "new"}
               billingDataPerCountry={billingDataPerCountry}
               setBillingDataPerCountry={setBillingDataPerCountry}
               invoicingDataPerCountry={invoicingDataPerCountry}
@@ -308,6 +313,8 @@ const CompanyForm = () => {
               setInvoiceItemsPerCountry={setInvoiceItemsPerCountry}
               invoiceCommentsPerCountry={invoiceCommentsPerCountry}
               setInvoiceCommentsPerCountry={setInvoiceCommentsPerCountry}
+              invoiceTemplates={invoiceTemplates}
+              setInvoiceTemplates={setInvoiceTemplates}
             />
           </div>
         )}

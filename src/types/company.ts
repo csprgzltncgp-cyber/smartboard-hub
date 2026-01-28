@@ -173,6 +173,39 @@ export interface InvoiceComment {
   comment: string;
 }
 
+// Invoice Template - Számla sablon (DirectInvoiceData megfelelője)
+// Egy cégnek több sablonja lehet, mindegyik külön tételekkel és megjegyzésekkel
+export interface InvoiceTemplate {
+  id: string;
+  company_id: string;
+  country_id: string | null;
+  admin_identifier: string | null;
+  name: string;
+  is_name_shown: boolean;
+  country: string | null;
+  postal_code: string | null;
+  city: string | null;
+  street: string | null;
+  house_number: string | null;
+  is_address_shown: boolean;
+  po_number: string | null;
+  is_po_number_shown: boolean;
+  is_po_number_changing: boolean;
+  is_po_number_required: boolean;
+  tax_number: string | null;
+  community_tax_number: string | null;
+  is_tax_number_shown: boolean;
+  group_id: string | null;
+  payment_deadline: number | null;
+  is_payment_deadline_shown: boolean;
+  invoicing_inactive: boolean;
+  invoicing_inactive_from: string | null;
+  invoicing_inactive_to: string | null;
+  // Kapcsolódó tételek és megjegyzések
+  items: InvoiceItem[];
+  comments: InvoiceComment[];
+}
+
 // Form state típusok
 export interface CompanyFormData {
   name: string;
@@ -191,6 +224,8 @@ export interface CompanyFormData {
   invoicingData: InvoicingData | null;
   invoiceItems: InvoiceItem[];
   invoiceComments: InvoiceComment[];
+  // Új: Számla sablonok (többsablonos számlázás)
+  invoiceTemplates: InvoiceTemplate[];
 }
 
 // Account admin típus (Lead Account választóhoz)
