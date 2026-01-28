@@ -805,7 +805,7 @@ export const CompanyInvoicingPanel = ({
             {/* Meglévő megjegyzések */}
             {invoiceComments.length > 0 && (
               <div className="space-y-3">
-                <Label>Megjegyzések</Label>
+                <Label>Megjegyzések (Nem jelenik meg a számlán)</Label>
                 {invoiceComments.map((comment) => (
                   <div key={comment.id} className="flex items-center gap-2">
                     <Input
@@ -1085,7 +1085,7 @@ const InvoiceItemRow = ({ item, index, currency, onUpdate, onRemove }: InvoiceIt
             <Textarea
               value={item.comment || ""}
               onChange={(e) => onUpdate({ comment: e.target.value || null })}
-              placeholder="Megjegyzés a tételhez..."
+              placeholder="Megjegyzés a tételhez... (Megjelenik a számlán)"
               rows={2}
             />
           </div>
