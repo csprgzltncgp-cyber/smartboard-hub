@@ -25,6 +25,8 @@ import ClientActivityPage from "./pages/my-clients/ClientActivityPage";
 import DataPage from "./pages/data/DataPage";
 import ExpertList from "./pages/experts/ExpertList";
 import ExpertForm from "./pages/experts/ExpertForm";
+import CompanyList from "./pages/companies/CompanyList";
+import CompanyForm from "./pages/companies/CompanyForm";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +52,10 @@ const App = () => (
               <Route path="settings/experts" element={<ExpertList />} />
               <Route path="settings/experts/new" element={<ExpertForm />} />
               <Route path="settings/experts/:expertId/edit" element={<ExpertForm />} />
+              <Route path="settings/companies" element={<CompanyList />} />
+              <Route path="settings/companies/new" element={<CompanyForm />} />
+              <Route path="settings/companies/:companyId/edit" element={<CompanyForm />} />
+              <Route path="settings/companies/:companyId/inputs" element={<InputsPage />} />
               <Route path="inputs" element={<InputsPage />} />
               <Route path="crm" element={<CrmPage />} />
               <Route path="smartboard/sales" element={<SalesSmartboard />} />

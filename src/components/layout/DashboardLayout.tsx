@@ -142,6 +142,8 @@ const DashboardLayout = () => {
       "/dashboard/settings/operators/new": { label: "Új operátor regisztrálása", parentPath: "/dashboard/settings/operators", parentLabel: "Operátorok" },
       "/dashboard/settings/experts": { label: "Szakértők" },
       "/dashboard/settings/experts/new": { label: "Új szakértő hozzáadása", parentPath: "/dashboard/settings/experts", parentLabel: "Szakértők" },
+      "/dashboard/settings/companies": { label: "Cégek" },
+      "/dashboard/settings/companies/new": { label: "Új cég hozzáadása", parentPath: "/dashboard/settings/companies", parentLabel: "Cégek" },
     };
 
     // Check for user edit route pattern
@@ -177,6 +179,24 @@ const DashboardLayout = () => {
       return [
         { label: "Szakértők", path: "/dashboard/settings/experts" },
         { label: "Szerkesztés", path: path },
+      ];
+    }
+
+    // Check for company edit route pattern
+    const companyEditMatch = path.match(/^\/dashboard\/settings\/companies\/([^/]+)\/edit$/);
+    if (companyEditMatch) {
+      return [
+        { label: "Cégek", path: "/dashboard/settings/companies" },
+        { label: "Szerkesztés", path: path },
+      ];
+    }
+
+    // Check for company inputs route pattern
+    const companyInputsMatch = path.match(/^\/dashboard\/settings\/companies\/([^/]+)\/inputs$/);
+    if (companyInputsMatch) {
+      return [
+        { label: "Cégek", path: "/dashboard/settings/companies" },
+        { label: "Inputok szerkesztése", path: path },
       ];
     }
 
