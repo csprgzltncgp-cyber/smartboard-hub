@@ -230,6 +230,12 @@ const CompanyForm = () => {
       : []
   );
 
+  // Országonkénti számlázási adatok
+  const [billingDataPerCountry, setBillingDataPerCountry] = useState<Record<string, BillingData>>({});
+  const [invoicingDataPerCountry, setInvoicingDataPerCountry] = useState<Record<string, InvoicingData>>({});
+  const [invoiceItemsPerCountry, setInvoiceItemsPerCountry] = useState<Record<string, InvoiceItem[]>>({});
+  const [invoiceCommentsPerCountry, setInvoiceCommentsPerCountry] = useState<Record<string, InvoiceComment[]>>({});
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -347,6 +353,14 @@ const CompanyForm = () => {
               setInvoiceComments={setInvoiceComments}
               countryIds={countryIds}
               countries={mockCountries}
+              billingDataPerCountry={billingDataPerCountry}
+              setBillingDataPerCountry={setBillingDataPerCountry}
+              invoicingDataPerCountry={invoicingDataPerCountry}
+              setInvoicingDataPerCountry={setInvoicingDataPerCountry}
+              invoiceItemsPerCountry={invoiceItemsPerCountry}
+              setInvoiceItemsPerCountry={setInvoiceItemsPerCountry}
+              invoiceCommentsPerCountry={invoiceCommentsPerCountry}
+              setInvoiceCommentsPerCountry={setInvoiceCommentsPerCountry}
             />
           </div>
         )}

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Trash2, MessageSquare, Calendar } from "lucide-react";
 import { DifferentPerCountryToggle } from "./DifferentPerCountryToggle";
+import { CountryBillingForm } from "./CountryBillingForm";
 import {
   CountryDifferentiate,
   BillingData,
@@ -26,7 +27,7 @@ import {
   INVOICE_ITEM_TYPES,
   InvoiceItemType,
 } from "@/types/company";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 interface Country {
@@ -231,6 +232,59 @@ export const CompanyInvoicingPanel = ({
 
   const removeInvoiceComment = (id: string) => {
     setInvoiceComments(invoiceComments.filter((c) => c.id !== id));
+  };
+
+  // === Országonkénti adatok kezelése ===
+  const getCountryBillingData = (countryId: string): BillingData => {
+    return billingDataPerCountry[countryId] || { ...getDefaultBillingData(), country_id: countryId };
+  };
+
+  const setCountryBillingData = (countryId: string, data: BillingData) => {
+    if (setBillingDataPerCountry) {
+      setBillingDataPerCountry({
+        ...billingDataPerCountry,
+        [countryId]: data,
+      });
+    }
+  };
+
+  const getCountryInvoicingData = (countryId: string): InvoicingData => {
+    return invoicingDataPerCountry[countryId] || { ...getDefaultInvoicingData(), country_id: countryId };
+  };
+
+  const setCountryInvoicingData = (countryId: string, data: InvoicingData) => {
+    if (setInvoicingDataPerCountry) {
+      setInvoicingDataPerCountry({
+        ...invoicingDataPerCountry,
+        [countryId]: data,
+      });
+    }
+  };
+
+  const getCountryInvoiceItems = (countryId: string): InvoiceItem[] => {
+    return invoiceItemsPerCountry[countryId] || [];
+  };
+
+  const setCountryInvoiceItems = (countryId: string, items: InvoiceItem[]) => {
+    if (setInvoiceItemsPerCountry) {
+      setInvoiceItemsPerCountry({
+        ...invoiceItemsPerCountry,
+        [countryId]: items,
+      });
+    }
+  };
+
+  const getCountryInvoiceComments = (countryId: string): InvoiceComment[] => {
+    return invoiceCommentsPerCountry[countryId] || [];
+  };
+
+  const setCountryInvoiceComments = (countryId: string, comments: InvoiceComment[]) => {
+    if (setInvoiceCommentsPerCountry) {
+      setInvoiceCommentsPerCountry({
+        ...invoiceCommentsPerCountry,
+        [countryId]: comments,
+      });
+    }
   };
 
   const currentBillingData = billingData || getDefaultBillingData();
@@ -910,76 +964,17 @@ export const CompanyInvoicingPanel = ({
               </TabsList>
               {selectedCountries.map((country) => (
                 <TabsContent key={country.id} value={country.id} className="mt-4">
-                  <div className="space-y-4 border-l-2 border-primary/20 pl-4 ml-2">
-                    <div className="text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">{country.name}</span> számlázási beállításai
-                    </div>
-                    {/* Placeholder: Országspecifikus form mezők ide kerülnek */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Számlázási név</Label>
-                        <Input placeholder={`${country.name} számlázási név`} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Devizanem</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Válassz devizanemet" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {CURRENCIES.map((curr) => (
-                              <SelectItem key={curr.id} value={curr.id}>
-                                {curr.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>ÁFA kulcs</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Válassz ÁFA kulcsot" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {VAT_RATES.map((rate) => (
-                              <SelectItem key={rate.id} value={rate.id}>
-                                {rate.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Számlázási gyakoriság</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Válassz gyakoriságot" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {BILLING_FREQUENCIES.map((freq) => (
-                              <SelectItem key={freq.id} value={freq.id}>
-                                {freq.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Adószám</Label>
-                      <Input placeholder="Adószám" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Számlázási cím</Label>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        <Input placeholder="Irányítószám" />
-                        <Input placeholder="Város" />
-                        <Input placeholder="Utca" />
-                        <Input placeholder="Házszám" />
-                      </div>
-                    </div>
-                  </div>
+                  <CountryBillingForm
+                    countryName={country.name}
+                    billingData={getCountryBillingData(country.id)}
+                    setBillingData={(data) => setCountryBillingData(country.id, data)}
+                    invoicingData={getCountryInvoicingData(country.id)}
+                    setInvoicingData={(data) => setCountryInvoicingData(country.id, data)}
+                    invoiceItems={getCountryInvoiceItems(country.id)}
+                    setInvoiceItems={(items) => setCountryInvoiceItems(country.id, items)}
+                    invoiceComments={getCountryInvoiceComments(country.id)}
+                    setInvoiceComments={(comments) => setCountryInvoiceComments(country.id, comments)}
+                  />
                 </TabsContent>
               ))}
             </Tabs>
