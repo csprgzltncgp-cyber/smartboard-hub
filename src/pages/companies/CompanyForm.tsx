@@ -456,6 +456,16 @@ const CompanyForm = () => {
       <CollapsiblePanel title="Feljegyzések">
         <NotesTabContent companyId={companyId || "new"} />
       </CollapsiblePanel>
+
+      {/* Inputok panel */}
+      <CollapsiblePanel title="Inputok">
+        <InputsTabContent companyId={companyId || "new"} />
+      </CollapsiblePanel>
+
+      {/* Statisztikák panel */}
+      <CollapsiblePanel title="Statisztikák">
+        <StatisticsTabContent companyId={companyId || "new"} />
+      </CollapsiblePanel>
     </div>
   );
 
@@ -569,7 +579,7 @@ const CompanyForm = () => {
       {
         id: "inputs",
         label: "Inputok",
-        visible: hasInputs,
+        visible: true,
         content: <InputsTabContent companyId={companyId || "new"} />,
       },
       {
@@ -581,7 +591,7 @@ const CompanyForm = () => {
       {
         id: "statistics",
         label: "Statisztikák",
-        visible: hasStatistics,
+        visible: true,
         content: <StatisticsTabContent companyId={companyId || "new"} />,
       },
     ];
