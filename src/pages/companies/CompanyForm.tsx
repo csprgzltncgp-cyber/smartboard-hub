@@ -611,6 +611,15 @@ const CompanyForm = () => {
                 <Save className="h-4 w-4 mr-2" />
                 Mentés
               </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => toast.info("Új felhasználó hozzáadása - fejlesztés alatt")}
+                className="rounded-xl"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Új felhasználó hozzáadása
+              </Button>
             </div>
           </div>
         ),
