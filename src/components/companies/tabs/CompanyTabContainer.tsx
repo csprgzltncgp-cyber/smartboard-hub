@@ -6,6 +6,7 @@ export interface CompanyTab {
   label: string;
   visible: boolean;
   content: React.ReactNode;
+  variant?: "default" | "highlight";
 }
 
 interface CompanyTabContainerProps {
@@ -33,7 +34,12 @@ export const CompanyTabContainer = ({
           <TabsTrigger
             key={tab.id}
             value={tab.id}
-            className="rounded-lg px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            className={cn(
+              "rounded-lg px-4 py-2",
+              tab.variant === "highlight"
+                ? "bg-[#91b752]/20 text-[#91b752] font-semibold data-[state=active]:bg-[#91b752] data-[state=active]:text-white"
+                : "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            )}
           >
             {tab.label}
           </TabsTrigger>

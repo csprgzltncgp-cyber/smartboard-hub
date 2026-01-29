@@ -12,6 +12,7 @@ interface CollapsiblePanelProps {
   defaultOpen?: boolean;
   children: React.ReactNode;
   className?: string;
+  variant?: "default" | "highlight";
 }
 
 export const CollapsiblePanel = ({
@@ -19,18 +20,33 @@ export const CollapsiblePanel = ({
   defaultOpen = false,
   children,
   className,
+  variant = "default",
 }: CollapsiblePanelProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
+  const isHighlight = variant === "highlight";
+
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className={cn("bg-card border rounded-lg", className)}>
+    <Collapsible 
+      open={isOpen} 
+      onOpenChange={setIsOpen} 
+      className={cn(
+        "bg-card border rounded-lg",
+        isHighlight && "border-[#91b752] border-2",
+        className
+      )}
+    >
       <CollapsibleTrigger asChild>
         <div
           className={cn(
             "flex items-center justify-between p-4 cursor-pointer transition-colors",
             isOpen
-              ? "bg-primary text-primary-foreground rounded-t-lg"
-              : "bg-muted hover:bg-muted/80 rounded-lg"
+              ? isHighlight 
+                ? "bg-[#91b752] text-white rounded-t-lg"
+                : "bg-primary text-primary-foreground rounded-t-lg"
+              : isHighlight
+                ? "bg-[#91b752]/20 hover:bg-[#91b752]/30 rounded-lg"
+                : "bg-muted hover:bg-muted/80 rounded-lg"
           )}
         >
           <span className="font-medium">{title}</span>
