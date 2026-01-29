@@ -203,6 +203,10 @@ const CompanyForm = () => {
         setInvoicingData(company.invoicingData);
         setInvoiceItems(company.invoiceItems);
         setInvoiceComments(company.invoiceComments);
+        // Load newcomer status from company data (e.g. from CRM)
+        if (company.isNewcomer) {
+          setIsNewcomer(true);
+        }
       }
       
       setFormLoading(false);
