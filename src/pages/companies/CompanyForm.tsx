@@ -357,9 +357,22 @@ const CompanyForm = () => {
     );
   }
 
-  // === SINGLE COUNTRY LAYOUT (3 összecsukható panel) ===
+  // === SINGLE COUNTRY LAYOUT (összecsukható panelek) ===
   const renderSingleCountryLayout = () => (
     <div className="space-y-4">
+      {/* Bevezetés panel - ELSŐ, ha Új érkező */}
+      {isNewcomer && (
+        <CollapsiblePanel title="Bevezetés" variant="highlight" defaultOpen>
+          <OnboardingTabContent companyId={companyId || "new"} />
+          <div className="flex items-center gap-4 mt-6 pt-4 border-t">
+            <Button type="submit" className="rounded-xl">
+              <Save className="h-4 w-4 mr-2" />
+              Mentés
+            </Button>
+          </div>
+        </CollapsiblePanel>
+      )}
+
       {/* Alapadatok panel */}
       <CollapsiblePanel title="Alapadatok">
         <SingleCountryBasicDataPanel
@@ -453,26 +466,6 @@ const CompanyForm = () => {
         </CollapsiblePanel>
       )}
 
-      {/* Feljegyzések panel */}
-      <CollapsiblePanel title="Feljegyzések">
-        <NotesTabContent companyId={companyId || "new"} />
-        <div className="flex items-center gap-4 mt-6 pt-4 border-t">
-          <Button type="submit" className="rounded-xl">
-            <Save className="h-4 w-4 mr-2" />
-            Mentés
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => toast.info("Új feljegyzés hozzáadása - fejlesztés alatt")}
-            className="rounded-xl"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Új feljegyzés hozzáadása
-          </Button>
-        </div>
-      </CollapsiblePanel>
-
       {/* Inputok panel */}
       <CollapsiblePanel title="Inputok">
         <InputsTabContent companyId={companyId || "new"} />
@@ -489,6 +482,26 @@ const CompanyForm = () => {
           >
             <Plus className="h-4 w-4 mr-2" />
             Új input hozzáadása
+          </Button>
+        </div>
+      </CollapsiblePanel>
+
+      {/* Feljegyzések panel */}
+      <CollapsiblePanel title="Feljegyzések">
+        <NotesTabContent companyId={companyId || "new"} />
+        <div className="flex items-center gap-4 mt-6 pt-4 border-t">
+          <Button type="submit" className="rounded-xl">
+            <Save className="h-4 w-4 mr-2" />
+            Mentés
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => toast.info("Új feljegyzés hozzáadása - fejlesztés alatt")}
+            className="rounded-xl"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Új feljegyzés hozzáadása
           </Button>
         </div>
       </CollapsiblePanel>
@@ -530,7 +543,26 @@ const CompanyForm = () => {
 
   // === MULTI COUNTRY LAYOUT (fülek) ===
   const renderMultiCountryLayout = () => {
-    const tabs: CompanyTab[] = [
+    // Alap fülek - Bevezetés ELSŐ helyen ha Új érkező
+    const onboardingTab: CompanyTab = {
+      id: "onboarding",
+      label: "Bevezetés",
+      visible: isNewcomer,
+      variant: "highlight",
+      content: (
+        <div className="space-y-6">
+          <OnboardingTabContent companyId={companyId || "new"} />
+          <div className="flex items-center gap-4 pt-4 border-t">
+            <Button type="submit" className="rounded-xl">
+              <Save className="h-4 w-4 mr-2" />
+              Mentés
+            </Button>
+          </div>
+        </div>
+      ),
+    };
+
+    const baseTabs: CompanyTab[] = [
       {
         id: "basic",
         label: "Alapadatok",
@@ -677,23 +709,6 @@ const CompanyForm = () => {
           </div>
         ),
       },
-      // Kontextusfüggő fülek
-      {
-        id: "onboarding",
-        label: "Bevezetés",
-        visible: isNewcomer,
-        content: (
-          <div className="space-y-6">
-            <OnboardingTabContent companyId={companyId || "new"} />
-            <div className="flex items-center gap-4 pt-4 border-t">
-              <Button type="submit" className="rounded-xl">
-                <Save className="h-4 w-4 mr-2" />
-                Mentés
-              </Button>
-            </div>
-          </div>
-        ),
-      },
       {
         id: "inputs",
         label: "Inputok",
@@ -762,7 +777,12 @@ const CompanyForm = () => {
       },
     ];
 
-    return <CompanyTabContainer tabs={tabs} defaultTab="basic" />;
+    // Ha Új érkező, a Bevezetés fül ELSŐ helyen
+    const tabs: CompanyTab[] = isNewcomer 
+      ? [onboardingTab, ...baseTabs]
+      : baseTabs;
+
+    return <CompanyTabContainer tabs={tabs} defaultTab={isNewcomer ? "onboarding" : "basic"} />;
   };
 
   return (
