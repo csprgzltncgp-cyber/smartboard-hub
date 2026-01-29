@@ -1,25 +1,27 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { ContractedEntity, createDefaultEntity, CountryEntities } from '@/types/contracted-entity';
 import { ConsultationRow, PriceHistoryEntry } from '@/types/company';
 
 /**
  * Hook a szerződött entitások kezelésére
+ * @param companyId - Opcionális cég ID. Ha meg van adva, automatikusan lekéri az entitásokat.
  */
-export const useContractedEntities = () => {
+export const useContractedEntities = (companyId?: string) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [entities, setEntities] = useState<ContractedEntity[]>([]);
 
   /**
    * Lekéri egy cég összes szerződött entitását
    */
-  const getEntitiesByCompanyId = useCallback(async (companyId: string): Promise<ContractedEntity[]> => {
+  const getEntitiesByCompanyId = useCallback(async (targetCompanyId: string): Promise<ContractedEntity[]> => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('company_contracted_entities')
         .select('*')
-        .eq('company_id', companyId)
+        .eq('company_id', targetCompanyId)
         .order('created_at', { ascending: true });
       
       if (error) throw error;
@@ -33,6 +35,23 @@ export const useContractedEntities = () => {
       setLoading(false);
     }
   }, []);
+
+  /**
+   * Frissíti a helyi entitás listát
+   */
+  const refreshEntities = useCallback(async () => {
+    if (!companyId) {
+      setEntities([]);
+      return;
+    }
+    const fetchedEntities = await getEntitiesByCompanyId(companyId);
+    setEntities(fetchedEntities);
+  }, [companyId, getEntitiesByCompanyId]);
+
+  // Automatikus lekérés ha companyId változik
+  useEffect(() => {
+    refreshEntities();
+  }, [refreshEntities]);
 
   /**
    * Lekéri egy adott ország entitásait egy cégen belül
@@ -97,7 +116,10 @@ export const useContractedEntities = () => {
       
       if (error) throw error;
       
-      return mapDbToEntity(data);
+      const newEntity = mapDbToEntity(data);
+      // Frissítjük a lokális listát
+      setEntities(prev => [...prev, newEntity]);
+      return newEntity;
     } catch (e: any) {
       console.error('[ContractedEntities] Failed to create entity:', e);
       setError(e.message);
@@ -144,6 +166,11 @@ export const useContractedEntities = () => {
       
       if (error) throw error;
       
+      // Frissítjük a lokális listát
+      setEntities(prev => prev.map(e => 
+        e.id === id ? { ...e, ...updates } : e
+      ));
+      
       return true;
     } catch (e: any) {
       console.error('[ContractedEntities] Failed to update entity:', e);
@@ -166,6 +193,9 @@ export const useContractedEntities = () => {
         .eq('id', id);
       
       if (error) throw error;
+      
+      // Frissítjük a lokális listát
+      setEntities(prev => prev.filter(e => e.id !== id));
       
       return true;
     } catch (e: any) {
@@ -228,8 +258,10 @@ export const useContractedEntities = () => {
   }, [createEntity]);
 
   return {
+    entities,
     loading,
     error,
+    refreshEntities,
     getEntitiesByCompanyId,
     getEntitiesByCountry,
     createEntity,
