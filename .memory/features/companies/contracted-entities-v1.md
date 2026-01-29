@@ -12,6 +12,8 @@ Company (Cég)
 └── Country (Ország)
     └── Contracted Entity (Szerződött Entitás)
         ├── Alapadatok (ORG ID, szerződés dátumok, ár, stb.)
+        ├── Szerződés adatai (ContractDataPanel - teljes)
+        ├── Workshop és Krízis adatok
         ├── Számlázási adatok
         └── Számla sablonok
 ```
@@ -32,26 +34,30 @@ Módosított táblák:
 
 ### UI megjelenés
 
-1. **Egy ország, egy entitás**: Egyszerű nézet (mai állapot) - entitás panel rejtett
-2. **Egy ország, több entitás bekapcsolva**: EntityListPanel látható, entitások listázhatók
-3. **Több ország, vegyes**: Minden országnál saját EntityListPanel
+Az entitás funkció OPCIONÁLIS minden cég esetében. A "Több entitás" toggle-val aktiválható.
 
-Az entitás funkció OPCIONÁLIS minden cég esetében. A "Több entitás" toggle-val aktiválható bármely cégprofil esetén (akár 1, akár több országos).
+**Aktiválás után:**
+- Füles (Tabs) navigáció jelenik meg az entitások között
+- Minden entitás fül egy teljes értékű Alapadatok panelt tartalmaz
+- "+ Új entitás" gomb a fülek mellett
+- Entitás törölhető (ha több mint 1 van)
 
-### Komponensek
-
-- `EntityListPanel` - Fő panel az entitások listázásához, toggle-val
-- `EntityFormDialog` - Entitás hozzáadás/szerkesztés dialógus
+**Komponensek:**
+- `EntityTabsPanel` - Fő panel füles navigációval
+- `EntityDataPanel` - Teljes értékű alapadat panel minden entitáshoz
+- `EntityFormDialog` - Legacy, már nem használt
 - Hook: `useContractedEntities(companyId?)` - CRUD műveletek, auto-fetch
 
 ### Típusok
 
 - `ContractedEntity` - fő entitás interfész (`src/types/contracted-entity.ts`)
 - `CountryEntities` - országonkénti csoportosítás UI-hoz
+- `WorkshopData`, `CrisisData` - JSON struktúrák
 
 ### Fontos szabályok
 
 1. Az entitás funkció opcionális, minden cég esetében elérhető
-2. Minden entitáshoz saját számlázási adatok tartozhatnak
-3. Az entitás neve szabadon megadható (pl. "Henkel Hungary Kft.")
-4. Migráció: meglévő `company_country_settings` adatok átvihetők entitásba
+2. Minden entitáshoz teljes szerződési adatok tartoznak (ContractDataPanel)
+3. Minden entitáshoz saját számlázási adatok tartozhatnak
+4. Az entitás neve szabadon megadható (pl. "Henkel Hungary Kft.")
+5. Migráció: meglévő `company_country_settings` adatok átvihetők entitásba
