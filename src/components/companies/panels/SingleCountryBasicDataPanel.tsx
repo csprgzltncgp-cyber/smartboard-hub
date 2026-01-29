@@ -201,13 +201,34 @@ export const SingleCountryBasicDataPanel = ({
     if (enabled && entities.length === 0 && companyId && countryId && !isCreatingInitialEntities) {
       setIsCreatingInitialEntities(true);
       try {
-        // Első entitás: MINDIG a cégnév (ha van), különben "Entitás 1"
-        // Ez lesz a fő entitás, ami a már létező cég adatait tartalmazza
+        // Első entitás: a meglévő cégadatokkal (cégnév, szerződés, stb.)
+        // Ez az entitás örökli az összes jelenleg kitöltött adatot
         const entity1Name = name?.trim() || "Entitás 1";
-        const entity1 = createDefaultEntity(companyId, countryId, entity1Name);
+        const entity1: Omit<ContractedEntity, 'id' | 'created_at' | 'updated_at'> = {
+          company_id: companyId,
+          country_id: countryId,
+          name: entity1Name,
+          org_id: orgId,
+          contract_date: contractStart,
+          contract_end_date: contractEnd,
+          reporting_data: {},
+          contract_holder_type: contractHolderId,
+          contract_price: contractPrice,
+          price_type: contractPriceType,
+          contract_currency: contractCurrency,
+          pillars: pillarCount,
+          occasions: sessionCount,
+          industry: industry,
+          consultation_rows: consultationRows,
+          price_history: priceHistory,
+          workshop_data: {},
+          crisis_data: {},
+          headcount: headCount,
+          inactive_headcount: null,
+        };
         await onAddEntity(entity1);
         
-        // Második entitás: mindig "Entitás 2"
+        // Második entitás: üres, alapértelmezett értékekkel
         const entity2 = createDefaultEntity(companyId, countryId, "Entitás 2");
         await onAddEntity(entity2);
       } finally {
