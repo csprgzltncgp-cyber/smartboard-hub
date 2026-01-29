@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Trash2, Pencil, Building2, ChevronDown, ChevronRight, Link2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,11 +25,27 @@ import { useCompaniesDb } from "@/hooks/useCompaniesDb";
 
 const CompanyList = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { companies, countries, loading, deleteCompany, fetchCompanies } = useCompaniesDb();
   const [selectedCountryIds, setSelectedCountryIds] = useState<string[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [companyToDelete, setCompanyToDelete] = useState<Company | null>(null);
   const [openCountries, setOpenCountries] = useState<string[]>([]);
+
+  // Restore list UI state when coming back from edit
+  useEffect(() => {
+    const state = location.state as
+      | {
+          selectedCountryIds?: string[];
+          openCountries?: string[];
+        }
+      | undefined;
+
+    if (!state) return;
+
+    if (state.selectedCountryIds) setSelectedCountryIds(state.selectedCountryIds);
+    if (state.openCountries) setOpenCountries(state.openCountries);
+  }, [location.state]);
 
   // Ország választó opciók
   const countryOptions = [
@@ -108,7 +124,15 @@ const CompanyList = () => {
 
   const handleEditClick = (companyId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/dashboard/settings/companies/${companyId}/edit`);
+    navigate(`/dashboard/settings/companies/${companyId}/edit`, {
+      state: {
+        from: "/dashboard/settings/companies",
+        companiesListState: {
+          selectedCountryIds,
+          openCountries,
+        },
+      },
+    });
   };
 
   if (loading) {

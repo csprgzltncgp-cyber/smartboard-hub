@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,6 +103,7 @@ const PHONE_PREFIXES = [
 
 const ExpertForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { expertId } = useParams<{ expertId: string }>();
   const isEditMode = Boolean(expertId);
 
@@ -817,7 +818,29 @@ const ExpertForm = () => {
   return (
     <div>
       <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            const state = location.state as
+              | {
+                  from?: string;
+                  expertsListState?: {
+                    selectedCountryIds: string[];
+                    openCountries: string[];
+                    countryTabs: Record<string, "all" | "individual" | "company">;
+                  };
+                }
+              | undefined;
+
+            if (state?.from === "/dashboard/settings/experts") {
+              navigate(state.from, { state: state.expertsListState });
+              return;
+            }
+
+            navigate(-1);
+          }}
+        >
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <h1 className="text-3xl font-calibri-bold">{getTitle()}</h1>
