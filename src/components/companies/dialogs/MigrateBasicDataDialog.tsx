@@ -43,17 +43,15 @@ export const MigrateBasicDataDialog = ({
   onConfirm,
   onCancel,
 }: MigrateBasicDataDialogProps) => {
-  const [basicDataCountryId, setBasicDataCountryId] = useState<string>(
-    countries[0]?.id || ""
-  );
-  const [invoicingCountryId, setInvoicingCountryId] = useState<string>(
+  const [selectedCountryId, setSelectedCountryId] = useState<string>(
     countries[0]?.id || ""
   );
 
   const handleConfirm = () => {
+    // Mindkét adat (alapadatok és számlázás) ugyanabba az országba kerül
     onConfirm(
-      hasBasicData ? basicDataCountryId : null,
-      hasInvoicingData ? invoicingCountryId : null
+      hasBasicData ? selectedCountryId : null,
+      hasInvoicingData ? selectedCountryId : null
     );
   };
 
@@ -76,53 +74,36 @@ export const MigrateBasicDataDialog = ({
             Meglévő adatok migrálása
           </DialogTitle>
           <DialogDescription>
-            Az "Alapadatok országonként különbözőek" opció bekapcsolásához meg kell határozni,
-            hogy a már meglévő adatok melyik országhoz kerüljenek.
+            Az "Alapadatok országonként különbözőek" opció bekapcsolásával a számlázás is 
+            országonként különböző lesz. Válaszd ki, melyik országhoz kerüljenek a már 
+            meglévő adatok.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {hasBasicData && (
-            <div className="space-y-2">
-              <Label>Melyik ország alá kerüljön a meglévő Alapadatok?</Label>
-              <Select value={basicDataCountryId} onValueChange={setBasicDataCountryId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Válasszon országot..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((country) => (
-                    <SelectItem key={country.id} value={country.id}>
-                      {country.name} ({country.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                A szerződési adatok (ár, szerződéshordozó, stb.) ehhez az országhoz lesznek rendelve.
-              </p>
+          <div className="space-y-2">
+            <Label>Melyik ország alá kerüljenek a meglévő adatok?</Label>
+            <Select value={selectedCountryId} onValueChange={setSelectedCountryId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Válasszon országot..." />
+              </SelectTrigger>
+              <SelectContent>
+                {countries.map((country) => (
+                  <SelectItem key={country.id} value={country.id}>
+                    {country.name} ({country.code})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="text-xs text-muted-foreground space-y-1">
+              {hasBasicData && (
+                <p>• A szerződési adatok (ár, szerződéshordozó, stb.) ehhez az országhoz lesznek rendelve.</p>
+              )}
+              {hasInvoicingData && (
+                <p>• A számlázási sablonok és beállítások szintén ehhez az országhoz lesznek rendelve.</p>
+              )}
             </div>
-          )}
-
-          {hasInvoicingData && (
-            <div className="space-y-2">
-              <Label>Melyik ország alá kerüljön a meglévő Számlázási adat?</Label>
-              <Select value={invoicingCountryId} onValueChange={setInvoicingCountryId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Válasszon országot..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((country) => (
-                    <SelectItem key={country.id} value={country.id}>
-                      {country.name} ({country.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                A számlázási sablonok és beállítások ehhez az országhoz lesznek rendelve.
-              </p>
-            </div>
-          )}
+          </div>
         </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">

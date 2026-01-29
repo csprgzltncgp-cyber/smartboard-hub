@@ -196,23 +196,22 @@ export const MultiCountryBasicDataPanel = ({
       setCountrySettings([...newCountrySettings, updatedSettings]);
     }
 
-    // Migrate invoicing data to the selected country
+    // Migrate invoicing data to the selected country (same country as basic data)
     if (invoicingCountryId && hasInvoicingData) {
       const updatedTemplates = invoiceTemplates.map((template) => ({
         ...template,
         country_id: invoicingCountryId,
       }));
       setInvoiceTemplates(updatedTemplates);
-      
-      // Also enable invoicing differentiate
-      setCountryDifferentiates({
-        ...countryDifferentiates,
-        basic_data: true,
-        invoicing: true,
-      });
-    } else {
-      setCountryDifferentiates({ ...countryDifferentiates, basic_data: true });
     }
+    
+    // Always enable both basic_data and invoicing differentiate together
+    // If basic data is per-country, invoicing must be per-country too
+    setCountryDifferentiates({
+      ...countryDifferentiates,
+      basic_data: true,
+      invoicing: true,
+    });
 
     setShowMigrateDialog(false);
   };
