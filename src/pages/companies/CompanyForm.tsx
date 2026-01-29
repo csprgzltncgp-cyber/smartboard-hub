@@ -107,9 +107,7 @@ const CompanyForm = () => {
   const [contractCurrency, setContractCurrency] = useState<string | null>(null);
   const [pillarCount, setPillarCount] = useState<number | null>(null);
   const [sessionCount, setSessionCount] = useState<number | null>(null);
-  const [consultationTypes, setConsultationTypes] = useState<string[]>([]);
-  const [consultationDurations, setConsultationDurations] = useState<string[]>([]);
-  const [consultationFormats, setConsultationFormats] = useState<string[]>([]);
+  const [consultationRows, setConsultationRows] = useState<import("@/types/company").ConsultationRow[]>([]);
   const [industry, setIndustry] = useState<string | null>(null);
 
   // Számlázási adatok
@@ -429,12 +427,8 @@ const CompanyForm = () => {
           setPillarCount={setPillarCount}
           sessionCount={sessionCount}
           setSessionCount={setSessionCount}
-          consultationTypes={consultationTypes}
-          setConsultationTypes={setConsultationTypes}
-          consultationDurations={consultationDurations}
-          setConsultationDurations={setConsultationDurations}
-          consultationFormats={consultationFormats}
-          setConsultationFormats={setConsultationFormats}
+          consultationRows={consultationRows}
+          setConsultationRows={setConsultationRows}
           industry={industry}
           setIndustry={setIndustry}
         />
@@ -615,12 +609,8 @@ const CompanyForm = () => {
               setPillarCount={setPillarCount}
               sessionCount={sessionCount}
               setSessionCount={setSessionCount}
-              consultationTypes={consultationTypes}
-              setConsultationTypes={setConsultationTypes}
-              consultationDurations={consultationDurations}
-              setConsultationDurations={setConsultationDurations}
-              consultationFormats={consultationFormats}
-              setConsultationFormats={setConsultationFormats}
+              consultationRows={consultationRows}
+              setConsultationRows={setConsultationRows}
               industry={industry}
               setIndustry={setIndustry}
             />

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import { DifferentPerCountryToggle } from "../DifferentPerCountryToggle";
-import { CountryDifferentiate, ContractHolder } from "@/types/company";
+import { CountryDifferentiate, ContractHolder, ConsultationRow } from "@/types/company";
 import { ContractDataPanel } from "./ContractDataPanel";
 
 interface Country {
@@ -52,12 +52,8 @@ interface MultiCountryBasicDataPanelProps {
   setPillarCount: (count: number | null) => void;
   sessionCount: number | null;
   setSessionCount: (count: number | null) => void;
-  consultationTypes: string[];
-  setConsultationTypes: (types: string[]) => void;
-  consultationDurations: string[];
-  setConsultationDurations: (durations: string[]) => void;
-  consultationFormats: string[];
-  setConsultationFormats: (formats: string[]) => void;
+  consultationRows: ConsultationRow[];
+  setConsultationRows: (rows: ConsultationRow[]) => void;
   industry: string | null;
   setIndustry: (industry: string | null) => void;
 }
@@ -96,12 +92,8 @@ export const MultiCountryBasicDataPanel = ({
   setPillarCount,
   sessionCount,
   setSessionCount,
-  consultationTypes,
-  setConsultationTypes,
-  consultationDurations,
-  setConsultationDurations,
-  consultationFormats,
-  setConsultationFormats,
+  consultationRows,
+  setConsultationRows,
   industry,
   setIndustry,
 }: MultiCountryBasicDataPanelProps) => {
@@ -163,12 +155,8 @@ export const MultiCountryBasicDataPanel = ({
         setPillarCount={setPillarCount}
         sessionCount={sessionCount}
         setSessionCount={setSessionCount}
-        consultationTypes={consultationTypes}
-        setConsultationTypes={setConsultationTypes}
-        consultationDurations={consultationDurations}
-        setConsultationDurations={setConsultationDurations}
-        consultationFormats={consultationFormats}
-        setConsultationFormats={setConsultationFormats}
+        consultationRows={consultationRows}
+        setConsultationRows={setConsultationRows}
         industry={industry}
         setIndustry={setIndustry}
         showDifferentPerCountry={countryIds.length > 1}

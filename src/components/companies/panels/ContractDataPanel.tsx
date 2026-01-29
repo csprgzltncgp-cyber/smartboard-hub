@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, FileText, X } from "lucide-react";
+import { Upload, FileText, X, Plus, Trash2 } from "lucide-react";
 import { DifferentPerCountryToggle } from "../DifferentPerCountryToggle";
 import { CURRENCIES, INDUSTRIES, ContractHolder, CountryDifferentiate } from "@/types/company";
 import { useState, useRef } from "react";
@@ -44,6 +44,14 @@ const CONSULTATION_FORMATS = [
   { id: "chat", label: "Szöveges üzenet (Chat)" },
 ];
 
+// Consultation row type
+export interface ConsultationRow {
+  id: string;
+  type: string | null;
+  durations: string[];
+  formats: string[];
+}
+
 interface ContractDataPanelProps {
   contractHolderId: string | null;
   setContractHolderId: (id: string | null) => void;
@@ -66,13 +74,9 @@ interface ContractDataPanelProps {
   setPillarCount: (count: number | null) => void;
   sessionCount: number | null;
   setSessionCount: (count: number | null) => void;
-  // Consultation options
-  consultationTypes: string[];
-  setConsultationTypes: (types: string[]) => void;
-  consultationDurations: string[];
-  setConsultationDurations: (durations: string[]) => void;
-  consultationFormats: string[];
-  setConsultationFormats: (formats: string[]) => void;
+  // Consultation rows (new structure)
+  consultationRows: ConsultationRow[];
+  setConsultationRows: (rows: ConsultationRow[]) => void;
   // Industry
   industry: string | null;
   setIndustry: (industry: string | null) => void;
@@ -98,12 +102,8 @@ export const ContractDataPanel = ({
   setPillarCount,
   sessionCount,
   setSessionCount,
-  consultationTypes,
-  setConsultationTypes,
-  consultationDurations,
-  setConsultationDurations,
-  consultationFormats,
-  setConsultationFormats,
+  consultationRows,
+  setConsultationRows,
   industry,
   setIndustry,
   showDifferentPerCountry = false,
@@ -130,7 +130,6 @@ export const ContractDataPanel = ({
     setIsUploading(true);
     try {
       // TODO: Implement actual file upload to Supabase Storage
-      // For now, we'll just simulate it
       await new Promise((resolve) => setTimeout(resolve, 1000));
       const fakeUrl = `contracts/${Date.now()}_${file.name}`;
       setContractFileUrl(fakeUrl);
@@ -148,6 +147,37 @@ export const ContractDataPanel = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  // Consultation row handlers
+  const addConsultationRow = () => {
+    const newRow: ConsultationRow = {
+      id: crypto.randomUUID(),
+      type: null,
+      durations: [],
+      formats: [],
+    };
+    setConsultationRows([...consultationRows, newRow]);
+  };
+
+  const removeConsultationRow = (rowId: string) => {
+    setConsultationRows(consultationRows.filter((row) => row.id !== rowId));
+  };
+
+  const updateConsultationRow = (rowId: string, field: keyof ConsultationRow, value: any) => {
+    setConsultationRows(
+      consultationRows.map((row) =>
+        row.id === rowId ? { ...row, [field]: value } : row
+      )
+    );
+  };
+
+  // Get available consultation types (exclude already selected ones)
+  const getAvailableTypes = (currentRowId: string) => {
+    const usedTypes = consultationRows
+      .filter((row) => row.id !== currentRowId && row.type)
+      .map((row) => row.type);
+    return CONSULTATION_TYPES.filter((t) => !usedTypes.includes(t.id));
   };
 
   return (
@@ -301,32 +331,102 @@ export const ContractDataPanel = ({
         </div>
       </div>
 
-      {/* Consultation Types, Durations, Formats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <MultiSelectField
-          label="Tanácsadás típusa"
-          options={CONSULTATION_TYPES}
-          selectedIds={consultationTypes}
-          onChange={setConsultationTypes}
-          placeholder="Válassz..."
-          badgeColor="teal"
-        />
-        <MultiSelectField
-          label="Tanácsadás időtartama"
-          options={CONSULTATION_DURATIONS}
-          selectedIds={consultationDurations}
-          onChange={setConsultationDurations}
-          placeholder="Válassz..."
-          badgeColor="teal"
-        />
-        <MultiSelectField
-          label="Tanácsadás formája"
-          options={CONSULTATION_FORMATS}
-          selectedIds={consultationFormats}
-          onChange={setConsultationFormats}
-          placeholder="Válassz..."
-          badgeColor="teal"
-        />
+      {/* Consultation Rows */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label>Tanácsadás beállítások</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addConsultationRow}
+            className="h-8"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Új sor
+          </Button>
+        </div>
+
+        {consultationRows.length === 0 ? (
+          <div className="text-sm text-muted-foreground py-4 text-center border border-dashed rounded-lg">
+            Nincs tanácsadás beállítás. Kattints az "Új sor" gombra a hozzáadáshoz.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {consultationRows.map((row, index) => (
+              <div
+                key={row.id}
+                className="bg-background border rounded-lg p-3 space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {index + 1}. tanácsadás típus
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeConsultationRow(row.id)}
+                    className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {/* Type selector */}
+                  <div className="space-y-1">
+                    <Label className="text-xs">Típus</Label>
+                    <Select
+                      value={row.type || "none"}
+                      onValueChange={(val) =>
+                        updateConsultationRow(row.id, "type", val === "none" ? null : val)
+                      }
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="Válassz típust..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Válassz típust...</SelectItem>
+                        {getAvailableTypes(row.id).map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.label}
+                          </SelectItem>
+                        ))}
+                        {/* Also show the currently selected type if any */}
+                        {row.type && !getAvailableTypes(row.id).find((t) => t.id === row.type) && (
+                          <SelectItem value={row.type}>
+                            {CONSULTATION_TYPES.find((t) => t.id === row.type)?.label}
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Duration multi-select */}
+                  <MultiSelectField
+                    label="Időtartam"
+                    options={CONSULTATION_DURATIONS}
+                    selectedIds={row.durations}
+                    onChange={(durations) => updateConsultationRow(row.id, "durations", durations)}
+                    placeholder="Válassz..."
+                    badgeColor="teal"
+                  />
+
+                  {/* Format multi-select */}
+                  <MultiSelectField
+                    label="Forma"
+                    options={CONSULTATION_FORMATS}
+                    selectedIds={row.formats}
+                    onChange={(formats) => updateConsultationRow(row.id, "formats", formats)}
+                    placeholder="Válassz..."
+                    badgeColor="teal"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Industry */}

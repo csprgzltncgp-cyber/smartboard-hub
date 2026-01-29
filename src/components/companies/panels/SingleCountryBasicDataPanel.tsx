@@ -11,7 +11,7 @@ import {
 import { Plus, ChevronDown, ChevronUp, X } from "lucide-react";
 import { useState } from "react";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
-import { ContractHolder, Workshop, CrisisIntervention, CountryDifferentiate } from "@/types/company";
+import { ContractHolder, Workshop, CrisisIntervention, CountryDifferentiate, ConsultationRow } from "@/types/company";
 import { ContractDataPanel } from "./ContractDataPanel";
 
 interface Country {
@@ -71,12 +71,8 @@ interface SingleCountryBasicDataPanelProps {
   setPillarCount: (count: number | null) => void;
   sessionCount: number | null;
   setSessionCount: (count: number | null) => void;
-  consultationTypes: string[];
-  setConsultationTypes: (types: string[]) => void;
-  consultationDurations: string[];
-  setConsultationDurations: (durations: string[]) => void;
-  consultationFormats: string[];
-  setConsultationFormats: (formats: string[]) => void;
+  consultationRows: ConsultationRow[];
+  setConsultationRows: (rows: ConsultationRow[]) => void;
   industry: string | null;
   setIndustry: (industry: string | null) => void;
 }
@@ -122,12 +118,8 @@ export const SingleCountryBasicDataPanel = ({
   setPillarCount,
   sessionCount,
   setSessionCount,
-  consultationTypes,
-  setConsultationTypes,
-  consultationDurations,
-  setConsultationDurations,
-  consultationFormats,
-  setConsultationFormats,
+  consultationRows,
+  setConsultationRows,
   industry,
   setIndustry,
 }: SingleCountryBasicDataPanelProps) => {
@@ -257,12 +249,8 @@ export const SingleCountryBasicDataPanel = ({
         setPillarCount={setPillarCount}
         sessionCount={sessionCount}
         setSessionCount={setSessionCount}
-        consultationTypes={consultationTypes}
-        setConsultationTypes={setConsultationTypes}
-        consultationDurations={consultationDurations}
-        setConsultationDurations={setConsultationDurations}
-        consultationFormats={consultationFormats}
-        setConsultationFormats={setConsultationFormats}
+        consultationRows={consultationRows}
+        setConsultationRows={setConsultationRows}
         industry={industry}
         setIndustry={setIndustry}
         showDifferentPerCountry={false}
