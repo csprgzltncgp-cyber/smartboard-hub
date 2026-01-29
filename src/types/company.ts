@@ -21,6 +21,7 @@ export interface PriceHistoryEntry {
 export interface Company {
   id: string;
   name: string;
+  dispatch_name: string | null; // Cég elnevezése kiközvetítéshez
   active: boolean;
   country_ids: string[];
   contract_holder_id: string | null;

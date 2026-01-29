@@ -267,6 +267,7 @@ export type Database = {
           contract_holder_type: string | null
           country_id: string
           created_at: string
+          dispatch_name: string | null
           id: string
           lead_account_user_id: string | null
           name: string
@@ -280,6 +281,7 @@ export type Database = {
           contract_holder_type?: string | null
           country_id: string
           created_at?: string
+          dispatch_name?: string | null
           id?: string
           lead_account_user_id?: string | null
           name: string
@@ -293,6 +295,7 @@ export type Database = {
           contract_holder_type?: string | null
           country_id?: string
           created_at?: string
+          dispatch_name?: string | null
           id?: string
           lead_account_user_id?: string | null
           name?: string

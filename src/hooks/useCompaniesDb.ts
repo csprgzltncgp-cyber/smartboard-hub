@@ -181,6 +181,7 @@ export const useCompaniesDb = () => {
         return {
           id: c.id,
           name: c.name,
+          dispatch_name: (c as any).dispatch_name || null,
           active: true, // TODO: add active column to companies table
           country_ids: countryIds.length > 0 ? countryIds : [c.country_id],
           contract_holder_id: c.contract_holder_type === 'cgp' ? '2' : c.contract_holder_type === 'telus' ? '1' : null,
@@ -211,6 +212,7 @@ export const useCompaniesDb = () => {
         const mockNewcomerCompany: Company = {
           id: 'mock-newcomer-mediagroup',
           name: 'MediaGroup Hungary',
+          dispatch_name: null,
           active: true,
           country_ids: [hungaryId],
           contract_holder_id: '2', // CGP
@@ -289,6 +291,7 @@ export const useCompaniesDb = () => {
         return {
           id: 'mock-newcomer-mediagroup',
           name: 'MediaGroup Hungary',
+          dispatch_name: null,
           active: true,
           country_ids: hungaryId ? [hungaryId] : [],
           contract_holder_id: '2', // CGP
@@ -419,6 +422,7 @@ export const useCompaniesDb = () => {
       const company: CompanyWithDetails = {
         id: companyData.id,
         name: companyData.name,
+        dispatch_name: (companyData as any).dispatch_name || null,
         active: true,
         country_ids: countryIds.length > 0 ? countryIds : [companyData.country_id],
         contract_holder_id: companyData.contract_holder_type === 'cgp' ? '2' : companyData.contract_holder_type === 'telus' ? '1' : null,
@@ -579,6 +583,7 @@ export const useCompaniesDb = () => {
   // Create a new company
   const createCompany = useCallback(async (data: {
     name: string;
+    dispatchName?: string | null;
     countryIds: string[];
     contractHolderType?: 'telus' | 'cgp' | null;
     connectedCompanyId?: string | null;
@@ -590,6 +595,7 @@ export const useCompaniesDb = () => {
         .from('companies')
         .insert({
           name: data.name,
+          dispatch_name: data.dispatchName || null,
           country_id: data.countryIds[0],
           contract_holder_type: data.contractHolderType || null,
           connected_company_id: data.connectedCompanyId || null,
@@ -629,6 +635,7 @@ export const useCompaniesDb = () => {
       const company: Company = {
         id: newCompany.id,
         name: newCompany.name,
+        dispatch_name: null,
         active: true,
         country_ids: data.countryIds,
         contract_holder_id: data.contractHolderType === 'cgp' ? '2' : data.contractHolderType === 'telus' ? '1' : null,
@@ -665,6 +672,7 @@ export const useCompaniesDb = () => {
     id: string,
     data: Partial<{
       name: string;
+      dispatchName: string | null;
       countryIds: string[];
       contractHolderType: 'telus' | 'cgp' | null;
       connectedCompanyId: string | null;
@@ -680,6 +688,7 @@ export const useCompaniesDb = () => {
       // Update company basic data
       const updateData: any = {};
       if (data.name !== undefined) updateData.name = data.name;
+      if (data.dispatchName !== undefined) updateData.dispatch_name = data.dispatchName;
       if (data.contractHolderType !== undefined) updateData.contract_holder_type = data.contractHolderType;
       if (data.connectedCompanyId !== undefined) updateData.connected_company_id = data.connectedCompanyId;
       if (data.leadAccountUserId !== undefined) updateData.lead_account_user_id = data.leadAccountUserId;
