@@ -148,6 +148,12 @@ const CompanyForm = () => {
     addInputFnRef.current = fn;
   }, []);
 
+  // Notes tab callback ref
+  const addNoteFnRef = useRef<(() => void) | null>(null);
+  const handleAddNoteRef = useCallback((fn: () => void) => {
+    addNoteFnRef.current = fn;
+  }, []);
+
   // Load company data in edit mode
   useEffect(() => {
     const loadCompany = async () => {
@@ -526,7 +532,7 @@ const CompanyForm = () => {
 
       {/* Feljegyzések panel */}
       <CollapsiblePanel title="Feljegyzések">
-        <NotesTabContent companyId={companyId || "new"} />
+        <NotesTabContent companyId={companyId || "new"} onAddNoteRef={handleAddNoteRef} />
         <div className="flex items-center gap-4 mt-6 pt-4 border-t">
           <Button type="submit" className="rounded-xl">
             <Save className="h-4 w-4 mr-2" />
@@ -535,7 +541,7 @@ const CompanyForm = () => {
           <Button
             type="button"
             variant="outline"
-            onClick={() => toast.info("Új feljegyzés hozzáadása - fejlesztés alatt")}
+            onClick={() => addNoteFnRef.current?.()}
             className="rounded-xl"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -775,7 +781,7 @@ const CompanyForm = () => {
         visible: true,
         content: (
           <div className="space-y-6">
-            <NotesTabContent companyId={companyId || "new"} />
+            <NotesTabContent companyId={companyId || "new"} onAddNoteRef={handleAddNoteRef} />
             <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">
                 <Save className="h-4 w-4 mr-2" />
@@ -784,7 +790,7 @@ const CompanyForm = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => toast.info("Új feljegyzés hozzáadása - fejlesztés alatt")}
+                onClick={() => addNoteFnRef.current?.()}
                 className="rounded-xl"
               >
                 <Plus className="h-4 w-4 mr-2" />
