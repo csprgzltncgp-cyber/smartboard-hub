@@ -65,7 +65,14 @@ const CompanyForm = () => {
   const [contractEnd, setContractEnd] = useState<string | null>(null);
   const [contractReminderEmail, setContractReminderEmail] = useState<string | null>(null);
   const [leadAccountId, setLeadAccountId] = useState<string | null>(null);
-  const [connectedCompanyId, setConnectedCompanyId] = useState<string | null>(null);
+  // Client Dashboard felhasználók (több felhasználó támogatás)
+  interface ClientDashboardUser {
+    id: string;
+    username: string;
+    password?: string;
+    languageId: string | null;
+  }
+  const [clientDashboardUsers, setClientDashboardUsers] = useState<ClientDashboardUser[]>([]);
 
   // Országonként különböző beállítások
   const [countryDifferentiates, setCountryDifferentiates] = useState<CountryDifferentiate>({
@@ -140,7 +147,7 @@ const CompanyForm = () => {
         setContractEnd(company.contract_end);
         setContractReminderEmail(company.contract_reminder_email);
         setLeadAccountId(company.lead_account_id);
-        setConnectedCompanyId(company.connected_company_id);
+        // connectedCompanyId eltávolítva - már nincs használatban
         setCountryDifferentiates(company.countryDifferentiates);
         setCountrySettings(company.countrySettings);
         setBillingData(company.billingData);
@@ -190,7 +197,7 @@ const CompanyForm = () => {
           name,
           countryIds,
           contractHolderType: contractHolderId === "2" ? "cgp" : contractHolderId === "1" ? "telus" : null,
-          connectedCompanyId,
+          connectedCompanyId: null, // eltávolítva
           leadAccountUserId: leadAccountId,
           countryDifferentiates,
           billingData: billingData ?? {},
@@ -210,7 +217,7 @@ const CompanyForm = () => {
           name,
           countryIds,
           contractHolderType: contractHolderId === "2" ? "cgp" : contractHolderId === "1" ? "telus" : null,
-          connectedCompanyId,
+          connectedCompanyId: null, // eltávolítva
           leadAccountUserId: leadAccountId,
         });
         
@@ -372,23 +379,17 @@ const CompanyForm = () => {
           setContractEnd={setContractEnd}
           contractReminderEmail={contractReminderEmail}
           setContractReminderEmail={setContractReminderEmail}
-          connectedCompanyId={connectedCompanyId}
-          setConnectedCompanyId={setConnectedCompanyId}
           countries={countries}
           contractHolders={mockContractHolders}
-          connectedCompanies={connectedCompanies}
           headCount={headCount}
           setHeadCount={setHeadCount}
           workshops={workshops}
           setWorkshops={setWorkshops}
           crisisInterventions={crisisInterventions}
           setCrisisInterventions={setCrisisInterventions}
-          clientUsername={clientUsername}
-          setClientUsername={setClientUsername}
-          clientLanguageId={clientLanguageId}
-          setClientLanguageId={setClientLanguageId}
-          hasClientPassword={hasClientPassword}
-          onSetNewPassword={handleSetNewPassword}
+          clientDashboardUsers={clientDashboardUsers}
+          setClientDashboardUsers={setClientDashboardUsers}
+          onSetNewPassword={(userId: string) => toast.info(`Új jelszó beállítása: ${userId} - fejlesztés alatt`)}
         />
         {/* Mentés gomb az Alapadatok panelben */}
         <div className="flex items-center gap-4 mt-6 pt-4 border-t">
@@ -553,13 +554,10 @@ const CompanyForm = () => {
               setContractEnd={setContractEnd}
               contractReminderEmail={contractReminderEmail}
               setContractReminderEmail={setContractReminderEmail}
-              connectedCompanyId={connectedCompanyId}
-              setConnectedCompanyId={setConnectedCompanyId}
               countryDifferentiates={countryDifferentiates}
               setCountryDifferentiates={setCountryDifferentiates}
               countries={countries}
               contractHolders={mockContractHolders}
-              connectedCompanies={connectedCompanies}
             />
             <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">

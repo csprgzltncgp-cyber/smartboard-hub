@@ -11,11 +11,6 @@ import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import { DifferentPerCountryToggle } from "../DifferentPerCountryToggle";
 import { CountryDifferentiate, ContractHolder } from "@/types/company";
 
-interface ConnectedCompany {
-  id: string;
-  name: string;
-}
-
 interface Country {
   id: string;
   code: string;
@@ -39,13 +34,10 @@ interface MultiCountryBasicDataPanelProps {
   setContractEnd: (date: string | null) => void;
   contractReminderEmail: string | null;
   setContractReminderEmail: (email: string | null) => void;
-  connectedCompanyId: string | null;
-  setConnectedCompanyId: (id: string | null) => void;
   countryDifferentiates: CountryDifferentiate;
   setCountryDifferentiates: (diff: CountryDifferentiate) => void;
   countries: Country[];
   contractHolders: ContractHolder[];
-  connectedCompanies: ConnectedCompany[];
 }
 
 export const MultiCountryBasicDataPanel = ({
@@ -65,13 +57,10 @@ export const MultiCountryBasicDataPanel = ({
   setContractEnd,
   contractReminderEmail,
   setContractReminderEmail,
-  connectedCompanyId,
-  setConnectedCompanyId,
   countryDifferentiates,
   setCountryDifferentiates,
   countries,
   contractHolders,
-  connectedCompanies,
 }: MultiCountryBasicDataPanelProps) => {
   const isCGP = contractHolderId === "2";
   const isLifeworks = contractHolderId === "1";
@@ -107,29 +96,6 @@ export const MultiCountryBasicDataPanel = ({
             onChange={setCountryIds}
             placeholder="Válasszon országokat..."
           />
-        </div>
-      </div>
-
-      {/* Kapcsolt cég */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-        <div className="space-y-2">
-          <Label>Kapcsolt cég</Label>
-          <Select
-            value={connectedCompanyId || "none"}
-            onValueChange={(val) => setConnectedCompanyId(val === "none" ? null : val)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Válasszon..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Nincs</SelectItem>
-              {connectedCompanies.map((company) => (
-                <SelectItem key={company.id} value={company.id}>
-                  {company.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
