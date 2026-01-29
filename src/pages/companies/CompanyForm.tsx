@@ -654,6 +654,10 @@ const CompanyForm = () => {
               setIndustry={setIndustry}
               priceHistory={priceHistory}
               setPriceHistory={setPriceHistory}
+              countrySettings={countrySettings}
+              setCountrySettings={setCountrySettings}
+              invoiceTemplates={invoiceTemplates}
+              setInvoiceTemplates={setInvoiceTemplates}
             />
             
             {/* Archived onboarding panel - only shown after onboarding completion */}

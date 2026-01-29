@@ -152,21 +152,6 @@ export const CompanyCountrySettingsPanel = ({
 
   return (
     <div className="space-y-6">
-      {/* Alapadatok országonként toggle */}
-      <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border">
-        <div>
-          <p className="font-medium">Alapadatok országonként különbözőek</p>
-          <p className="text-sm text-muted-foreground">
-            Ha bekapcsolod, minden országhoz egyedi szerződési adatokat (szerződő fél, ár, dokumentum stb.) adhatsz meg.
-          </p>
-        </div>
-        <DifferentPerCountryToggle
-          label=""
-          checked={countryDifferentiates.basic_data}
-          onChange={(checked) => setCountryDifferentiates({ ...countryDifferentiates, basic_data: checked })}
-        />
-      </div>
-
       {/* Ország csíkok */}
       <div className="space-y-4">
         {selectedCountries.map((country) => {
