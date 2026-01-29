@@ -52,10 +52,28 @@ import { mockIncomingCompany } from "@/data/crmMockData";
 interface OnboardingTabContentProps {
   companyId: string;
   onComplete?: (data: OnboardingData) => void;
+  /** If true, use empty initial data instead of mock data (for new companies) */
+  isEmpty?: boolean;
 }
 
-// Mock data for MediaGroup Hungary
-const getInitialOnboardingData = (companyId: string): OnboardingData => {
+// Empty onboarding data for new companies
+const getEmptyOnboardingData = (companyId: string): OnboardingData => {
+  return {
+    companyId,
+    contacts: [],
+    details: [],
+    notes: [],
+    steps: DEFAULT_ONBOARDING_STEPS.map((step, idx) => ({
+      ...step,
+      id: `step-${idx + 1}`,
+      status: 'pending' as OnboardingStepStatus,
+    })) as OnboardingStep[],
+    isCompleted: false,
+  };
+};
+
+// Mock data for existing MediaGroup Hungary (demo purposes)
+const getMockOnboardingData = (companyId: string): OnboardingData => {
   const crmData = mockIncomingCompany;
   
   return {
@@ -101,8 +119,10 @@ const getInitialOnboardingData = (companyId: string): OnboardingData => {
   };
 };
 
-export const OnboardingTabContent = ({ companyId, onComplete }: OnboardingTabContentProps) => {
-  const [data, setData] = useState<OnboardingData>(() => getInitialOnboardingData(companyId));
+export const OnboardingTabContent = ({ companyId, onComplete, isEmpty = false }: OnboardingTabContentProps) => {
+  const [data, setData] = useState<OnboardingData>(() => 
+    isEmpty ? getEmptyOnboardingData(companyId) : getMockOnboardingData(companyId)
+  );
   const [isContactsOpen, setIsContactsOpen] = useState(true);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
