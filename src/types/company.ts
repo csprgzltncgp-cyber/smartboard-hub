@@ -75,6 +75,8 @@ export interface CompanyCountrySettings {
   client_password_set: boolean;
   client_language_id: string | null;
   all_country_access: boolean;
+  // When this country was added to the company
+  added_at: string | null;
 }
 
 export interface Workshop {
