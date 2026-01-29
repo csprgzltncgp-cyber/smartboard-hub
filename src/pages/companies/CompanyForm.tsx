@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -141,6 +141,12 @@ const CompanyForm = () => {
   const [hasInputs, setHasInputs] = useState(false); // TODO: DB check
   const [hasNotes, setHasNotes] = useState(false); // TODO: DB check  
   const [hasStatistics, setHasStatistics] = useState(true); // TODO: DB check
+
+  // Inputs tab callback ref
+  const addInputFnRef = useRef<(() => void) | null>(null);
+  const handleAddInputRef = useCallback((fn: () => void) => {
+    addInputFnRef.current = fn;
+  }, []);
 
   // Load company data in edit mode
   useEffect(() => {
@@ -500,7 +506,7 @@ const CompanyForm = () => {
 
       {/* Inputok panel */}
       <CollapsiblePanel title="Inputok">
-        <InputsTabContent companyId={companyId || "new"} />
+        <InputsTabContent companyId={companyId || "new"} onAddInputRef={handleAddInputRef} />
         <div className="flex items-center gap-4 mt-6 pt-4 border-t">
           <Button type="submit" className="rounded-xl">
             <Save className="h-4 w-4 mr-2" />
@@ -509,7 +515,7 @@ const CompanyForm = () => {
           <Button
             type="button"
             variant="outline"
-            onClick={() => toast.info("Új input hozzáadása - fejlesztés alatt")}
+            onClick={() => addInputFnRef.current?.()}
             className="rounded-xl"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -744,7 +750,7 @@ const CompanyForm = () => {
         visible: true,
         content: (
           <div className="space-y-6">
-            <InputsTabContent companyId={companyId || "new"} />
+            <InputsTabContent companyId={companyId || "new"} onAddInputRef={handleAddInputRef} />
             <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">
                 <Save className="h-4 w-4 mr-2" />
@@ -753,7 +759,7 @@ const CompanyForm = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => toast.info("Új input hozzáadása - fejlesztés alatt")}
+                onClick={() => addInputFnRef.current?.()}
                 className="rounded-xl"
               >
                 <Plus className="h-4 w-4 mr-2" />

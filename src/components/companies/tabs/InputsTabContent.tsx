@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Globe, Database, Lock, Pencil, Trash2, Save, X, ChevronDown, ChevronRight } from "lucide-react";
 import {
   Table,
@@ -63,9 +63,10 @@ const languages = [
 
 interface InputsTabContentProps {
   companyId: string;
+  onAddInputRef?: (fn: () => void) => void;
 }
 
-export const InputsTabContent = ({ companyId }: InputsTabContentProps) => {
+export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentProps) => {
   const [inputs, setInputs] = useState<CompanyInput[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<{ name: string; type: InputType }>({ name: "", type: "text" });
@@ -255,6 +256,13 @@ export const InputsTabContent = ({ companyId }: InputsTabContentProps) => {
     toast.success("Új input létrehozva");
   };
 
+  // Expose addNewInput to parent via callback ref
+  useEffect(() => {
+    if (onAddInputRef) {
+      onAddInputRef(addNewInput);
+    }
+  }, [onAddInputRef, inputs]);
+
   const hasOptions = (type: InputType) => type === "select";
 
   return (
@@ -262,14 +270,6 @@ export const InputsTabContent = ({ companyId }: InputsTabContentProps) => {
       <p className="text-muted-foreground text-sm">
         Itt hozhatsz létre és szerkeszthetsz cég-specifikus egyedi inputokat.
       </p>
-      
-      <Button
-        onClick={addNewInput}
-        className="rounded-xl"
-      >
-        <Plus className="w-4 h-4 mr-2" />
-        Új input hozzáadása
-      </Button>
 
       {inputs.length === 0 ? (
         <div className="bg-muted/30 border rounded-lg p-6">
