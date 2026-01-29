@@ -204,16 +204,20 @@ export const OnboardingTabContent = ({ companyId, onComplete }: OnboardingTabCon
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          {progressPercent === 100 && (
-            <Button 
-              type="button"
-              onClick={handleCompleteOnboarding}
-              className="bg-[#91b752] hover:bg-[#7fa043] rounded-xl"
-            >
-              <CheckCheck className="w-4 h-4 mr-2" />
-              Bevezetés kész
-            </Button>
-          )}
+          <Button 
+            type="button"
+            onClick={handleCompleteOnboarding}
+            disabled={progressPercent < 100}
+            className={cn(
+              "rounded-xl",
+              progressPercent === 100 
+                ? "bg-[#91b752] hover:bg-[#7fa043]" 
+                : "bg-muted text-muted-foreground cursor-not-allowed"
+            )}
+          >
+            <CheckCheck className="w-4 h-4 mr-2" />
+            Bevezetés kész
+          </Button>
         </div>
       </div>
 
