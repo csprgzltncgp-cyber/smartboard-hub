@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, Calendar } from "lucide-react";
+import { format } from "date-fns";
+import { hu } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -82,6 +84,7 @@ export const CompanyCountrySettingsPanel = ({
       client_password_set: false,
       client_language_id: null,
       all_country_access: false,
+      added_at: null,
     };
   };
 
@@ -212,7 +215,15 @@ const CountrySettingsCard = ({
               : "bg-muted hover:bg-muted/80 rounded-lg"
           }`}
         >
-          <span className="font-medium">{country.code}</span>
+          <div className="flex items-center gap-3">
+            <span className="font-medium">{country.code}</span>
+            {settings.added_at && (
+              <span className={`flex items-center gap-1 text-xs ${isOpen ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                <Calendar className="h-3 w-3" />
+                {format(new Date(settings.added_at), "yyyy. MMM d.", { locale: hu })}
+              </span>
+            )}
+          </div>
           {isOpen ? (
             <ChevronUp className="h-5 w-5" />
           ) : (

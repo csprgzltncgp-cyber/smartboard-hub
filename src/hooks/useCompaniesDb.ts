@@ -29,6 +29,7 @@ interface DbCompanyCountry {
   id: string;
   company_id: string;
   country_id: string;
+  created_at: string;
 }
 
 interface DbCountryDifferentiate {
@@ -159,7 +160,7 @@ export const useCompaniesDb = () => {
       // Fetch company-country associations
       const { data: companyCountriesData, error: ccError } = await supabase
         .from('company_countries')
-        .select('company_id, country_id');
+        .select('company_id, country_id, created_at');
       
       if (ccError) throw ccError;
 
@@ -219,10 +220,10 @@ export const useCompaniesDb = () => {
       if (companyError) throw companyError;
       if (!companyData) return null;
 
-      // Fetch country associations
+      // Fetch country associations with created_at
       const { data: countryAssocs } = await supabase
         .from('company_countries')
-        .select('country_id')
+        .select('country_id, created_at')
         .eq('company_id', id);
 
       // Fetch country differentiates
@@ -311,22 +312,29 @@ export const useCompaniesDb = () => {
           invoicing: false,
           contract_date_reminder_email: false,
         },
-        countrySettings: (settingsData || []).map((s: DbCountrySettings) => ({
-          id: s.id,
-          company_id: s.company_id,
-          country_id: s.country_id,
-          contract_holder_id: null,
-          org_id: s.org_id,
-          contract_start: s.contract_date,
-          contract_end: s.contract_end_date,
-          contract_reminder_email: null,
-          head_count: null,
-          activity_plan_user_id: null,
-          client_username: null,
-          client_password_set: false,
-          client_language_id: null,
-          all_country_access: false,
-        })),
+        // Build countrySettings from countryAssocs, merging with settingsData where available
+        countrySettings: (countryAssocs || []).map((ca: { country_id: string; created_at: string }) => {
+          const existingSettings = (settingsData || []).find(
+            (s: DbCountrySettings) => s.country_id === ca.country_id
+          );
+          return {
+            id: existingSettings?.id || `new-${ca.country_id}`,
+            company_id: existingSettings?.company_id || id,
+            country_id: ca.country_id,
+            contract_holder_id: null,
+            org_id: existingSettings?.org_id || null,
+            contract_start: existingSettings?.contract_date || null,
+            contract_end: existingSettings?.contract_end_date || null,
+            contract_reminder_email: null,
+            head_count: null,
+            activity_plan_user_id: null,
+            client_username: null,
+            client_password_set: false,
+            client_language_id: null,
+            all_country_access: false,
+            added_at: ca.created_at,
+          };
+        }),
         billingData: billingData ? {
           id: billingData.id,
           company_id: billingData.company_id,
