@@ -17,7 +17,9 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { CompanyCountrySettings, CountryDifferentiate, ContractHolder, AccountAdmin, Workshop, CrisisIntervention } from "@/types/company";
+import { CompanyCountrySettings, CountryDifferentiate, ContractHolder, AccountAdmin, Workshop, CrisisIntervention, ConsultationRow, PriceHistoryEntry, INDUSTRIES, CURRENCIES } from "@/types/company";
+import { DifferentPerCountryToggle } from "./DifferentPerCountryToggle";
+import { ContractDataPanel } from "./panels/ContractDataPanel";
 
 interface Country {
   id: string;
@@ -31,6 +33,7 @@ interface CompanyCountrySettingsPanelProps {
   countrySettings: CompanyCountrySettings[];
   setCountrySettings: (settings: CompanyCountrySettings[]) => void;
   countryDifferentiates: CountryDifferentiate;
+  setCountryDifferentiates: (diff: CountryDifferentiate) => void;
   contractHolders: ContractHolder[];
   accountAdmins: AccountAdmin[];
   globalContractHolderId: string | null;
@@ -47,6 +50,7 @@ export const CompanyCountrySettingsPanel = ({
   countrySettings,
   setCountrySettings,
   countryDifferentiates,
+  setCountryDifferentiates,
   contractHolders,
   accountAdmins,
   globalContractHolderId,
@@ -85,6 +89,15 @@ export const CompanyCountrySettingsPanel = ({
       client_language_id: null,
       all_country_access: false,
       added_at: null,
+      contract_file_url: null,
+      contract_price: null,
+      contract_price_type: null,
+      contract_currency: null,
+      pillar_count: null,
+      session_count: null,
+      consultation_rows: [],
+      industry: null,
+      price_history: [],
     };
   };
 
@@ -138,35 +151,55 @@ export const CompanyCountrySettingsPanel = ({
   };
 
   return (
-    <div className="space-y-4">
-      {selectedCountries.map((country) => {
-        const settings = getCountrySettings(country.id);
-        const countryWorkshops = getCountryWorkshops(country.id);
-        const countryCrisis = getCountryCrisis(country.id);
-        const effectiveContractHolder = countryDifferentiates.contract_holder
-          ? settings.contract_holder_id
-          : globalContractHolderId;
-        const isCGP = effectiveContractHolder === "2";
-        const isLifeworks = effectiveContractHolder === "1";
+    <div className="space-y-6">
+      {/* Alapadatok országonként toggle */}
+      <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border">
+        <div>
+          <p className="font-medium">Alapadatok országonként különbözőek</p>
+          <p className="text-sm text-muted-foreground">
+            Ha bekapcsolod, minden országhoz egyedi szerződési adatokat (szerződő fél, ár, dokumentum stb.) adhatsz meg.
+          </p>
+        </div>
+        <DifferentPerCountryToggle
+          label=""
+          checked={countryDifferentiates.basic_data}
+          onChange={(checked) => setCountryDifferentiates({ ...countryDifferentiates, basic_data: checked })}
+        />
+      </div>
 
-        return (
-          <CountrySettingsCard
-            key={country.id}
-            country={country}
-            settings={settings}
-            onUpdate={(updates) => updateCountrySettings(country.id, updates)}
-            countryDifferentiates={countryDifferentiates}
-            contractHolders={contractHolders}
-            accountAdmins={accountAdmins}
-            isCGP={isCGP}
-            isLifeworks={isLifeworks}
-            workshops={countryWorkshops}
-            onAddWorkshop={() => addWorkshop(country.id)}
-            crisisInterventions={countryCrisis}
-            onAddCrisis={() => addCrisis(country.id)}
-          />
-        );
-      })}
+      {/* Ország csíkok */}
+      <div className="space-y-4">
+        {selectedCountries.map((country) => {
+          const settings = getCountrySettings(country.id);
+          const countryWorkshops = getCountryWorkshops(country.id);
+          const countryCrisis = getCountryCrisis(country.id);
+          const effectiveContractHolder = countryDifferentiates.basic_data
+            ? settings.contract_holder_id
+            : countryDifferentiates.contract_holder
+              ? settings.contract_holder_id
+              : globalContractHolderId;
+          const isCGP = effectiveContractHolder === "2";
+          const isLifeworks = effectiveContractHolder === "1";
+
+          return (
+            <CountrySettingsCard
+              key={country.id}
+              country={country}
+              settings={settings}
+              onUpdate={(updates) => updateCountrySettings(country.id, updates)}
+              countryDifferentiates={countryDifferentiates}
+              contractHolders={contractHolders}
+              accountAdmins={accountAdmins}
+              isCGP={isCGP}
+              isLifeworks={isLifeworks}
+              workshops={countryWorkshops}
+              onAddWorkshop={() => addWorkshop(country.id)}
+              crisisInterventions={countryCrisis}
+              onAddCrisis={() => addCrisis(country.id)}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 };
@@ -234,79 +267,238 @@ const CountrySettingsCard = ({
 
       <CollapsibleContent className="space-y-4 p-4 border border-t-0 rounded-b-lg bg-background">
 
-        {/* Szerződéshordozó - ha országonként különböző */}
-        {countryDifferentiates.contract_holder && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Szerződéshordozó</Label>
-              <Select
-                value={settings.contract_holder_id || ""}
-                onValueChange={(val) => onUpdate({ contract_holder_id: val || null })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Válasszon..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {contractHolders.map((ch) => (
-                    <SelectItem key={ch.id} value={ch.id}>
-                      {ch.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        {/* Ha basic_data aktív, megjelenítjük az összes szerződési adatot */}
+        {countryDifferentiates.basic_data && (
+          <div className="space-y-6">
+            {/* Szerződéshordozó */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Szerződéshordozó</Label>
+                <Select
+                  value={settings.contract_holder_id || ""}
+                  onValueChange={(val) => onUpdate({ contract_holder_id: val || null })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Válasszon..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {contractHolders.map((ch) => (
+                      <SelectItem key={ch.id} value={ch.id}>
+                        {ch.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Szerződés adatai */}
+            <div className="space-y-4 border-l-2 border-primary/20 pl-4">
+              <h4 className="text-sm font-medium text-primary">Szerződés adatai</h4>
+              
+              {/* Ár és típus */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Szerződéses ár</Label>
+                  <Input
+                    type="number"
+                    value={settings.contract_price || ""}
+                    onChange={(e) => onUpdate({ contract_price: e.target.value ? parseFloat(e.target.value) : null })}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Ár típusa</Label>
+                  <Select
+                    value={settings.contract_price_type || ""}
+                    onValueChange={(val) => onUpdate({ contract_price_type: val || null })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Válasszon..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pepm">PEPM</SelectItem>
+                      <SelectItem value="package">Csomagár</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Devizanem</Label>
+                  <Select
+                    value={settings.contract_currency || ""}
+                    onValueChange={(val) => onUpdate({ contract_currency: val || null })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Válasszon..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCIES.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Pillér és Alkalom */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Pillér</Label>
+                  <Input
+                    type="number"
+                    value={settings.pillar_count || ""}
+                    onChange={(e) => onUpdate({ pillar_count: e.target.value ? parseInt(e.target.value) : null })}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Alkalom</Label>
+                  <Input
+                    type="number"
+                    value={settings.session_count || ""}
+                    onChange={(e) => onUpdate({ session_count: e.target.value ? parseInt(e.target.value) : null })}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Iparág</Label>
+                  <Select
+                    value={settings.industry || ""}
+                    onValueChange={(val) => onUpdate({ industry: val || null })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Válasszon..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {INDUSTRIES.map((ind) => (
+                        <SelectItem key={ind.id} value={ind.id}>
+                          {ind.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Szerződés dátumok */}
+              {isCGP && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Szerződés kezdete</Label>
+                    <Input
+                      type="date"
+                      value={settings.contract_start || ""}
+                      onChange={(e) => onUpdate({ contract_start: e.target.value || null })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Szerződés lejárta</Label>
+                    <Input
+                      type="date"
+                      value={settings.contract_end || ""}
+                      onChange={(e) => onUpdate({ contract_end: e.target.value || null })}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* ORG ID - Lifeworks */}
+              {isLifeworks && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>ORG ID</Label>
+                    <Input
+                      value={settings.org_id || ""}
+                      onChange={(e) => onUpdate({ org_id: e.target.value || null })}
+                      placeholder="ORG ID"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* ORG ID - ha országonként különböző és Lifeworks */}
-        {countryDifferentiates.org_id && isLifeworks && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>ORG ID</Label>
-              <Input
-                value={settings.org_id || ""}
-                onChange={(e) => onUpdate({ org_id: e.target.value || null })}
-                placeholder="ORG ID"
-              />
-            </div>
-          </div>
-        )}
+        {/* Ha basic_data NINCS aktív, a korábbi logika: egyedi mezők külön-külön */}
+        {!countryDifferentiates.basic_data && (
+          <>
+            {/* Szerződéshordozó - ha országonként különböző */}
+            {countryDifferentiates.contract_holder && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Szerződéshordozó</Label>
+                  <Select
+                    value={settings.contract_holder_id || ""}
+                    onValueChange={(val) => onUpdate({ contract_holder_id: val || null })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Válasszon..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {contractHolders.map((ch) => (
+                        <SelectItem key={ch.id} value={ch.id}>
+                          {ch.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
 
-        {/* Szerződés dátumok - ha országonként különböző és CGP */}
-        {countryDifferentiates.contract_date && isCGP && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Szerződés kezdete</Label>
-              <Input
-                type="date"
-                value={settings.contract_start || ""}
-                onChange={(e) => onUpdate({ contract_start: e.target.value || null })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Szerződés lejárta</Label>
-              <Input
-                type="date"
-                value={settings.contract_end || ""}
-                onChange={(e) => onUpdate({ contract_end: e.target.value || null })}
-              />
-            </div>
-          </div>
-        )}
+            {/* ORG ID - ha országonként különböző és Lifeworks */}
+            {countryDifferentiates.org_id && isLifeworks && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>ORG ID</Label>
+                  <Input
+                    value={settings.org_id || ""}
+                    onChange={(e) => onUpdate({ org_id: e.target.value || null })}
+                    placeholder="ORG ID"
+                  />
+                </div>
+              </div>
+            )}
 
-        {/* Emlékeztető email - ha országonként különböző */}
-        {countryDifferentiates.contract_date_reminder_email && isCGP && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Emlékeztető e-mail</Label>
-              <Input
-                type="email"
-                value={settings.contract_reminder_email || ""}
-                onChange={(e) => onUpdate({ contract_reminder_email: e.target.value || null })}
-                placeholder="email@ceg.hu"
-              />
-            </div>
-          </div>
+            {/* Szerződés dátumok - ha országonként különböző és CGP */}
+            {countryDifferentiates.contract_date && isCGP && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Szerződés kezdete</Label>
+                  <Input
+                    type="date"
+                    value={settings.contract_start || ""}
+                    onChange={(e) => onUpdate({ contract_start: e.target.value || null })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Szerződés lejárta</Label>
+                  <Input
+                    type="date"
+                    value={settings.contract_end || ""}
+                    onChange={(e) => onUpdate({ contract_end: e.target.value || null })}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Emlékeztető email - ha országonként különböző */}
+            {countryDifferentiates.contract_date_reminder_email && isCGP && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Emlékeztető e-mail</Label>
+                  <Input
+                    type="email"
+                    value={settings.contract_reminder_email || ""}
+                    onChange={(e) => onUpdate({ contract_reminder_email: e.target.value || null })}
+                    placeholder="email@ceg.hu"
+                  />
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Létszám - mindig látható */}
