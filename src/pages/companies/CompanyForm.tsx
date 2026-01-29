@@ -451,6 +451,11 @@ const CompanyForm = () => {
           </div>
         </CollapsiblePanel>
       )}
+
+      {/* Feljegyzések panel */}
+      <CollapsiblePanel title="Feljegyzések">
+        <NotesTabContent companyId={companyId || "new"} />
+      </CollapsiblePanel>
     </div>
   );
 
@@ -570,7 +575,7 @@ const CompanyForm = () => {
       {
         id: "notes",
         label: "Feljegyzések",
-        visible: hasNotes,
+        visible: true,
         content: <NotesTabContent companyId={companyId || "new"} />,
       },
       {
