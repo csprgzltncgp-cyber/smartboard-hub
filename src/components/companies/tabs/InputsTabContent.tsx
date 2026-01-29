@@ -263,17 +263,13 @@ export const InputsTabContent = ({ companyId }: InputsTabContentProps) => {
         Itt hozhatsz létre és szerkeszthetsz cég-specifikus egyedi inputokat.
       </p>
       
-      <a 
-        href="#" 
-        className="text-cgp-link hover:text-cgp-link-hover hover:underline text-sm inline-flex items-center gap-1"
-        onClick={(e) => {
-          e.preventDefault();
-          addNewInput();
-        }}
+      <Button
+        onClick={addNewInput}
+        className="rounded-xl"
       >
-        <Plus className="w-4 h-4" />
-        Új input létrehozása
-      </a>
+        <Plus className="w-4 h-4 mr-2" />
+        Új input hozzáadása
+      </Button>
 
       {inputs.length === 0 ? (
         <div className="bg-muted/30 border rounded-lg p-6">
