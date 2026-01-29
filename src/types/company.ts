@@ -1,5 +1,13 @@
 // Cég típusok a Companies modulhoz
 
+// Consultation row structure - each row has a type with associated durations and formats
+export interface ConsultationRow {
+  id: string;
+  type: string | null;
+  durations: string[];
+  formats: string[];
+}
+
 export interface Company {
   id: string;
   name: string;
@@ -20,9 +28,7 @@ export interface Company {
   contract_currency: string | null; // Szerződéses ár devizanem
   pillar_count: number | null; // Pillér szám
   session_count: number | null; // Alkalom szám
-  consultation_types: string[]; // Tanácsadás típusa (többválasztós)
-  consultation_durations: string[]; // Tanácsadás időtartama (többválasztós)
-  consultation_formats: string[]; // Tanácsadás formája (többválasztós)
+  consultation_rows: ConsultationRow[]; // Tanácsadás sorok (típus + időtartam + forma)
   industry: string | null; // Iparág
   created_at: string;
   updated_at: string;
