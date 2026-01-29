@@ -335,6 +335,7 @@ export type Database = {
           billing_postal_code: string | null
           company_id: string
           contact_holder_name: string | null
+          contracted_entity_id: string | null
           country_id: string | null
           created_at: string
           currency: string | null
@@ -365,6 +366,7 @@ export type Database = {
           billing_postal_code?: string | null
           company_id: string
           contact_holder_name?: string | null
+          contracted_entity_id?: string | null
           country_id?: string | null
           created_at?: string
           currency?: string | null
@@ -395,6 +397,7 @@ export type Database = {
           billing_postal_code?: string | null
           company_id?: string
           contact_holder_name?: string | null
+          contracted_entity_id?: string | null
           country_id?: string | null
           created_at?: string
           currency?: string | null
@@ -429,6 +432,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_billing_data_contracted_entity_id_fkey"
+            columns: ["contracted_entity_id"]
+            isOneToOne: false
+            referencedRelation: "company_contracted_entities"
             referencedColumns: ["id"]
           },
           {
@@ -476,6 +486,99 @@ export type Database = {
           },
         ]
       }
+      company_contracted_entities: {
+        Row: {
+          company_id: string
+          consultation_rows: Json | null
+          contract_currency: string | null
+          contract_date: string | null
+          contract_end_date: string | null
+          contract_holder_type: string | null
+          contract_price: number | null
+          country_id: string
+          created_at: string
+          crisis_data: Json | null
+          headcount: number | null
+          id: string
+          inactive_headcount: number | null
+          industry: string | null
+          name: string
+          occasions: number | null
+          org_id: string | null
+          pillars: number | null
+          price_history: Json | null
+          price_type: string | null
+          reporting_data: Json | null
+          updated_at: string
+          workshop_data: Json | null
+        }
+        Insert: {
+          company_id: string
+          consultation_rows?: Json | null
+          contract_currency?: string | null
+          contract_date?: string | null
+          contract_end_date?: string | null
+          contract_holder_type?: string | null
+          contract_price?: number | null
+          country_id: string
+          created_at?: string
+          crisis_data?: Json | null
+          headcount?: number | null
+          id?: string
+          inactive_headcount?: number | null
+          industry?: string | null
+          name: string
+          occasions?: number | null
+          org_id?: string | null
+          pillars?: number | null
+          price_history?: Json | null
+          price_type?: string | null
+          reporting_data?: Json | null
+          updated_at?: string
+          workshop_data?: Json | null
+        }
+        Update: {
+          company_id?: string
+          consultation_rows?: Json | null
+          contract_currency?: string | null
+          contract_date?: string | null
+          contract_end_date?: string | null
+          contract_holder_type?: string | null
+          contract_price?: number | null
+          country_id?: string
+          created_at?: string
+          crisis_data?: Json | null
+          headcount?: number | null
+          id?: string
+          inactive_headcount?: number | null
+          industry?: string | null
+          name?: string
+          occasions?: number | null
+          org_id?: string | null
+          pillars?: number | null
+          price_history?: Json | null
+          price_type?: string | null
+          reporting_data?: Json | null
+          updated_at?: string
+          workshop_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_contracted_entities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_contracted_entities_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_countries: {
         Row: {
           company_id: string
@@ -518,6 +621,7 @@ export type Database = {
           contract_date: boolean
           contract_holder: boolean
           created_at: string
+          has_multiple_entities: boolean
           id: string
           invoicing: boolean
           org_id: boolean
@@ -529,6 +633,7 @@ export type Database = {
           contract_date?: boolean
           contract_holder?: boolean
           created_at?: string
+          has_multiple_entities?: boolean
           id?: string
           invoicing?: boolean
           org_id?: boolean
@@ -540,6 +645,7 @@ export type Database = {
           contract_date?: boolean
           contract_holder?: boolean
           created_at?: string
+          has_multiple_entities?: boolean
           id?: string
           invoicing?: boolean
           org_id?: boolean
@@ -611,6 +717,7 @@ export type Database = {
         Row: {
           comment: string
           company_id: string
+          contracted_entity_id: string | null
           country_id: string | null
           created_at: string
           id: string
@@ -619,6 +726,7 @@ export type Database = {
         Insert: {
           comment: string
           company_id: string
+          contracted_entity_id?: string | null
           country_id?: string | null
           created_at?: string
           id?: string
@@ -627,6 +735,7 @@ export type Database = {
         Update: {
           comment?: string
           company_id?: string
+          contracted_entity_id?: string | null
           country_id?: string | null
           created_at?: string
           id?: string
@@ -638,6 +747,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_invoice_comments_contracted_entity_id_fkey"
+            columns: ["contracted_entity_id"]
+            isOneToOne: false
+            referencedRelation: "company_contracted_entities"
             referencedColumns: ["id"]
           },
           {
@@ -660,6 +776,7 @@ export type Database = {
         Row: {
           amount: number
           company_id: string
+          contracted_entity_id: string | null
           country_id: string | null
           created_at: string
           id: string
@@ -670,6 +787,7 @@ export type Database = {
         Insert: {
           amount?: number
           company_id: string
+          contracted_entity_id?: string | null
           country_id?: string | null
           created_at?: string
           id?: string
@@ -680,6 +798,7 @@ export type Database = {
         Update: {
           amount?: number
           company_id?: string
+          contracted_entity_id?: string | null
           country_id?: string | null
           created_at?: string
           id?: string
@@ -693,6 +812,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_invoice_items_contracted_entity_id_fkey"
+            columns: ["contracted_entity_id"]
+            isOneToOne: false
+            referencedRelation: "company_contracted_entities"
             referencedColumns: ["id"]
           },
           {
@@ -717,6 +843,7 @@ export type Database = {
           city: string | null
           community_tax_number: string | null
           company_id: string
+          contracted_entity_id: string | null
           country: string | null
           country_id: string | null
           created_at: string
@@ -746,6 +873,7 @@ export type Database = {
           city?: string | null
           community_tax_number?: string | null
           company_id: string
+          contracted_entity_id?: string | null
           country?: string | null
           country_id?: string | null
           created_at?: string
@@ -775,6 +903,7 @@ export type Database = {
           city?: string | null
           community_tax_number?: string | null
           company_id?: string
+          contracted_entity_id?: string | null
           country?: string | null
           country_id?: string | null
           created_at?: string
@@ -805,6 +934,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_invoice_templates_contracted_entity_id_fkey"
+            columns: ["contracted_entity_id"]
+            isOneToOne: false
+            referencedRelation: "company_contracted_entities"
             referencedColumns: ["id"]
           },
           {
