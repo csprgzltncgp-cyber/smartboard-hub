@@ -17,9 +17,14 @@ export const NewCompanyOnboardingDialog = ({
   open,
   onChoice,
 }: NewCompanyOnboardingDialogProps) => {
+  // X gomb vagy kívülre kattintás = Bevezetés nélkül
+  const handleClose = () => {
+    onChoice(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose(); }}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Új cég létrehozása</DialogTitle>
           <DialogDescription>
