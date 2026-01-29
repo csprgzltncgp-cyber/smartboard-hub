@@ -818,6 +818,106 @@ export const mockTodoItems: CrmTodoItem[] = [
   },
 ];
 
+// Mock incoming company (Új érkező)
+export const mockIncomingCompany: CrmLead = {
+  id: 'incoming-1',
+  companyName: 'MediaGroup Hungary',
+  assignedTo: 'Peter Janky',
+  assignedToId: 'pj1',
+  status: 'incoming_company',
+  progress: 100,
+  contacts: [
+    {
+      id: 'ic-c1',
+      name: 'Szabó Katalin',
+      title: 'HR igazgató',
+      gender: 'female',
+      phone: '+36 30 555 1234',
+      email: 'szabo.katalin@mediagroup.hu',
+      address: '1138 Budapest, Váci út 188.',
+      isPrimary: true,
+    },
+    {
+      id: 'ic-c2',
+      name: 'Kiss András',
+      title: 'HR menedzser',
+      gender: 'male',
+      phone: '+36 20 555 5678',
+      email: 'kiss.andras@mediagroup.hu',
+      isPrimary: false,
+    },
+    {
+      id: 'ic-c3',
+      name: 'Tóth Eszter',
+      title: 'Kommunikációs vezető',
+      gender: 'female',
+      phone: '+36 70 555 9012',
+      email: 'toth.eszter@mediagroup.hu',
+      isPrimary: false,
+    },
+  ],
+  meetings: [
+    {
+      id: 'ic-m1',
+      date: '2024.12.10',
+      time: '10:00 A.M.',
+      contactId: 'ic-c1',
+      contactName: 'Szabó Katalin',
+      contactTitle: 'HR igazgató',
+      contactType: 'video',
+      pillars: 4,
+      sessions: 50,
+      mood: 'happy',
+      status: 'completed',
+      note: 'Sikeres tárgyalás, szerződés aláírva.',
+    },
+    {
+      id: 'ic-m2',
+      date: '2024.11.28',
+      time: '14:00 P.M.',
+      contactId: 'ic-c1',
+      contactName: 'Szabó Katalin',
+      contactTitle: 'HR igazgató',
+      contactType: 'in_person',
+      pillars: 4,
+      sessions: 50,
+      mood: 'happy',
+      status: 'completed',
+      note: 'Bemutatkozás és szolgáltatások ismertetése.',
+    },
+  ],
+  details: {
+    name: 'MediaGroup Hungary',
+    city: 'Budapest',
+    country: 'Hungary',
+    industry: 'Média & Szórakoztatás',
+    headcount: 2800,
+    pillars: 4,
+    sessions: 50,
+  },
+  customDetails: [
+    { id: 'cd1', label: 'Szerződés értéke', value: 'EUR 3500/hó' },
+    { id: 'cd2', label: 'Szolgáltatási csomag', value: 'Premium EAP' },
+    { id: 'cd3', label: 'Szerződés időtartama', value: '24 hónap' },
+  ],
+  notes: [
+    {
+      id: 'ic-n1',
+      content: 'A cég kiemelt ügyfél, fontos a magas szintű kiszolgálás. A HR igazgató rendkívül precíz, minden dokumentumot előre kér.',
+      createdAt: '2024-12-10',
+      createdBy: 'Peter Janky',
+    },
+    {
+      id: 'ic-n2',
+      content: 'A kommunikációs anyagokat angol és magyar nyelven kérik. A print anyagok szállítási címe: 1138 Budapest, Váci út 188.',
+      createdAt: '2024-12-05',
+      createdBy: 'Peter Janky',
+    },
+  ],
+  createdAt: '2024-11-15',
+  updatedAt: '2024-12-10',
+};
+
 // Filter options
 export const mockCountries = ['Hungary', 'USA', 'Germany', 'Austria', 'Slovakia', 'Czech Republic'];
 export const mockColleagues = [
