@@ -31,7 +31,7 @@ export const CollapsiblePanel = ({
       open={isOpen} 
       onOpenChange={setIsOpen} 
       className={cn(
-        "bg-card border rounded-lg",
+        "bg-card border rounded-lg overflow-hidden",
         isHighlight && "border-[#91b752] border-2",
         className
       )}
@@ -42,11 +42,11 @@ export const CollapsiblePanel = ({
             "flex items-center justify-between p-4 cursor-pointer transition-colors",
             isOpen
               ? isHighlight 
-                ? "bg-[#91b752] text-white rounded-t-lg"
-                : "bg-primary text-primary-foreground rounded-t-lg"
+                ? "bg-[#91b752] text-white"
+                : "bg-primary text-primary-foreground"
               : isHighlight
-                ? "bg-[#91b752]/20 hover:bg-[#91b752]/30 rounded-lg"
-                : "bg-muted hover:bg-muted/80 rounded-lg"
+                ? "bg-[#91b752]/20 hover:bg-[#91b752]/30"
+                : "bg-muted hover:bg-muted/80"
           )}
         >
           <span className="font-medium">{title}</span>
