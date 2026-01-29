@@ -8,12 +8,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, FileText, X, Plus, Trash2 } from "lucide-react";
+import { Upload, FileText, X, Plus, Trash2, History, Calendar } from "lucide-react";
 import { DifferentPerCountryToggle } from "../DifferentPerCountryToggle";
-import { CURRENCIES, INDUSTRIES, ContractHolder, CountryDifferentiate } from "@/types/company";
+import { CURRENCIES, INDUSTRIES, ContractHolder, CountryDifferentiate, PriceHistoryEntry } from "@/types/company";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
+import { format } from "date-fns";
+import { hu } from "date-fns/locale";
 
 // Price type options
 const PRICE_TYPES = [
@@ -80,6 +82,9 @@ interface ContractDataPanelProps {
   // Industry
   industry: string | null;
   setIndustry: (industry: string | null) => void;
+  // Price history
+  priceHistory: PriceHistoryEntry[];
+  setPriceHistory: (history: PriceHistoryEntry[]) => void;
   // Show different per country toggle (only for multi-country companies)
   showDifferentPerCountry?: boolean;
 }
@@ -106,6 +111,8 @@ export const ContractDataPanel = ({
   setConsultationRows,
   industry,
   setIndustry,
+  priceHistory,
+  setPriceHistory,
   showDifferentPerCountry = false,
 }: ContractDataPanelProps) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -178,6 +185,60 @@ export const ContractDataPanel = ({
       .filter((row) => row.id !== currentRowId && row.type)
       .map((row) => row.type);
     return CONSULTATION_TYPES.filter((t) => !usedTypes.includes(t.id));
+  };
+
+  // Price history handlers
+  const [showPriceHistoryForm, setShowPriceHistoryForm] = useState(false);
+  const [newHistoryEntry, setNewHistoryEntry] = useState<Partial<PriceHistoryEntry>>({
+    effective_date: new Date().toISOString().split('T')[0],
+    price: contractPrice || undefined,
+    price_type: contractPriceType || undefined,
+    currency: contractCurrency || undefined,
+    notes: null,
+  });
+
+  const addPriceHistoryEntry = () => {
+    if (!newHistoryEntry.effective_date || !newHistoryEntry.price) {
+      toast.error("Kérjük adja meg a dátumot és az árat!");
+      return;
+    }
+
+    const entry: PriceHistoryEntry = {
+      id: crypto.randomUUID(),
+      effective_date: newHistoryEntry.effective_date,
+      price: newHistoryEntry.price,
+      price_type: newHistoryEntry.price_type || null,
+      currency: newHistoryEntry.currency || null,
+      notes: newHistoryEntry.notes || null,
+    };
+
+    // Sort by date descending (newest first)
+    const updatedHistory = [...priceHistory, entry].sort(
+      (a, b) => new Date(b.effective_date).getTime() - new Date(a.effective_date).getTime()
+    );
+    
+    setPriceHistory(updatedHistory);
+    setShowPriceHistoryForm(false);
+    setNewHistoryEntry({
+      effective_date: new Date().toISOString().split('T')[0],
+      price: contractPrice || undefined,
+      price_type: contractPriceType || undefined,
+      currency: contractCurrency || undefined,
+      notes: null,
+    });
+    toast.success("Árváltozás sikeresen rögzítve!");
+  };
+
+  const removePriceHistoryEntry = (entryId: string) => {
+    setPriceHistory(priceHistory.filter((e) => e.id !== entryId));
+  };
+
+  const getPriceTypeName = (type: string | null) => {
+    return PRICE_TYPES.find((pt) => pt.id === type)?.name || type || "-";
+  };
+
+  const getCurrencyName = (currency: string | null) => {
+    return CURRENCIES.find((c) => c.id === currency)?.name || currency?.toUpperCase() || "-";
   };
 
   return (
@@ -305,6 +366,184 @@ export const ContractDataPanel = ({
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      {/* Price History Section */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <History className="h-4 w-4 text-muted-foreground" />
+            <Label>Árváltozás előzmények</Label>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowPriceHistoryForm(!showPriceHistoryForm)}
+            className="h-8"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Árváltozás rögzítése
+          </Button>
+        </div>
+
+        {/* Add new price history entry form */}
+        {showPriceHistoryForm && (
+          <div className="bg-background border rounded-lg p-4 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Érvényesség kezdete</Label>
+                <Input
+                  type="date"
+                  value={newHistoryEntry.effective_date || ""}
+                  onChange={(e) =>
+                    setNewHistoryEntry({ ...newHistoryEntry, effective_date: e.target.value })
+                  }
+                  className="h-9"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Ár</Label>
+                <Input
+                  type="number"
+                  value={newHistoryEntry.price ?? ""}
+                  onChange={(e) =>
+                    setNewHistoryEntry({
+                      ...newHistoryEntry,
+                      price: e.target.value ? parseFloat(e.target.value) : undefined,
+                    })
+                  }
+                  placeholder="0"
+                  min={0}
+                  className="h-9"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Ár típusa</Label>
+                <Select
+                  value={newHistoryEntry.price_type || "none"}
+                  onValueChange={(val) =>
+                    setNewHistoryEntry({
+                      ...newHistoryEntry,
+                      price_type: val === "none" ? undefined : val,
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Válasszon..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Válasszon...</SelectItem>
+                    {PRICE_TYPES.map((pt) => (
+                      <SelectItem key={pt.id} value={pt.id}>
+                        {pt.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Devizanem</Label>
+                <Select
+                  value={newHistoryEntry.currency || "none"}
+                  onValueChange={(val) =>
+                    setNewHistoryEntry({
+                      ...newHistoryEntry,
+                      currency: val === "none" ? undefined : val,
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Válasszon..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Válasszon...</SelectItem>
+                    {CURRENCIES.map((curr) => (
+                      <SelectItem key={curr.id} value={curr.id}>
+                        {curr.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Megjegyzés (opcionális)</Label>
+              <Input
+                value={newHistoryEntry.notes || ""}
+                onChange={(e) =>
+                  setNewHistoryEntry({ ...newHistoryEntry, notes: e.target.value || null })
+                }
+                placeholder="Pl.: Éves ármódosítás, infláció követése..."
+                className="h-9"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button type="button" size="sm" onClick={addPriceHistoryEntry}>
+                Mentés
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPriceHistoryForm(false)}
+              >
+                Mégse
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Price history list */}
+        {priceHistory.length === 0 ? (
+          <div className="text-sm text-muted-foreground py-3 text-center border border-dashed rounded-lg">
+            Nincs árváltozás előzmény rögzítve.
+          </div>
+        ) : (
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="text-left px-3 py-2 font-medium">Dátum</th>
+                  <th className="text-left px-3 py-2 font-medium">Ár</th>
+                  <th className="text-left px-3 py-2 font-medium">Típus</th>
+                  <th className="text-left px-3 py-2 font-medium">Megjegyzés</th>
+                  <th className="w-10"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {priceHistory.map((entry) => (
+                  <tr key={entry.id} className="hover:bg-muted/30">
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3 text-muted-foreground" />
+                        {format(new Date(entry.effective_date), "yyyy. MMM d.", { locale: hu })}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 font-medium">
+                      {entry.price.toLocaleString("hu-HU")} {getCurrencyName(entry.currency)}
+                    </td>
+                    <td className="px-3 py-2">{getPriceTypeName(entry.price_type)}</td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {entry.notes || "-"}
+                    </td>
+                    <td className="px-2 py-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removePriceHistoryEntry(entry.id)}
+                        className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Pillar/Session */}

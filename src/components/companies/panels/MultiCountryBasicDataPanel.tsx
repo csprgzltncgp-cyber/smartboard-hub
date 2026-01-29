@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import { DifferentPerCountryToggle } from "../DifferentPerCountryToggle";
-import { CountryDifferentiate, ContractHolder, ConsultationRow } from "@/types/company";
+import { CountryDifferentiate, ContractHolder, ConsultationRow, PriceHistoryEntry } from "@/types/company";
 import { ContractDataPanel } from "./ContractDataPanel";
 
 interface Country {
@@ -56,6 +56,8 @@ interface MultiCountryBasicDataPanelProps {
   setConsultationRows: (rows: ConsultationRow[]) => void;
   industry: string | null;
   setIndustry: (industry: string | null) => void;
+  priceHistory: PriceHistoryEntry[];
+  setPriceHistory: (history: PriceHistoryEntry[]) => void;
 }
 
 export const MultiCountryBasicDataPanel = ({
@@ -96,6 +98,8 @@ export const MultiCountryBasicDataPanel = ({
   setConsultationRows,
   industry,
   setIndustry,
+  priceHistory,
+  setPriceHistory,
 }: MultiCountryBasicDataPanelProps) => {
   const isCGP = contractHolderId === "2";
   const isLifeworks = contractHolderId === "1";
@@ -159,6 +163,8 @@ export const MultiCountryBasicDataPanel = ({
         setConsultationRows={setConsultationRows}
         industry={industry}
         setIndustry={setIndustry}
+        priceHistory={priceHistory}
+        setPriceHistory={setPriceHistory}
         showDifferentPerCountry={countryIds.length > 1}
       />
 

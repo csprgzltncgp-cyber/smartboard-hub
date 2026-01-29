@@ -11,7 +11,7 @@ import {
 import { Plus, ChevronDown, ChevronUp, X } from "lucide-react";
 import { useState } from "react";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
-import { ContractHolder, Workshop, CrisisIntervention, CountryDifferentiate, ConsultationRow } from "@/types/company";
+import { ContractHolder, Workshop, CrisisIntervention, CountryDifferentiate, ConsultationRow, PriceHistoryEntry } from "@/types/company";
 import { ContractDataPanel } from "./ContractDataPanel";
 
 interface Country {
@@ -75,6 +75,8 @@ interface SingleCountryBasicDataPanelProps {
   setConsultationRows: (rows: ConsultationRow[]) => void;
   industry: string | null;
   setIndustry: (industry: string | null) => void;
+  priceHistory: PriceHistoryEntry[];
+  setPriceHistory: (history: PriceHistoryEntry[]) => void;
 }
 
 export const SingleCountryBasicDataPanel = ({
@@ -122,6 +124,8 @@ export const SingleCountryBasicDataPanel = ({
   setConsultationRows,
   industry,
   setIndustry,
+  priceHistory,
+  setPriceHistory,
 }: SingleCountryBasicDataPanelProps) => {
   const isCGP = contractHolderId === "2";
   const isLifeworks = contractHolderId === "1";
@@ -253,6 +257,8 @@ export const SingleCountryBasicDataPanel = ({
         setConsultationRows={setConsultationRows}
         industry={industry}
         setIndustry={setIndustry}
+        priceHistory={priceHistory}
+        setPriceHistory={setPriceHistory}
         showDifferentPerCountry={false}
       />
 

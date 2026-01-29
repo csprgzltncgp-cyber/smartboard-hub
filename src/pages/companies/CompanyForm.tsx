@@ -27,6 +27,7 @@ import {
   InvoiceItem,
   InvoiceComment,
   InvoiceTemplate,
+  PriceHistoryEntry,
 } from "@/types/company";
 import { useCompaniesDb } from "@/hooks/useCompaniesDb";
 import { useAppUsersDb } from "@/hooks/useAppUsersDb";
@@ -109,6 +110,7 @@ const CompanyForm = () => {
   const [sessionCount, setSessionCount] = useState<number | null>(null);
   const [consultationRows, setConsultationRows] = useState<import("@/types/company").ConsultationRow[]>([]);
   const [industry, setIndustry] = useState<string | null>(null);
+  const [priceHistory, setPriceHistory] = useState<PriceHistoryEntry[]>([]);
 
   // Számlázási adatok
   const [billingData, setBillingData] = useState<BillingData | null>(null);
@@ -431,6 +433,8 @@ const CompanyForm = () => {
           setConsultationRows={setConsultationRows}
           industry={industry}
           setIndustry={setIndustry}
+          priceHistory={priceHistory}
+          setPriceHistory={setPriceHistory}
         />
         {/* Mentés gomb az Alapadatok panelben */}
         <div className="flex items-center gap-4 mt-6 pt-4 border-t">
@@ -613,6 +617,8 @@ const CompanyForm = () => {
               setConsultationRows={setConsultationRows}
               industry={industry}
               setIndustry={setIndustry}
+              priceHistory={priceHistory}
+              setPriceHistory={setPriceHistory}
             />
             <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">
