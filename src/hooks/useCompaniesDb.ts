@@ -274,7 +274,76 @@ export const useCompaniesDb = () => {
   // Fetch single company with all details
   const getCompanyById = useCallback(async (id: string): Promise<CompanyWithDetails | null> => {
     try {
-      // Fetch company
+      // Handle mock newcomer company (MediaGroup Hungary)
+      if (id === 'mock-newcomer-mediagroup') {
+        // Find the Hungary country ID
+        const { data: hungaryData } = await supabase
+          .from('countries')
+          .select('id')
+          .eq('code', 'HU')
+          .maybeSingle();
+        
+        const hungaryId = hungaryData?.id || '';
+        
+        // Return mock company with details
+        return {
+          id: 'mock-newcomer-mediagroup',
+          name: 'MediaGroup Hungary',
+          active: true,
+          country_ids: hungaryId ? [hungaryId] : [],
+          contract_holder_id: '2', // CGP
+          org_id: null,
+          contract_start: null,
+          contract_end: null,
+          contract_reminder_email: null,
+          lead_account_id: null,
+          contract_file_url: null,
+          contract_price: null,
+          contract_price_type: null,
+          contract_currency: null,
+          pillar_count: 3,
+          session_count: 6,
+          consultation_rows: [],
+          industry: 'Média / Marketing',
+          price_history: [],
+          is_connected: false,
+          connected_company_id: null,
+          isNewcomer: true, // Key flag for onboarding panel!
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          countryDifferentiates: {
+            contract_holder: false,
+            org_id: false,
+            contract_date: false,
+            reporting: false,
+            invoicing: false,
+            contract_date_reminder_email: false,
+          },
+          countrySettings: hungaryId ? [{
+            id: 'mock-setting-hu',
+            company_id: 'mock-newcomer-mediagroup',
+            country_id: hungaryId,
+            contract_holder_id: null,
+            org_id: null,
+            contract_start: null,
+            contract_end: null,
+            contract_reminder_email: null,
+            head_count: 450,
+            activity_plan_user_id: null,
+            client_username: null,
+            client_password_set: false,
+            client_language_id: null,
+            all_country_access: false,
+            added_at: new Date().toISOString(),
+          }] : [],
+          billingData: null,
+          invoicingData: null,
+          invoiceItems: [],
+          invoiceComments: [],
+        };
+      }
+
+      // Fetch company from database
       const { data: companyData, error: companyError } = await supabase
         .from('companies')
         .select('*')
