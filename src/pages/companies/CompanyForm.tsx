@@ -412,7 +412,7 @@ const CompanyForm = () => {
       {/* Bevezetés panel - ELSŐ, ha Új érkező */}
       {isNewcomer && (
         <CollapsiblePanel title="Bevezetés" variant="highlight" defaultOpen>
-          <OnboardingTabContent companyId={companyId || "new"} onComplete={handleOnboardingComplete} />
+          <OnboardingTabContent companyId={companyId || "new"} onComplete={handleOnboardingComplete} isEmpty={!isEditMode} />
         </CollapsiblePanel>
       )}
 
@@ -597,7 +597,7 @@ const CompanyForm = () => {
       variant: "highlight",
       content: (
         <div className="space-y-6">
-          <OnboardingTabContent companyId={companyId || "new"} onComplete={handleOnboardingComplete} />
+          <OnboardingTabContent companyId={companyId || "new"} onComplete={handleOnboardingComplete} isEmpty={!isEditMode} />
         </div>
       ),
     };
