@@ -10,6 +10,7 @@ import {
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import { DifferentPerCountryToggle } from "../DifferentPerCountryToggle";
 import { CountryDifferentiate, ContractHolder } from "@/types/company";
+import { ContractDataPanel } from "./ContractDataPanel";
 
 interface Country {
   id: string;
@@ -38,6 +39,17 @@ interface MultiCountryBasicDataPanelProps {
   setCountryDifferentiates: (diff: CountryDifferentiate) => void;
   countries: Country[];
   contractHolders: ContractHolder[];
+  // Contract data fields
+  contractFileUrl: string | null;
+  setContractFileUrl: (url: string | null) => void;
+  contractCurrency: string | null;
+  setContractCurrency: (currency: string | null) => void;
+  pillarCount: number | null;
+  setPillarCount: (count: number | null) => void;
+  sessionCount: number | null;
+  setSessionCount: (count: number | null) => void;
+  industry: string | null;
+  setIndustry: (industry: string | null) => void;
 }
 
 export const MultiCountryBasicDataPanel = ({
@@ -61,6 +73,17 @@ export const MultiCountryBasicDataPanel = ({
   setCountryDifferentiates,
   countries,
   contractHolders,
+  // Contract data fields
+  contractFileUrl,
+  setContractFileUrl,
+  contractCurrency,
+  setContractCurrency,
+  pillarCount,
+  setPillarCount,
+  sessionCount,
+  setSessionCount,
+  industry,
+  setIndustry,
 }: MultiCountryBasicDataPanelProps) => {
   const isCGP = contractHolderId === "2";
   const isLifeworks = contractHolderId === "1";
@@ -99,32 +122,27 @@ export const MultiCountryBasicDataPanel = ({
         </div>
       </div>
 
-      {/* Contract Holder + Különböző országonként */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-        <div className="space-y-2">
-          <Label>Szerződéshordozó</Label>
-          <Select
-            value={contractHolderId || ""}
-            onValueChange={(val) => setContractHolderId(val || null)}
-            disabled={countryDifferentiates.contract_holder}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Válasszon..." />
-            </SelectTrigger>
-            <SelectContent>
-              {contractHolders.map((ch) => (
-                <SelectItem key={ch.id} value={ch.id}>
-                  {ch.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <DifferentPerCountryToggle
-          checked={countryDifferentiates.contract_holder}
-          onChange={(checked) => updateDifferentiate("contract_holder", checked)}
-        />
-      </div>
+      {/* ============================================== */}
+      {/* BELSŐ PANEL: Szerződés adatai */}
+      {/* ============================================== */}
+      <ContractDataPanel
+        contractHolderId={contractHolderId}
+        setContractHolderId={setContractHolderId}
+        contractHolders={contractHolders}
+        countryDifferentiates={countryDifferentiates}
+        onUpdateDifferentiate={(key, value) => updateDifferentiate(key, value)}
+        contractFileUrl={contractFileUrl}
+        setContractFileUrl={setContractFileUrl}
+        contractCurrency={contractCurrency}
+        setContractCurrency={setContractCurrency}
+        pillarCount={pillarCount}
+        setPillarCount={setPillarCount}
+        sessionCount={sessionCount}
+        setSessionCount={setSessionCount}
+        industry={industry}
+        setIndustry={setIndustry}
+        showDifferentPerCountry={countryIds.length > 1}
+      />
 
       {/* ORG ID (csak Lifeworks esetén) */}
       {(isLifeworks || !contractHolderId) && (

@@ -11,7 +11,8 @@ import {
 import { Plus, ChevronDown, ChevronUp, X } from "lucide-react";
 import { useState } from "react";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
-import { ContractHolder, Workshop, CrisisIntervention } from "@/types/company";
+import { ContractHolder, Workshop, CrisisIntervention, CountryDifferentiate } from "@/types/company";
+import { ContractDataPanel } from "./ContractDataPanel";
 
 interface Country {
   id: string;
@@ -57,6 +58,17 @@ interface SingleCountryBasicDataPanelProps {
   clientDashboardUsers: ClientDashboardUser[];
   setClientDashboardUsers: (users: ClientDashboardUser[]) => void;
   onSetNewPassword: (userId: string) => void;
+  // Contract data fields
+  contractFileUrl: string | null;
+  setContractFileUrl: (url: string | null) => void;
+  contractCurrency: string | null;
+  setContractCurrency: (currency: string | null) => void;
+  pillarCount: number | null;
+  setPillarCount: (count: number | null) => void;
+  sessionCount: number | null;
+  setSessionCount: (count: number | null) => void;
+  industry: string | null;
+  setIndustry: (industry: string | null) => void;
 }
 
 export const SingleCountryBasicDataPanel = ({
@@ -87,6 +99,17 @@ export const SingleCountryBasicDataPanel = ({
   clientDashboardUsers,
   setClientDashboardUsers,
   onSetNewPassword,
+  // Contract data fields
+  contractFileUrl,
+  setContractFileUrl,
+  contractCurrency,
+  setContractCurrency,
+  pillarCount,
+  setPillarCount,
+  sessionCount,
+  setSessionCount,
+  industry,
+  setIndustry,
 }: SingleCountryBasicDataPanelProps) => {
   const isCGP = contractHolderId === "2";
   const isLifeworks = contractHolderId === "1";
@@ -95,6 +118,16 @@ export const SingleCountryBasicDataPanel = ({
   const [isWorkshopsOpen, setIsWorkshopsOpen] = useState(false);
   const [isCrisisOpen, setIsCrisisOpen] = useState(false);
   const [isClientDashboardOpen, setIsClientDashboardOpen] = useState(true);
+
+  // Dummy countryDifferentiates for single country (no different per country needed)
+  const countryDifferentiates: CountryDifferentiate = {
+    contract_holder: false,
+    org_id: false,
+    contract_date: false,
+    reporting: false,
+    invoicing: false,
+    contract_date_reminder_email: false,
+  };
 
   const countryOptions = countries.map((c) => ({ id: c.id, label: c.name }));
 
@@ -183,27 +216,27 @@ export const SingleCountryBasicDataPanel = ({
         </div>
       </div>
 
-      {/* Contract Holder */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-        <div className="space-y-2">
-          <Label>Szerződéshordozó</Label>
-          <Select
-            value={contractHolderId || ""}
-            onValueChange={(val) => setContractHolderId(val || null)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Válasszon..." />
-            </SelectTrigger>
-            <SelectContent>
-              {contractHolders.map((ch) => (
-                <SelectItem key={ch.id} value={ch.id}>
-                  {ch.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      {/* ============================================== */}
+      {/* BELSŐ PANEL: Szerződés adatai */}
+      {/* ============================================== */}
+      <ContractDataPanel
+        contractHolderId={contractHolderId}
+        setContractHolderId={setContractHolderId}
+        contractHolders={contractHolders}
+        countryDifferentiates={countryDifferentiates}
+        onUpdateDifferentiate={() => {}}
+        contractFileUrl={contractFileUrl}
+        setContractFileUrl={setContractFileUrl}
+        contractCurrency={contractCurrency}
+        setContractCurrency={setContractCurrency}
+        pillarCount={pillarCount}
+        setPillarCount={setPillarCount}
+        sessionCount={sessionCount}
+        setSessionCount={setSessionCount}
+        industry={industry}
+        setIndustry={setIndustry}
+        showDifferentPerCountry={false}
+      />
 
       {/* ORG ID (csak Lifeworks esetén) */}
       {(isLifeworks || !contractHolderId) && (

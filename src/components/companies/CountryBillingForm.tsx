@@ -426,7 +426,7 @@ export const CountryBillingForm = ({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Devizanem</Label>
+            <Label>Számlázási devizanem</Label>
             <Select
               value={invoicingData.currency || "none"}
               onValueChange={(val) => updateInvoicingData({ currency: val === "none" ? null : val })}
