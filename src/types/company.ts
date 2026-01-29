@@ -13,6 +13,12 @@ export interface Company {
   lead_account_id: string | null;
   is_connected: boolean;
   connected_company_id: string | null; // Kapcsolt cég
+  // New contract data fields
+  contract_file_url: string | null; // PDF fájl URL
+  contract_currency: string | null; // Szerződéses ár devizanem
+  pillar_count: number | null; // Pillér szám
+  session_count: number | null; // Alkalom szám
+  industry: string | null; // Iparág
   created_at: string;
   updated_at: string;
 }
@@ -262,6 +268,23 @@ export const CURRENCIES = [
   { id: "rsd", name: "RSD" },
   { id: "mdl", name: "MDL" },
   { id: "chf", name: "CHF" },
+];
+
+// Iparágak
+export const INDUSTRIES = [
+  { id: "it", name: "IT / Technológia" },
+  { id: "finance", name: "Pénzügy / Bank" },
+  { id: "healthcare", name: "Egészségügy" },
+  { id: "manufacturing", name: "Gyártás / Ipar" },
+  { id: "retail", name: "Kereskedelem" },
+  { id: "services", name: "Szolgáltatások" },
+  { id: "education", name: "Oktatás" },
+  { id: "government", name: "Közigazgatás" },
+  { id: "telecom", name: "Telekommunikáció" },
+  { id: "energy", name: "Energia" },
+  { id: "transport", name: "Szállítás / Logisztika" },
+  { id: "pharma", name: "Gyógyszeripar" },
+  { id: "other", name: "Egyéb" },
 ];
 
 // ÁFA kulcsok

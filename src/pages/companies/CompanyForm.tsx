@@ -100,6 +100,13 @@ const CompanyForm = () => {
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [crisisInterventions, setCrisisInterventions] = useState<CrisisIntervention[]>([]);
 
+  // Contract data fields (Szerződés adatai)
+  const [contractFileUrl, setContractFileUrl] = useState<string | null>(null);
+  const [contractCurrency, setContractCurrency] = useState<string | null>(null);
+  const [pillarCount, setPillarCount] = useState<number | null>(null);
+  const [sessionCount, setSessionCount] = useState<number | null>(null);
+  const [industry, setIndustry] = useState<string | null>(null);
+
   // Számlázási adatok
   const [billingData, setBillingData] = useState<BillingData | null>(null);
   const [invoicingData, setInvoicingData] = useState<InvoicingData | null>(null);
@@ -404,6 +411,17 @@ const CompanyForm = () => {
           clientDashboardUsers={clientDashboardUsers}
           setClientDashboardUsers={setClientDashboardUsers}
           onSetNewPassword={(userId: string) => toast.info(`Új jelszó beállítása: ${userId} - fejlesztés alatt`)}
+          // Contract data fields
+          contractFileUrl={contractFileUrl}
+          setContractFileUrl={setContractFileUrl}
+          contractCurrency={contractCurrency}
+          setContractCurrency={setContractCurrency}
+          pillarCount={pillarCount}
+          setPillarCount={setPillarCount}
+          sessionCount={sessionCount}
+          setSessionCount={setSessionCount}
+          industry={industry}
+          setIndustry={setIndustry}
         />
         {/* Mentés gomb az Alapadatok panelben */}
         <div className="flex items-center gap-4 mt-6 pt-4 border-t">
@@ -569,6 +587,17 @@ const CompanyForm = () => {
               setCountryDifferentiates={setCountryDifferentiates}
               countries={countries}
               contractHolders={mockContractHolders}
+              // Contract data fields
+              contractFileUrl={contractFileUrl}
+              setContractFileUrl={setContractFileUrl}
+              contractCurrency={contractCurrency}
+              setContractCurrency={setContractCurrency}
+              pillarCount={pillarCount}
+              setPillarCount={setPillarCount}
+              sessionCount={sessionCount}
+              setSessionCount={setSessionCount}
+              industry={industry}
+              setIndustry={setIndustry}
             />
             <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">
