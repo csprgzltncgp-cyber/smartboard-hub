@@ -41,6 +41,9 @@ export interface Company {
   consultation_rows: ConsultationRow[]; // Tanácsadás sorok (típus + időtartam + forma)
   industry: string | null; // Iparág
   price_history: PriceHistoryEntry[]; // Árváltozás előzmények
+  // Newcomer status from CRM
+  isNewcomer?: boolean; // CRM-ből érkező "Új érkező" státusz
+  onboardingData?: any; // CRM-ből átvett onboarding adatok
   created_at: string;
   updated_at: string;
 }
