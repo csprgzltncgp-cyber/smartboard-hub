@@ -8,21 +8,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, ChevronDown, ChevronUp, X } from "lucide-react";
 import { useState } from "react";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
-import { DifferentPerCountryToggle } from "../DifferentPerCountryToggle";
-import { CountryDifferentiate, ContractHolder, Workshop, CrisisIntervention, CompanyCountrySettings } from "@/types/company";
-
-interface ConnectedCompany {
-  id: string;
-  name: string;
-}
+import { ContractHolder, Workshop, CrisisIntervention } from "@/types/company";
 
 interface Country {
   id: string;
   code: string;
   name: string;
+}
+
+interface ClientDashboardUser {
+  id: string;
+  username: string;
+  password?: string;
+  languageId: string | null;
 }
 
 interface SingleCountryBasicDataPanelProps {
@@ -42,11 +43,8 @@ interface SingleCountryBasicDataPanelProps {
   setContractEnd: (date: string | null) => void;
   contractReminderEmail: string | null;
   setContractReminderEmail: (email: string | null) => void;
-  connectedCompanyId: string | null;
-  setConnectedCompanyId: (id: string | null) => void;
   countries: Country[];
   contractHolders: ContractHolder[];
-  connectedCompanies: ConnectedCompany[];
   // Létszám (single country)
   headCount: number | null;
   setHeadCount: (count: number | null) => void;
@@ -55,13 +53,10 @@ interface SingleCountryBasicDataPanelProps {
   setWorkshops: (workshops: Workshop[]) => void;
   crisisInterventions: CrisisIntervention[];
   setCrisisInterventions: (interventions: CrisisIntervention[]) => void;
-  // Client Dashboard (single country, CGP only)
-  clientUsername: string;
-  setClientUsername: (username: string) => void;
-  clientLanguageId: string | null;
-  setClientLanguageId: (id: string | null) => void;
-  hasClientPassword: boolean;
-  onSetNewPassword: () => void;
+  // Client Dashboard users
+  clientDashboardUsers: ClientDashboardUser[];
+  setClientDashboardUsers: (users: ClientDashboardUser[]) => void;
+  onSetNewPassword: (userId: string) => void;
 }
 
 export const SingleCountryBasicDataPanel = ({
@@ -81,22 +76,16 @@ export const SingleCountryBasicDataPanel = ({
   setContractEnd,
   contractReminderEmail,
   setContractReminderEmail,
-  connectedCompanyId,
-  setConnectedCompanyId,
   countries,
   contractHolders,
-  connectedCompanies,
   headCount,
   setHeadCount,
   workshops,
   setWorkshops,
   crisisInterventions,
   setCrisisInterventions,
-  clientUsername,
-  setClientUsername,
-  clientLanguageId,
-  setClientLanguageId,
-  hasClientPassword,
+  clientDashboardUsers,
+  setClientDashboardUsers,
   onSetNewPassword,
 }: SingleCountryBasicDataPanelProps) => {
   const isCGP = contractHolderId === "2";
@@ -105,6 +94,7 @@ export const SingleCountryBasicDataPanel = ({
 
   const [isWorkshopsOpen, setIsWorkshopsOpen] = useState(false);
   const [isCrisisOpen, setIsCrisisOpen] = useState(false);
+  const [isClientDashboardOpen, setIsClientDashboardOpen] = useState(true);
 
   const countryOptions = countries.map((c) => ({ id: c.id, label: c.name }));
 
@@ -145,6 +135,26 @@ export const SingleCountryBasicDataPanel = ({
     setCrisisInterventions(crisisInterventions.map((c) => (c.id === id ? { ...c, ...updates } : c)));
   };
 
+  const addClientDashboardUser = () => {
+    const newUser: ClientDashboardUser = {
+      id: `new-user-${Date.now()}`,
+      username: "",
+      password: "",
+      languageId: null,
+    };
+    setClientDashboardUsers([...clientDashboardUsers, newUser]);
+  };
+
+  const updateClientDashboardUser = (id: string, updates: Partial<ClientDashboardUser>) => {
+    setClientDashboardUsers(
+      clientDashboardUsers.map((u) => (u.id === id ? { ...u, ...updates } : u))
+    );
+  };
+
+  const removeClientDashboardUser = (id: string) => {
+    setClientDashboardUsers(clientDashboardUsers.filter((u) => u.id !== id));
+  };
+
   return (
     <div className="space-y-6">
       {/* Cégnév */}
@@ -170,29 +180,6 @@ export const SingleCountryBasicDataPanel = ({
             onChange={setCountryIds}
             placeholder="Válasszon országokat..."
           />
-        </div>
-      </div>
-
-      {/* Kapcsolt cég */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-        <div className="space-y-2">
-          <Label>Kapcsolt cég</Label>
-          <Select
-            value={connectedCompanyId || "none"}
-            onValueChange={(val) => setConnectedCompanyId(val === "none" ? null : val)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Válasszon..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Nincs</SelectItem>
-              {connectedCompanies.map((company) => (
-                <SelectItem key={company.id} value={company.id}>
-                  {company.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
@@ -282,14 +269,35 @@ export const SingleCountryBasicDataPanel = ({
         </div>
       </div>
 
-      {/* Workshop és Krízisintervenció beállítások */}
-      <div className="space-y-4 pt-4 border-t">
-        <h4 className="text-sm font-medium text-primary">Workshop és Krízisintervenció beállítások</h4>
+      {/* Aktív státusz */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+        <div className="space-y-2">
+          <Label>Aktív</Label>
+          <Select
+            value={active ? "true" : "false"}
+            onValueChange={(val) => setActive(val === "true")}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="true">Igen</SelectItem>
+              <SelectItem value="false">Nem</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* ============================================== */}
+      {/* BELSŐ PANEL: Workshop és Krízisintervenció */}
+      {/* ============================================== */}
+      <div className="bg-muted/30 border rounded-lg p-4 space-y-4">
+        <h4 className="text-sm font-medium text-primary">Workshop és Krízisintervenció</h4>
 
         {/* Workshops */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-primary">Workshopok</span>
+            <span className="text-sm text-muted-foreground">Workshopok</span>
             <Button
               type="button"
               variant="outline"
@@ -339,7 +347,7 @@ export const SingleCountryBasicDataPanel = ({
         {/* Krízisintervenciók */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-primary">Krízisintervenciók</span>
+            <span className="text-sm text-muted-foreground">Krízisintervenciók</span>
             <Button
               type="button"
               variant="outline"
@@ -387,84 +395,102 @@ export const SingleCountryBasicDataPanel = ({
         </div>
       </div>
 
-      {/* Client Dashboard beállítások - csak CGP esetén */}
+      {/* ============================================== */}
+      {/* BELSŐ PANEL: Client Dashboard beállítások */}
+      {/* ============================================== */}
       {(isCGP || !contractHolderId) && (
-        <div className="space-y-4 border-l-2 border-primary/20 pl-4 ml-2">
-          <h3 className="text-sm font-medium text-primary">Client Dashboard beállítások</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Felhasználónév Client Dashboard-hoz</Label>
-              <Input
-                value={clientUsername}
-                onChange={(e) => setClientUsername(e.target.value)}
-                placeholder="Felhasználónév"
-              />
-            </div>
+        <div className="bg-muted/30 border rounded-lg p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-primary">Client Dashboard felhasználók</h4>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addClientDashboardUser}
+              className="h-8"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Új felhasználó
+            </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {!hasClientPassword ? (
-              <div className="space-y-2">
-                <Label>Jelszó Client Dashboard-hoz</Label>
-                <Input type="password" placeholder="Jelszó" />
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Label>&nbsp;</Label>
-                <button
+          {clientDashboardUsers.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              Nincs még felhasználó hozzáadva a Client Dashboard-hoz.
+            </p>
+          )}
+
+          {clientDashboardUsers.map((user, idx) => (
+            <div key={user.id} className="border rounded-lg p-3 space-y-3 bg-background">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Felhasználó #{idx + 1}</span>
+                <Button
                   type="button"
-                  onClick={onSetNewPassword}
-                  className="inline-flex items-center text-primary hover:underline"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeClientDashboardUser(user.id)}
+                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                 >
-                  + Új jelszó beállítása
-                </button>
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
-            )}
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Client Dashboard nyelve</Label>
-              <Select
-                value={clientLanguageId || ""}
-                onValueChange={(val) => setClientLanguageId(val || null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Válasszon..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="3">English</SelectItem>
-                  <SelectItem value="1">Magyar</SelectItem>
-                  <SelectItem value="2">Polska</SelectItem>
-                  <SelectItem value="4">Slovenský</SelectItem>
-                  <SelectItem value="5">Česky</SelectItem>
-                  <SelectItem value="6">Українська</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Felhasználónév</Label>
+                  <Input
+                    value={user.username}
+                    onChange={(e) => updateClientDashboardUser(user.id, { username: e.target.value })}
+                    placeholder="Felhasználónév"
+                    className="h-9"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Jelszó</Label>
+                  {user.id.startsWith("new-") ? (
+                    <Input
+                      type="password"
+                      value={user.password || ""}
+                      onChange={(e) => updateClientDashboardUser(user.id, { password: e.target.value })}
+                      placeholder="Jelszó"
+                      className="h-9"
+                    />
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="link"
+                      size="sm"
+                      onClick={() => onSetNewPassword(user.id)}
+                      className="h-9 p-0 text-primary"
+                    >
+                      + Új jelszó beállítása
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Nyelv</Label>
+                  <Select
+                    value={user.languageId || ""}
+                    onValueChange={(val) => updateClientDashboardUser(user.id, { languageId: val || null })}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Válasszon..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="3">English</SelectItem>
+                      <SelectItem value="1">Magyar</SelectItem>
+                      <SelectItem value="2">Polska</SelectItem>
+                      <SelectItem value="4">Slovenský</SelectItem>
+                      <SelectItem value="5">Česky</SelectItem>
+                      <SelectItem value="6">Українська</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
       )}
-
-      {/* Aktív státusz */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-        <div className="space-y-2">
-          <Label>Aktív</Label>
-          <Select
-            value={active ? "true" : "false"}
-            onValueChange={(val) => setActive(val === "true")}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="true">Igen</SelectItem>
-              <SelectItem value="false">Nem</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
     </div>
   );
 };
