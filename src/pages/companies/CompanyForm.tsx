@@ -34,6 +34,8 @@ import {
 } from "@/types/company";
 import { useCompaniesDb } from "@/hooks/useCompaniesDb";
 import { useAppUsersDb } from "@/hooks/useAppUsersDb";
+import { useContractedEntities } from "@/hooks/useContractedEntities";
+import { ContractedEntity } from "@/types/contracted-entity";
 
 // Mock contract holders (until we have a proper table)
 const mockContractHolders: ContractHolder[] = [
@@ -57,6 +59,15 @@ const CompanyForm = () => {
   } = useCompaniesDb();
   
   const { users } = useAppUsersDb();
+  
+  // Contracted entities hook
+  const {
+    entities,
+    loading: entitiesLoading,
+    createEntity,
+    updateEntity,
+    deleteEntity,
+  } = useContractedEntities(companyId || undefined);
 
   const [formLoading, setFormLoading] = useState(isEditMode);
 
@@ -522,6 +533,20 @@ const CompanyForm = () => {
           setIndustry={setIndustry}
           priceHistory={priceHistory}
           setPriceHistory={setPriceHistory}
+          // Contracted entities
+          entities={entities.filter(e => e.country_id === countryIds[0])}
+          hasMultipleEntities={countryDifferentiates.has_multiple_entities}
+          onToggleMultipleEntities={(enabled) => setCountryDifferentiates(prev => ({ ...prev, has_multiple_entities: enabled }))}
+          onAddEntity={async (entity) => {
+            await createEntity(entity);
+          }}
+          onUpdateEntity={async (id, updates) => {
+            await updateEntity(id, updates);
+          }}
+          onDeleteEntity={async (id) => {
+            await deleteEntity(id);
+          }}
+          isEntitiesLoading={entitiesLoading}
         />
         
         {/* Archived onboarding panel - only shown after onboarding completion */}

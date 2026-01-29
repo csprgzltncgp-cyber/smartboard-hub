@@ -32,19 +32,26 @@ Módosított táblák:
 
 ### UI megjelenés
 
-1. **Egy ország, egy entitás**: Marad az egyszerű nézet (mai állapot)
-2. **Egy ország, több entitás**: Alapadatok panelen belül entitás lista
-3. **Több ország, vegyes**: Országok fülön, minden országnál entitás lista
+1. **Egy ország, egy entitás**: Egyszerű nézet (mai állapot) - entitás panel rejtett
+2. **Egy ország, több entitás bekapcsolva**: EntityListPanel látható, entitások listázhatók
+3. **Több ország, vegyes**: Minden országnál saját EntityListPanel
+
+Az entitás funkció OPCIONÁLIS minden cég esetében. A "Több entitás" toggle-val aktiválható bármely cégprofil esetén (akár 1, akár több országos).
+
+### Komponensek
+
+- `EntityListPanel` - Fő panel az entitások listázásához, toggle-val
+- `EntityFormDialog` - Entitás hozzáadás/szerkesztés dialógus
+- Hook: `useContractedEntities(companyId?)` - CRUD műveletek, auto-fetch
 
 ### Típusok
 
 - `ContractedEntity` - fő entitás interfész (`src/types/contracted-entity.ts`)
 - `CountryEntities` - országonkénti csoportosítás UI-hoz
-- Hook: `useContractedEntities` - CRUD műveletek
 
 ### Fontos szabályok
 
-1. Ha egy országban nincs entitás, a rendszer automatikusan létrehoz egyet
-2. Minden entitáshoz saját számlázási adatok tartoznak
+1. Az entitás funkció opcionális, minden cég esetében elérhető
+2. Minden entitáshoz saját számlázási adatok tartozhatnak
 3. Az entitás neve szabadon megadható (pl. "Henkel Hungary Kft.")
 4. Migráció: meglévő `company_country_settings` adatok átvihetők entitásba

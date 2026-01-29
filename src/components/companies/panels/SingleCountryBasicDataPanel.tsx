@@ -13,7 +13,8 @@ import { useState } from "react";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import { ContractHolder, Workshop, CrisisIntervention, CountryDifferentiate, ConsultationRow, PriceHistoryEntry } from "@/types/company";
 import { ContractDataPanel } from "./ContractDataPanel";
-
+import { EntityListPanel } from "../entities";
+import { ContractedEntity } from "@/types/contracted-entity";
 interface Country {
   id: string;
   code: string;
@@ -79,6 +80,14 @@ interface SingleCountryBasicDataPanelProps {
   setIndustry: (industry: string | null) => void;
   priceHistory: PriceHistoryEntry[];
   setPriceHistory: (history: PriceHistoryEntry[]) => void;
+  // Contracted entities
+  entities: ContractedEntity[];
+  hasMultipleEntities: boolean;
+  onToggleMultipleEntities: (enabled: boolean) => void;
+  onAddEntity: (entity: Omit<ContractedEntity, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  onUpdateEntity: (id: string, updates: Partial<ContractedEntity>) => Promise<void>;
+  onDeleteEntity: (id: string) => Promise<void>;
+  isEntitiesLoading?: boolean;
 }
 
 export const SingleCountryBasicDataPanel = ({
@@ -130,6 +139,14 @@ export const SingleCountryBasicDataPanel = ({
   setIndustry,
   priceHistory,
   setPriceHistory,
+  // Contracted entities
+  entities,
+  hasMultipleEntities,
+  onToggleMultipleEntities,
+  onAddEntity,
+  onUpdateEntity,
+  onDeleteEntity,
+  isEntitiesLoading = false,
 }: SingleCountryBasicDataPanelProps) => {
   const isCGP = contractHolderId === "2";
   const isLifeworks = contractHolderId === "1";
@@ -253,6 +270,23 @@ export const SingleCountryBasicDataPanel = ({
         </div>
       </div>
 
+      {/* ============================================== */}
+      {/* BELSŐ PANEL: Szerződött entitások */}
+      {/* ============================================== */}
+      {countryId && (
+        <EntityListPanel
+          companyId="" 
+          countryId={countryId}
+          countryName={countries.find(c => c.id === countryId)?.name || ""}
+          entities={entities}
+          hasMultipleEntities={hasMultipleEntities}
+          onToggleMultipleEntities={onToggleMultipleEntities}
+          onAddEntity={onAddEntity}
+          onUpdateEntity={onUpdateEntity}
+          onDeleteEntity={onDeleteEntity}
+          isLoading={isEntitiesLoading}
+        />
+      )}
       {/* ============================================== */}
       {/* BELSŐ PANEL: Szerződés adatai */}
       {/* ============================================== */}
