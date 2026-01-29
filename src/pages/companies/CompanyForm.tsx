@@ -455,16 +455,52 @@ const CompanyForm = () => {
       {/* Feljegyzések panel */}
       <CollapsiblePanel title="Feljegyzések">
         <NotesTabContent companyId={companyId || "new"} />
+        <div className="flex items-center gap-4 mt-6 pt-4 border-t">
+          <Button type="submit" className="rounded-xl">
+            <Save className="h-4 w-4 mr-2" />
+            Mentés
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => toast.info("Új feljegyzés hozzáadása - fejlesztés alatt")}
+            className="rounded-xl"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Új feljegyzés hozzáadása
+          </Button>
+        </div>
       </CollapsiblePanel>
 
       {/* Inputok panel */}
       <CollapsiblePanel title="Inputok">
         <InputsTabContent companyId={companyId || "new"} />
+        <div className="flex items-center gap-4 mt-6 pt-4 border-t">
+          <Button type="submit" className="rounded-xl">
+            <Save className="h-4 w-4 mr-2" />
+            Mentés
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => toast.info("Új input hozzáadása - fejlesztés alatt")}
+            className="rounded-xl"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Új input hozzáadása
+          </Button>
+        </div>
       </CollapsiblePanel>
 
       {/* Statisztikák panel */}
       <CollapsiblePanel title="Statisztikák">
         <StatisticsTabContent companyId={companyId || "new"} />
+        <div className="flex justify-end mt-6 pt-4 border-t">
+          <Button type="submit" className="rounded-xl">
+            <Save className="h-4 w-4 mr-2" />
+            Mentés
+          </Button>
+        </div>
       </CollapsiblePanel>
     </div>
   );
@@ -477,31 +513,39 @@ const CompanyForm = () => {
         label: "Alapadatok",
         visible: true,
         content: (
-          <MultiCountryBasicDataPanel
-            name={name}
-            setName={setName}
-            active={active}
-            setActive={setActive}
-            countryIds={countryIds}
-            setCountryIds={setCountryIds}
-            contractHolderId={contractHolderId}
-            setContractHolderId={setContractHolderId}
-            orgId={orgId}
-            setOrgId={setOrgId}
-            contractStart={contractStart}
-            setContractStart={setContractStart}
-            contractEnd={contractEnd}
-            setContractEnd={setContractEnd}
-            contractReminderEmail={contractReminderEmail}
-            setContractReminderEmail={setContractReminderEmail}
-            connectedCompanyId={connectedCompanyId}
-            setConnectedCompanyId={setConnectedCompanyId}
-            countryDifferentiates={countryDifferentiates}
-            setCountryDifferentiates={setCountryDifferentiates}
-            countries={countries}
-            contractHolders={mockContractHolders}
-            connectedCompanies={connectedCompanies}
-          />
+          <div className="space-y-6">
+            <MultiCountryBasicDataPanel
+              name={name}
+              setName={setName}
+              active={active}
+              setActive={setActive}
+              countryIds={countryIds}
+              setCountryIds={setCountryIds}
+              contractHolderId={contractHolderId}
+              setContractHolderId={setContractHolderId}
+              orgId={orgId}
+              setOrgId={setOrgId}
+              contractStart={contractStart}
+              setContractStart={setContractStart}
+              contractEnd={contractEnd}
+              setContractEnd={setContractEnd}
+              contractReminderEmail={contractReminderEmail}
+              setContractReminderEmail={setContractReminderEmail}
+              connectedCompanyId={connectedCompanyId}
+              setConnectedCompanyId={setConnectedCompanyId}
+              countryDifferentiates={countryDifferentiates}
+              setCountryDifferentiates={setCountryDifferentiates}
+              countries={countries}
+              contractHolders={mockContractHolders}
+              connectedCompanies={connectedCompanies}
+            />
+            <div className="flex justify-end pt-4 border-t">
+              <Button type="submit" className="rounded-xl">
+                <Save className="h-4 w-4 mr-2" />
+                Mentés
+              </Button>
+            </div>
+          </div>
         ),
       },
       {
@@ -509,64 +553,99 @@ const CompanyForm = () => {
         label: "Országok",
         visible: true,
         content: (
-          <CompanyCountrySettingsPanel
-            countryIds={countryIds}
-            countries={countries}
-            countrySettings={countrySettings}
-            setCountrySettings={setCountrySettings}
-            countryDifferentiates={countryDifferentiates}
-            contractHolders={mockContractHolders}
-            accountAdmins={accountAdmins}
-            globalContractHolderId={contractHolderId}
-            workshops={workshops}
-            setWorkshops={setWorkshops}
-            crisisInterventions={crisisInterventions}
-            setCrisisInterventions={setCrisisInterventions}
-          />
+          <div className="space-y-6">
+            <CompanyCountrySettingsPanel
+              countryIds={countryIds}
+              countries={countries}
+              countrySettings={countrySettings}
+              setCountrySettings={setCountrySettings}
+              countryDifferentiates={countryDifferentiates}
+              contractHolders={mockContractHolders}
+              accountAdmins={accountAdmins}
+              globalContractHolderId={contractHolderId}
+              workshops={workshops}
+              setWorkshops={setWorkshops}
+              crisisInterventions={crisisInterventions}
+              setCrisisInterventions={setCrisisInterventions}
+            />
+            <div className="flex justify-end pt-4 border-t">
+              <Button type="submit" className="rounded-xl">
+                <Save className="h-4 w-4 mr-2" />
+                Mentés
+              </Button>
+            </div>
+          </div>
         ),
       },
       {
         id: "client-dashboard",
         label: "Client Dashboard",
         visible: isCGP || !contractHolderId,
-        content: <ClientDashboardTabContent companyId={companyId || "new"} countryIds={countryIds} />,
+        content: (
+          <div className="space-y-6">
+            <ClientDashboardTabContent companyId={companyId || "new"} countryIds={countryIds} />
+            <div className="flex justify-end pt-4 border-t">
+              <Button type="submit" className="rounded-xl">
+                <Save className="h-4 w-4 mr-2" />
+                Mentés
+              </Button>
+            </div>
+          </div>
+        ),
       },
       {
         id: "invoicing",
         label: "Számlázás",
         visible: isCGP || !contractHolderId,
         content: (
-          <CompanyInvoicingPanel
-            countryDifferentiates={countryDifferentiates}
-            setCountryDifferentiates={setCountryDifferentiates}
-            billingData={billingData}
-            setBillingData={setBillingData}
-            invoicingData={invoicingData}
-            setInvoicingData={setInvoicingData}
-            invoiceItems={invoiceItems}
-            setInvoiceItems={setInvoiceItems}
-            invoiceComments={invoiceComments}
-            setInvoiceComments={setInvoiceComments}
-            countryIds={countryIds}
-            countries={countries}
-            companyId={companyId || "new"}
-            billingDataPerCountry={billingDataPerCountry}
-            setBillingDataPerCountry={setBillingDataPerCountry}
-            invoicingDataPerCountry={invoicingDataPerCountry}
-            setInvoicingDataPerCountry={setInvoicingDataPerCountry}
-            invoiceItemsPerCountry={invoiceItemsPerCountry}
-            setInvoiceItemsPerCountry={setInvoiceItemsPerCountry}
-            invoiceCommentsPerCountry={invoiceCommentsPerCountry}
-            setInvoiceCommentsPerCountry={setInvoiceCommentsPerCountry}
-            invoiceSlips={invoiceSlips}
-            setInvoiceSlips={setInvoiceSlips}
-            activeInvoicingCountryId={activeInvoicingCountryId}
-            setActiveInvoicingCountryId={setActiveInvoicingCountryId}
-            invoiceSlipsPerCountry={invoiceSlipsPerCountry}
-            setInvoiceSlipsPerCountry={setInvoiceSlipsPerCountry}
-            invoiceTemplates={invoiceTemplates}
-            setInvoiceTemplates={setInvoiceTemplates}
-          />
+          <div className="space-y-6">
+            <CompanyInvoicingPanel
+              countryDifferentiates={countryDifferentiates}
+              setCountryDifferentiates={setCountryDifferentiates}
+              billingData={billingData}
+              setBillingData={setBillingData}
+              invoicingData={invoicingData}
+              setInvoicingData={setInvoicingData}
+              invoiceItems={invoiceItems}
+              setInvoiceItems={setInvoiceItems}
+              invoiceComments={invoiceComments}
+              setInvoiceComments={setInvoiceComments}
+              countryIds={countryIds}
+              countries={countries}
+              companyId={companyId || "new"}
+              billingDataPerCountry={billingDataPerCountry}
+              setBillingDataPerCountry={setBillingDataPerCountry}
+              invoicingDataPerCountry={invoicingDataPerCountry}
+              setInvoicingDataPerCountry={setInvoicingDataPerCountry}
+              invoiceItemsPerCountry={invoiceItemsPerCountry}
+              setInvoiceItemsPerCountry={setInvoiceItemsPerCountry}
+              invoiceCommentsPerCountry={invoiceCommentsPerCountry}
+              setInvoiceCommentsPerCountry={setInvoiceCommentsPerCountry}
+              invoiceSlips={invoiceSlips}
+              setInvoiceSlips={setInvoiceSlips}
+              activeInvoicingCountryId={activeInvoicingCountryId}
+              setActiveInvoicingCountryId={setActiveInvoicingCountryId}
+              invoiceSlipsPerCountry={invoiceSlipsPerCountry}
+              setInvoiceSlipsPerCountry={setInvoiceSlipsPerCountry}
+              invoiceTemplates={invoiceTemplates}
+              setInvoiceTemplates={setInvoiceTemplates}
+            />
+            <div className="flex items-center gap-4 pt-4 border-t">
+              <Button type="submit" className="rounded-xl">
+                <Save className="h-4 w-4 mr-2" />
+                Mentés
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleAddInvoiceList}
+                className="rounded-xl"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Új számla hozzáadása
+              </Button>
+            </div>
+          </div>
         ),
       },
       // Kontextusfüggő fülek
@@ -574,25 +653,83 @@ const CompanyForm = () => {
         id: "onboarding",
         label: "Bevezetés",
         visible: isNewcomer,
-        content: <OnboardingTabContent companyId={companyId || "new"} />,
+        content: (
+          <div className="space-y-6">
+            <OnboardingTabContent companyId={companyId || "new"} />
+            <div className="flex justify-end pt-4 border-t">
+              <Button type="submit" className="rounded-xl">
+                <Save className="h-4 w-4 mr-2" />
+                Mentés
+              </Button>
+            </div>
+          </div>
+        ),
       },
       {
         id: "inputs",
         label: "Inputok",
         visible: true,
-        content: <InputsTabContent companyId={companyId || "new"} />,
+        content: (
+          <div className="space-y-6">
+            <InputsTabContent companyId={companyId || "new"} />
+            <div className="flex items-center gap-4 pt-4 border-t">
+              <Button type="submit" className="rounded-xl">
+                <Save className="h-4 w-4 mr-2" />
+                Mentés
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => toast.info("Új input hozzáadása - fejlesztés alatt")}
+                className="rounded-xl"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Új input hozzáadása
+              </Button>
+            </div>
+          </div>
+        ),
       },
       {
         id: "notes",
         label: "Feljegyzések",
         visible: true,
-        content: <NotesTabContent companyId={companyId || "new"} />,
+        content: (
+          <div className="space-y-6">
+            <NotesTabContent companyId={companyId || "new"} />
+            <div className="flex items-center gap-4 pt-4 border-t">
+              <Button type="submit" className="rounded-xl">
+                <Save className="h-4 w-4 mr-2" />
+                Mentés
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => toast.info("Új feljegyzés hozzáadása - fejlesztés alatt")}
+                className="rounded-xl"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Új feljegyzés hozzáadása
+              </Button>
+            </div>
+          </div>
+        ),
       },
       {
         id: "statistics",
         label: "Statisztikák",
         visible: true,
-        content: <StatisticsTabContent companyId={companyId || "new"} />,
+        content: (
+          <div className="space-y-6">
+            <StatisticsTabContent companyId={companyId || "new"} />
+            <div className="flex justify-end pt-4 border-t">
+              <Button type="submit" className="rounded-xl">
+                <Save className="h-4 w-4 mr-2" />
+                Mentés
+              </Button>
+            </div>
+          </div>
+        ),
       },
     ];
 
@@ -618,28 +755,6 @@ const CompanyForm = () => {
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Dinamikus layout az országok száma alapján */}
         {isSingleCountry ? renderSingleCountryLayout() : renderMultiCountryLayout()}
-
-        {/* Műveletek - csak multi-country layout esetén jelennek meg itt */}
-        {!isSingleCountry && (
-          <div className="flex items-center gap-4">
-            <Button type="submit" className="rounded-xl">
-              <Save className="h-4 w-4 mr-2" />
-              Mentés
-            </Button>
-
-            {(isCGP || !contractHolderId) && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleAddInvoiceList}
-                className="rounded-xl"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Új számla hozzáadása
-              </Button>
-            )}
-          </div>
-        )}
       </form>
     </div>
   );
