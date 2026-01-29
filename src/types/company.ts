@@ -8,6 +8,16 @@ export interface ConsultationRow {
   formats: string[];
 }
 
+// Price history entry - tracks contract price changes over time
+export interface PriceHistoryEntry {
+  id: string;
+  effective_date: string; // YYYY-MM-DD format
+  price: number;
+  price_type: string | null; // 'pepm' | 'package'
+  currency: string | null;
+  notes: string | null;
+}
+
 export interface Company {
   id: string;
   name: string;
@@ -30,6 +40,7 @@ export interface Company {
   session_count: number | null; // Alkalom szám
   consultation_rows: ConsultationRow[]; // Tanácsadás sorok (típus + időtartam + forma)
   industry: string | null; // Iparág
+  price_history: PriceHistoryEntry[]; // Árváltozás előzmények
   created_at: string;
   updated_at: string;
 }
