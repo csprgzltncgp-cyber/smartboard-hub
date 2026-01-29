@@ -492,6 +492,28 @@ const CompanyForm = () => {
         </div>
       </CollapsiblePanel>
 
+      {/* Client Dashboard panel (csak CGP) */}
+      {(isCGP || !contractHolderId) && (
+        <CollapsiblePanel title="Client Dashboard">
+          <ClientDashboardTabContent companyId={companyId || "new"} countryIds={countryIds} />
+          <div className="flex items-center gap-4 mt-6 pt-4 border-t">
+            <Button type="submit" className="rounded-xl">
+              <Save className="h-4 w-4 mr-2" />
+              Mentés
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => toast.info("Új felhasználó hozzáadása - fejlesztés alatt")}
+              className="rounded-xl"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Új felhasználó hozzáadása
+            </Button>
+          </div>
+        </CollapsiblePanel>
+      )}
+
       {/* Statisztikák panel */}
       <CollapsiblePanel title="Statisztikák">
         <StatisticsTabContent companyId={companyId || "new"} />
