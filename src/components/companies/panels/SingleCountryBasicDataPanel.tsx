@@ -29,6 +29,7 @@ interface ClientDashboardUser {
 }
 
 interface SingleCountryBasicDataPanelProps {
+  companyId?: string;
   name: string;
   setName: (name: string) => void;
   dispatchName: string | null;
@@ -91,6 +92,7 @@ interface SingleCountryBasicDataPanelProps {
 }
 
 export const SingleCountryBasicDataPanel = ({
+  companyId,
   name,
   setName,
   dispatchName,
@@ -273,9 +275,9 @@ export const SingleCountryBasicDataPanel = ({
       {/* ============================================== */}
       {/* BELSŐ PANEL: Szerződött entitások */}
       {/* ============================================== */}
-      {countryId && (
+      {countryId && companyId && (
         <EntityTabsPanel
-          companyId="" 
+          companyId={companyId}
           countryId={countryId}
           countryName={countries.find(c => c.id === countryId)?.name || ""}
           entities={entities}
