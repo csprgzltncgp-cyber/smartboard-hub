@@ -216,6 +216,51 @@ const CompanyForm = () => {
     loadCompany();
   }, [isEditMode, companyId, getCompanyById]);
 
+  // Új ország hozzáadásakor automatikusan beállítjuk az added_at dátumot
+  const prevCountryIdsRef = useRef<string[]>([]);
+  useEffect(() => {
+    const prevIds = prevCountryIdsRef.current;
+    const newCountryIds = countryIds.filter(id => !prevIds.includes(id));
+    
+    if (newCountryIds.length > 0) {
+      const now = new Date().toISOString();
+      const newSettings: CompanyCountrySettings[] = newCountryIds
+        .filter(id => !countrySettings.find(cs => cs.country_id === id))
+        .map(id => ({
+          id: `new-${id}`,
+          company_id: companyId || "",
+          country_id: id,
+          contract_holder_id: null,
+          org_id: null,
+          contract_start: null,
+          contract_end: null,
+          contract_reminder_email: null,
+          head_count: null,
+          activity_plan_user_id: null,
+          client_username: null,
+          client_password_set: false,
+          client_language_id: null,
+          all_country_access: false,
+          added_at: now,
+          contract_file_url: null,
+          contract_price: null,
+          contract_price_type: null,
+          contract_currency: null,
+          pillar_count: null,
+          session_count: null,
+          consultation_rows: [],
+          industry: null,
+          price_history: [],
+        }));
+      
+      if (newSettings.length > 0) {
+        setCountrySettings(prev => [...prev, ...newSettings]);
+      }
+    }
+    
+    prevCountryIdsRef.current = countryIds;
+  }, [countryIds, countrySettings, companyId]);
+
   // Account admins from users
   const accountAdmins: AccountAdmin[] = users.map(u => ({
     id: u.id,
