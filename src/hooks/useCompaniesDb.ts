@@ -149,6 +149,14 @@ export const useCompaniesDb = () => {
     try {
       setLoading(true);
       
+      // Fetch countries first to get Hungary's ID
+      const { data: countriesData } = await supabase
+        .from('countries')
+        .select('id, name')
+        .order('name');
+      
+      const hungaryId = countriesData?.find(c => c.name === 'Hungary' || c.name === 'Magyarország')?.id;
+      
       // Fetch companies
       const { data: companiesData, error: companiesError } = await supabase
         .from('companies')
@@ -192,10 +200,66 @@ export const useCompaniesDb = () => {
           price_history: [],
           is_connected: !!c.connected_company_id,
           connected_company_id: c.connected_company_id,
+          isNewcomer: false,
           created_at: c.created_at,
           updated_at: c.updated_at,
         };
       });
+
+      // Add mock "Új érkező" company for Hungary (MediaGroup Hungary)
+      if (hungaryId) {
+        const mockNewcomerCompany: Company = {
+          id: 'mock-newcomer-mediagroup',
+          name: 'MediaGroup Hungary',
+          active: true,
+          country_ids: [hungaryId],
+          contract_holder_id: '2', // CGP
+          org_id: null,
+          contract_start: null,
+          contract_end: null,
+          contract_reminder_email: null,
+          lead_account_id: null,
+          contract_file_url: null,
+          contract_price: null,
+          contract_price_type: null,
+          contract_currency: null,
+          pillar_count: 3,
+          session_count: 6,
+          consultation_rows: [],
+          industry: 'Média / Marketing',
+          price_history: [],
+          is_connected: false,
+          connected_company_id: null,
+          isNewcomer: true, // This is the key flag!
+          onboardingData: {
+            contacts: [
+              { id: '1', name: 'Kovács Péter', title: 'HR Igazgató', gender: 'male', phone: '+36 30 123 4567', email: 'kovacs.peter@mediagroup.hu', address: '1052 Budapest, Váci utca 12.' },
+              { id: '2', name: 'Nagy Andrea', title: 'Office Manager', gender: 'female', phone: '+36 20 987 6543', email: 'nagy.andrea@mediagroup.hu', address: '1052 Budapest, Váci utca 12.' },
+            ],
+            details: {
+              name: 'MediaGroup Hungary Kft.',
+              city: 'Budapest',
+              country: 'Magyarország',
+              industry: 'Média / Marketing',
+              headcount: 450,
+              pillars: 3,
+              sessions: 6,
+            },
+            customDetails: [
+              { id: '1', label: 'Kapcsolatfelvétel forrása', value: 'LinkedIn' },
+              { id: '2', label: 'Döntéshozó', value: 'Kovács Péter' },
+            ],
+            notes: [
+              { id: '1', content: 'Első kapcsolatfelvétel sikeres, érdeklődnek a teljes EAP csomag iránt.', createdAt: '2024-01-15', createdBy: 'Janky Péter' },
+              { id: '2', content: 'HR csapattal egyeztetés, 3 pillér + 6 alkalom.', createdAt: '2024-01-20', createdBy: 'Janky Péter' },
+            ],
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        
+        companiesWithCountries.push(mockNewcomerCompany);
+      }
 
       setCompanies(companiesWithCountries);
       setError(null);

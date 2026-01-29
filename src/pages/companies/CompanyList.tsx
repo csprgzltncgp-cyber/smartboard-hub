@@ -271,7 +271,11 @@ interface CompanyRowProps {
 
 const CompanyRow = ({ company, onEdit, onDelete }: CompanyRowProps) => {
   return (
-    <div className="flex items-center justify-between p-3 bg-white border rounded-lg hover:bg-accent/50 transition-colors">
+    <div className={`flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors ${
+      company.isNewcomer 
+        ? "bg-[#91b752]/10 border-[#91b752] border-2" 
+        : "bg-white"
+    }`}>
       <div className="flex items-center gap-3">
         {company.is_connected && (
           <div className="flex items-center text-primary">
@@ -282,6 +286,11 @@ const CompanyRow = ({ company, onEdit, onDelete }: CompanyRowProps) => {
         <span className={company.active ? "" : "text-muted-foreground"}>
           {company.name}
         </span>
+        {company.isNewcomer && (
+          <Badge className="bg-[#91b752] text-white hover:bg-[#91b752]/90 text-xs font-semibold">
+            Új érkező
+          </Badge>
+        )}
         {!company.active && (
           <Badge variant="secondary" className="text-xs">
             Inaktív
