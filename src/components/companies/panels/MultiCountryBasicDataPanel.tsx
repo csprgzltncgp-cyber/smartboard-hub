@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import { DifferentPerCountryToggle } from "../DifferentPerCountryToggle";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CountryDifferentiate, ContractHolder, ConsultationRow, PriceHistoryEntry, CompanyCountrySettings, InvoiceTemplate } from "@/types/company";
 import { ContractDataPanel } from "./ContractDataPanel";
 import { MigrateBasicDataDialog } from "../dialogs/MigrateBasicDataDialog";
@@ -260,20 +261,23 @@ export const MultiCountryBasicDataPanel = ({
         </div>
       </div>
 
-      {/* "Alapadatok országonként különbözőek" toggle - csak ha több ország van */}
+      {/* "Alapadatok országonként különbözőek" checkbox - csak ha több ország van */}
       {countryIds.length > 1 && (
-        <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border">
-          <div>
-            <p className="font-medium">Alapadatok országonként különbözőek</p>
+        <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg border">
+          <Checkbox
+            id="basic-data-per-country"
+            checked={countryDifferentiates.basic_data}
+            onCheckedChange={(checked) => handleBasicDataToggleChange(checked === true)}
+            className="mt-0.5"
+          />
+          <div className="space-y-1">
+            <Label htmlFor="basic-data-per-country" className="font-medium cursor-pointer">
+              Alapadatok országonként különbözőek
+            </Label>
             <p className="text-sm text-muted-foreground">
               Ha bekapcsolod, minden országhoz egyedi szerződési adatokat (szerződő fél, ár, dokumentum stb.) adhatsz meg.
             </p>
           </div>
-          <DifferentPerCountryToggle
-            label=""
-            checked={countryDifferentiates.basic_data}
-            onChange={handleBasicDataToggleChange}
-          />
         </div>
       )}
 
