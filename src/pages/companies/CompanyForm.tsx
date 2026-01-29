@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -39,6 +39,7 @@ const mockContractHolders: ContractHolder[] = [
 
 const CompanyForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { companyId } = useParams<{ companyId: string }>();
   const isEditMode = Boolean(companyId);
   
@@ -792,7 +793,21 @@ const CompanyForm = () => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            const state = location.state as
+              | {
+                  from?: string;
+                  companiesListState?: { selectedCountryIds: string[]; openCountries: string[] };
+                }
+              | undefined;
+
+            if (state?.from === "/dashboard/settings/companies") {
+              navigate(state.from, { state: state.companiesListState });
+              return;
+            }
+
+            navigate(-1);
+          }}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>

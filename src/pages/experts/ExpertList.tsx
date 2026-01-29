@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { hu } from "date-fns/locale";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Trash2, Power, Pencil, Lock, Unlock, FileX, Building2, User, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
@@ -76,6 +76,7 @@ type ActiveInactivity = {
 
 const ExpertList = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [experts, setExperts] = useState<Expert[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -88,6 +89,23 @@ const ExpertList = () => {
   const [inactivityDialogOpen, setInactivityDialogOpen] = useState(false);
   const [selectedExpertForInactivity, setSelectedExpertForInactivity] = useState<Expert | null>(null);
   const [activeInactivityByExpertId, setActiveInactivityByExpertId] = useState<Record<string, ActiveInactivity>>({});
+
+  // Restore list UI state when coming back from edit
+  useEffect(() => {
+    const state = location.state as
+      | {
+          selectedCountryIds?: string[];
+          openCountries?: string[];
+          countryTabs?: Record<string, "all" | "individual" | "company">;
+        }
+      | undefined;
+
+    if (!state) return;
+
+    if (state.selectedCountryIds) setSelectedCountryIds(state.selectedCountryIds);
+    if (state.openCountries) setOpenCountries(state.openCountries);
+    if (state.countryTabs) setCountryTabs(state.countryTabs);
+  }, [location.state]);
 
   useEffect(() => {
     fetchData();
@@ -339,7 +357,18 @@ const ExpertList = () => {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => navigate(`/dashboard/settings/experts/${expert.id}/edit`)}
+        onClick={() =>
+          navigate(`/dashboard/settings/experts/${expert.id}/edit`, {
+            state: {
+              from: "/dashboard/settings/experts",
+              expertsListState: {
+                selectedCountryIds,
+                openCountries,
+                countryTabs,
+              },
+            },
+          })
+        }
         title="Szerkesztés"
       >
         <Pencil className="w-4 h-4" />
