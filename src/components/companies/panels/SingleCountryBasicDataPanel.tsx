@@ -13,7 +13,7 @@ import { useState } from "react";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import { ContractHolder, Workshop, CrisisIntervention, CountryDifferentiate, ConsultationRow, PriceHistoryEntry } from "@/types/company";
 import { ContractDataPanel } from "./ContractDataPanel";
-import { EntityListPanel } from "../entities";
+import { EntityTabsPanel } from "../entities";
 import { ContractedEntity } from "@/types/contracted-entity";
 interface Country {
   id: string;
@@ -274,12 +274,13 @@ export const SingleCountryBasicDataPanel = ({
       {/* BELSŐ PANEL: Szerződött entitások */}
       {/* ============================================== */}
       {countryId && (
-        <EntityListPanel
+        <EntityTabsPanel
           companyId="" 
           countryId={countryId}
           countryName={countries.find(c => c.id === countryId)?.name || ""}
           entities={entities}
           hasMultipleEntities={hasMultipleEntities}
+          contractHolders={contractHolders}
           onToggleMultipleEntities={onToggleMultipleEntities}
           onAddEntity={onAddEntity}
           onUpdateEntity={onUpdateEntity}
