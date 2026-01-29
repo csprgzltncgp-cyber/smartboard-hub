@@ -358,6 +358,7 @@ export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentP
                         {editingId === input.id ? (
                           <>
                             <Button
+                              type="button"
                               variant="ghost"
                               size="sm"
                               className="rounded-xl text-primary hover:text-primary"
@@ -366,6 +367,7 @@ export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentP
                               <Save className="w-4 h-4" />
                             </Button>
                             <Button
+                              type="button"
                               variant="ghost"
                               size="sm"
                               className="rounded-xl"
@@ -377,6 +379,7 @@ export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentP
                         ) : (
                           <>
                             <Button
+                              type="button"
                               variant="ghost"
                               size="sm"
                               className="rounded-xl"
@@ -385,6 +388,7 @@ export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentP
                               <Pencil className="w-4 h-4" />
                             </Button>
                             <Button
+                              type="button"
                               variant="ghost"
                               size="sm"
                               className="rounded-xl"
@@ -393,6 +397,7 @@ export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentP
                               <Globe className="w-4 h-4" />
                             </Button>
                             <Button
+                              type="button"
                               variant="ghost"
                               size="sm"
                               className="rounded-xl text-destructive hover:text-destructive"
@@ -424,6 +429,7 @@ export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentP
                                       autoFocus
                                     />
                                     <Button
+                                      type="button"
                                       variant="ghost"
                                       size="sm"
                                       className="h-8 w-8 p-0 text-primary"
@@ -432,6 +438,7 @@ export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentP
                                       <Save className="w-3.5 h-3.5" />
                                     </Button>
                                     <Button
+                                      type="button"
                                       variant="ghost"
                                       size="sm"
                                       className="h-8 w-8 p-0"
@@ -444,6 +451,7 @@ export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentP
                                   <>
                                     <span className="text-sm">{option.value}</span>
                                     <Button
+                                      type="button"
                                       variant="ghost"
                                       size="sm"
                                       className="h-6 w-6 p-0"
@@ -452,6 +460,7 @@ export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentP
                                       <Pencil className="w-3 h-3" />
                                     </Button>
                                     <Button
+                                      type="button"
                                       variant="ghost"
                                       size="sm"
                                       className="h-6 w-6 p-0 text-destructive hover:text-destructive"
@@ -472,11 +481,13 @@ export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentP
                               className="max-w-xs h-8"
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") {
+                                  e.preventDefault();
                                   addOption(input.id);
                                 }
                               }}
                             />
                             <Button
+                              type="button"
                               variant="outline"
                               size="sm"
                               className="h-8 rounded-xl"
@@ -547,10 +558,10 @@ export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentP
             )}
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" className="rounded-xl" onClick={() => setTranslationDialogOpen(false)}>
+            <Button type="button" variant="outline" className="rounded-xl" onClick={() => setTranslationDialogOpen(false)}>
               Mégse
             </Button>
-            <Button className="rounded-xl" onClick={saveTranslations}>
+            <Button type="button" className="rounded-xl" onClick={saveTranslations}>
               Mentés
             </Button>
           </div>
@@ -567,7 +578,7 @@ export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentP
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl">Mégse</AlertDialogCancel>
+            <AlertDialogCancel type="button" className="rounded-xl">Mégse</AlertDialogCancel>
             <AlertDialogAction
               type="button"
               className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
