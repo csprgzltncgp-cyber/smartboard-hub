@@ -207,22 +207,14 @@ export const OnboardingTabContent = ({ companyId, onComplete }: OnboardingTabCon
             {completedStepsCount} / {totalStepsCount} lépés kész ({progressPercent}%)
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-[#91b752] transition-all duration-300"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          <Button 
-            type="button"
-            onClick={handleOnboardingButtonClick}
-            className="bg-[hsl(21,82%,55%)] text-white px-5 py-2 rounded-xl font-medium hover:bg-[hsl(21,82%,48%)] hover:shadow-md active:translate-y-px transition-all"
-          >
-            <CheckCheck className="w-4 h-4 mr-2" />
-            Bevezetés kész
-          </Button>
-        </div>
+        <Button 
+          type="button"
+          onClick={handleOnboardingButtonClick}
+          className="bg-[hsl(21,82%,55%)] text-white px-5 py-2 rounded-xl font-medium hover:bg-[hsl(21,82%,48%)] hover:shadow-md active:translate-y-px transition-all"
+        >
+          <CheckCheck className="w-4 h-4 mr-2" />
+          Bevezetés kész
+        </Button>
       </div>
 
       {/* =========== CRM DATA SECTION =========== */}
