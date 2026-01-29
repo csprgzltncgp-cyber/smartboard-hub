@@ -102,9 +102,14 @@ const CompanyForm = () => {
 
   // Contract data fields (Szerződés adatai)
   const [contractFileUrl, setContractFileUrl] = useState<string | null>(null);
+  const [contractPrice, setContractPrice] = useState<number | null>(null);
+  const [contractPriceType, setContractPriceType] = useState<string | null>(null);
   const [contractCurrency, setContractCurrency] = useState<string | null>(null);
   const [pillarCount, setPillarCount] = useState<number | null>(null);
   const [sessionCount, setSessionCount] = useState<number | null>(null);
+  const [consultationTypes, setConsultationTypes] = useState<string[]>([]);
+  const [consultationDurations, setConsultationDurations] = useState<string[]>([]);
+  const [consultationFormats, setConsultationFormats] = useState<string[]>([]);
   const [industry, setIndustry] = useState<string | null>(null);
 
   // Számlázási adatok
@@ -414,12 +419,22 @@ const CompanyForm = () => {
           // Contract data fields
           contractFileUrl={contractFileUrl}
           setContractFileUrl={setContractFileUrl}
+          contractPrice={contractPrice}
+          setContractPrice={setContractPrice}
+          contractPriceType={contractPriceType}
+          setContractPriceType={setContractPriceType}
           contractCurrency={contractCurrency}
           setContractCurrency={setContractCurrency}
           pillarCount={pillarCount}
           setPillarCount={setPillarCount}
           sessionCount={sessionCount}
           setSessionCount={setSessionCount}
+          consultationTypes={consultationTypes}
+          setConsultationTypes={setConsultationTypes}
+          consultationDurations={consultationDurations}
+          setConsultationDurations={setConsultationDurations}
+          consultationFormats={consultationFormats}
+          setConsultationFormats={setConsultationFormats}
           industry={industry}
           setIndustry={setIndustry}
         />
@@ -590,12 +605,22 @@ const CompanyForm = () => {
               // Contract data fields
               contractFileUrl={contractFileUrl}
               setContractFileUrl={setContractFileUrl}
+              contractPrice={contractPrice}
+              setContractPrice={setContractPrice}
+              contractPriceType={contractPriceType}
+              setContractPriceType={setContractPriceType}
               contractCurrency={contractCurrency}
               setContractCurrency={setContractCurrency}
               pillarCount={pillarCount}
               setPillarCount={setPillarCount}
               sessionCount={sessionCount}
               setSessionCount={setSessionCount}
+              consultationTypes={consultationTypes}
+              setConsultationTypes={setConsultationTypes}
+              consultationDurations={consultationDurations}
+              setConsultationDurations={setConsultationDurations}
+              consultationFormats={consultationFormats}
+              setConsultationFormats={setConsultationFormats}
               industry={industry}
               setIndustry={setIndustry}
             />

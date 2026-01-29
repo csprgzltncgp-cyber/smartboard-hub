@@ -13,6 +13,36 @@ import { DifferentPerCountryToggle } from "../DifferentPerCountryToggle";
 import { CURRENCIES, INDUSTRIES, ContractHolder, CountryDifferentiate } from "@/types/company";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
+import { MultiSelectField } from "@/components/experts/MultiSelectField";
+
+// Price type options
+const PRICE_TYPES = [
+  { id: "pepm", name: "PEPM" },
+  { id: "package", name: "Csomagár" },
+];
+
+// Consultation type options
+const CONSULTATION_TYPES = [
+  { id: "psychology", label: "Pszichológia" },
+  { id: "legal", label: "Jog" },
+  { id: "finance", label: "Pénzügy" },
+  { id: "health_coaching", label: "Health Coaching" },
+  { id: "other", label: "Egyéb" },
+];
+
+// Consultation duration options
+const CONSULTATION_DURATIONS = [
+  { id: "30", label: "30 perc" },
+  { id: "50", label: "50 perc" },
+];
+
+// Consultation format options
+const CONSULTATION_FORMATS = [
+  { id: "personal", label: "Személyes" },
+  { id: "video", label: "Videó" },
+  { id: "phone", label: "Telefonos" },
+  { id: "chat", label: "Szöveges üzenet (Chat)" },
+];
 
 interface ContractDataPanelProps {
   contractHolderId: string | null;
@@ -23,6 +53,11 @@ interface ContractDataPanelProps {
   // Contract file
   contractFileUrl: string | null;
   setContractFileUrl: (url: string | null) => void;
+  // Contract price
+  contractPrice: number | null;
+  setContractPrice: (price: number | null) => void;
+  contractPriceType: string | null;
+  setContractPriceType: (type: string | null) => void;
   // Contract currency
   contractCurrency: string | null;
   setContractCurrency: (currency: string | null) => void;
@@ -31,6 +66,13 @@ interface ContractDataPanelProps {
   setPillarCount: (count: number | null) => void;
   sessionCount: number | null;
   setSessionCount: (count: number | null) => void;
+  // Consultation options
+  consultationTypes: string[];
+  setConsultationTypes: (types: string[]) => void;
+  consultationDurations: string[];
+  setConsultationDurations: (durations: string[]) => void;
+  consultationFormats: string[];
+  setConsultationFormats: (formats: string[]) => void;
   // Industry
   industry: string | null;
   setIndustry: (industry: string | null) => void;
@@ -46,12 +88,22 @@ export const ContractDataPanel = ({
   onUpdateDifferentiate,
   contractFileUrl,
   setContractFileUrl,
+  contractPrice,
+  setContractPrice,
+  contractPriceType,
+  setContractPriceType,
   contractCurrency,
   setContractCurrency,
   pillarCount,
   setPillarCount,
   sessionCount,
   setSessionCount,
+  consultationTypes,
+  setConsultationTypes,
+  consultationDurations,
+  setConsultationDurations,
+  consultationFormats,
+  setConsultationFormats,
   industry,
   setIndustry,
   showDifferentPerCountry = false,
@@ -173,8 +225,37 @@ export const ContractDataPanel = ({
         )}
       </div>
 
-      {/* Contract Currency */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+      {/* Contract Price + Type + Currency */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <div className="space-y-2">
+          <Label>Szerződéses ár</Label>
+          <Input
+            type="number"
+            value={contractPrice ?? ""}
+            onChange={(e) => setContractPrice(e.target.value ? parseFloat(e.target.value) : null)}
+            placeholder="0"
+            min={0}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Ár típusa</Label>
+          <Select
+            value={contractPriceType || "none"}
+            onValueChange={(val) => setContractPriceType(val === "none" ? null : val)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Válasszon..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Válasszon...</SelectItem>
+              {PRICE_TYPES.map((pt) => (
+                <SelectItem key={pt.id} value={pt.id}>
+                  {pt.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <div className="space-y-2">
           <Label>Szerződéses ár devizanem</Label>
           <Select
@@ -218,6 +299,34 @@ export const ContractDataPanel = ({
             min={0}
           />
         </div>
+      </div>
+
+      {/* Consultation Types, Durations, Formats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <MultiSelectField
+          label="Tanácsadás típusa"
+          options={CONSULTATION_TYPES}
+          selectedIds={consultationTypes}
+          onChange={setConsultationTypes}
+          placeholder="Válassz..."
+          badgeColor="teal"
+        />
+        <MultiSelectField
+          label="Tanácsadás időtartama"
+          options={CONSULTATION_DURATIONS}
+          selectedIds={consultationDurations}
+          onChange={setConsultationDurations}
+          placeholder="Válassz..."
+          badgeColor="teal"
+        />
+        <MultiSelectField
+          label="Tanácsadás formája"
+          options={CONSULTATION_FORMATS}
+          selectedIds={consultationFormats}
+          onChange={setConsultationFormats}
+          placeholder="Válassz..."
+          badgeColor="teal"
+        />
       </div>
 
       {/* Industry */}

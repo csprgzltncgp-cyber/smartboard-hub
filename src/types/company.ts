@@ -15,9 +15,14 @@ export interface Company {
   connected_company_id: string | null; // Kapcsolt cég
   // New contract data fields
   contract_file_url: string | null; // PDF fájl URL
+  contract_price: number | null; // Szerződéses ár
+  contract_price_type: string | null; // Ár típusa (PEPM / Csomagár)
   contract_currency: string | null; // Szerződéses ár devizanem
   pillar_count: number | null; // Pillér szám
   session_count: number | null; // Alkalom szám
+  consultation_types: string[]; // Tanácsadás típusa (többválasztós)
+  consultation_durations: string[]; // Tanácsadás időtartama (többválasztós)
+  consultation_formats: string[]; // Tanácsadás formája (többválasztós)
   industry: string | null; // Iparág
   created_at: string;
   updated_at: string;

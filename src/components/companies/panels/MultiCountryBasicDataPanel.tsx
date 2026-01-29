@@ -42,12 +42,22 @@ interface MultiCountryBasicDataPanelProps {
   // Contract data fields
   contractFileUrl: string | null;
   setContractFileUrl: (url: string | null) => void;
+  contractPrice: number | null;
+  setContractPrice: (price: number | null) => void;
+  contractPriceType: string | null;
+  setContractPriceType: (type: string | null) => void;
   contractCurrency: string | null;
   setContractCurrency: (currency: string | null) => void;
   pillarCount: number | null;
   setPillarCount: (count: number | null) => void;
   sessionCount: number | null;
   setSessionCount: (count: number | null) => void;
+  consultationTypes: string[];
+  setConsultationTypes: (types: string[]) => void;
+  consultationDurations: string[];
+  setConsultationDurations: (durations: string[]) => void;
+  consultationFormats: string[];
+  setConsultationFormats: (formats: string[]) => void;
   industry: string | null;
   setIndustry: (industry: string | null) => void;
 }
@@ -76,12 +86,22 @@ export const MultiCountryBasicDataPanel = ({
   // Contract data fields
   contractFileUrl,
   setContractFileUrl,
+  contractPrice,
+  setContractPrice,
+  contractPriceType,
+  setContractPriceType,
   contractCurrency,
   setContractCurrency,
   pillarCount,
   setPillarCount,
   sessionCount,
   setSessionCount,
+  consultationTypes,
+  setConsultationTypes,
+  consultationDurations,
+  setConsultationDurations,
+  consultationFormats,
+  setConsultationFormats,
   industry,
   setIndustry,
 }: MultiCountryBasicDataPanelProps) => {
@@ -133,12 +153,22 @@ export const MultiCountryBasicDataPanel = ({
         onUpdateDifferentiate={(key, value) => updateDifferentiate(key, value)}
         contractFileUrl={contractFileUrl}
         setContractFileUrl={setContractFileUrl}
+        contractPrice={contractPrice}
+        setContractPrice={setContractPrice}
+        contractPriceType={contractPriceType}
+        setContractPriceType={setContractPriceType}
         contractCurrency={contractCurrency}
         setContractCurrency={setContractCurrency}
         pillarCount={pillarCount}
         setPillarCount={setPillarCount}
         sessionCount={sessionCount}
         setSessionCount={setSessionCount}
+        consultationTypes={consultationTypes}
+        setConsultationTypes={setConsultationTypes}
+        consultationDurations={consultationDurations}
+        setConsultationDurations={setConsultationDurations}
+        consultationFormats={consultationFormats}
+        setConsultationFormats={setConsultationFormats}
         industry={industry}
         setIndustry={setIndustry}
         showDifferentPerCountry={countryIds.length > 1}
