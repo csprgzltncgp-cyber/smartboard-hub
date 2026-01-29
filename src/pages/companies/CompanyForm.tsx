@@ -36,6 +36,7 @@ import { useCompaniesDb } from "@/hooks/useCompaniesDb";
 import { useAppUsersDb } from "@/hooks/useAppUsersDb";
 import { useContractedEntities } from "@/hooks/useContractedEntities";
 import { ContractedEntity } from "@/types/contracted-entity";
+import { EntityInvoicingTabs } from "@/components/companies/entities";
 
 // Mock contract holders (until we have a proper table)
 const mockContractHolders: ContractHolder[] = [
@@ -152,6 +153,9 @@ const CompanyForm = () => {
   
   // Számla sablonok (legacy - backward compatibility)
   const [invoiceTemplates, setInvoiceTemplates] = useState<InvoiceTemplate[]>([]);
+
+  // Aktív entitás a Számlázás panelen (ha több entitás van)
+  const [activeInvoicingEntityId, setActiveInvoicingEntityId] = useState<string>("");
 
   // Kontextusfüggő fülek állapota
   // CRM-ből érkező cégek mindig newcomer-ek (fromCrm state flag)
@@ -567,37 +571,91 @@ const CompanyForm = () => {
       {/* Számlázás panel (csak CGP) */}
       {(isCGP || !contractHolderId) && (
         <CollapsiblePanel title="Számlázás">
-          <CompanyInvoicingPanel
-            countryDifferentiates={countryDifferentiates}
-            setCountryDifferentiates={setCountryDifferentiates}
-            billingData={billingData}
-            setBillingData={setBillingData}
-            invoicingData={invoicingData}
-            setInvoicingData={setInvoicingData}
-            invoiceItems={invoiceItems}
-            setInvoiceItems={setInvoiceItems}
-            invoiceComments={invoiceComments}
-            setInvoiceComments={setInvoiceComments}
-            countryIds={countryIds}
-            countries={countries}
-            companyId={companyId || "new"}
-            billingDataPerCountry={billingDataPerCountry}
-            setBillingDataPerCountry={setBillingDataPerCountry}
-            invoicingDataPerCountry={invoicingDataPerCountry}
-            setInvoicingDataPerCountry={setInvoicingDataPerCountry}
-            invoiceItemsPerCountry={invoiceItemsPerCountry}
-            setInvoiceItemsPerCountry={setInvoiceItemsPerCountry}
-            invoiceCommentsPerCountry={invoiceCommentsPerCountry}
-            setInvoiceCommentsPerCountry={setInvoiceCommentsPerCountry}
-            invoiceSlips={invoiceSlips}
-            setInvoiceSlips={setInvoiceSlips}
-            activeInvoicingCountryId={activeInvoicingCountryId}
-            setActiveInvoicingCountryId={setActiveInvoicingCountryId}
-            invoiceSlipsPerCountry={invoiceSlipsPerCountry}
-            setInvoiceSlipsPerCountry={setInvoiceSlipsPerCountry}
-            invoiceTemplates={invoiceTemplates}
-            setInvoiceTemplates={setInvoiceTemplates}
-          />
+          {/* Entitás fülek ha több entitás van */}
+          {countryDifferentiates.has_multiple_entities && entities.filter(e => e.country_id === countryIds[0]).length > 0 && (
+            <EntityInvoicingTabs
+              entities={entities.filter(e => e.country_id === countryIds[0])}
+              hasMultipleEntities={countryDifferentiates.has_multiple_entities}
+              activeEntityId={activeInvoicingEntityId || entities.filter(e => e.country_id === countryIds[0])[0]?.id || ""}
+              onActiveEntityChange={setActiveInvoicingEntityId}
+            >
+              {(entityId, entity) => (
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Számlázási adatok: <span className="font-medium text-foreground">{entity.name}</span>
+                  </p>
+                  {/* TODO: Entity-specifikus számlázási panel ide kerül */}
+                  <CompanyInvoicingPanel
+                    countryDifferentiates={countryDifferentiates}
+                    setCountryDifferentiates={setCountryDifferentiates}
+                    billingData={billingData}
+                    setBillingData={setBillingData}
+                    invoicingData={invoicingData}
+                    setInvoicingData={setInvoicingData}
+                    invoiceItems={invoiceItems}
+                    setInvoiceItems={setInvoiceItems}
+                    invoiceComments={invoiceComments}
+                    setInvoiceComments={setInvoiceComments}
+                    countryIds={countryIds}
+                    countries={countries}
+                    companyId={companyId || "new"}
+                    billingDataPerCountry={billingDataPerCountry}
+                    setBillingDataPerCountry={setBillingDataPerCountry}
+                    invoicingDataPerCountry={invoicingDataPerCountry}
+                    setInvoicingDataPerCountry={setInvoicingDataPerCountry}
+                    invoiceItemsPerCountry={invoiceItemsPerCountry}
+                    setInvoiceItemsPerCountry={setInvoiceItemsPerCountry}
+                    invoiceCommentsPerCountry={invoiceCommentsPerCountry}
+                    setInvoiceCommentsPerCountry={setInvoiceCommentsPerCountry}
+                    invoiceSlips={invoiceSlips}
+                    setInvoiceSlips={setInvoiceSlips}
+                    activeInvoicingCountryId={activeInvoicingCountryId}
+                    setActiveInvoicingCountryId={setActiveInvoicingCountryId}
+                    invoiceSlipsPerCountry={invoiceSlipsPerCountry}
+                    setInvoiceSlipsPerCountry={setInvoiceSlipsPerCountry}
+                    invoiceTemplates={invoiceTemplates}
+                    setInvoiceTemplates={setInvoiceTemplates}
+                  />
+                </div>
+              )}
+            </EntityInvoicingTabs>
+          )}
+          
+          {/* Normál számlázás panel ha nincs több entitás */}
+          {!countryDifferentiates.has_multiple_entities && (
+            <CompanyInvoicingPanel
+              countryDifferentiates={countryDifferentiates}
+              setCountryDifferentiates={setCountryDifferentiates}
+              billingData={billingData}
+              setBillingData={setBillingData}
+              invoicingData={invoicingData}
+              setInvoicingData={setInvoicingData}
+              invoiceItems={invoiceItems}
+              setInvoiceItems={setInvoiceItems}
+              invoiceComments={invoiceComments}
+              setInvoiceComments={setInvoiceComments}
+              countryIds={countryIds}
+              countries={countries}
+              companyId={companyId || "new"}
+              billingDataPerCountry={billingDataPerCountry}
+              setBillingDataPerCountry={setBillingDataPerCountry}
+              invoicingDataPerCountry={invoicingDataPerCountry}
+              setInvoicingDataPerCountry={setInvoicingDataPerCountry}
+              invoiceItemsPerCountry={invoiceItemsPerCountry}
+              setInvoiceItemsPerCountry={setInvoiceItemsPerCountry}
+              invoiceCommentsPerCountry={invoiceCommentsPerCountry}
+              setInvoiceCommentsPerCountry={setInvoiceCommentsPerCountry}
+              invoiceSlips={invoiceSlips}
+              setInvoiceSlips={setInvoiceSlips}
+              activeInvoicingCountryId={activeInvoicingCountryId}
+              setActiveInvoicingCountryId={setActiveInvoicingCountryId}
+              invoiceSlipsPerCountry={invoiceSlipsPerCountry}
+              setInvoiceSlipsPerCountry={setInvoiceSlipsPerCountry}
+              invoiceTemplates={invoiceTemplates}
+              setInvoiceTemplates={setInvoiceTemplates}
+            />
+          )}
+          
           {/* Mentés és Új számla gombok a Számlázás panelben */}
           <div className="flex items-center gap-4 mt-6 pt-4 border-t">
             <Button type="submit" className="rounded-xl">
