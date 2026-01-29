@@ -30,14 +30,39 @@ interface Note {
   updatedAt: Date;
 }
 
-type NoteColor = "yellow" | "green" | "blue" | "pink" | "orange";
+type NoteColor = "teal" | "green" | "orange" | "purple" | "light";
 
-const noteColors: Record<NoteColor, { bg: string; border: string; shadow: string }> = {
-  yellow: { bg: "bg-yellow-100", border: "border-yellow-300", shadow: "shadow-yellow-200/50" },
-  green: { bg: "bg-green-100", border: "border-green-300", shadow: "shadow-green-200/50" },
-  blue: { bg: "bg-blue-100", border: "border-blue-300", shadow: "shadow-blue-200/50" },
-  pink: { bg: "bg-pink-100", border: "border-pink-300", shadow: "shadow-pink-200/50" },
-  orange: { bg: "bg-orange-100", border: "border-orange-300", shadow: "shadow-orange-200/50" },
+const noteColors: Record<NoteColor, { bg: string; border: string; shadow: string; colorDot: string }> = {
+  teal: { 
+    bg: "bg-cgp-teal-light/20", 
+    border: "border-cgp-teal-light", 
+    shadow: "shadow-cgp-teal-light/30",
+    colorDot: "bg-cgp-teal-light"
+  },
+  green: { 
+    bg: "bg-cgp-badge-new/20", 
+    border: "border-cgp-badge-new", 
+    shadow: "shadow-cgp-badge-new/30",
+    colorDot: "bg-cgp-badge-new"
+  },
+  orange: { 
+    bg: "bg-cgp-badge-lastday/20", 
+    border: "border-cgp-badge-lastday", 
+    shadow: "shadow-cgp-badge-lastday/30",
+    colorDot: "bg-cgp-badge-lastday"
+  },
+  purple: { 
+    bg: "bg-cgp-task-completed-purple/20", 
+    border: "border-cgp-task-completed-purple", 
+    shadow: "shadow-cgp-task-completed-purple/30",
+    colorDot: "bg-cgp-task-completed-purple"
+  },
+  light: { 
+    bg: "bg-cgp-form-bg", 
+    border: "border-muted-foreground/30", 
+    shadow: "shadow-muted/50",
+    colorDot: "bg-muted-foreground/50"
+  },
 };
 
 interface NotesTabContentProps {
@@ -61,7 +86,7 @@ export const NotesTabContent = ({ companyId, onAddNoteRef }: NotesTabContentProp
     const newNote: Note = {
       id: crypto.randomUUID(),
       content: "",
-      color: (["yellow", "green", "blue", "pink", "orange"] as NoteColor[])[Math.floor(Math.random() * 5)],
+      color: (["teal", "green", "orange", "purple", "light"] as NoteColor[])[Math.floor(Math.random() * 5)],
       position: { 
         x: 20 + (notes.length % 4) * 220, 
         y: 20 + Math.floor(notes.length / 4) * 200 
@@ -236,9 +261,9 @@ export const NotesTabContent = ({ companyId, onAddNoteRef }: NotesTabContentProp
                             changeColor(note.id, color);
                           }}
                           className={cn(
-                            "w-4 h-4 rounded-full border border-current/20 transition-transform hover:scale-110",
-                            noteColors[color].bg,
-                            note.color === color && "ring-2 ring-current/30 ring-offset-1"
+                            "w-4 h-4 rounded-full border-2 border-white/50 transition-transform hover:scale-110",
+                            noteColors[color].colorDot,
+                            note.color === color && "ring-2 ring-foreground/30 ring-offset-1"
                           )}
                         />
                       ))}
@@ -251,7 +276,7 @@ export const NotesTabContent = ({ companyId, onAddNoteRef }: NotesTabContentProp
                         <button
                           type="button"
                           onClick={saveEditing}
-                          className="p-1 rounded hover:bg-current/10 text-green-700"
+                          className="p-1 rounded hover:bg-current/10 text-cgp-badge-new"
                         >
                           <Check className="w-4 h-4" />
                         </button>
@@ -305,7 +330,7 @@ export const NotesTabContent = ({ companyId, onAddNoteRef }: NotesTabContentProp
                         <button
                           type="button"
                           onClick={() => openDeleteDialog(note)}
-                          className="p-1 rounded hover:bg-current/10 text-red-600"
+                          className="p-1 rounded hover:bg-current/10 text-cgp-error"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
