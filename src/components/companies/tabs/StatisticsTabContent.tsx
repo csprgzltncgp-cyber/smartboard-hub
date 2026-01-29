@@ -1,5 +1,3 @@
-import { BarChart3 } from "lucide-react";
-
 interface StatisticsTabContentProps {
   companyId: string;
 }
@@ -7,11 +5,6 @@ interface StatisticsTabContentProps {
 export const StatisticsTabContent = ({ companyId }: StatisticsTabContentProps) => {
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 text-primary">
-        <BarChart3 className="h-5 w-5" />
-        <h2 className="text-lg font-semibold">Statisztikák</h2>
-      </div>
-      
       <p className="text-muted-foreground">
         Igénybevételi adatok, bevétel/költség elemzés, riasztások.
       </p>
