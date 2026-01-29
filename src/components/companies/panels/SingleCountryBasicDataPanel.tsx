@@ -8,13 +8,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ChevronDown, ChevronUp, X } from "lucide-react";
-import { useState } from "react";
+import { Plus, ChevronDown, ChevronUp, X, Building2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import { ContractHolder, Workshop, CrisisIntervention, CountryDifferentiate, ConsultationRow, PriceHistoryEntry } from "@/types/company";
 import { ContractDataPanel } from "./ContractDataPanel";
-import { EntityTabsPanel } from "../entities";
-import { ContractedEntity } from "@/types/contracted-entity";
+import { ContractedEntity, createDefaultEntity } from "@/types/contracted-entity";
+import { DifferentPerCountryToggle } from "../DifferentPerCountryToggle";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
+
 interface Country {
   id: string;
   code: string;
@@ -157,6 +160,8 @@ export const SingleCountryBasicDataPanel = ({
   const [isWorkshopsOpen, setIsWorkshopsOpen] = useState(false);
   const [isCrisisOpen, setIsCrisisOpen] = useState(false);
   const [isClientDashboardOpen, setIsClientDashboardOpen] = useState(true);
+  const [activeEntityId, setActiveEntityId] = useState<string>(entities[0]?.id || "");
+  const [isCreatingInitialEntities, setIsCreatingInitialEntities] = useState(false);
 
   // Dummy countryDifferentiates for single country (no different per country needed)
   const countryDifferentiates: CountryDifferentiate = {
@@ -174,6 +179,50 @@ export const SingleCountryBasicDataPanel = ({
 
   const countryWorkshops = workshops.filter((w) => w.country_id === countryId);
   const countryCrisis = crisisInterventions.filter((c) => c.country_id === countryId);
+
+  // Update active tab when entities change
+  useEffect(() => {
+    if (entities.length > 0 && !entities.find(e => e.id === activeEntityId)) {
+      setActiveEntityId(entities[0].id);
+    }
+  }, [entities, activeEntityId]);
+
+  // Set first entity as active when entities are loaded
+  useEffect(() => {
+    if (entities.length > 0 && !activeEntityId) {
+      setActiveEntityId(entities[0].id);
+    }
+  }, [entities, activeEntityId]);
+
+  const handleToggleMultipleEntities = async (enabled: boolean) => {
+    onToggleMultipleEntities(enabled);
+    
+    // Ha bekapcsoljuk és nincs még entitás, automatikusan létrehozunk 2-t
+    if (enabled && entities.length === 0 && companyId && countryId && !isCreatingInitialEntities) {
+      setIsCreatingInitialEntities(true);
+      try {
+        // Első entitás: a cégnév (vagy "Entitás 1" ha nincs)
+        const entity1 = createDefaultEntity(companyId, countryId, name || "Entitás 1");
+        await onAddEntity(entity1);
+        
+        // Második entitás
+        const entity2 = createDefaultEntity(companyId, countryId, "Entitás 2");
+        await onAddEntity(entity2);
+      } finally {
+        setIsCreatingInitialEntities(false);
+      }
+    }
+  };
+
+  const handleAddEntity = async () => {
+    if (!companyId || !countryId) return;
+    const newEntity = createDefaultEntity(companyId, countryId, `Entitás ${entities.length + 1}`);
+    await onAddEntity(newEntity);
+  };
+
+  const getEntityTabLabel = (entity: ContractedEntity, index: number): string => {
+    return entity.name || `Entitás ${index + 1}`;
+  };
 
   const addWorkshop = () => {
     const newWorkshop: Workshop = {
@@ -229,383 +278,536 @@ export const SingleCountryBasicDataPanel = ({
     setClientDashboardUsers(clientDashboardUsers.filter((u) => u.id !== id));
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Cégnév */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-        <div className="space-y-2">
-          <Label>Cégnév</Label>
-          <Input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Cégnév"
-            required
-          />
-        </div>
-      </div>
+  // ==== Render entity content (used for tabs or single view) ====
+  const renderEntityContent = (entity?: ContractedEntity) => {
+    // Ha van entity, akkor az entitás adatait jelenítjük meg
+    // Ha nincs entity (single mode), akkor a component props-ból jönnek az adatok
+    const isEntityMode = !!entity;
+    
+    const entityName = isEntityMode ? entity.name : name;
+    const setEntityName = isEntityMode 
+      ? (val: string) => onUpdateEntity(entity.id, { name: val })
+      : setName;
+    const entityOrgId = isEntityMode ? entity.org_id : orgId;
+    const setEntityOrgId = isEntityMode 
+      ? (val: string | null) => onUpdateEntity(entity.id, { org_id: val })
+      : setOrgId;
+    const entityContractStart = isEntityMode ? entity.contract_date : contractStart;
+    const setEntityContractStart = isEntityMode 
+      ? (val: string | null) => onUpdateEntity(entity.id, { contract_date: val })
+      : setContractStart;
+    const entityContractEnd = isEntityMode ? entity.contract_end_date : contractEnd;
+    const setEntityContractEnd = isEntityMode 
+      ? (val: string | null) => onUpdateEntity(entity.id, { contract_end_date: val })
+      : setContractEnd;
+    const entityContractHolderId = isEntityMode ? entity.contract_holder_type : contractHolderId;
+    const setEntityContractHolderId = isEntityMode 
+      ? (val: string | null) => onUpdateEntity(entity.id, { contract_holder_type: val })
+      : setContractHolderId;
+    const entityContractPrice = isEntityMode ? entity.contract_price : contractPrice;
+    const setEntityContractPrice = isEntityMode 
+      ? (val: number | null) => onUpdateEntity(entity.id, { contract_price: val })
+      : setContractPrice;
+    const entityContractPriceType = isEntityMode ? entity.price_type : contractPriceType;
+    const setEntityContractPriceType = isEntityMode 
+      ? (val: string | null) => onUpdateEntity(entity.id, { price_type: val })
+      : setContractPriceType;
+    const entityContractCurrency = isEntityMode ? entity.contract_currency : contractCurrency;
+    const setEntityContractCurrency = isEntityMode 
+      ? (val: string | null) => onUpdateEntity(entity.id, { contract_currency: val })
+      : setContractCurrency;
+    const entityPillarCount = isEntityMode ? entity.pillars : pillarCount;
+    const setEntityPillarCount = isEntityMode 
+      ? (val: number | null) => onUpdateEntity(entity.id, { pillars: val })
+      : setPillarCount;
+    const entitySessionCount = isEntityMode ? entity.occasions : sessionCount;
+    const setEntitySessionCount = isEntityMode 
+      ? (val: number | null) => onUpdateEntity(entity.id, { occasions: val })
+      : setSessionCount;
+    const entityConsultationRows = isEntityMode ? (entity.consultation_rows || []) : consultationRows;
+    const setEntityConsultationRows = isEntityMode 
+      ? (rows: ConsultationRow[]) => onUpdateEntity(entity.id, { consultation_rows: rows })
+      : setConsultationRows;
+    const entityIndustry = isEntityMode ? entity.industry : industry;
+    const setEntityIndustry = isEntityMode 
+      ? (val: string | null) => onUpdateEntity(entity.id, { industry: val })
+      : setIndustry;
+    const entityPriceHistory = isEntityMode ? (entity.price_history || []) : priceHistory;
+    const setEntityPriceHistory = isEntityMode 
+      ? (history: PriceHistoryEntry[]) => onUpdateEntity(entity.id, { price_history: history })
+      : setPriceHistory;
+    const entityHeadCount = isEntityMode ? entity.headcount : headCount;
+    const setEntityHeadCount = isEntityMode 
+      ? (val: number | null) => onUpdateEntity(entity.id, { headcount: val })
+      : setHeadCount;
+    
+    const entityIsCGP = entityContractHolderId === "2";
+    const entityIsLifeworks = entityContractHolderId === "1";
 
-      {/* Cég elnevezése kiközvetítéshez */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-        <div className="space-y-2">
-          <Label>Cég elnevezése kiközvetítéshez</Label>
-          <Input
-            value={dispatchName || ""}
-            onChange={(e) => setDispatchName(e.target.value || null)}
-            placeholder="Ahogy az operátorok listájában megjelenik"
-          />
-          <p className="text-xs text-muted-foreground">
-            Ha üres, a cégnév jelenik meg az operátorok listájában.
-          </p>
+    return (
+      <div className="space-y-6">
+        {/* Cégnév / Entitás név */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+          <div className="space-y-2">
+            <Label>{isEntityMode ? "Entitás neve *" : "Cégnév"}</Label>
+            <Input
+              value={entityName}
+              onChange={(e) => setEntityName(e.target.value)}
+              placeholder={isEntityMode ? "pl. Henkel Hungary Kft." : "Cégnév"}
+              required
+            />
+            {isEntityMode && (
+              <p className="text-xs text-muted-foreground">
+                A jogi személy neve, akivel a szerződést kötötték
+              </p>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Országok */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-        <div className="space-y-2">
-          <MultiSelectField
-            label="Országok"
-            options={countryOptions}
-            selectedIds={countryIds}
-            onChange={setCountryIds}
-            placeholder="Válasszon országokat..."
-          />
-        </div>
-      </div>
+        {/* Cég elnevezése kiközvetítéshez - csak nem entity módban */}
+        {!isEntityMode && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+            <div className="space-y-2">
+              <Label>Cég elnevezése kiközvetítéshez</Label>
+              <Input
+                value={dispatchName || ""}
+                onChange={(e) => setDispatchName(e.target.value || null)}
+                placeholder="Ahogy az operátorok listájában megjelenik"
+              />
+              <p className="text-xs text-muted-foreground">
+                Ha üres, a cégnév jelenik meg az operátorok listájában.
+              </p>
+            </div>
+          </div>
+        )}
 
-      {/* ============================================== */}
-      {/* BELSŐ PANEL: Szerződött entitások */}
-      {/* ============================================== */}
-      {countryId && companyId && (
-        <EntityTabsPanel
-          companyId={companyId}
-          countryId={countryId}
-          countryName={countries.find(c => c.id === countryId)?.name || ""}
-          companyName={name}
-          entities={entities}
-          hasMultipleEntities={hasMultipleEntities}
+        {/* Országok - csak nem entity módban */}
+        {!isEntityMode && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+            <div className="space-y-2">
+              <MultiSelectField
+                label="Országok"
+                options={countryOptions}
+                selectedIds={countryIds}
+                onChange={setCountryIds}
+                placeholder="Válasszon országokat..."
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Szerződés adatai */}
+        <ContractDataPanel
+          contractHolderId={entityContractHolderId}
+          setContractHolderId={setEntityContractHolderId}
           contractHolders={contractHolders}
-          onToggleMultipleEntities={onToggleMultipleEntities}
-          onAddEntity={onAddEntity}
-          onUpdateEntity={onUpdateEntity}
-          onDeleteEntity={onDeleteEntity}
-          isLoading={isEntitiesLoading}
+          countryDifferentiates={countryDifferentiates}
+          onUpdateDifferentiate={() => {}}
+          contractFileUrl={contractFileUrl}
+          setContractFileUrl={setContractFileUrl}
+          contractPrice={entityContractPrice}
+          setContractPrice={setEntityContractPrice}
+          contractPriceType={entityContractPriceType}
+          setContractPriceType={setEntityContractPriceType}
+          contractCurrency={entityContractCurrency}
+          setContractCurrency={setEntityContractCurrency}
+          pillarCount={entityPillarCount}
+          setPillarCount={setEntityPillarCount}
+          sessionCount={entitySessionCount}
+          setSessionCount={setEntitySessionCount}
+          consultationRows={entityConsultationRows}
+          setConsultationRows={setEntityConsultationRows}
+          industry={entityIndustry}
+          setIndustry={setEntityIndustry}
+          priceHistory={entityPriceHistory}
+          setPriceHistory={setEntityPriceHistory}
+          showDifferentPerCountry={false}
         />
-      )}
-      {/* ============================================== */}
-      {/* BELSŐ PANEL: Szerződés adatai */}
-      {/* ============================================== */}
-      <ContractDataPanel
-        contractHolderId={contractHolderId}
-        setContractHolderId={setContractHolderId}
-        contractHolders={contractHolders}
-        countryDifferentiates={countryDifferentiates}
-        onUpdateDifferentiate={() => {}}
-        contractFileUrl={contractFileUrl}
-        setContractFileUrl={setContractFileUrl}
-        contractPrice={contractPrice}
-        setContractPrice={setContractPrice}
-        contractPriceType={contractPriceType}
-        setContractPriceType={setContractPriceType}
-        contractCurrency={contractCurrency}
-        setContractCurrency={setContractCurrency}
-        pillarCount={pillarCount}
-        setPillarCount={setPillarCount}
-        sessionCount={sessionCount}
-        setSessionCount={setSessionCount}
-        consultationRows={consultationRows}
-        setConsultationRows={setConsultationRows}
-        industry={industry}
-        setIndustry={setIndustry}
-        priceHistory={priceHistory}
-        setPriceHistory={setPriceHistory}
-        showDifferentPerCountry={false}
-      />
 
-      {/* ORG ID (csak Lifeworks esetén) */}
-      {(isLifeworks || !contractHolderId) && (
+        {/* ORG ID (csak Lifeworks esetén) */}
+        {(entityIsLifeworks || !entityContractHolderId) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+            <div className="space-y-2">
+              <Label>ORG ID</Label>
+              <Input
+                value={entityOrgId || ""}
+                onChange={(e) => setEntityOrgId(e.target.value || null)}
+                placeholder="ORG ID"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Szerződés dátumok (csak CGP esetén) */}
+        {(entityIsCGP || !entityContractHolderId) && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div className="space-y-2">
+              <Label>Szerződés kezdete</Label>
+              <Input
+                type="date"
+                value={entityContractStart || ""}
+                onChange={(e) => setEntityContractStart(e.target.value || null)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Szerződés lejárta</Label>
+              <Input
+                type="date"
+                value={entityContractEnd || ""}
+                onChange={(e) => setEntityContractEnd(e.target.value || null)}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Emlékeztető email (csak CGP esetén) - csak nem entity módban */}
+        {!isEntityMode && (entityIsCGP || !entityContractHolderId) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+            <div className="space-y-2">
+              <Label>Emlékeztető e-mail</Label>
+              <Input
+                type="email"
+                value={contractReminderEmail || ""}
+                onChange={(e) => setContractReminderEmail(e.target.value || null)}
+                placeholder="email@ceg.hu"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Létszám */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
           <div className="space-y-2">
-            <Label>ORG ID</Label>
+            <Label>Létszám</Label>
             <Input
-              value={orgId || ""}
-              onChange={(e) => setOrgId(e.target.value || null)}
-              placeholder="ORG ID"
+              type="number"
+              value={entityHeadCount || ""}
+              onChange={(e) => setEntityHeadCount(e.target.value ? parseInt(e.target.value) : null)}
+              placeholder="0"
             />
           </div>
         </div>
-      )}
 
-      {/* Szerződés dátumok (csak CGP esetén) */}
-      {(isCGP || !contractHolderId) && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-          <div className="space-y-2">
-            <Label>Szerződés kezdete</Label>
-            <Input
-              type="date"
-              value={contractStart || ""}
-              onChange={(e) => setContractStart(e.target.value || null)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Szerződés lejárta</Label>
-            <Input
-              type="date"
-              value={contractEnd || ""}
-              onChange={(e) => setContractEnd(e.target.value || null)}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Emlékeztető email (csak CGP esetén) */}
-      {(isCGP || !contractHolderId) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-          <div className="space-y-2">
-            <Label>Emlékeztető e-mail</Label>
-            <Input
-              type="email"
-              value={contractReminderEmail || ""}
-              onChange={(e) => setContractReminderEmail(e.target.value || null)}
-              placeholder="email@ceg.hu"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Létszám */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-        <div className="space-y-2">
-          <Label>Létszám</Label>
-          <Input
-            type="number"
-            value={headCount || ""}
-            onChange={(e) => setHeadCount(e.target.value ? parseInt(e.target.value) : null)}
-            placeholder="0"
-          />
-        </div>
-      </div>
-
-      {/* Aktív státusz */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-        <div className="space-y-2">
-          <Label>Aktív</Label>
-          <Select
-            value={active ? "true" : "false"}
-            onValueChange={(val) => setActive(val === "true")}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="true">Igen</SelectItem>
-              <SelectItem value="false">Nem</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* ============================================== */}
-      {/* BELSŐ PANEL: Workshop és Krízisintervenció */}
-      {/* ============================================== */}
-      <div className="bg-muted/30 border rounded-lg p-4 space-y-4">
-        <h4 className="text-sm font-medium text-primary">Workshop és Krízisintervenció</h4>
-
-        {/* Workshops */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Workshopok</span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addWorkshop}
-              className="h-8"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Hozzáadás
-            </Button>
-            {countryWorkshops.length > 0 && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsWorkshopsOpen(!isWorkshopsOpen)}
-                className="h-8"
+        {/* Aktív státusz - csak nem entity módban */}
+        {!isEntityMode && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+            <div className="space-y-2">
+              <Label>Aktív</Label>
+              <Select
+                value={active ? "true" : "false"}
+                onValueChange={(val) => setActive(val === "true")}
               >
-                {isWorkshopsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </Button>
-            )}
-          </div>
-          {isWorkshopsOpen && countryWorkshops.length > 0 && (
-            <div className="space-y-2 pl-4">
-              {countryWorkshops.map((ws, idx) => (
-                <div key={ws.id} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>{idx + 1}.</span>
-                  <Input
-                    value={ws.name}
-                    onChange={(e) => updateWorkshop(ws.id, { name: e.target.value })}
-                    placeholder="Workshop neve"
-                    className="h-8 flex-1"
-                  />
-                  <Input
-                    type="number"
-                    value={ws.sessions_available}
-                    onChange={(e) => updateWorkshop(ws.id, { sessions_available: parseInt(e.target.value) || 0 })}
-                    placeholder="Alkalmak"
-                    className="h-8 w-24"
-                  />
-                </div>
-              ))}
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">Igen</SelectItem>
+                  <SelectItem value="false">Nem</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          )}
-        </div>
-
-        {/* Krízisintervenciók */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Krízisintervenciók</span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addCrisis}
-              className="h-8"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Hozzáadás
-            </Button>
-            {countryCrisis.length > 0 && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsCrisisOpen(!isCrisisOpen)}
-                className="h-8"
-              >
-                {isCrisisOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </Button>
-            )}
           </div>
-          {isCrisisOpen && countryCrisis.length > 0 && (
-            <div className="space-y-2 pl-4">
-              {countryCrisis.map((ci, idx) => (
-                <div key={ci.id} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>{idx + 1}.</span>
-                  <Input
-                    value={ci.name}
-                    onChange={(e) => updateCrisis(ci.id, { name: e.target.value })}
-                    placeholder="Krízisintervenció neve"
-                    className="h-8 flex-1"
-                  />
-                  <Input
-                    type="number"
-                    value={ci.sessions_available}
-                    onChange={(e) => updateCrisis(ci.id, { sessions_available: parseInt(e.target.value) || 0 })}
-                    placeholder="Alkalmak"
-                    className="h-8 w-24"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+        )}
 
-      {/* ============================================== */}
-      {/* BELSŐ PANEL: Client Dashboard beállítások */}
-      {/* ============================================== */}
-      {(isCGP || !contractHolderId) && (
+        {/* Workshop és Krízisintervenció */}
         <div className="bg-muted/30 border rounded-lg p-4 space-y-4">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-primary">Client Dashboard felhasználók</h4>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addClientDashboardUser}
-              className="h-8"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Új felhasználó
-            </Button>
-          </div>
+          <h4 className="text-sm font-medium text-primary">Workshop és Krízisintervenció</h4>
 
-          {clientDashboardUsers.length === 0 && (
-            <p className="text-sm text-muted-foreground">
-              Nincs még felhasználó hozzáadva a Client Dashboard-hoz.
-            </p>
-          )}
-
-          {clientDashboardUsers.map((user, idx) => (
-            <div key={user.id} className="border rounded-lg p-3 space-y-3 bg-background">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Felhasználó #{idx + 1}</span>
+          {/* Workshops */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Workshopok</span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addWorkshop}
+                className="h-8"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Hozzáadás
+              </Button>
+              {countryWorkshops.length > 0 && (
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => removeClientDashboardUser(user.id)}
-                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                  onClick={() => setIsWorkshopsOpen(!isWorkshopsOpen)}
+                  className="h-8"
                 >
-                  <X className="h-4 w-4" />
+                  {isWorkshopsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              )}
+            </div>
+            {isWorkshopsOpen && countryWorkshops.length > 0 && (
+              <div className="space-y-2 pl-4">
+                {countryWorkshops.map((ws, idx) => (
+                  <div key={ws.id} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>{idx + 1}.</span>
+                    <Input
+                      value={ws.name}
+                      onChange={(e) => updateWorkshop(ws.id, { name: e.target.value })}
+                      placeholder="Workshop neve"
+                      className="h-8 flex-1"
+                    />
+                    <Input
+                      type="number"
+                      value={ws.sessions_available}
+                      onChange={(e) => updateWorkshop(ws.id, { sessions_available: parseInt(e.target.value) || 0 })}
+                      placeholder="Alkalmak"
+                      className="h-8 w-24"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Krízisintervenciók */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Krízisintervenciók</span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addCrisis}
+                className="h-8"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Hozzáadás
+              </Button>
+              {countryCrisis.length > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsCrisisOpen(!isCrisisOpen)}
+                  className="h-8"
+                >
+                  {isCrisisOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              )}
+            </div>
+            {isCrisisOpen && countryCrisis.length > 0 && (
+              <div className="space-y-2 pl-4">
+                {countryCrisis.map((ci, idx) => (
+                  <div key={ci.id} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>{idx + 1}.</span>
+                    <Input
+                      value={ci.name}
+                      onChange={(e) => updateCrisis(ci.id, { name: e.target.value })}
+                      placeholder="Krízisintervenció neve"
+                      className="h-8 flex-1"
+                    />
+                    <Input
+                      type="number"
+                      value={ci.sessions_available}
+                      onChange={(e) => updateCrisis(ci.id, { sessions_available: parseInt(e.target.value) || 0 })}
+                      placeholder="Alkalmak"
+                      className="h-8 w-24"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Client Dashboard felhasználók - csak nem entity módban */}
+        {!isEntityMode && (entityIsCGP || !entityContractHolderId) && (
+          <div className="bg-muted/30 border rounded-lg p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-primary">Client Dashboard felhasználók</h4>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addClientDashboardUser}
+                className="h-8"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Új felhasználó
+              </Button>
+            </div>
+
+            {clientDashboardUsers.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                Nincs még felhasználó hozzáadva a Client Dashboard-hoz.
+              </p>
+            )}
+
+            {clientDashboardUsers.map((user, idx) => (
+              <div key={user.id} className="border rounded-lg p-3 space-y-3 bg-background">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Felhasználó #{idx + 1}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeClientDashboardUser(user.id)}
+                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Felhasználónév</Label>
+                    <Input
+                      value={user.username}
+                      onChange={(e) => updateClientDashboardUser(user.id, { username: e.target.value })}
+                      placeholder="Felhasználónév"
+                      className="h-9"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Jelszó</Label>
+                    {user.id.startsWith("new-") ? (
+                      <Input
+                        type="password"
+                        value={user.password || ""}
+                        onChange={(e) => updateClientDashboardUser(user.id, { password: e.target.value })}
+                        placeholder="Jelszó"
+                        className="h-9"
+                      />
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="link"
+                        size="sm"
+                        onClick={() => onSetNewPassword(user.id)}
+                        className="h-9 p-0 text-primary"
+                      >
+                        + Új jelszó beállítása
+                      </Button>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Nyelv</Label>
+                    <Select
+                      value={user.languageId || ""}
+                      onValueChange={(val) => updateClientDashboardUser(user.id, { languageId: val || null })}
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="Válasszon..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="3">English</SelectItem>
+                        <SelectItem value="1">Magyar</SelectItem>
+                        <SelectItem value="2">Polska</SelectItem>
+                        <SelectItem value="4">Slovenský</SelectItem>
+                        <SelectItem value="5">Česky</SelectItem>
+                        <SelectItem value="6">Українська</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Entitás törlés gomb - csak entity módban és ha több van */}
+        {isEntityMode && entities.length > 1 && (
+          <div className="pt-4 border-t">
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() => onDeleteEntity(entity.id)}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Entitás törlése
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Több entitás toggle - A PANEL TETEJÉN */}
+      {countryId && companyId && (
+        <div className="flex items-center justify-between bg-muted/30 border rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <Building2 className="h-5 w-5 text-primary" />
+            <div>
+              <h4 className="text-sm font-medium text-primary">Szerződött entitások</h4>
+              <p className="text-xs text-muted-foreground">
+                Ha egy országban több jogi személlyel is szerződést kötnek
+              </p>
+            </div>
+          </div>
+          <DifferentPerCountryToggle
+            label="Több entitás"
+            checked={hasMultipleEntities}
+            onChange={handleToggleMultipleEntities}
+            disabled={isEntitiesLoading || isCreatingInitialEntities}
+          />
+        </div>
+      )}
+
+      {/* Ha nincs több entitás, egyszerű panel */}
+      {!hasMultipleEntities && renderEntityContent()}
+
+      {/* Ha több entitás van, füles megjelenítés */}
+      {hasMultipleEntities && (
+        <>
+          {(entities.length === 0 || isCreatingInitialEntities) ? (
+            <div className="text-center py-8 border rounded-lg bg-muted/30">
+              <p className="text-sm text-muted-foreground">
+                Entitások létrehozása...
+              </p>
+            </div>
+          ) : (
+            <Tabs 
+              value={activeEntityId} 
+              onValueChange={setActiveEntityId}
+              className="w-full"
+            >
+              <div className="flex items-center gap-2 flex-wrap mb-4">
+                <TabsList className="h-auto p-1 bg-muted/50 flex-wrap gap-1">
+                  {entities.map((entity, index) => (
+                    <TabsTrigger
+                      key={entity.id}
+                      value={entity.id}
+                      className={cn(
+                        "rounded-lg px-4 py-2 text-sm",
+                        "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                      )}
+                    >
+                      {getEntityTabLabel(entity, index)}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddEntity}
+                  disabled={isEntitiesLoading}
+                  className="h-9"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Új entitás
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs">Felhasználónév</Label>
-                  <Input
-                    value={user.username}
-                    onChange={(e) => updateClientDashboardUser(user.id, { username: e.target.value })}
-                    placeholder="Felhasználónév"
-                    className="h-9"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Jelszó</Label>
-                  {user.id.startsWith("new-") ? (
-                    <Input
-                      type="password"
-                      value={user.password || ""}
-                      onChange={(e) => updateClientDashboardUser(user.id, { password: e.target.value })}
-                      placeholder="Jelszó"
-                      className="h-9"
-                    />
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="link"
-                      size="sm"
-                      onClick={() => onSetNewPassword(user.id)}
-                      className="h-9 p-0 text-primary"
-                    >
-                      + Új jelszó beállítása
-                    </Button>
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Nyelv</Label>
-                  <Select
-                    value={user.languageId || ""}
-                    onValueChange={(val) => updateClientDashboardUser(user.id, { languageId: val || null })}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Válasszon..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="3">English</SelectItem>
-                      <SelectItem value="1">Magyar</SelectItem>
-                      <SelectItem value="2">Polska</SelectItem>
-                      <SelectItem value="4">Slovenský</SelectItem>
-                      <SelectItem value="5">Česky</SelectItem>
-                      <SelectItem value="6">Українська</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              {entities.map((entity) => (
+                <TabsContent
+                  key={entity.id}
+                  value={entity.id}
+                  className="mt-0"
+                >
+                  {renderEntityContent(entity)}
+                </TabsContent>
+              ))}
+            </Tabs>
+          )}
+        </>
       )}
     </div>
   );
