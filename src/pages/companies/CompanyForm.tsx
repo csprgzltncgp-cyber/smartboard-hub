@@ -62,6 +62,7 @@ const CompanyForm = () => {
 
   // Alapadatok
   const [name, setName] = useState("");
+  const [dispatchName, setDispatchName] = useState<string | null>(null);
   const [active, setActive] = useState(true);
   const [countryIds, setCountryIds] = useState<string[]>([]);
   const [contractHolderId, setContractHolderId] = useState<string | null>(null);
@@ -189,6 +190,7 @@ const CompanyForm = () => {
       
       if (company) {
         setName(company.name);
+        setDispatchName(company.dispatch_name);
         setActive(company.active);
         setCountryIds(company.country_ids);
         setContractHolderId(company.contract_holder_id);
@@ -294,6 +296,7 @@ const CompanyForm = () => {
       if (isEditMode && companyId) {
         const success = await updateCompany(companyId, {
           name,
+          dispatchName,
           countryIds,
           contractHolderType: contractHolderId === "2" ? "cgp" : contractHolderId === "1" ? "telus" : null,
           connectedCompanyId: null, // eltávolítva
@@ -314,6 +317,7 @@ const CompanyForm = () => {
       } else {
         const newCompany = await createCompany({
           name,
+          dispatchName,
           countryIds,
           contractHolderType: contractHolderId === "2" ? "cgp" : contractHolderId === "1" ? "telus" : null,
           connectedCompanyId: null, // eltávolítva
@@ -471,6 +475,8 @@ const CompanyForm = () => {
         <SingleCountryBasicDataPanel
           name={name}
           setName={setName}
+          dispatchName={dispatchName}
+          setDispatchName={setDispatchName}
           active={active}
           setActive={setActive}
           countryIds={countryIds}
@@ -662,6 +668,8 @@ const CompanyForm = () => {
             <MultiCountryBasicDataPanel
               name={name}
               setName={setName}
+              dispatchName={dispatchName}
+              setDispatchName={setDispatchName}
               active={active}
               setActive={setActive}
               countryIds={countryIds}

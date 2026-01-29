@@ -30,6 +30,8 @@ interface ClientDashboardUser {
 interface SingleCountryBasicDataPanelProps {
   name: string;
   setName: (name: string) => void;
+  dispatchName: string | null;
+  setDispatchName: (name: string | null) => void;
   active: boolean;
   setActive: (active: boolean) => void;
   countryIds: string[];
@@ -82,6 +84,8 @@ interface SingleCountryBasicDataPanelProps {
 export const SingleCountryBasicDataPanel = ({
   name,
   setName,
+  dispatchName,
+  setDispatchName,
   active,
   setActive,
   countryIds,
@@ -217,6 +221,21 @@ export const SingleCountryBasicDataPanel = ({
             placeholder="Cégnév"
             required
           />
+        </div>
+      </div>
+
+      {/* Cég elnevezése kiközvetítéshez */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+        <div className="space-y-2">
+          <Label>Cég elnevezése kiközvetítéshez</Label>
+          <Input
+            value={dispatchName || ""}
+            onChange={(e) => setDispatchName(e.target.value || null)}
+            placeholder="Ahogy az operátorok listájában megjelenik"
+          />
+          <p className="text-xs text-muted-foreground">
+            Ha üres, a cégnév jelenik meg az operátorok listájában.
+          </p>
         </div>
       </div>
 
