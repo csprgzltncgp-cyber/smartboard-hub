@@ -120,7 +120,7 @@ export interface InvoicingData {
   id: string;
   company_id: string;
   country_id: string | null;
-  billing_frequency: "monthly" | "quarterly" | "yearly" | null;
+  billing_frequency: "monthly" | "quarterly" | "semi-annually" | "yearly" | null;
   invoice_language: string | null;
   currency: string | null;
   vat_rate: number | null;
@@ -265,6 +265,7 @@ export const CLIENT_DASHBOARD_LANGUAGES = [
 export const BILLING_FREQUENCIES = [
   { id: "monthly", name: "Havi" },
   { id: "quarterly", name: "Negyedéves" },
+  { id: "semi-annually", name: "Féléves" },
   { id: "yearly", name: "Éves" },
 ];
 
