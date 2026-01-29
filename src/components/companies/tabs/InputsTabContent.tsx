@@ -569,6 +569,7 @@ export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentP
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-xl">Mégse</AlertDialogCancel>
             <AlertDialogAction
+              type="button"
               className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={confirmDeleteInput}
             >
