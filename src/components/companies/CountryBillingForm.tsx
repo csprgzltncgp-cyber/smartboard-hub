@@ -74,6 +74,7 @@ const getDefaultInvoicingData = (): InvoicingData => ({
   company_id: "",
   country_id: null,
   billing_frequency: null,
+  billing_in_advance: false,
   invoice_language: null,
   currency: null,
   vat_rate: null,
@@ -405,6 +406,24 @@ export const CountryBillingForm = ({
                 ))}
               </SelectContent>
             </Select>
+            {/* Előre számlázás checkbox - csak nem havi gyakoriságnál */}
+            {invoicingData.billing_frequency && invoicingData.billing_frequency !== "monthly" && (
+              <div className="flex items-center gap-2 mt-2">
+                <Checkbox
+                  id="billing_in_advance"
+                  checked={invoicingData.billing_in_advance}
+                  onCheckedChange={(checked) =>
+                    updateInvoicingData({ billing_in_advance: checked === true })
+                  }
+                />
+                <label
+                  htmlFor="billing_in_advance"
+                  className="text-sm text-muted-foreground cursor-pointer"
+                >
+                  Előre számlázás
+                </label>
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Számla nyelve</Label>

@@ -121,6 +121,7 @@ export interface InvoicingData {
   company_id: string;
   country_id: string | null;
   billing_frequency: "monthly" | "quarterly" | "semi-annually" | "yearly" | null;
+  billing_in_advance: boolean;
   invoice_language: string | null;
   currency: string | null;
   vat_rate: number | null;
