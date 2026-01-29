@@ -110,6 +110,7 @@ export const OnboardingTabContent = ({ companyId, onComplete }: OnboardingTabCon
   
   // Dialog states
   const [addStepDialogOpen, setAddStepDialogOpen] = useState(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [newStepTitle, setNewStepTitle] = useState("");
   const [newStepDescription, setNewStepDescription] = useState("");
   const [newStepDueDate, setNewStepDueDate] = useState("");
@@ -167,6 +168,14 @@ export const OnboardingTabContent = ({ companyId, onComplete }: OnboardingTabCon
     }));
   };
 
+  const handleOnboardingButtonClick = () => {
+    if (progressPercent < 100) {
+      setConfirmDialogOpen(true);
+    } else {
+      handleCompleteOnboarding();
+    }
+  };
+
   const handleCompleteOnboarding = () => {
     const completedData: OnboardingData = {
       ...data,
@@ -174,6 +183,7 @@ export const OnboardingTabContent = ({ companyId, onComplete }: OnboardingTabCon
       completedAt: new Date().toISOString(),
     };
     onComplete?.(completedData);
+    setConfirmDialogOpen(false);
   };
 
   const getStatusIcon = (status: OnboardingStepStatus) => {
@@ -206,14 +216,8 @@ export const OnboardingTabContent = ({ companyId, onComplete }: OnboardingTabCon
           </div>
           <Button 
             type="button"
-            onClick={handleCompleteOnboarding}
-            disabled={progressPercent < 100}
-            className={cn(
-              "rounded-xl px-5 py-2 font-medium border-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-              progressPercent === 100 
-                ? "bg-cgp-badge-lastday text-white border-cgp-badge-lastday hover:bg-cgp-badge-lastday/90 hover:shadow-md active:translate-y-px" 
-                : "bg-cgp-badge-lastday/10 text-cgp-badge-lastday border-cgp-badge-lastday/40 opacity-90 cursor-not-allowed"
-            )}
+            onClick={handleOnboardingButtonClick}
+            className="bg-[hsl(21,82%,55%)] text-white px-5 py-2 rounded-xl font-medium hover:bg-[hsl(21,82%,48%)] hover:shadow-md active:translate-y-px transition-all"
           >
             <CheckCheck className="w-4 h-4 mr-2" />
             Bevezetés kész
@@ -467,6 +471,33 @@ export const OnboardingTabContent = ({ companyId, onComplete }: OnboardingTabCon
               </Button>
               <Button type="button" onClick={addStep} disabled={!newStepTitle.trim()}>
                 Hozzáadás
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm incomplete onboarding dialog */}
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Bevezetés lezárása</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              Még nem fejeztél be minden lépést ({completedStepsCount} / {totalStepsCount}). 
+              Biztosan le akarod zárni a bevezetést?
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setConfirmDialogOpen(false)}>
+                Mégse
+              </Button>
+              <Button 
+                type="button" 
+                onClick={handleCompleteOnboarding}
+                className="bg-[hsl(21,82%,55%)] text-white hover:bg-[hsl(21,82%,48%)]"
+              >
+                Igen, lezárom
               </Button>
             </div>
           </div>
