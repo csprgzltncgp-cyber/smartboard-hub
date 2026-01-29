@@ -539,7 +539,7 @@ const CompanyForm = () => {
               contractHolders={mockContractHolders}
               connectedCompanies={connectedCompanies}
             />
-            <div className="flex justify-end pt-4 border-t">
+            <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">
                 <Save className="h-4 w-4 mr-2" />
                 Mentés
@@ -568,7 +568,7 @@ const CompanyForm = () => {
               crisisInterventions={crisisInterventions}
               setCrisisInterventions={setCrisisInterventions}
             />
-            <div className="flex justify-end pt-4 border-t">
+            <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">
                 <Save className="h-4 w-4 mr-2" />
                 Mentés
@@ -584,7 +584,7 @@ const CompanyForm = () => {
         content: (
           <div className="space-y-6">
             <ClientDashboardTabContent companyId={companyId || "new"} countryIds={countryIds} />
-            <div className="flex justify-end pt-4 border-t">
+            <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">
                 <Save className="h-4 w-4 mr-2" />
                 Mentés
@@ -656,7 +656,7 @@ const CompanyForm = () => {
         content: (
           <div className="space-y-6">
             <OnboardingTabContent companyId={companyId || "new"} />
-            <div className="flex justify-end pt-4 border-t">
+            <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">
                 <Save className="h-4 w-4 mr-2" />
                 Mentés
@@ -722,7 +722,7 @@ const CompanyForm = () => {
         content: (
           <div className="space-y-6">
             <StatisticsTabContent companyId={companyId || "new"} />
-            <div className="flex justify-end pt-4 border-t">
+            <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">
                 <Save className="h-4 w-4 mr-2" />
                 Mentés
