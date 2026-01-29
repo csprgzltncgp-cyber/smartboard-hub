@@ -485,6 +485,7 @@ const CompanyForm = () => {
       {/* Alapadatok panel */}
       <CollapsiblePanel title="Alapadatok">
         <SingleCountryBasicDataPanel
+          companyId={companyId}
           name={name}
           setName={setName}
           dispatchName={dispatchName}
