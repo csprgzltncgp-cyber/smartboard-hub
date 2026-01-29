@@ -17,6 +17,7 @@ import { NotesTabContent } from "@/components/companies/tabs/NotesTabContent";
 import { StatisticsTabContent } from "@/components/companies/tabs/StatisticsTabContent";
 import { ClientDashboardTabContent } from "@/components/companies/tabs/ClientDashboardTabContent";
 import { InvoiceSlip } from "@/components/companies/InvoiceSlipCard";
+import { NewCompanyOnboardingDialog } from "@/components/companies/NewCompanyOnboardingDialog";
 import {
   CountryDifferentiate,
   CompanyCountrySettings,
@@ -139,10 +140,21 @@ const CompanyForm = () => {
   const [invoiceTemplates, setInvoiceTemplates] = useState<InvoiceTemplate[]>([]);
 
   // Kontextusfüggő fülek állapota
-  const [isNewcomer, setIsNewcomer] = useState(true); // CRM-ből érkezik - mock: true for demo
+  // CRM-ből érkező cégek mindig newcomer-ek (fromCrm state flag)
+  const fromCrm = location.state?.fromCrm === true;
+  
+  // New company: show dialog to choose onboarding mode (unless from CRM)
+  const [showOnboardingDialog, setShowOnboardingDialog] = useState(!isEditMode && !fromCrm);
+  const [isNewcomer, setIsNewcomer] = useState(fromCrm ? true : false);
   const [hasInputs, setHasInputs] = useState(false); // TODO: DB check
   const [hasNotes, setHasNotes] = useState(false); // TODO: DB check  
   const [hasStatistics, setHasStatistics] = useState(true); // TODO: DB check
+
+  // Handle onboarding choice from dialog
+  const handleOnboardingChoice = useCallback((withOnboarding: boolean) => {
+    setIsNewcomer(withOnboarding);
+    setShowOnboardingDialog(false);
+  }, []);
 
   // Archived onboarding data
   const [archivedOnboarding, setArchivedOnboarding] = useState<OnboardingData | null>(null);
@@ -867,6 +879,12 @@ const CompanyForm = () => {
           {isEditMode ? name || "Cég szerkesztése" : "Új cég hozzáadása"}
         </h1>
       </div>
+
+      {/* Onboarding choice dialog for new companies */}
+      <NewCompanyOnboardingDialog
+        open={showOnboardingDialog}
+        onChoice={handleOnboardingChoice}
+      />
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Dinamikus layout az országok száma alapján */}
