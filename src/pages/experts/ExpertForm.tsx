@@ -817,7 +817,7 @@ const ExpertForm = () => {
   return (
     <div>
       <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard/settings/experts")}>
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <h1 className="text-3xl font-calibri-bold">{getTitle()}</h1>
