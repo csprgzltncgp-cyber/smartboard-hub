@@ -201,11 +201,13 @@ export const SingleCountryBasicDataPanel = ({
     if (enabled && entities.length === 0 && companyId && countryId && !isCreatingInitialEntities) {
       setIsCreatingInitialEntities(true);
       try {
-        // Első entitás: a cégnév (vagy "Entitás 1" ha nincs)
-        const entity1 = createDefaultEntity(companyId, countryId, name || "Entitás 1");
+        // Első entitás: MINDIG a cégnév (ha van), különben "Entitás 1"
+        // Ez lesz a fő entitás, ami a már létező cég adatait tartalmazza
+        const entity1Name = name?.trim() || "Entitás 1";
+        const entity1 = createDefaultEntity(companyId, countryId, entity1Name);
         await onAddEntity(entity1);
         
-        // Második entitás
+        // Második entitás: mindig "Entitás 2"
         const entity2 = createDefaultEntity(companyId, countryId, "Entitás 2");
         await onAddEntity(entity2);
       } finally {
@@ -221,6 +223,10 @@ export const SingleCountryBasicDataPanel = ({
   };
 
   const getEntityTabLabel = (entity: ContractedEntity, index: number): string => {
+    // Az első entitás esetén, ha a neve üres vagy "Entitás 1", használjuk a cégnevet
+    if (index === 0 && name && (!entity.name || entity.name === "Entitás 1")) {
+      return name;
+    }
     return entity.name || `Entitás ${index + 1}`;
   };
 
