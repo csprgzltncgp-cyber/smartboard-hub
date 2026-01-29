@@ -10,7 +10,9 @@ import { CompanyCountrySettingsPanel } from "@/components/companies/CompanyCount
 import { CompanyInvoicingPanel } from "@/components/companies/CompanyInvoicingPanel";
 import { CompanyTabContainer, CompanyTab } from "@/components/companies/tabs/CompanyTabContainer";
 import { OnboardingTabContent } from "@/components/companies/tabs/OnboardingTabContent";
+import { ArchivedOnboardingPanel } from "@/components/companies/panels/ArchivedOnboardingPanel";
 import { InputsTabContent } from "@/components/companies/tabs/InputsTabContent";
+import { OnboardingData } from "@/types/onboarding";
 import { NotesTabContent } from "@/components/companies/tabs/NotesTabContent";
 import { StatisticsTabContent } from "@/components/companies/tabs/StatisticsTabContent";
 import { ClientDashboardTabContent } from "@/components/companies/tabs/ClientDashboardTabContent";
@@ -137,10 +139,20 @@ const CompanyForm = () => {
   const [invoiceTemplates, setInvoiceTemplates] = useState<InvoiceTemplate[]>([]);
 
   // Kontextusfüggő fülek állapota
-  const [isNewcomer, setIsNewcomer] = useState(false); // CRM-ből érkezik
+  const [isNewcomer, setIsNewcomer] = useState(true); // CRM-ből érkezik - mock: true for demo
   const [hasInputs, setHasInputs] = useState(false); // TODO: DB check
   const [hasNotes, setHasNotes] = useState(false); // TODO: DB check  
   const [hasStatistics, setHasStatistics] = useState(true); // TODO: DB check
+
+  // Archived onboarding data
+  const [archivedOnboarding, setArchivedOnboarding] = useState<OnboardingData | null>(null);
+
+  // Handle onboarding completion
+  const handleOnboardingComplete = useCallback((data: OnboardingData) => {
+    setArchivedOnboarding(data);
+    setIsNewcomer(false);
+    toast.success("Bevezetés sikeresen lezárva és archiválva!");
+  }, []);
 
   // Inputs tab callback ref
   const addInputFnRef = useRef<(() => void) | null>(null);
@@ -388,13 +400,7 @@ const CompanyForm = () => {
       {/* Bevezetés panel - ELSŐ, ha Új érkező */}
       {isNewcomer && (
         <CollapsiblePanel title="Bevezetés" variant="highlight" defaultOpen>
-          <OnboardingTabContent companyId={companyId || "new"} />
-          <div className="flex items-center gap-4 mt-6 pt-4 border-t">
-            <Button type="submit" className="rounded-xl">
-              <Save className="h-4 w-4 mr-2" />
-              Mentés
-            </Button>
-          </div>
+          <OnboardingTabContent companyId={companyId || "new"} onComplete={handleOnboardingComplete} />
         </CollapsiblePanel>
       )}
 
@@ -448,6 +454,12 @@ const CompanyForm = () => {
           priceHistory={priceHistory}
           setPriceHistory={setPriceHistory}
         />
+        
+        {/* Archived onboarding panel - only shown after onboarding completion */}
+        {archivedOnboarding && (
+          <ArchivedOnboardingPanel data={archivedOnboarding} />
+        )}
+        
         {/* Mentés gomb az Alapadatok panelben */}
         <div className="flex items-center gap-4 mt-6 pt-4 border-t">
           <Button type="submit" className="rounded-xl">
@@ -573,13 +585,7 @@ const CompanyForm = () => {
       variant: "highlight",
       content: (
         <div className="space-y-6">
-          <OnboardingTabContent companyId={companyId || "new"} />
-          <div className="flex items-center gap-4 pt-4 border-t">
-            <Button type="submit" className="rounded-xl">
-              <Save className="h-4 w-4 mr-2" />
-              Mentés
-            </Button>
-          </div>
+          <OnboardingTabContent companyId={companyId || "new"} onComplete={handleOnboardingComplete} />
         </div>
       ),
     };
@@ -632,6 +638,12 @@ const CompanyForm = () => {
               priceHistory={priceHistory}
               setPriceHistory={setPriceHistory}
             />
+            
+            {/* Archived onboarding panel - only shown after onboarding completion */}
+            {archivedOnboarding && (
+              <ArchivedOnboardingPanel data={archivedOnboarding} />
+            )}
+            
             <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">
                 <Save className="h-4 w-4 mr-2" />
