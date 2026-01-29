@@ -280,6 +280,7 @@ export const SingleCountryBasicDataPanel = ({
           companyId={companyId}
           countryId={countryId}
           countryName={countries.find(c => c.id === countryId)?.name || ""}
+          companyName={name}
           entities={entities}
           hasMultipleEntities={hasMultipleEntities}
           contractHolders={contractHolders}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +12,7 @@ interface EntityTabsPanelProps {
   companyId: string;
   countryId: string;
   countryName: string;
+  companyName?: string; // Cégnév - az első entitás neve lesz
   entities: ContractedEntity[];
   hasMultipleEntities: boolean;
   contractHolders: ContractHolder[];
@@ -26,6 +27,7 @@ export const EntityTabsPanel = ({
   companyId,
   countryId,
   countryName,
+  companyName,
   entities,
   hasMultipleEntities,
   contractHolders,
@@ -36,13 +38,30 @@ export const EntityTabsPanel = ({
   isLoading = false,
 }: EntityTabsPanelProps) => {
   const [activeEntityId, setActiveEntityId] = useState<string>(entities[0]?.id || "");
+  const [isCreatingInitialEntities, setIsCreatingInitialEntities] = useState(false);
 
-  const handleToggle = (enabled: boolean) => {
+  const handleToggle = async (enabled: boolean) => {
     onToggleMultipleEntities(enabled);
+    
+    // Ha bekapcsoljuk és nincs még entitás, automatikusan létrehozunk 2-t
+    if (enabled && entities.length === 0 && !isCreatingInitialEntities) {
+      setIsCreatingInitialEntities(true);
+      try {
+        // Első entitás: a cégnév vagy "Entitás 1"
+        const entity1 = createDefaultEntity(companyId, countryId, companyName || "Entitás 1");
+        await onAddEntity(entity1);
+        
+        // Második entitás
+        const entity2 = createDefaultEntity(companyId, countryId, "Entitás 2");
+        await onAddEntity(entity2);
+      } finally {
+        setIsCreatingInitialEntities(false);
+      }
+    }
   };
 
   const handleAddEntity = async () => {
-    const newEntity = createDefaultEntity(companyId, countryId, `Új entitás ${entities.length + 1}`);
+    const newEntity = createDefaultEntity(companyId, countryId, `Entitás ${entities.length + 1}`);
     await onAddEntity(newEntity);
   };
 
@@ -62,9 +81,22 @@ export const EntityTabsPanel = ({
   };
 
   // Update active tab when entities change
-  if (entities.length > 0 && !entities.find(e => e.id === activeEntityId)) {
-    setActiveEntityId(entities[0].id);
-  }
+  useEffect(() => {
+    if (entities.length > 0 && !entities.find(e => e.id === activeEntityId)) {
+      setActiveEntityId(entities[0].id);
+    }
+  }, [entities, activeEntityId]);
+
+  // Set first entity as active when entities are loaded
+  useEffect(() => {
+    if (entities.length > 0 && !activeEntityId) {
+      setActiveEntityId(entities[0].id);
+    }
+  }, [entities, activeEntityId]);
+
+  const getEntityTabLabel = (entity: ContractedEntity, index: number): string => {
+    return entity.name || `Entitás ${index + 1}`;
+  };
 
   return (
     <div className="bg-muted/30 border rounded-lg p-4 space-y-4">
@@ -77,26 +109,17 @@ export const EntityTabsPanel = ({
           label="Több entitás"
           checked={hasMultipleEntities}
           onChange={handleToggle}
-          disabled={isLoading}
+          disabled={isLoading || isCreatingInitialEntities}
         />
       </div>
 
       {hasMultipleEntities && (
         <>
-          {entities.length === 0 ? (
+          {(entities.length === 0 || isCreatingInitialEntities) ? (
             <div className="text-center py-8 border-t">
-              <p className="text-sm text-muted-foreground mb-4">
-                Még nincs entitás hozzáadva. Kattintson az "Új entitás" gombra.
+              <p className="text-sm text-muted-foreground">
+                Entitások létrehozása...
               </p>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleAddEntity}
-                disabled={isLoading}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Új entitás
-              </Button>
             </div>
           ) : (
             <Tabs 
@@ -104,7 +127,7 @@ export const EntityTabsPanel = ({
               onValueChange={setActiveEntityId}
               className="w-full"
             >
-              <div className="flex items-center justify-between border-t pt-4">
+              <div className="flex items-center gap-2 border-t pt-4 flex-wrap">
                 <TabsList className="h-auto p-1 bg-muted/50 flex-wrap gap-1">
                   {entities.map((entity, index) => (
                     <TabsTrigger
@@ -115,7 +138,7 @@ export const EntityTabsPanel = ({
                         "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                       )}
                     >
-                      {entity.name || `Entitás ${index + 1}`}
+                      {getEntityTabLabel(entity, index)}
                     </TabsTrigger>
                   ))}
                 </TabsList>
@@ -125,7 +148,7 @@ export const EntityTabsPanel = ({
                   size="sm"
                   onClick={handleAddEntity}
                   disabled={isLoading}
-                  className="h-8"
+                  className="h-9"
                 >
                   <Plus className="h-4 w-4 mr-1" />
                   Új entitás
