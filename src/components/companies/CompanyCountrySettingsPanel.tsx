@@ -220,7 +220,7 @@ const CountrySettingsCard = ({
             {settings.added_at && (
               <span className={`flex items-center gap-1 text-xs ${isOpen ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                 <Calendar className="h-3 w-3" />
-                {format(new Date(settings.added_at), "yyyy. MMM d.", { locale: hu })}
+                Hozzáadva: {format(new Date(settings.added_at), "yyyy. MMM d.", { locale: hu })}
               </span>
             )}
           </div>
