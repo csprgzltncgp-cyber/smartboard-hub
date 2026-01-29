@@ -208,11 +208,12 @@ export const OnboardingTabContent = ({ companyId, onComplete }: OnboardingTabCon
             type="button"
             onClick={handleCompleteOnboarding}
             disabled={progressPercent < 100}
+            variant={progressPercent === 100 ? "default" : "outline"}
             className={cn(
-              "rounded-xl shadow-sm transition-all",
+              "rounded-xl px-6 py-2 font-medium transition-all duration-200",
               progressPercent === 100 
-                ? "bg-cgp-badge-new text-white hover:bg-cgp-badge-new/90 hover:shadow-md active:translate-y-px" 
-                : "bg-muted text-muted-foreground border border-input opacity-70 cursor-not-allowed"
+                ? "bg-cgp-badge-new text-white border-2 border-cgp-badge-new hover:bg-cgp-badge-new/90 hover:shadow-lg active:scale-[0.98]" 
+                : "bg-white text-gray-500 border-2 border-gray-300 hover:bg-gray-50"
             )}
           >
             <CheckCheck className="w-4 h-4 mr-2" />
