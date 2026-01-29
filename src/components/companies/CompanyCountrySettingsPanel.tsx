@@ -136,8 +136,6 @@ export const CompanyCountrySettingsPanel = ({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Ország beállítások</h2>
-
       {selectedCountries.map((country) => {
         const settings = getCountrySettings(country.id);
         const countryWorkshops = getCountryWorkshops(country.id);
