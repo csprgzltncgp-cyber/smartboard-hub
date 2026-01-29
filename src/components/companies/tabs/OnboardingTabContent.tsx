@@ -56,18 +56,14 @@ interface OnboardingTabContentProps {
   isEmpty?: boolean;
 }
 
-// Empty onboarding data for new companies
+// Empty onboarding data for new companies (no CRM data, no pre-defined steps)
 const getEmptyOnboardingData = (companyId: string): OnboardingData => {
   return {
     companyId,
     contacts: [],
     details: [],
     notes: [],
-    steps: DEFAULT_ONBOARDING_STEPS.map((step, idx) => ({
-      ...step,
-      id: `step-${idx + 1}`,
-      status: 'pending' as OnboardingStepStatus,
-    })) as OnboardingStep[],
+    steps: [], // No pre-defined steps for new companies
     isCompleted: false,
   };
 };
@@ -237,133 +233,141 @@ export const OnboardingTabContent = ({ companyId, onComplete, isEmpty = false }:
         </Button>
       </div>
 
-      {/* =========== CRM DATA SECTION =========== */}
-      <div className="bg-muted/30 border rounded-lg overflow-hidden">
-        <div className="bg-muted/50 px-4 py-3 border-b">
-          <h4 className="font-medium text-primary">CRM-ből átvett adatok</h4>
-        </div>
-        
-        <div className="p-4 space-y-4">
-          {/* Kapcsolattartók */}
-          <div className="border rounded-lg overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setIsContactsOpen(!isContactsOpen)}
-              className="w-full flex items-center justify-between px-4 py-3 bg-background hover:bg-muted/30 transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-primary" />
-                <span className="font-medium">Kapcsolattartók</span>
-                <Badge variant="secondary" className="text-xs">{data.contacts.length}</Badge>
+      {/* =========== CRM DATA SECTION - Only show if there's CRM data =========== */}
+      {!isEmpty && (data.contacts.length > 0 || data.details.length > 0 || data.notes.length > 0) && (
+        <div className="bg-muted/30 border rounded-lg overflow-hidden">
+          <div className="bg-muted/50 px-4 py-3 border-b">
+            <h4 className="font-medium text-primary">CRM-ből átvett adatok</h4>
+          </div>
+          
+          <div className="p-4 space-y-4">
+            {/* Kapcsolattartók */}
+            {data.contacts.length > 0 && (
+              <div className="border rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setIsContactsOpen(!isContactsOpen)}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-background hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary" />
+                    <span className="font-medium">Kapcsolattartók</span>
+                    <Badge variant="secondary" className="text-xs">{data.contacts.length}</Badge>
+                  </div>
+                  {isContactsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+                {isContactsOpen && (
+                  <div className="p-4 space-y-3 border-t bg-background">
+                    {data.contacts.map((contact) => (
+                      <div 
+                        key={contact.id} 
+                        className={cn(
+                          "flex items-start gap-4 p-3 rounded-lg border",
+                          contact.isPrimary && "border-primary/30 bg-primary/5"
+                        )}
+                      >
+                        <div className={cn(
+                          "w-10 h-10 rounded-full flex items-center justify-center",
+                          contact.gender === 'female' ? "bg-pink-100 text-pink-600" : "bg-blue-100 text-blue-600"
+                        )}>
+                          <User className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{contact.name}</span>
+                            {contact.isPrimary && (
+                              <Badge className="bg-primary/10 text-primary text-xs">Elsődleges</Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">{contact.title}</p>
+                          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                            {contact.phone && (
+                              <span className="flex items-center gap-1">
+                                <Phone className="w-3 h-3" /> {contact.phone}
+                              </span>
+                            )}
+                            {contact.email && (
+                              <span className="flex items-center gap-1">
+                                <Mail className="w-3 h-3" /> {contact.email}
+                              </span>
+                            )}
+                            {contact.address && (
+                              <span className="flex items-center gap-1">
+                                <MapPin className="w-3 h-3" /> {contact.address}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              {isContactsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </button>
-            {isContactsOpen && (
-              <div className="p-4 space-y-3 border-t bg-background">
-                {data.contacts.map((contact) => (
-                  <div 
-                    key={contact.id} 
-                    className={cn(
-                      "flex items-start gap-4 p-3 rounded-lg border",
-                      contact.isPrimary && "border-primary/30 bg-primary/5"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center",
-                      contact.gender === 'female' ? "bg-pink-100 text-pink-600" : "bg-blue-100 text-blue-600"
-                    )}>
-                      <User className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{contact.name}</span>
-                        {contact.isPrimary && (
-                          <Badge className="bg-primary/10 text-primary text-xs">Elsődleges</Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{contact.title}</p>
-                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                        {contact.phone && (
-                          <span className="flex items-center gap-1">
-                            <Phone className="w-3 h-3" /> {contact.phone}
-                          </span>
-                        )}
-                        {contact.email && (
-                          <span className="flex items-center gap-1">
-                            <Mail className="w-3 h-3" /> {contact.email}
-                          </span>
-                        )}
-                        {contact.address && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3" /> {contact.address}
-                          </span>
-                        )}
-                      </div>
+            )}
+
+            {/* Részletek */}
+            {data.details.length > 0 && (
+              <div className="border rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setIsDetailsOpen(!isDetailsOpen)}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-background hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-primary" />
+                    <span className="font-medium">Részletek</span>
+                  </div>
+                  {isDetailsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+                {isDetailsOpen && (
+                  <div className="p-4 border-t bg-background">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {data.details.map((detail) => (
+                        <div key={detail.id} className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">{detail.label}</Label>
+                          <p className="font-medium">{detail.value}</p>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
+                )}
               </div>
             )}
-          </div>
 
-          {/* Részletek */}
-          <div className="border rounded-lg overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setIsDetailsOpen(!isDetailsOpen)}
-              className="w-full flex items-center justify-between px-4 py-3 bg-background hover:bg-muted/30 transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-primary" />
-                <span className="font-medium">Részletek</span>
-              </div>
-              {isDetailsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </button>
-            {isDetailsOpen && (
-              <div className="p-4 border-t bg-background">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {data.details.map((detail) => (
-                    <div key={detail.id} className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">{detail.label}</Label>
-                      <p className="font-medium">{detail.value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Feljegyzések */}
-          <div className="border rounded-lg overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setIsNotesOpen(!isNotesOpen)}
-              className="w-full flex items-center justify-between px-4 py-3 bg-background hover:bg-muted/30 transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-primary" />
-                <span className="font-medium">Feljegyzések</span>
-                <Badge variant="secondary" className="text-xs">{data.notes.length}</Badge>
-              </div>
-              {isNotesOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </button>
-            {isNotesOpen && (
-              <div className="p-4 space-y-3 border-t bg-background">
-                {data.notes.map((note) => (
-                  <div key={note.id} className="p-3 rounded-lg bg-muted/30 border">
-                    <p className="text-sm">{note.content}</p>
-                    <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                      <span>{note.createdBy}</span>
-                      <span>•</span>
-                      <span>{note.createdAt}</span>
-                    </div>
+            {/* Feljegyzések */}
+            {data.notes.length > 0 && (
+              <div className="border rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setIsNotesOpen(!isNotesOpen)}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-background hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-primary" />
+                    <span className="font-medium">Feljegyzések</span>
+                    <Badge variant="secondary" className="text-xs">{data.notes.length}</Badge>
                   </div>
-                ))}
+                  {isNotesOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+                {isNotesOpen && (
+                  <div className="p-4 space-y-3 border-t bg-background">
+                    {data.notes.map((note) => (
+                      <div key={note.id} className="p-3 rounded-lg bg-muted/30 border">
+                        <p className="text-sm">{note.content}</p>
+                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                          <span>{note.createdBy}</span>
+                          <span>•</span>
+                          <span>{note.createdAt}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
-      </div>
+      )}
 
       {/* =========== ONBOARDING STEPS SECTION =========== */}
       <div className="bg-muted/30 border rounded-lg overflow-hidden">
