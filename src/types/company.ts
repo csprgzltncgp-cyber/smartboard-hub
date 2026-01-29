@@ -55,6 +55,7 @@ export interface CountryDifferentiate {
   reporting: boolean;
   invoicing: boolean;
   contract_date_reminder_email: boolean;
+  basic_data: boolean; // Ha true, minden alapadat (szerződés, ár, stb.) országonként különböző
 }
 
 export interface ContractHolder {
@@ -80,6 +81,16 @@ export interface CompanyCountrySettings {
   all_country_access: boolean;
   // When this country was added to the company
   added_at: string | null;
+  // Country-specific basic data (when basic_data differentiate is true)
+  contract_file_url: string | null;
+  contract_price: number | null;
+  contract_price_type: string | null;
+  contract_currency: string | null;
+  pillar_count: number | null;
+  session_count: number | null;
+  consultation_rows: ConsultationRow[];
+  industry: string | null;
+  price_history: PriceHistoryEntry[];
 }
 
 export interface Workshop {

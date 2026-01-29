@@ -318,6 +318,7 @@ export const useCompaniesDb = () => {
             reporting: false,
             invoicing: false,
             contract_date_reminder_email: false,
+            basic_data: false,
           },
           countrySettings: hungaryId ? [{
             id: 'mock-setting-hu',
@@ -335,6 +336,15 @@ export const useCompaniesDb = () => {
             client_language_id: null,
             all_country_access: false,
             added_at: new Date().toISOString(),
+            contract_file_url: null,
+            contract_price: null,
+            contract_price_type: null,
+            contract_currency: null,
+            pillar_count: null,
+            session_count: null,
+            consultation_rows: [],
+            industry: null,
+            price_history: [],
           }] : [],
           billingData: null,
           invoicingData: null,
@@ -437,6 +447,7 @@ export const useCompaniesDb = () => {
           reporting: diffData.reporting,
           invoicing: diffData.invoicing,
           contract_date_reminder_email: false,
+          basic_data: false,
         } : {
           contract_holder: false,
           org_id: false,
@@ -444,6 +455,7 @@ export const useCompaniesDb = () => {
           reporting: false,
           invoicing: false,
           contract_date_reminder_email: false,
+          basic_data: false,
         },
         // Build countrySettings from countryAssocs, merging with settingsData where available
         countrySettings: (countryAssocs || []).map((ca: { country_id: string; created_at: string }) => {
@@ -466,6 +478,15 @@ export const useCompaniesDb = () => {
             client_language_id: null,
             all_country_access: false,
             added_at: ca.created_at,
+            contract_file_url: null,
+            contract_price: null,
+            contract_price_type: null,
+            contract_currency: null,
+            pillar_count: null,
+            session_count: null,
+            consultation_rows: [],
+            industry: null,
+            price_history: [],
           };
         }),
         billingData: billingData ? {

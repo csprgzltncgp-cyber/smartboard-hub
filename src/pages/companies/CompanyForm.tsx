@@ -87,6 +87,7 @@ const CompanyForm = () => {
     reporting: false,
     invoicing: false,
     contract_date_reminder_email: false,
+    basic_data: false,
   });
 
   // Ország-specifikus beállítások
@@ -681,6 +682,7 @@ const CompanyForm = () => {
               countrySettings={countrySettings}
               setCountrySettings={setCountrySettings}
               countryDifferentiates={countryDifferentiates}
+              setCountryDifferentiates={setCountryDifferentiates}
               contractHolders={mockContractHolders}
               accountAdmins={accountAdmins}
               globalContractHolderId={contractHolderId}

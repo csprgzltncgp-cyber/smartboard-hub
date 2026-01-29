@@ -143,6 +143,7 @@ export const SingleCountryBasicDataPanel = ({
     reporting: false,
     invoicing: false,
     contract_date_reminder_email: false,
+    basic_data: false,
   };
 
   const countryOptions = countries.map((c) => ({ id: c.id, label: c.name }));
