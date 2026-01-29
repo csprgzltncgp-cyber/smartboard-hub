@@ -104,10 +104,11 @@ export interface CompanyWithDetails extends Company {
   invoiceComments: InvoiceComment[];
 }
 
-// Map database billing frequency (1=monthly, 3=quarterly, 12=yearly) to string
-const mapBillingFrequency = (freq: number | null): "monthly" | "quarterly" | "yearly" | null => {
+// Map database billing frequency (1=monthly, 3=quarterly, 6=semi-annually, 12=yearly) to string
+const mapBillingFrequency = (freq: number | null): "monthly" | "quarterly" | "semi-annually" | "yearly" | null => {
   if (freq === 1) return "monthly";
   if (freq === 3) return "quarterly";
+  if (freq === 6) return "semi-annually";
   if (freq === 12) return "yearly";
   return null;
 };
@@ -115,6 +116,7 @@ const mapBillingFrequency = (freq: number | null): "monthly" | "quarterly" | "ye
 const mapBillingFrequencyToDb = (freq: string | null): number => {
   if (freq === "monthly") return 1;
   if (freq === "quarterly") return 3;
+  if (freq === "semi-annually") return 6;
   if (freq === "yearly") return 12;
   return 1;
 };
