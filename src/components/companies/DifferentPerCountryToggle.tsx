@@ -18,12 +18,16 @@ export const DifferentPerCountryToggle = ({
     <div
       onClick={() => !disabled && onChange(!checked)}
       className={cn(
-        "flex items-center justify-between cursor-pointer border-2 border-primary rounded-lg px-3 py-2 min-w-[200px]",
+        "flex items-center justify-between cursor-pointer border-2 border-primary rounded-lg px-3 py-2 min-w-[200px] transition-colors",
+        checked && "bg-cgp-teal-light/20",
         disabled && "opacity-50 cursor-not-allowed"
       )}
     >
       <span className="text-sm text-primary">{label}</span>
-      <div className="w-10 h-10 flex items-center justify-center border-l-2 border-primary -mr-3 -my-2 cursor-pointer">
+      <div className={cn(
+        "w-10 h-10 flex items-center justify-center border-l-2 border-primary -mr-3 -my-2 cursor-pointer transition-colors",
+        checked && "bg-cgp-teal-light/30"
+      )}>
         {checked ? (
           <Check className="h-5 w-5 text-cgp-teal" />
         ) : (
