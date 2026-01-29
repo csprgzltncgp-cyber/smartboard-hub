@@ -391,7 +391,7 @@ const CompanyForm = () => {
           onSetNewPassword={handleSetNewPassword}
         />
         {/* Mentés gomb az Alapadatok panelben */}
-        <div className="flex justify-end mt-6 pt-4 border-t">
+        <div className="flex items-center gap-4 mt-6 pt-4 border-t">
           <Button type="submit" className="rounded-xl">
             <Save className="h-4 w-4 mr-2" />
             Mentés
@@ -495,7 +495,7 @@ const CompanyForm = () => {
       {/* Statisztikák panel */}
       <CollapsiblePanel title="Statisztikák">
         <StatisticsTabContent companyId={companyId || "new"} />
-        <div className="flex justify-end mt-6 pt-4 border-t">
+        <div className="flex items-center gap-4 mt-6 pt-4 border-t">
           <Button type="submit" className="rounded-xl">
             <Save className="h-4 w-4 mr-2" />
             Mentés
