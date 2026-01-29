@@ -360,17 +360,9 @@ export const CompanyInvoicingPanel = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Számlázás</h2>
-      </div>
-
       {/* Országonként különböző számlázás - csak több ország esetén */}
       {countryIds.length > 1 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-          <div className="space-y-2">
-            <Label className="text-muted-foreground">Számlázás</Label>
-            <Input value="Számlázás" disabled className="bg-muted" />
-          </div>
+        <div className="flex items-center gap-4">
           <DifferentPerCountryToggle
             checked={countryDifferentiates.invoicing}
             onChange={(checked) => updateDifferentiate("invoicing", checked)}
