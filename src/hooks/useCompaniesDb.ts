@@ -357,6 +357,7 @@ export const useCompaniesDb = () => {
           company_id: billingData.company_id,
           country_id: billingData.country_id,
           billing_frequency: mapBillingFrequency(billingData.billing_frequency),
+          billing_in_advance: false, // TODO: Add to database schema if needed
           invoice_language: billingData.invoice_language,
           currency: billingData.currency?.toLowerCase() || null,
           vat_rate: billingData.vat_rate,
