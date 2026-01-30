@@ -8,6 +8,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Plus, ChevronDown, ChevronUp, X, Building2, Globe } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
@@ -830,15 +841,32 @@ export const SingleCountryBasicDataPanel = ({
         {/* Entitás törlés gomb - csak entity módban és ha több van */}
         {isEntityMode && entities.length > 1 && (
           <div className="pt-4 border-t">
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              onClick={() => onDeleteEntity(entity.id)}
-            >
-              <X className="h-4 w-4 mr-2" />
-              Entitás törlése
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Entitás törlése
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Entitás törlése</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Biztosan törölni szeretné a(z) "{entity.name}" entitást? Ez a művelet nem vonható vissza.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Mégse</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onDeleteEntity(entity.id)}>
+                    Törlés
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         )}
       </div>

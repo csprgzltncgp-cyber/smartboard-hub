@@ -17,6 +17,17 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CompanyCountrySettings, CountryDifferentiate, ContractHolder, AccountAdmin, Workshop, CrisisIntervention, ConsultationRow, PriceHistoryEntry, INDUSTRIES, CURRENCIES } from "@/types/company";
 import { DifferentPerCountryToggle } from "./DifferentPerCountryToggle";
@@ -2332,15 +2343,32 @@ const EntityDataForm = ({
       {/* Entitás törlés */}
       {canDelete && (
         <div className="pt-4 border-t">
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            onClick={onDelete}
-          >
-            <X className="h-4 w-4 mr-2" />
-            Entitás törlése
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Entitás törlése
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Entitás törlése</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Biztosan törölni szeretné a(z) "{entity.name}" entitást? Ez a művelet nem vonható vissza.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Mégse</AlertDialogCancel>
+                <AlertDialogAction onClick={onDelete}>
+                  Törlés
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       )}
     </div>
