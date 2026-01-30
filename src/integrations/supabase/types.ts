@@ -683,35 +683,80 @@ export type Database = {
       company_country_settings: {
         Row: {
           company_id: string
+          consultation_rows: Json | null
+          contract_currency: string | null
           contract_date: string | null
           contract_end_date: string | null
+          contract_file_url: string | null
+          contract_holder_id: string | null
+          contract_price: number | null
+          contract_price_type: string | null
+          contract_reminder_email: string | null
           country_id: string
           created_at: string
+          dispatch_name: string | null
+          head_count: number | null
           id: string
+          industry: string | null
+          is_active: boolean | null
+          name: string | null
           org_id: string | null
+          pillar_count: number | null
+          price_history: Json | null
           reporting_data: Json | null
+          session_count: number | null
           updated_at: string
         }
         Insert: {
           company_id: string
+          consultation_rows?: Json | null
+          contract_currency?: string | null
           contract_date?: string | null
           contract_end_date?: string | null
+          contract_file_url?: string | null
+          contract_holder_id?: string | null
+          contract_price?: number | null
+          contract_price_type?: string | null
+          contract_reminder_email?: string | null
           country_id: string
           created_at?: string
+          dispatch_name?: string | null
+          head_count?: number | null
           id?: string
+          industry?: string | null
+          is_active?: boolean | null
+          name?: string | null
           org_id?: string | null
+          pillar_count?: number | null
+          price_history?: Json | null
           reporting_data?: Json | null
+          session_count?: number | null
           updated_at?: string
         }
         Update: {
           company_id?: string
+          consultation_rows?: Json | null
+          contract_currency?: string | null
           contract_date?: string | null
           contract_end_date?: string | null
+          contract_file_url?: string | null
+          contract_holder_id?: string | null
+          contract_price?: number | null
+          contract_price_type?: string | null
+          contract_reminder_email?: string | null
           country_id?: string
           created_at?: string
+          dispatch_name?: string | null
+          head_count?: number | null
           id?: string
+          industry?: string | null
+          is_active?: boolean | null
+          name?: string | null
           org_id?: string | null
+          pillar_count?: number | null
+          price_history?: Json | null
           reporting_data?: Json | null
+          session_count?: number | null
           updated_at?: string
         }
         Relationships: [
