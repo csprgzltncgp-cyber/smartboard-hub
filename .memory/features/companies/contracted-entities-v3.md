@@ -10,6 +10,7 @@ A rendszer támogatja a Szerződött entitások kezelését a Company -> Country
 1. **"Több entitás" opció előfeltétele**: A "Több entitás" funkció CSAK akkor érhető el, ha az **"Alapadatok országonként különbözőek"** opció be van kapcsolva.
 2. **Ország-szintű beállítás**: A "Több entitás" toggle az egyes országok beállítási paneljén (Országok fül -> ország csík kinyitása) jelenik meg.
 3. **entity_country_ids**: Nyilvántartja, mely országokban van több entitás mód aktiválva.
+4. **Automatikus migráció**: Bekapcsoláskor 2 entitás jön létre - az első örökli az ország beállításainak minden adatát (név, ár, dátumok, stb.)
 
 ### Egyországos mód (SingleCountryBasicDataPanel)
 - Ország kiválasztó kiemelt panelben (teal színű keret)
@@ -29,7 +30,7 @@ A rendszer támogatja a Szerződött entitások kezelését a Company -> Country
 - `CompanyCountrySettingsPanel` - Ország-specifikus beállítások a Countries fülön
 - `CountrySettingsCard` - Egyetlen ország összecsukható kártyája, tartalmazza a Több entitás toggle-t és az EntitySection-t
 - `EntitySection` - Entitás kezelő (fülek, hozzáadás) egy adott országon belül
-- `EntityDataForm` - Entitás űrlap a többországos módban
+- `EntityDataForm` - **TELJES** entitás űrlap (Cégnév, Dispatch name, Aktív, Szerződéshordozó, Ár, Pillér, Alkalom, Consultation rows, Price history, Szerződés dátumok, ORG ID, Létszám, Client Dashboard felhasználók)
 - `SingleCountryBasicDataPanel.renderEntityContent()` - Egyországos entitás megjelenítés
 
 ### Entity adatok
@@ -41,5 +42,12 @@ Minden entitás tartalmazza:
 - `contract_price`, `price_type`, `contract_currency` - Ár adatok
 - `contract_date`, `contract_end_date`, `contract_reminder_email` - Szerződés dátumok
 - `org_id`, `headcount`, `industry` - Egyéb adatok
+- `pillars`, `occasions` - Pillér és alkalom számok
 - `consultation_rows`, `price_history` - JSON struktúrák
 - `client_dashboard_users` - CD felhasználók listája
+
+### Automatikus entitás létrehozás
+Amikor a "Több entitás" toggle bekapcsol egy országnál:
+1. Ha még nincs entitás, 2 entitás jön létre automatikusan
+2. Az első entitás örökli az ország CompanyCountrySettings adatait (név, ár, dátumok, stb.)
+3. A második entitás üres, alapértelmezett értékekkel

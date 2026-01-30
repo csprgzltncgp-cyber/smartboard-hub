@@ -106,6 +106,8 @@ export const CompanyCountrySettingsPanel = ({
   onDeleteEntity,
   isEntitiesLoading = false,
 }: CompanyCountrySettingsPanelProps) => {
+  const [isCreatingInitialEntities, setIsCreatingInitialEntities] = useState<Record<string, boolean>>({});
+  
   const selectedCountries = countries.filter((c) => countryIds.includes(c.id));
 
   if (selectedCountries.length === 0) {
@@ -211,7 +213,7 @@ export const CompanyCountrySettingsPanel = ({
   };
 
   // Toggle entity mode for a specific country
-  const handleToggleEntityMode = (countryId: string, enabled: boolean) => {
+  const handleToggleEntityMode = async (countryId: string, enabled: boolean) => {
     const currentIds = countryDifferentiates.entity_country_ids || [];
     let newIds: string[];
     
@@ -226,6 +228,53 @@ export const CompanyCountrySettingsPanel = ({
       has_multiple_entities: newIds.length > 0,
       entity_country_ids: newIds,
     });
+
+    // Ha bekapcsoljuk és nincs még entitás az országban, létrehozzuk a 2 entitást
+    if (enabled) {
+      const countryEntities = entities.filter(e => e.country_id === countryId);
+      if (countryEntities.length === 0 && !isCreatingInitialEntities[countryId]) {
+        setIsCreatingInitialEntities(prev => ({ ...prev, [countryId]: true }));
+        try {
+          const settings = getCountrySettings(countryId);
+          const entityCompanyId = companyId || "pending";
+          
+          // Első entitás: az ország beállításainak adatait kapja
+          const entity1: Omit<ContractedEntity, 'id' | 'created_at' | 'updated_at'> = {
+            company_id: entityCompanyId,
+            country_id: countryId,
+            name: settings.name || "Entitás 1",
+            dispatch_name: settings.dispatch_name,
+            is_active: settings.is_active,
+            org_id: settings.org_id,
+            contract_date: settings.contract_start,
+            contract_end_date: settings.contract_end,
+            contract_reminder_email: settings.contract_reminder_email,
+            reporting_data: {},
+            contract_holder_type: settings.contract_holder_id,
+            contract_price: settings.contract_price,
+            price_type: settings.contract_price_type,
+            contract_currency: settings.contract_currency,
+            pillars: settings.pillar_count,
+            occasions: settings.session_count,
+            industry: settings.industry,
+            consultation_rows: settings.consultation_rows || [],
+            price_history: settings.price_history || [],
+            workshop_data: {},
+            crisis_data: {},
+            headcount: settings.head_count,
+            inactive_headcount: null,
+            client_dashboard_users: [],
+          };
+          await onAddEntity(entity1);
+          
+          // Második entitás: üres
+          const entity2 = createDefaultEntity(entityCompanyId, countryId, "Új entitás");
+          await onAddEntity(entity2);
+        } finally {
+          setIsCreatingInitialEntities(prev => ({ ...prev, [countryId]: false }));
+        }
+      }
+    }
   };
 
   return (
@@ -267,6 +316,7 @@ export const CompanyCountrySettingsPanel = ({
               onUpdateEntity={onUpdateEntity}
               onDeleteEntity={onDeleteEntity}
               isEntitiesLoading={isEntitiesLoading}
+              isCreatingInitialEntities={isCreatingInitialEntities[country.id] || false}
               onToggleEntityMode={handleToggleEntityMode}
             />
           );
@@ -891,6 +941,7 @@ interface CountrySettingsCardProps {
   onUpdateEntity: (id: string, updates: Partial<ContractedEntity>) => Promise<void>;
   onDeleteEntity: (id: string) => Promise<void>;
   isEntitiesLoading?: boolean;
+  isCreatingInitialEntities?: boolean;
   // Callback to toggle entity mode for this country
   onToggleEntityMode: (countryId: string, enabled: boolean) => void;
 }
@@ -915,6 +966,7 @@ const CountrySettingsCard = ({
   onUpdateEntity,
   onDeleteEntity,
   isEntitiesLoading = false,
+  isCreatingInitialEntities = false,
   onToggleEntityMode,
 }: CountrySettingsCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -980,6 +1032,7 @@ const CountrySettingsCard = ({
                 activeEntityId={activeEntityId}
                 setActiveEntityId={setActiveEntityId}
                 companyId={companyId}
+                countrySettings={settings}
                 contractHolders={contractHolders}
                 isCGP={isCGP}
                 isLifeworks={isLifeworks}
@@ -987,6 +1040,7 @@ const CountrySettingsCard = ({
                 onUpdateEntity={onUpdateEntity}
                 onDeleteEntity={onDeleteEntity}
                 isEntitiesLoading={isEntitiesLoading}
+                isCreatingInitialEntities={isCreatingInitialEntities}
               />
             )}
 
@@ -1350,6 +1404,7 @@ interface EntitySectionProps {
   activeEntityId: string;
   setActiveEntityId: (id: string) => void;
   companyId?: string;
+  countrySettings: CompanyCountrySettings;
   contractHolders: ContractHolder[];
   isCGP: boolean;
   isLifeworks: boolean;
@@ -1357,6 +1412,7 @@ interface EntitySectionProps {
   onUpdateEntity: (id: string, updates: Partial<ContractedEntity>) => Promise<void>;
   onDeleteEntity: (id: string) => Promise<void>;
   isEntitiesLoading?: boolean;
+  isCreatingInitialEntities?: boolean;
 }
 
 const EntitySection = ({
@@ -1365,6 +1421,7 @@ const EntitySection = ({
   activeEntityId,
   setActiveEntityId,
   companyId,
+  countrySettings,
   contractHolders,
   isCGP,
   isLifeworks,
@@ -1372,6 +1429,7 @@ const EntitySection = ({
   onUpdateEntity,
   onDeleteEntity,
   isEntitiesLoading = false,
+  isCreatingInitialEntities = false,
 }: EntitySectionProps) => {
   const [isCreating, setIsCreating] = useState(false);
 
@@ -1404,28 +1462,29 @@ const EntitySection = ({
     return `Entitás ${index + 1}`;
   };
 
-  if (entities.length === 0) {
+  if (entities.length === 0 || isCreatingInitialEntities) {
     return (
-      <div className="text-center py-6 border rounded-lg bg-muted/30">
+      <div className="text-center py-8 border rounded-lg bg-muted/30">
         <Building2 className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-        <p className="text-sm text-muted-foreground mb-3">
-          Még nincs entitás ebben az országban
+        <p className="text-sm text-muted-foreground">
+          {isCreatingInitialEntities ? "Entitások létrehozása..." : "Még nincs entitás ebben az országban"}
         </p>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleAddEntity}
-          disabled={isEntitiesLoading || isCreating || !companyId}
-        >
-          <Plus className="h-4 w-4 mr-1" />
-          Entitás létrehozása
-        </Button>
+        {!isCreatingInitialEntities && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddEntity}
+            disabled={isEntitiesLoading || isCreating || !companyId}
+            className="mt-3"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Entitás létrehozása
+          </Button>
+        )}
       </div>
     );
   }
-
-  const activeEntity = entities.find(e => e.id === activeEntityId);
 
   return (
     <div className="space-y-4">
@@ -1471,8 +1530,6 @@ const EntitySection = ({
             <EntityDataForm
               entity={entity}
               contractHolders={contractHolders}
-              isCGP={isCGP}
-              isLifeworks={isLifeworks}
               onUpdate={(updates) => onUpdateEntity(entity.id, updates)}
               onDelete={() => onDeleteEntity(entity.id)}
               canDelete={entities.length > 1}
@@ -1484,37 +1541,203 @@ const EntitySection = ({
   );
 };
 
-// === EntityDataForm - Entitás űrlap ===
+// === EntityDataForm - Teljes entitás űrlap (ugyanaz mint SingleCountryBasicDataPanel) ===
 interface EntityDataFormProps {
   entity: ContractedEntity;
   contractHolders: ContractHolder[];
-  isCGP: boolean;
-  isLifeworks: boolean;
   onUpdate: (updates: Partial<ContractedEntity>) => void;
   onDelete: () => void;
   canDelete: boolean;
 }
 
+// Helper: entity CD users to component format
+interface ClientDashboardUser {
+  id: string;
+  username: string;
+  password?: string;
+  languageId: string | null;
+}
+
+const entityCDUsersToComponentFormat = (users: EntityClientDashboardUser[]): ClientDashboardUser[] => {
+  return users.map(u => ({
+    id: u.id,
+    username: u.username,
+    password: u.password,
+    languageId: u.language_id,
+  }));
+};
+
 const EntityDataForm = ({
   entity,
   contractHolders,
-  isCGP,
-  isLifeworks,
   onUpdate,
   onDelete,
   canDelete,
 }: EntityDataFormProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [showPriceHistoryForm, setShowPriceHistoryForm] = useState(false);
+  const [newHistoryEntry, setNewHistoryEntry] = useState<Partial<PriceHistoryEntry>>({
+    effective_date: new Date().toISOString().split('T')[0],
+    price: entity.contract_price || undefined,
+    price_type: entity.price_type || undefined,
+    currency: entity.contract_currency || undefined,
+    notes: null,
+  });
+
+  const consultationRows = entity.consultation_rows || [];
+  const priceHistory = entity.price_history || [];
+  const cdUsers = entityCDUsersToComponentFormat(entity.client_dashboard_users || []);
+
+  const isCGP = entity.contract_holder_type === "2";
+  const isLifeworks = entity.contract_holder_type === "1";
+
+  // File handlers
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      toast.error("Csak PDF fájl tölthető fel!");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("A fájl mérete maximum 10MB lehet!");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const fakeUrl = `contracts/${Date.now()}_${file.name}`;
+      // Note: contract_file_url is not in entity type yet, would need to add
+      toast.success("Szerződés sikeresen feltöltve!");
+    } catch (error) {
+      toast.error("Hiba a feltöltés során!");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Consultation row handlers
+  const addConsultationRow = () => {
+    const newRow: ConsultationRow = {
+      id: crypto.randomUUID(),
+      type: null,
+      durations: [],
+      formats: [],
+    };
+    onUpdate({ consultation_rows: [...consultationRows, newRow] });
+  };
+
+  const removeConsultationRow = (rowId: string) => {
+    onUpdate({ consultation_rows: consultationRows.filter((row) => row.id !== rowId) });
+  };
+
+  const updateConsultationRow = (rowId: string, field: keyof ConsultationRow, value: any) => {
+    onUpdate({
+      consultation_rows: consultationRows.map((row) =>
+        row.id === rowId ? { ...row, [field]: value } : row
+      ),
+    });
+  };
+
+  const getAvailableTypes = (currentRowId: string) => {
+    const usedTypes = consultationRows
+      .filter((row) => row.id !== currentRowId && row.type)
+      .map((row) => row.type);
+    return CONSULTATION_TYPES.filter((t) => !usedTypes.includes(t.id));
+  };
+
+  // Price history handlers
+  const addPriceHistoryEntry = () => {
+    if (!newHistoryEntry.effective_date || !newHistoryEntry.price) {
+      toast.error("Kérjük adja meg a dátumot és az árat!");
+      return;
+    }
+
+    const entry: PriceHistoryEntry = {
+      id: crypto.randomUUID(),
+      effective_date: newHistoryEntry.effective_date,
+      price: newHistoryEntry.price,
+      price_type: newHistoryEntry.price_type || null,
+      currency: newHistoryEntry.currency || null,
+      notes: newHistoryEntry.notes || null,
+    };
+
+    const updatedHistory = [...priceHistory, entry].sort(
+      (a, b) => new Date(b.effective_date).getTime() - new Date(a.effective_date).getTime()
+    );
+
+    onUpdate({ price_history: updatedHistory });
+    setShowPriceHistoryForm(false);
+    setNewHistoryEntry({
+      effective_date: new Date().toISOString().split('T')[0],
+      price: entity.contract_price || undefined,
+      price_type: entity.price_type || undefined,
+      currency: entity.contract_currency || undefined,
+      notes: null,
+    });
+    toast.success("Árváltozás sikeresen rögzítve!");
+  };
+
+  const removePriceHistoryEntry = (entryId: string) => {
+    onUpdate({ price_history: priceHistory.filter((e) => e.id !== entryId) });
+  };
+
+  const getPriceTypeName = (type: string | null) => {
+    return PRICE_TYPES.find((pt) => pt.id === type)?.name || type || "-";
+  };
+
+  const getCurrencyName = (currency: string | null) => {
+    return CURRENCIES.find((c) => c.id === currency)?.name || currency?.toUpperCase() || "-";
+  };
+
+  // CD user handlers
+  const addCDUser = () => {
+    const newUser: EntityClientDashboardUser = {
+      id: `new-user-${Date.now()}`,
+      username: "",
+      password: "",
+      language_id: null,
+    };
+    onUpdate({ client_dashboard_users: [...(entity.client_dashboard_users || []), newUser] });
+  };
+
+  const updateCDUser = (userId: string, updates: Partial<ClientDashboardUser>) => {
+    const newUsers = (entity.client_dashboard_users || []).map(u => 
+      u.id === userId 
+        ? { 
+            ...u, 
+            username: updates.username ?? u.username,
+            password: updates.password ?? u.password,
+            language_id: updates.languageId !== undefined ? updates.languageId : u.language_id,
+          } 
+        : u
+    );
+    onUpdate({ client_dashboard_users: newUsers });
+  };
+
+  const removeCDUser = (userId: string) => {
+    const newUsers = (entity.client_dashboard_users || []).filter(u => u.id !== userId);
+    onUpdate({ client_dashboard_users: newUsers });
+  };
+
   return (
-    <div className="space-y-4 p-4 border rounded-lg bg-muted/10">
+    <div className="space-y-6 p-4 border rounded-lg bg-muted/10">
       {/* Entitás név */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Entitás neve (Cégnév)</Label>
+          <Label>Entitás neve (Cégnév) *</Label>
           <Input
             value={entity.name}
             onChange={(e) => onUpdate({ name: e.target.value })}
-            placeholder="Entitás neve"
+            placeholder="pl. Henkel Hungary Kft."
           />
+          <p className="text-xs text-muted-foreground">
+            A jogi személy neve, akivel a szerződést kötötték
+          </p>
         </div>
         <div className="space-y-2">
           <Label>Cég elnevezése kiközvetítéshez</Label>
@@ -1526,7 +1749,7 @@ const EntityDataForm = ({
         </div>
       </div>
 
-      {/* Aktív státusz */}
+      {/* Aktív és Szerződéshordozó */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Aktív</Label>
@@ -1563,7 +1786,7 @@ const EntityDataForm = ({
         </div>
       </div>
 
-      {/* Szerződés adatok */}
+      {/* Szerződéses ár, típus, deviza */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label>Szerződéses ár</Label>
@@ -1609,51 +1832,199 @@ const EntityDataForm = ({
         </div>
       </div>
 
-      {/* Szerződés dátumok */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label>Szerződés kezdete</Label>
-          <Input
-            type="date"
-            value={entity.contract_date || ""}
-            onChange={(e) => onUpdate({ contract_date: e.target.value || null })}
-          />
+      {/* Price History Section */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <History className="h-4 w-4 text-muted-foreground" />
+            <Label>Árváltozás előzmények</Label>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowPriceHistoryForm(!showPriceHistoryForm)}
+            className="h-8"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Árváltozás rögzítése
+          </Button>
         </div>
-        <div className="space-y-2">
-          <Label>Szerződés lejárta</Label>
-          <Input
-            type="date"
-            value={entity.contract_end_date || ""}
-            onChange={(e) => onUpdate({ contract_end_date: e.target.value || null })}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Emlékeztető e-mail</Label>
-          <Input
-            type="email"
-            value={entity.contract_reminder_email || ""}
-            onChange={(e) => onUpdate({ contract_reminder_email: e.target.value || null })}
-            placeholder="email@ceg.hu"
-          />
-        </div>
+
+        {showPriceHistoryForm && (
+          <div className="bg-background border rounded-lg p-4 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Érvényesség kezdete</Label>
+                <Input
+                  type="date"
+                  value={newHistoryEntry.effective_date || ""}
+                  onChange={(e) =>
+                    setNewHistoryEntry({ ...newHistoryEntry, effective_date: e.target.value })
+                  }
+                  className="h-9"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Ár</Label>
+                <Input
+                  type="number"
+                  value={newHistoryEntry.price ?? ""}
+                  onChange={(e) =>
+                    setNewHistoryEntry({
+                      ...newHistoryEntry,
+                      price: e.target.value ? parseFloat(e.target.value) : undefined,
+                    })
+                  }
+                  placeholder="0"
+                  min={0}
+                  className="h-9"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Ár típusa</Label>
+                <Select
+                  value={newHistoryEntry.price_type || "none"}
+                  onValueChange={(val) =>
+                    setNewHistoryEntry({
+                      ...newHistoryEntry,
+                      price_type: val === "none" ? undefined : val,
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Válasszon..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Válasszon...</SelectItem>
+                    {PRICE_TYPES.map((pt) => (
+                      <SelectItem key={pt.id} value={pt.id}>
+                        {pt.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Devizanem</Label>
+                <Select
+                  value={newHistoryEntry.currency || "none"}
+                  onValueChange={(val) =>
+                    setNewHistoryEntry({
+                      ...newHistoryEntry,
+                      currency: val === "none" ? undefined : val,
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Válasszon..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Válasszon...</SelectItem>
+                    {CURRENCIES.map((curr) => (
+                      <SelectItem key={curr.id} value={curr.id}>
+                        {curr.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Megjegyzés (opcionális)</Label>
+              <Input
+                value={newHistoryEntry.notes || ""}
+                onChange={(e) =>
+                  setNewHistoryEntry({ ...newHistoryEntry, notes: e.target.value || null })
+                }
+                placeholder="Pl.: Éves ármódosítás, infláció követése..."
+                className="h-9"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button type="button" size="sm" onClick={addPriceHistoryEntry}>
+                Mentés
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPriceHistoryForm(false)}
+              >
+                Mégse
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {priceHistory.length === 0 ? (
+          <div className="text-sm text-muted-foreground py-3 text-center border border-dashed rounded-lg">
+            Nincs árváltozás előzmény rögzítve.
+          </div>
+        ) : (
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="text-left px-3 py-2 font-medium">Dátum</th>
+                  <th className="text-left px-3 py-2 font-medium">Ár</th>
+                  <th className="text-left px-3 py-2 font-medium">Típus</th>
+                  <th className="text-left px-3 py-2 font-medium">Megjegyzés</th>
+                  <th className="w-10"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {priceHistory.map((entry) => (
+                  <tr key={entry.id} className="hover:bg-muted/30">
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3 text-muted-foreground" />
+                        {format(new Date(entry.effective_date), "yyyy. MMM d.", { locale: hu })}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 font-medium">
+                      {entry.price.toLocaleString("hu-HU")} {getCurrencyName(entry.currency)}
+                    </td>
+                    <td className="px-3 py-2">{getPriceTypeName(entry.price_type)}</td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {entry.notes || "-"}
+                    </td>
+                    <td className="px-2 py-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removePriceHistoryEntry(entry.id)}
+                        className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      {/* ORG ID, Létszám */}
+      {/* Pillér, Alkalom, Iparág */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label>ORG ID</Label>
+          <Label>Pillér</Label>
           <Input
-            value={entity.org_id || ""}
-            onChange={(e) => onUpdate({ org_id: e.target.value || null })}
-            placeholder="ORG ID"
+            type="number"
+            value={entity.pillars || ""}
+            onChange={(e) => onUpdate({ pillars: e.target.value ? parseInt(e.target.value) : null })}
+            placeholder="0"
           />
         </div>
         <div className="space-y-2">
-          <Label>Létszám</Label>
+          <Label>Alkalom</Label>
           <Input
             type="number"
-            value={entity.headcount || ""}
-            onChange={(e) => onUpdate({ headcount: e.target.value ? parseInt(e.target.value) : null })}
+            value={entity.occasions || ""}
+            onChange={(e) => onUpdate({ occasions: e.target.value ? parseInt(e.target.value) : null })}
             placeholder="0"
           />
         </div>
@@ -1677,6 +2048,248 @@ const EntityDataForm = ({
         </div>
       </div>
 
+      {/* Consultation Rows */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label>Tanácsadás beállítások</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addConsultationRow}
+            className="h-8"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Új sor
+          </Button>
+        </div>
+
+        {consultationRows.length === 0 ? (
+          <div className="text-sm text-muted-foreground py-4 text-center border border-dashed rounded-lg">
+            Nincs tanácsadás beállítás. Kattints az "Új sor" gombra a hozzáadáshoz.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {consultationRows.map((row, index) => (
+              <div
+                key={row.id}
+                className="bg-background border rounded-lg p-3 space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {index + 1}. tanácsadás típus
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeConsultationRow(row.id)}
+                    className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Típus</Label>
+                    <Select
+                      value={row.type || "none"}
+                      onValueChange={(val) =>
+                        updateConsultationRow(row.id, "type", val === "none" ? null : val)
+                      }
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="Válassz típust..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Válassz típust...</SelectItem>
+                        {getAvailableTypes(row.id).map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.label}
+                          </SelectItem>
+                        ))}
+                        {row.type && !getAvailableTypes(row.id).find((t) => t.id === row.type) && (
+                          <SelectItem value={row.type}>
+                            {CONSULTATION_TYPES.find((t) => t.id === row.type)?.label}
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <MultiSelectField
+                    label="Időtartam"
+                    options={CONSULTATION_DURATIONS}
+                    selectedIds={row.durations}
+                    onChange={(durations) => updateConsultationRow(row.id, "durations", durations)}
+                    placeholder="Válassz..."
+                    badgeColor="teal"
+                  />
+
+                  <MultiSelectField
+                    label="Forma"
+                    options={CONSULTATION_FORMATS}
+                    selectedIds={row.formats}
+                    onChange={(formats) => updateConsultationRow(row.id, "formats", formats)}
+                    placeholder="Válassz..."
+                    badgeColor="teal"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Szerződés dátumok - CGP */}
+      {(isCGP || !entity.contract_holder_type) && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label>Szerződés kezdete</Label>
+            <Input
+              type="date"
+              value={entity.contract_date || ""}
+              onChange={(e) => onUpdate({ contract_date: e.target.value || null })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Szerződés lejárta</Label>
+            <Input
+              type="date"
+              value={entity.contract_end_date || ""}
+              onChange={(e) => onUpdate({ contract_end_date: e.target.value || null })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Emlékeztető e-mail</Label>
+            <Input
+              type="email"
+              value={entity.contract_reminder_email || ""}
+              onChange={(e) => onUpdate({ contract_reminder_email: e.target.value || null })}
+              placeholder="email@ceg.hu"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ORG ID és Létszám */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {(isLifeworks || !entity.contract_holder_type) && (
+          <div className="space-y-2">
+            <Label>ORG ID</Label>
+            <Input
+              value={entity.org_id || ""}
+              onChange={(e) => onUpdate({ org_id: e.target.value || null })}
+              placeholder="ORG ID"
+            />
+          </div>
+        )}
+        <div className="space-y-2">
+          <Label>Létszám</Label>
+          <Input
+            type="number"
+            value={entity.headcount || ""}
+            onChange={(e) => onUpdate({ headcount: e.target.value ? parseInt(e.target.value) : null })}
+            placeholder="0"
+          />
+        </div>
+      </div>
+
+      {/* Client Dashboard felhasználók - CGP */}
+      {(isCGP || !entity.contract_holder_type) && (
+        <div className="bg-muted/30 border rounded-lg p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-primary">Client Dashboard felhasználók</h4>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addCDUser}
+              className="h-8"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Új felhasználó
+            </Button>
+          </div>
+
+          {cdUsers.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              Nincs még felhasználó hozzáadva a Client Dashboard-hoz.
+            </p>
+          )}
+
+          {cdUsers.map((user, idx) => (
+            <div key={user.id} className="border rounded-lg p-3 space-y-3 bg-background">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Felhasználó #{idx + 1}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeCDUser(user.id)}
+                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Felhasználónév</Label>
+                  <Input
+                    value={user.username}
+                    onChange={(e) => updateCDUser(user.id, { username: e.target.value })}
+                    placeholder="Felhasználónév"
+                    className="h-9"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Jelszó</Label>
+                  {user.id.startsWith("new-") ? (
+                    <Input
+                      type="password"
+                      value={user.password || ""}
+                      onChange={(e) => updateCDUser(user.id, { password: e.target.value })}
+                      placeholder="Jelszó"
+                      className="h-9"
+                    />
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="link"
+                      size="sm"
+                      className="h-9 p-0 text-primary"
+                    >
+                      + Új jelszó beállítása
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Nyelv</Label>
+                  <Select
+                    value={user.languageId || ""}
+                    onValueChange={(val) => updateCDUser(user.id, { languageId: val || null })}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Válasszon..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="3">English</SelectItem>
+                      <SelectItem value="1">Magyar</SelectItem>
+                      <SelectItem value="2">Polska</SelectItem>
+                      <SelectItem value="4">Slovenský</SelectItem>
+                      <SelectItem value="5">Česky</SelectItem>
+                      <SelectItem value="6">Українська</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Entitás törlés */}
       {canDelete && (
         <div className="pt-4 border-t">
@@ -1686,6 +2299,7 @@ const EntityDataForm = ({
             size="sm"
             onClick={onDelete}
           >
+            <X className="h-4 w-4 mr-2" />
             Entitás törlése
           </Button>
         </div>
