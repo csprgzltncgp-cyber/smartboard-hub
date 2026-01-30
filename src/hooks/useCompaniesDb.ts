@@ -52,6 +52,23 @@ interface DbCountrySettings {
   contract_end_date: string | null;
   org_id: string | null;
   reporting_data: any;
+  // New fields for country-specific basic data
+  name: string | null;
+  dispatch_name: string | null;
+  is_active: boolean;
+  contract_holder_id: string | null;
+  contract_reminder_email: string | null;
+  head_count: number | null;
+  contract_file_url: string | null;
+  contract_price: number | null;
+  contract_price_type: string | null;
+  contract_currency: string | null;
+  pillar_count: number | null;
+  session_count: number | null;
+  consultation_rows: any[];
+  industry: string | null;
+  price_history: any[];
+  created_at: string;
 }
 
 interface DbBillingData {
@@ -479,37 +496,45 @@ export const useCompaniesDb = () => {
         // Build countrySettings from countryAssocs, merging with settingsData where available
         countrySettings: (countryAssocs || []).map((ca: { country_id: string; created_at: string }) => {
           const existingSettings = (settingsData || []).find(
-            (s: DbCountrySettings) => s.country_id === ca.country_id
+            (s: any) => s.country_id === ca.country_id
           );
+          // Parse JSON fields safely with explicit typing
+          const consultationRows = Array.isArray(existingSettings?.consultation_rows) 
+            ? (existingSettings.consultation_rows as any[])
+            : [];
+          const priceHistory = Array.isArray(existingSettings?.price_history) 
+            ? (existingSettings.price_history as any[])
+            : [];
+          
           return {
             id: existingSettings?.id || `new-${ca.country_id}`,
             company_id: existingSettings?.company_id || id,
             country_id: ca.country_id,
-            contract_holder_id: null,
+            contract_holder_id: existingSettings?.contract_holder_id || null,
             org_id: existingSettings?.org_id || null,
             contract_start: existingSettings?.contract_date || null,
             contract_end: existingSettings?.contract_end_date || null,
-            contract_reminder_email: null,
-            head_count: null,
+            contract_reminder_email: existingSettings?.contract_reminder_email || null,
+            head_count: existingSettings?.head_count || null,
             activity_plan_user_id: null,
             client_username: null,
             client_password_set: false,
             client_language_id: null,
             all_country_access: false,
-            added_at: ca.created_at,
-            name: null,
-            dispatch_name: null,
-            is_active: true,
-            contract_file_url: null,
-            contract_price: null,
-            contract_price_type: null,
-            contract_currency: null,
-            pillar_count: null,
-            session_count: null,
-            consultation_rows: [],
-            industry: null,
-            price_history: [],
-          };
+            added_at: existingSettings?.created_at || ca.created_at,
+            name: existingSettings?.name || null,
+            dispatch_name: existingSettings?.dispatch_name || null,
+            is_active: existingSettings?.is_active ?? true,
+            contract_file_url: existingSettings?.contract_file_url || null,
+            contract_price: existingSettings?.contract_price ? Number(existingSettings.contract_price) : null,
+            contract_price_type: existingSettings?.contract_price_type || null,
+            contract_currency: existingSettings?.contract_currency || null,
+            pillar_count: existingSettings?.pillar_count || null,
+            session_count: existingSettings?.session_count || null,
+            consultation_rows: consultationRows,
+            industry: existingSettings?.industry || null,
+            price_history: priceHistory,
+          } as import('@/types/company').CompanyCountrySettings;
         }),
         billingData: billingData ? {
           id: billingData.id,
@@ -698,6 +723,7 @@ export const useCompaniesDb = () => {
       connectedCompanyId: string | null;
       leadAccountUserId: string | null;
       countryDifferentiates: CountryDifferentiate;
+      countrySettings: CompanyCountrySettings[];
       billingData: Partial<BillingData>;
       invoicingData: Partial<InvoicingData>;
       invoiceItems: InvoiceItem[];
@@ -757,6 +783,53 @@ export const useCompaniesDb = () => {
             has_multiple_entities: data.countryDifferentiates.has_multiple_entities,
             entity_country_ids: data.countryDifferentiates.entity_country_ids || [],
           }, { onConflict: 'company_id' });
+      }
+
+      // Update country settings (country-specific basic data)
+      if (data.countrySettings && data.countrySettings.length > 0) {
+        for (const settings of data.countrySettings) {
+          const settingsData: any = {
+            company_id: id,
+            country_id: settings.country_id,
+            name: settings.name,
+            dispatch_name: settings.dispatch_name,
+            is_active: settings.is_active,
+            contract_holder_id: settings.contract_holder_id,
+            org_id: settings.org_id,
+            contract_date: settings.contract_start,
+            contract_end_date: settings.contract_end,
+            contract_reminder_email: settings.contract_reminder_email,
+            head_count: settings.head_count,
+            contract_file_url: settings.contract_file_url,
+            contract_price: settings.contract_price,
+            contract_price_type: settings.contract_price_type,
+            contract_currency: settings.contract_currency,
+            pillar_count: settings.pillar_count,
+            session_count: settings.session_count,
+            consultation_rows: settings.consultation_rows || [],
+            industry: settings.industry,
+            price_history: settings.price_history || [],
+          };
+
+          // Check if settings exist for this country
+          const { data: existing } = await supabase
+            .from('company_country_settings')
+            .select('id')
+            .eq('company_id', id)
+            .eq('country_id', settings.country_id)
+            .maybeSingle();
+
+          if (existing) {
+            await supabase
+              .from('company_country_settings')
+              .update(settingsData)
+              .eq('id', existing.id);
+          } else {
+            await supabase
+              .from('company_country_settings')
+              .insert(settingsData);
+          }
+        }
       }
 
       // Update billing data - always create/update if either billingData or invoicingData exists (even empty objects trigger this)

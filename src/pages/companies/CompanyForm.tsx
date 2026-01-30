@@ -357,6 +357,7 @@ const CompanyForm = () => {
           connectedCompanyId: null, // eltávolítva
           leadAccountUserId: leadAccountId,
           countryDifferentiates,
+          countrySettings,
           billingData: billingData ?? {},
           invoicingData: invoicingData ?? {},
           invoiceItems: invoiceItems,
