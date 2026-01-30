@@ -315,33 +315,37 @@ export const MultiCountryBasicDataPanel = ({
         </div>
       )}
 
-      {/* Cégnév */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-        <div className="space-y-2">
-          <Label>Cégnév</Label>
-          <Input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Cégnév"
-            required
-          />
+      {/* Cégnév - csak ha NEM országonként különböző */}
+      {!countryDifferentiates.basic_data && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+          <div className="space-y-2">
+            <Label>Cégnév</Label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Cégnév"
+              required
+            />
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Cég elnevezése kiközvetítéshez */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-        <div className="space-y-2">
-          <Label>Cég elnevezése kiközvetítéshez</Label>
-          <Input
-            value={dispatchName || ""}
-            onChange={(e) => setDispatchName(e.target.value || null)}
-            placeholder="Ahogy az operátorok listájában megjelenik"
-          />
-          <p className="text-xs text-muted-foreground">
-            Ha üres, a cégnév jelenik meg az operátorok listájában.
-          </p>
+      {/* Cég elnevezése kiközvetítéshez - csak ha NEM országonként különböző */}
+      {!countryDifferentiates.basic_data && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+          <div className="space-y-2">
+            <Label>Cég elnevezése kiközvetítéshez</Label>
+            <Input
+              value={dispatchName || ""}
+              onChange={(e) => setDispatchName(e.target.value || null)}
+              placeholder="Ahogy az operátorok listájában megjelenik"
+            />
+            <p className="text-xs text-muted-foreground">
+              Ha üres, a cégnév jelenik meg az operátorok listájában.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ============================================== */}
       {/* BELSŐ PANEL: Szerződés adatai - csak ha NEM országonként különböző */}
@@ -448,7 +452,7 @@ export const MultiCountryBasicDataPanel = ({
       {countryDifferentiates.basic_data && (
         <div className="p-4 bg-muted border border-border rounded-lg">
           <p className="text-sm text-muted-foreground">
-            Az Alapadatok országonként különbözőek opció aktív. A szerződési adatokat az <strong>Országok</strong> fülön, az egyes országok alatt lehet megadni.
+            Az Alapadatok országonként különbözőek opció aktív. A cégnevet és a szerződési adatokat az <strong>Országok</strong> fülön, az egyes országok alatt lehet megadni.
           </p>
         </div>
       )}
