@@ -133,8 +133,10 @@ export const MultiCountryBasicDataPanel = ({
   const countryOptions = countries.map((c) => ({ id: c.id, label: c.name }));
   const selectedCountries = countries.filter((c) => countryIds.includes(c.id));
 
-  // Check if there's existing basic data to migrate
+  // Check if there's existing basic data to migrate (including name and dispatchName)
   const hasBasicData = Boolean(
+    name.trim() ||
+    dispatchName?.trim() ||
     contractHolderId || 
     contractPrice || 
     contractFileUrl || 
@@ -180,8 +182,20 @@ export const MultiCountryBasicDataPanel = ({
           client_language_id: null,
           all_country_access: false,
           added_at: null,
+          contract_file_url: null,
+          contract_price: null,
+          contract_price_type: null,
+          contract_currency: null,
+          pillar_count: null,
+          session_count: null,
+          consultation_rows: [],
+          industry: null,
+          price_history: [],
         }),
-        // Migrate basic data fields
+        // Migrate basic data fields - including name, dispatch_name, is_active
+        name: name || null,
+        dispatch_name: dispatchName,
+        is_active: active,
         contract_holder_id: contractHolderId,
         contract_file_url: contractFileUrl,
         contract_price: contractPrice,

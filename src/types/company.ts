@@ -85,6 +85,9 @@ export interface CompanyCountrySettings {
   // When this country was added to the company
   added_at: string | null;
   // Country-specific basic data (when basic_data differentiate is true)
+  name: string | null; // Cégnév az adott országban
+  dispatch_name: string | null; // Cég elnevezése kiközvetítéshez
+  is_active: boolean; // Aktív státusz az adott országban
   contract_file_url: string | null;
   contract_price: number | null;
   contract_price_type: string | null;
