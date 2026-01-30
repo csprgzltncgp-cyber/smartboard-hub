@@ -124,6 +124,7 @@ export interface BillingData {
   id: string;
   company_id: string;
   country_id: string | null;
+  contracted_entity_id?: string | null; // Entitás-specifikus számlázáshoz
   admin_identifier: string | null;
   name: string | null;
   is_name_shown: boolean;
@@ -153,6 +154,7 @@ export interface InvoicingData {
   id: string;
   company_id: string;
   country_id: string | null;
+  contracted_entity_id?: string | null; // Entitás-specifikus számlázáshoz
   billing_frequency: "monthly" | "quarterly" | "semi-annually" | "yearly" | null;
   billing_in_advance: boolean;
   invoice_language: string | null;
