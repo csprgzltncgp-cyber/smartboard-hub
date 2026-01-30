@@ -63,10 +63,12 @@ const languages = [
 
 interface InputsTabContentProps {
   companyId: string;
+  entityId?: string;
+  entityName?: string;
   onAddInputRef?: (fn: () => void) => void;
 }
 
-export const InputsTabContent = ({ companyId, onAddInputRef }: InputsTabContentProps) => {
+export const InputsTabContent = ({ companyId, entityId, entityName, onAddInputRef }: InputsTabContentProps) => {
   const [inputs, setInputs] = useState<CompanyInput[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<{ name: string; type: InputType }>({ name: "", type: "text" });
