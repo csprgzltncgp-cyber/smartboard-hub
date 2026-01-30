@@ -237,7 +237,7 @@ export const SingleCountryBasicDataPanel = ({
         await onAddEntity(entity1);
         
         // Második entitás: üres, alapértelmezett értékekkel
-        const entity2 = createDefaultEntity(companyId, countryId, "Entitás 2");
+        const entity2 = createDefaultEntity(companyId, countryId, "Új entitás");
         await onAddEntity(entity2);
       } finally {
         setIsCreatingInitialEntities(false);
@@ -247,17 +247,21 @@ export const SingleCountryBasicDataPanel = ({
 
   const handleAddEntity = async () => {
     if (!companyId || !countryId) return;
-    const newEntity = createDefaultEntity(companyId, countryId, `Entitás ${entities.length + 1}`);
+    const newEntity = createDefaultEntity(companyId, countryId, "Új entitás");
     await onAddEntity(newEntity);
   };
 
   const getEntityTabLabel = (entity: ContractedEntity, index: number): string => {
     // Minden entitás a saját nevét (cégnév) mutatja, ha ki van töltve
-    // Ha üres vagy alapértelmezett "Entitás X", akkor fallback
-    if (entity.name && !entity.name.startsWith("Entitás ")) {
+    // Ha üres vagy alapértelmezett név ("Entitás X", "Új entitás"), akkor fallback
+    const isDefaultName = !entity.name || 
+      entity.name.startsWith("Entitás ") || 
+      entity.name.startsWith("Új entitás");
+    
+    if (!isDefaultName) {
       return entity.name;
     }
-    return entity.name || `Entitás ${index + 1}`;
+    return `Entitás ${index + 1}`;
   };
 
   const addWorkshop = () => {
