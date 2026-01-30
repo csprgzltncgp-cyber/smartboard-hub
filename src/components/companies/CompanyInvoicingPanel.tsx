@@ -1146,10 +1146,36 @@ export const CompanyInvoicingPanel = ({
                       {hasEntitiesInCountry && countryEntities.length > 0 ? (
                         // Entitás fülek az adott országhoz
                         <EntityInvoicingTabs
-                          entities={countryEntities.map(e => ({ ...e, dispatch_name: null, is_active: true, company_id: companyId, org_id: null, contract_date: null, contract_end_date: null, contract_reminder_email: null, reporting_data: {}, contract_holder_type: null, contract_price: null, price_type: null, contract_currency: null, pillars: null, occasions: null, industry: null, consultation_rows: [], price_history: [], workshop_data: {}, crisis_data: {}, headcount: null, inactive_headcount: null, client_dashboard_users: [], created_at: '', updated_at: '' }))}
+                          entities={countryEntities.map(e => ({ 
+                            id: e.id,
+                            company_id: companyId,
+                            country_id: e.country_id,
+                            name: e.name,
+                            dispatch_name: null,
+                            is_active: true,
+                            org_id: null,
+                            contract_date: null,
+                            contract_end_date: null,
+                            contract_reminder_email: null,
+                            reporting_data: {},
+                            contract_holder_type: null,
+                            contract_price: null,
+                            price_type: null,
+                            contract_currency: null,
+                            pillars: null,
+                            occasions: null,
+                            industry: null,
+                            consultation_rows: [],
+                            price_history: [],
+                            workshop_data: {},
+                            crisis_data: {},
+                            headcount: null,
+                            inactive_headcount: null,
+                            client_dashboard_users: [],
+                            created_at: '',
+                            updated_at: ''
+                          }))}
                           hasMultipleEntities={hasEntitiesInCountry}
-                          activeEntityId={countryEntities[0]?.id || ""}
-                          onActiveEntityChange={() => {}}
                         >
                           {(entityId, entity) => {
                             const entityBillingData = billingDataPerEntity[entityId] || getDefaultEntityBillingData(entityId);
