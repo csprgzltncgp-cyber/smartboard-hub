@@ -25,15 +25,35 @@ Ha az alapadatok országonként különböznek (`basic_data = true`), a számlá
   
 - Az **Országok fülön** (minden ország-kártyán belül):
   - Megjelenik a **„Több entitás" toggle** (Building2 ikon)
-  - Megjelenik a **teljes Alapadatok form**: Cégnév, Dispatch name, Aktív státusz, Szerződéshordozó, Szerződés adatai, stb.
+  - Megjelenik a **teljes Alapadatok form**:
+    - Cégnév
+    - Cég elnevezése kiközvetítéshez (Dispatch name)
+    - Aktív státusz
+    - Szerződéshordozó
+    - Szerződés (PDF) feltöltés
+    - Szerződéses ár + Ár típusa + Devizanem
+    - Árváltozás rögzítése / előzmények
+    - Pillér, Alkalom, Iparág
+    - Tanácsadás beállítások (ConsultationRows)
+    - Szerződés kezdete és lejárta (CGP esetén)
+    - Emlékeztető e-mail (CGP esetén)
+    - ORG ID (Lifeworks esetén)
   - Minden ország saját, független adatokat kezelhet
 
+### Toggle-k elrejtése
+Ha a `basic_data` opció aktív, az alábbi mezőknél **NEM jelenik meg** az "Országonként különböző" kapcsoló (mert már eleve különbözőek):
+- Szerződéshordozó
+- Szerződés kezdete/lejárta
+- Emlékeztető e-mail
+
 ## Technikai részletek
-- `CompanyCountrySettings` interfész tartalmazza: `name`, `dispatch_name`, `is_active` mezőket
+- `CompanyCountrySettings` interfész tartalmazza: `name`, `dispatch_name`, `is_active`, `contract_file_url`, `contract_price`, `contract_price_type`, `contract_currency`, `pillar_count`, `session_count`, `consultation_rows`, `industry`, `price_history` mezőket
 - `hasBasicData` ellenőrzés tartalmazza a `name` és `dispatchName` mezőket is
 - Migráció során minden mező (beleértve name, dispatch_name, is_active) átkerül a kiválasztott országba
+- `CountryContractDataSection` komponens kezeli a teljes szerződési form-ot az ország panelen belül
 
 ## Komponensek
 - `MultiCountryBasicDataPanel.tsx` - Tartalmazza a toggle-t és a migrációs dialógust
 - `MigrateBasicDataDialog.tsx` - Országválasztó dialógus
 - `CompanyCountrySettingsPanel.tsx` / `CountrySettingsCard` - Ország-specifikus mezők megjelenítése
+- `CountryContractDataSection` - Teljes szerződési adatok form az ország panelen belül

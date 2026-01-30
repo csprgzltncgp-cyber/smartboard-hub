@@ -86,7 +86,10 @@ interface ContractDataPanelProps {
   priceHistory: PriceHistoryEntry[];
   setPriceHistory: (history: PriceHistoryEntry[]) => void;
   // Show different per country toggle (only for multi-country companies)
+  // When basic_data is true, these toggles should be hidden
   showDifferentPerCountry?: boolean;
+  // Hide toggles when basic_data is already active (data is already per-country)
+  hideTogglesWhenBasicData?: boolean;
 }
 
 export const ContractDataPanel = ({
@@ -114,7 +117,10 @@ export const ContractDataPanel = ({
   priceHistory,
   setPriceHistory,
   showDifferentPerCountry = false,
+  hideTogglesWhenBasicData = false,
 }: ContractDataPanelProps) => {
+  // Ha basic_data aktív, a toggle-ok el vannak rejtve mert az adatok már országonként különbözőek
+  const shouldShowContractHolderToggle = showDifferentPerCountry && !hideTogglesWhenBasicData;
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -294,7 +300,7 @@ export const ContractDataPanel = ({
           <Select
             value={contractHolderId || ""}
             onValueChange={(val) => setContractHolderId(val || null)}
-            disabled={countryDifferentiates.contract_holder}
+            disabled={countryDifferentiates.contract_holder && !hideTogglesWhenBasicData}
           >
             <SelectTrigger>
               <SelectValue placeholder="Válasszon..." />
@@ -308,7 +314,7 @@ export const ContractDataPanel = ({
             </SelectContent>
           </Select>
         </div>
-        {showDifferentPerCountry && (
+        {shouldShowContractHolderToggle && (
           <DifferentPerCountryToggle
             checked={countryDifferentiates.contract_holder}
             onChange={(checked) => onUpdateDifferentiate("contract_holder", checked)}

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { ChevronDown, ChevronUp, Plus, Calendar, Building2 } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { ChevronDown, ChevronUp, Plus, Calendar, Building2, Upload, FileText, X, Trash2, History } from "lucide-react";
 import { format } from "date-fns";
 import { hu } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,37 @@ import { DifferentPerCountryToggle } from "./DifferentPerCountryToggle";
 import { ContractDataPanel } from "./panels/ContractDataPanel";
 import { ContractedEntity, createDefaultEntity, EntityClientDashboardUser } from "@/types/contracted-entity";
 import { cn } from "@/lib/utils";
+import { MultiSelectField } from "@/components/experts/MultiSelectField";
+import { toast } from "sonner";
+
+// Consultation type options
+const CONSULTATION_TYPES = [
+  { id: "psychology", label: "Pszichológia" },
+  { id: "legal", label: "Jog" },
+  { id: "finance", label: "Pénzügy" },
+  { id: "health_coaching", label: "Health Coaching" },
+  { id: "other", label: "Egyéb" },
+];
+
+// Consultation duration options
+const CONSULTATION_DURATIONS = [
+  { id: "30", label: "30 perc" },
+  { id: "50", label: "50 perc" },
+];
+
+// Consultation format options
+const CONSULTATION_FORMATS = [
+  { id: "personal", label: "Személyes" },
+  { id: "video", label: "Videó" },
+  { id: "phone", label: "Telefonos" },
+  { id: "chat", label: "Szöveges üzenet (Chat)" },
+];
+
+// Price type options
+const PRICE_TYPES = [
+  { id: "pepm", name: "PEPM" },
+  { id: "package", name: "Csomagár" },
+];
 
 interface Country {
   id: string;
@@ -245,6 +276,599 @@ export const CompanyCountrySettingsPanel = ({
   );
 };
 
+// Country-specific contract data section - full form with all fields
+interface CountryContractDataSectionProps {
+  settings: CompanyCountrySettings;
+  onUpdate: (updates: Partial<CompanyCountrySettings>) => void;
+  isCGP: boolean;
+  isLifeworks: boolean;
+}
+
+const CountryContractDataSection = ({
+  settings,
+  onUpdate,
+  isCGP,
+  isLifeworks,
+}: CountryContractDataSectionProps) => {
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showPriceHistoryForm, setShowPriceHistoryForm] = useState(false);
+  const [newHistoryEntry, setNewHistoryEntry] = useState<Partial<PriceHistoryEntry>>({
+    effective_date: new Date().toISOString().split('T')[0],
+    price: settings.contract_price || undefined,
+    price_type: settings.contract_price_type || undefined,
+    currency: settings.contract_currency || undefined,
+    notes: null,
+  });
+
+  const consultationRows = settings.consultation_rows || [];
+  const priceHistory = settings.price_history || [];
+
+  // File handlers
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      toast.error("Csak PDF fájl tölthető fel!");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("A fájl mérete maximum 10MB lehet!");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const fakeUrl = `contracts/${Date.now()}_${file.name}`;
+      onUpdate({ contract_file_url: fakeUrl });
+      toast.success("Szerződés sikeresen feltöltve!");
+    } catch (error) {
+      toast.error("Hiba a feltöltés során!");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    onUpdate({ contract_file_url: null });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Consultation row handlers
+  const addConsultationRow = () => {
+    const newRow: ConsultationRow = {
+      id: crypto.randomUUID(),
+      type: null,
+      durations: [],
+      formats: [],
+    };
+    onUpdate({ consultation_rows: [...consultationRows, newRow] });
+  };
+
+  const removeConsultationRow = (rowId: string) => {
+    onUpdate({ consultation_rows: consultationRows.filter((row) => row.id !== rowId) });
+  };
+
+  const updateConsultationRow = (rowId: string, field: keyof ConsultationRow, value: any) => {
+    onUpdate({
+      consultation_rows: consultationRows.map((row) =>
+        row.id === rowId ? { ...row, [field]: value } : row
+      ),
+    });
+  };
+
+  const getAvailableTypes = (currentRowId: string) => {
+    const usedTypes = consultationRows
+      .filter((row) => row.id !== currentRowId && row.type)
+      .map((row) => row.type);
+    return CONSULTATION_TYPES.filter((t) => !usedTypes.includes(t.id));
+  };
+
+  // Price history handlers
+  const addPriceHistoryEntry = () => {
+    if (!newHistoryEntry.effective_date || !newHistoryEntry.price) {
+      toast.error("Kérjük adja meg a dátumot és az árat!");
+      return;
+    }
+
+    const entry: PriceHistoryEntry = {
+      id: crypto.randomUUID(),
+      effective_date: newHistoryEntry.effective_date,
+      price: newHistoryEntry.price,
+      price_type: newHistoryEntry.price_type || null,
+      currency: newHistoryEntry.currency || null,
+      notes: newHistoryEntry.notes || null,
+    };
+
+    const updatedHistory = [...priceHistory, entry].sort(
+      (a, b) => new Date(b.effective_date).getTime() - new Date(a.effective_date).getTime()
+    );
+
+    onUpdate({ price_history: updatedHistory });
+    setShowPriceHistoryForm(false);
+    setNewHistoryEntry({
+      effective_date: new Date().toISOString().split('T')[0],
+      price: settings.contract_price || undefined,
+      price_type: settings.contract_price_type || undefined,
+      currency: settings.contract_currency || undefined,
+      notes: null,
+    });
+    toast.success("Árváltozás sikeresen rögzítve!");
+  };
+
+  const removePriceHistoryEntry = (entryId: string) => {
+    onUpdate({ price_history: priceHistory.filter((e) => e.id !== entryId) });
+  };
+
+  const getPriceTypeName = (type: string | null) => {
+    return PRICE_TYPES.find((pt) => pt.id === type)?.name || type || "-";
+  };
+
+  const getCurrencyName = (currency: string | null) => {
+    return CURRENCIES.find((c) => c.id === currency)?.name || currency?.toUpperCase() || "-";
+  };
+
+  return (
+    <div className="space-y-4 border-l-2 border-primary/20 pl-4">
+      <h4 className="text-sm font-medium text-primary">Szerződés adatai</h4>
+
+      {/* Contract PDF Upload */}
+      <div className="space-y-2">
+        <Label>Szerződés (PDF)</Label>
+        <div className="flex items-center gap-3">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,application/pdf"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+          {settings.contract_file_url ? (
+            <div className="flex items-center gap-2 bg-background border rounded-lg px-3 py-2 flex-1">
+              <FileText className="h-4 w-4 text-primary" />
+              <span className="text-sm truncate flex-1">
+                {settings.contract_file_url.split("/").pop()}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleRemoveFile}
+                className="h-6 w-6 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="flex-1"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {isUploading ? "Feltöltés..." : "PDF feltöltése"}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Ár és típus */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label>Szerződéses ár</Label>
+          <Input
+            type="number"
+            value={settings.contract_price || ""}
+            onChange={(e) => onUpdate({ contract_price: e.target.value ? parseFloat(e.target.value) : null })}
+            placeholder="0"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Ár típusa</Label>
+          <Select
+            value={settings.contract_price_type || ""}
+            onValueChange={(val) => onUpdate({ contract_price_type: val || null })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Válasszon..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pepm">PEPM</SelectItem>
+              <SelectItem value="package">Csomagár</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Szerződéses ár devizanem</Label>
+          <Select
+            value={settings.contract_currency || ""}
+            onValueChange={(val) => onUpdate({ contract_currency: val || null })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Válasszon..." />
+            </SelectTrigger>
+            <SelectContent>
+              {CURRENCIES.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Price History Section */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <History className="h-4 w-4 text-muted-foreground" />
+            <Label>Árváltozás előzmények</Label>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowPriceHistoryForm(!showPriceHistoryForm)}
+            className="h-8"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Árváltozás rögzítése
+          </Button>
+        </div>
+
+        {showPriceHistoryForm && (
+          <div className="bg-background border rounded-lg p-4 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Érvényesség kezdete</Label>
+                <Input
+                  type="date"
+                  value={newHistoryEntry.effective_date || ""}
+                  onChange={(e) =>
+                    setNewHistoryEntry({ ...newHistoryEntry, effective_date: e.target.value })
+                  }
+                  className="h-9"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Ár</Label>
+                <Input
+                  type="number"
+                  value={newHistoryEntry.price ?? ""}
+                  onChange={(e) =>
+                    setNewHistoryEntry({
+                      ...newHistoryEntry,
+                      price: e.target.value ? parseFloat(e.target.value) : undefined,
+                    })
+                  }
+                  placeholder="0"
+                  min={0}
+                  className="h-9"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Ár típusa</Label>
+                <Select
+                  value={newHistoryEntry.price_type || "none"}
+                  onValueChange={(val) =>
+                    setNewHistoryEntry({
+                      ...newHistoryEntry,
+                      price_type: val === "none" ? undefined : val,
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Válasszon..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Válasszon...</SelectItem>
+                    {PRICE_TYPES.map((pt) => (
+                      <SelectItem key={pt.id} value={pt.id}>
+                        {pt.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Devizanem</Label>
+                <Select
+                  value={newHistoryEntry.currency || "none"}
+                  onValueChange={(val) =>
+                    setNewHistoryEntry({
+                      ...newHistoryEntry,
+                      currency: val === "none" ? undefined : val,
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Válasszon..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Válasszon...</SelectItem>
+                    {CURRENCIES.map((curr) => (
+                      <SelectItem key={curr.id} value={curr.id}>
+                        {curr.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Megjegyzés (opcionális)</Label>
+              <Input
+                value={newHistoryEntry.notes || ""}
+                onChange={(e) =>
+                  setNewHistoryEntry({ ...newHistoryEntry, notes: e.target.value || null })
+                }
+                placeholder="Pl.: Éves ármódosítás, infláció követése..."
+                className="h-9"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button type="button" size="sm" onClick={addPriceHistoryEntry}>
+                Mentés
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPriceHistoryForm(false)}
+              >
+                Mégse
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {priceHistory.length === 0 ? (
+          <div className="text-sm text-muted-foreground py-3 text-center border border-dashed rounded-lg">
+            Nincs árváltozás előzmény rögzítve.
+          </div>
+        ) : (
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="text-left px-3 py-2 font-medium">Dátum</th>
+                  <th className="text-left px-3 py-2 font-medium">Ár</th>
+                  <th className="text-left px-3 py-2 font-medium">Típus</th>
+                  <th className="text-left px-3 py-2 font-medium">Megjegyzés</th>
+                  <th className="w-10"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {priceHistory.map((entry) => (
+                  <tr key={entry.id} className="hover:bg-muted/30">
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3 text-muted-foreground" />
+                        {format(new Date(entry.effective_date), "yyyy. MMM d.", { locale: hu })}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 font-medium">
+                      {entry.price.toLocaleString("hu-HU")} {getCurrencyName(entry.currency)}
+                    </td>
+                    <td className="px-3 py-2">{getPriceTypeName(entry.price_type)}</td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {entry.notes || "-"}
+                    </td>
+                    <td className="px-2 py-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removePriceHistoryEntry(entry.id)}
+                        className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Pillér és Alkalom és Iparág */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label>Pillér</Label>
+          <Input
+            type="number"
+            value={settings.pillar_count || ""}
+            onChange={(e) => onUpdate({ pillar_count: e.target.value ? parseInt(e.target.value) : null })}
+            placeholder="0"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Alkalom</Label>
+          <Input
+            type="number"
+            value={settings.session_count || ""}
+            onChange={(e) => onUpdate({ session_count: e.target.value ? parseInt(e.target.value) : null })}
+            placeholder="0"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Iparág</Label>
+          <Select
+            value={settings.industry || ""}
+            onValueChange={(val) => onUpdate({ industry: val || null })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Válasszon..." />
+            </SelectTrigger>
+            <SelectContent>
+              {INDUSTRIES.map((ind) => (
+                <SelectItem key={ind.id} value={ind.id}>
+                  {ind.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Consultation Rows */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label>Tanácsadás beállítások</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addConsultationRow}
+            className="h-8"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Új sor
+          </Button>
+        </div>
+
+        {consultationRows.length === 0 ? (
+          <div className="text-sm text-muted-foreground py-4 text-center border border-dashed rounded-lg">
+            Nincs tanácsadás beállítás. Kattints az "Új sor" gombra a hozzáadáshoz.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {consultationRows.map((row, index) => (
+              <div
+                key={row.id}
+                className="bg-background border rounded-lg p-3 space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {index + 1}. tanácsadás típus
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeConsultationRow(row.id)}
+                    className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Típus</Label>
+                    <Select
+                      value={row.type || "none"}
+                      onValueChange={(val) =>
+                        updateConsultationRow(row.id, "type", val === "none" ? null : val)
+                      }
+                    >
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="Válassz típust..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Válassz típust...</SelectItem>
+                        {getAvailableTypes(row.id).map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.label}
+                          </SelectItem>
+                        ))}
+                        {row.type && !getAvailableTypes(row.id).find((t) => t.id === row.type) && (
+                          <SelectItem value={row.type}>
+                            {CONSULTATION_TYPES.find((t) => t.id === row.type)?.label}
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <MultiSelectField
+                    label="Időtartam"
+                    options={CONSULTATION_DURATIONS}
+                    selectedIds={row.durations}
+                    onChange={(durations) => updateConsultationRow(row.id, "durations", durations)}
+                    placeholder="Válassz..."
+                    badgeColor="teal"
+                  />
+
+                  <MultiSelectField
+                    label="Forma"
+                    options={CONSULTATION_FORMATS}
+                    selectedIds={row.formats}
+                    onChange={(formats) => updateConsultationRow(row.id, "formats", formats)}
+                    placeholder="Válassz..."
+                    badgeColor="teal"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Szerződés dátumok - CGP */}
+      {isCGP && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Szerződés kezdete</Label>
+            <Input
+              type="date"
+              value={settings.contract_start || ""}
+              onChange={(e) => onUpdate({ contract_start: e.target.value || null })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Szerződés lejárta</Label>
+            <Input
+              type="date"
+              value={settings.contract_end || ""}
+              onChange={(e) => onUpdate({ contract_end: e.target.value || null })}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Emlékeztető email - CGP */}
+      {isCGP && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Emlékeztető e-mail</Label>
+            <Input
+              type="email"
+              value={settings.contract_reminder_email || ""}
+              onChange={(e) => onUpdate({ contract_reminder_email: e.target.value || null })}
+              placeholder="email@ceg.hu"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ORG ID - Lifeworks */}
+      {isLifeworks && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>ORG ID</Label>
+            <Input
+              value={settings.org_id || ""}
+              onChange={(e) => onUpdate({ org_id: e.target.value || null })}
+              placeholder="ORG ID"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Ország beállítások kártya
 interface CountrySettingsCardProps {
   country: Country;
@@ -430,132 +1054,13 @@ const CountrySettingsCard = ({
                   </div>
                 </div>
 
-            {/* Szerződés adatai */}
-            <div className="space-y-4 border-l-2 border-primary/20 pl-4">
-              <h4 className="text-sm font-medium text-primary">Szerződés adatai</h4>
-              
-              {/* Ár és típus */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Szerződéses ár</Label>
-                  <Input
-                    type="number"
-                    value={settings.contract_price || ""}
-                    onChange={(e) => onUpdate({ contract_price: e.target.value ? parseFloat(e.target.value) : null })}
-                    placeholder="0"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Ár típusa</Label>
-                  <Select
-                    value={settings.contract_price_type || ""}
-                    onValueChange={(val) => onUpdate({ contract_price_type: val || null })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Válasszon..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pepm">PEPM</SelectItem>
-                      <SelectItem value="package">Csomagár</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Devizanem</Label>
-                  <Select
-                    value={settings.contract_currency || ""}
-                    onValueChange={(val) => onUpdate({ contract_currency: val || null })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Válasszon..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CURRENCIES.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Pillér és Alkalom */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Pillér</Label>
-                  <Input
-                    type="number"
-                    value={settings.pillar_count || ""}
-                    onChange={(e) => onUpdate({ pillar_count: e.target.value ? parseInt(e.target.value) : null })}
-                    placeholder="0"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Alkalom</Label>
-                  <Input
-                    type="number"
-                    value={settings.session_count || ""}
-                    onChange={(e) => onUpdate({ session_count: e.target.value ? parseInt(e.target.value) : null })}
-                    placeholder="0"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Iparág</Label>
-                  <Select
-                    value={settings.industry || ""}
-                    onValueChange={(val) => onUpdate({ industry: val || null })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Válasszon..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {INDUSTRIES.map((ind) => (
-                        <SelectItem key={ind.id} value={ind.id}>
-                          {ind.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Szerződés dátumok */}
-              {isCGP && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Szerződés kezdete</Label>
-                    <Input
-                      type="date"
-                      value={settings.contract_start || ""}
-                      onChange={(e) => onUpdate({ contract_start: e.target.value || null })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Szerződés lejárta</Label>
-                    <Input
-                      type="date"
-                      value={settings.contract_end || ""}
-                      onChange={(e) => onUpdate({ contract_end: e.target.value || null })}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* ORG ID - Lifeworks */}
-              {isLifeworks && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>ORG ID</Label>
-                    <Input
-                      value={settings.org_id || ""}
-                      onChange={(e) => onUpdate({ org_id: e.target.value || null })}
-                      placeholder="ORG ID"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Szerződés adatai - Teljes form */}
+            <CountryContractDataSection
+              settings={settings}
+              onUpdate={onUpdate}
+              isCGP={isCGP}
+              isLifeworks={isLifeworks}
+            />
               </>
             )}
           </div>
