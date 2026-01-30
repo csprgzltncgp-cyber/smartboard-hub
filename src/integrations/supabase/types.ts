@@ -258,6 +258,128 @@ export type Database = {
           },
         ]
       }
+      client_dashboard_user_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          menu_item: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          menu_item: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          menu_item?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_dashboard_user_permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "client_dashboard_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_dashboard_user_scopes: {
+        Row: {
+          contracted_entity_id: string | null
+          country_id: string | null
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          contracted_entity_id?: string | null
+          country_id?: string | null
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          contracted_entity_id?: string | null
+          country_id?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_dashboard_user_scopes_contracted_entity_id_fkey"
+            columns: ["contracted_entity_id"]
+            isOneToOne: false
+            referencedRelation: "company_contracted_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_dashboard_user_scopes_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_dashboard_user_scopes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "client_dashboard_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_dashboard_users: {
+        Row: {
+          can_view_aggregated: boolean | null
+          company_id: string
+          created_at: string
+          id: string
+          is_superuser: boolean | null
+          language_id: string | null
+          password: string | null
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          can_view_aggregated?: boolean | null
+          company_id: string
+          created_at?: string
+          id?: string
+          is_superuser?: boolean | null
+          language_id?: string | null
+          password?: string | null
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          can_view_aggregated?: boolean | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_superuser?: boolean | null
+          language_id?: string | null
+          password?: string | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_dashboard_users_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address: string | null
@@ -1074,6 +1196,44 @@ export type Database = {
             columns: ["country_id"]
             isOneToOne: false
             referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_report_configuration: {
+        Row: {
+          access_type: string
+          company_id: string
+          configuration: Json | null
+          created_at: string
+          id: string
+          report_type: string
+          updated_at: string
+        }
+        Insert: {
+          access_type?: string
+          company_id: string
+          configuration?: Json | null
+          created_at?: string
+          id?: string
+          report_type?: string
+          updated_at?: string
+        }
+        Update: {
+          access_type?: string
+          company_id?: string
+          configuration?: Json | null
+          created_at?: string
+          id?: string
+          report_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_report_configuration_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
