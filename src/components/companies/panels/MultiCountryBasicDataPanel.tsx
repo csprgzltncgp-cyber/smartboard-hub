@@ -276,6 +276,26 @@ export const MultiCountryBasicDataPanel = ({
         </div>
       )}
 
+      {/* "Alapadatok országonként különbözőek" checkbox - csak ha több ország van, a Szerződött entitások után */}
+      {countryIds.length > 1 && (
+        <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg border">
+          <Checkbox
+            id="basic-data-per-country"
+            checked={countryDifferentiates.basic_data}
+            onCheckedChange={(checked) => handleBasicDataToggleChange(checked === true)}
+            className="mt-0.5"
+          />
+          <div className="space-y-1">
+            <Label htmlFor="basic-data-per-country" className="font-medium cursor-pointer">
+              Alapadatok országonként különbözőek
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              Ha bekapcsolod, minden országhoz egyedi szerződési adatokat (szerződő fél, ár, dokumentum stb.) adhatsz meg.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Cégnév */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
         <div className="space-y-2">
@@ -303,26 +323,6 @@ export const MultiCountryBasicDataPanel = ({
           </p>
         </div>
       </div>
-
-      {/* "Alapadatok országonként különbözőek" checkbox - csak ha több ország van */}
-      {countryIds.length > 1 && (
-        <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg border">
-          <Checkbox
-            id="basic-data-per-country"
-            checked={countryDifferentiates.basic_data}
-            onCheckedChange={(checked) => handleBasicDataToggleChange(checked === true)}
-            className="mt-0.5"
-          />
-          <div className="space-y-1">
-            <Label htmlFor="basic-data-per-country" className="font-medium cursor-pointer">
-              Alapadatok országonként különbözőek
-            </Label>
-            <p className="text-sm text-muted-foreground">
-              Ha bekapcsolod, minden országhoz egyedi szerződési adatokat (szerződő fél, ár, dokumentum stb.) adhatsz meg.
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* ============================================== */}
       {/* BELSŐ PANEL: Szerződés adatai - csak ha NEM országonként különböző */}
