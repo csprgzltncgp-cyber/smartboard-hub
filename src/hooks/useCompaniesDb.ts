@@ -40,6 +40,8 @@ interface DbCountryDifferentiate {
   contract_date: boolean;
   reporting: boolean;
   invoicing: boolean;
+  has_multiple_entities: boolean;
+  entity_country_ids: string[] | null;
 }
 
 interface DbCountrySettings {
@@ -453,9 +455,9 @@ export const useCompaniesDb = () => {
           reporting: diffData.reporting,
           invoicing: diffData.invoicing,
           contract_date_reminder_email: false,
-          basic_data: false,
-          has_multiple_entities: (diffData as any).has_multiple_entities || false,
-          entity_country_ids: [],
+          basic_data: diffData.invoicing, // basic_data mirrors invoicing for backwards compatibility
+          has_multiple_entities: diffData.has_multiple_entities || false,
+          entity_country_ids: diffData.entity_country_ids || [],
         } : {
           contract_holder: false,
           org_id: false,
@@ -739,6 +741,8 @@ export const useCompaniesDb = () => {
             contract_date: data.countryDifferentiates.contract_date,
             reporting: data.countryDifferentiates.reporting,
             invoicing: data.countryDifferentiates.invoicing,
+            has_multiple_entities: data.countryDifferentiates.has_multiple_entities,
+            entity_country_ids: data.countryDifferentiates.entity_country_ids || [],
           }, { onConflict: 'company_id' });
       }
 
