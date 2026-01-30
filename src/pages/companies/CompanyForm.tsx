@@ -36,7 +36,7 @@ import { useCompaniesDb } from "@/hooks/useCompaniesDb";
 import { useAppUsersDb } from "@/hooks/useAppUsersDb";
 import { useContractedEntities } from "@/hooks/useContractedEntities";
 import { ContractedEntity } from "@/types/contracted-entity";
-import { EntityInvoicingTabs } from "@/components/companies/entities";
+import { EntityInvoicingTabs, EntityBillingPanel, getDefaultEntityBillingData, getDefaultEntityInvoicingData } from "@/components/companies/entities";
 
 // Mock contract holders (until we have a proper table)
 const mockContractHolders: ContractHolder[] = [
@@ -163,6 +163,11 @@ const CompanyForm = () => {
 
   // Aktív entitás a Számlázás panelen (ha több entitás van)
   const [activeInvoicingEntityId, setActiveInvoicingEntityId] = useState<string>("");
+  
+  // Entitásonkénti számlázási adatok
+  const [billingDataPerEntity, setBillingDataPerEntity] = useState<Record<string, BillingData>>({});
+  const [invoicingDataPerEntity, setInvoicingDataPerEntity] = useState<Record<string, InvoicingData>>({});
+  const [invoiceSlipsPerEntity, setInvoiceSlipsPerEntity] = useState<Record<string, InvoiceSlip[]>>({});
 
   // Kontextusfüggő fülek állapota
   // CRM-ből érkező cégek mindig newcomer-ek (fromCrm state flag)
@@ -629,45 +634,31 @@ const CompanyForm = () => {
               activeEntityId={activeInvoicingEntityId || entities.filter(e => e.country_id === countryIds[0])[0]?.id || ""}
               onActiveEntityChange={setActiveInvoicingEntityId}
             >
-              {(entityId, entity) => (
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Számlázási adatok: <span className="font-medium text-foreground">{entity.name}</span>
-                  </p>
-                  {/* TODO: Entity-specifikus számlázási panel ide kerül */}
-                  <CompanyInvoicingPanel
-                    countryDifferentiates={countryDifferentiates}
-                    setCountryDifferentiates={setCountryDifferentiates}
-                    billingData={billingData}
-                    setBillingData={setBillingData}
-                    invoicingData={invoicingData}
-                    setInvoicingData={setInvoicingData}
-                    invoiceItems={invoiceItems}
-                    setInvoiceItems={setInvoiceItems}
-                    invoiceComments={invoiceComments}
-                    setInvoiceComments={setInvoiceComments}
-                    countryIds={countryIds}
-                    countries={countries}
-                    companyId={companyId || "new"}
-                    billingDataPerCountry={billingDataPerCountry}
-                    setBillingDataPerCountry={setBillingDataPerCountry}
-                    invoicingDataPerCountry={invoicingDataPerCountry}
-                    setInvoicingDataPerCountry={setInvoicingDataPerCountry}
-                    invoiceItemsPerCountry={invoiceItemsPerCountry}
-                    setInvoiceItemsPerCountry={setInvoiceItemsPerCountry}
-                    invoiceCommentsPerCountry={invoiceCommentsPerCountry}
-                    setInvoiceCommentsPerCountry={setInvoiceCommentsPerCountry}
-                    invoiceSlips={invoiceSlips}
-                    setInvoiceSlips={setInvoiceSlips}
-                    activeInvoicingCountryId={activeInvoicingCountryId}
-                    setActiveInvoicingCountryId={setActiveInvoicingCountryId}
-                    invoiceSlipsPerCountry={invoiceSlipsPerCountry}
-                    setInvoiceSlipsPerCountry={setInvoiceSlipsPerCountry}
-                    invoiceTemplates={invoiceTemplates}
-                    setInvoiceTemplates={setInvoiceTemplates}
+              {(entityId, entity) => {
+                // Get or create entity-specific billing data
+                const entityBillingData = billingDataPerEntity[entityId] || getDefaultEntityBillingData(entityId);
+                const entityInvoicingData = invoicingDataPerEntity[entityId] || getDefaultEntityInvoicingData(entityId);
+                
+                return (
+                  <EntityBillingPanel
+                    entity={entity}
+                    billingData={entityBillingData}
+                    setBillingData={(data) => {
+                      setBillingDataPerEntity(prev => ({
+                        ...prev,
+                        [entityId]: data
+                      }));
+                    }}
+                    invoicingData={entityInvoicingData}
+                    setInvoicingData={(data) => {
+                      setInvoicingDataPerEntity(prev => ({
+                        ...prev,
+                        [entityId]: data
+                      }));
+                    }}
                   />
-                </div>
-              )}
+                );
+              }}
             </EntityInvoicingTabs>
           )}
           
@@ -962,6 +953,11 @@ const CompanyForm = () => {
               setInvoiceSlipsPerCountry={setInvoiceSlipsPerCountry}
               invoiceTemplates={invoiceTemplates}
               setInvoiceTemplates={setInvoiceTemplates}
+              entities={entities.map(e => ({ id: e.id, name: e.name, country_id: e.country_id }))}
+              billingDataPerEntity={billingDataPerEntity}
+              setBillingDataPerEntity={setBillingDataPerEntity}
+              invoicingDataPerEntity={invoicingDataPerEntity}
+              setInvoicingDataPerEntity={setInvoicingDataPerEntity}
             />
             <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">

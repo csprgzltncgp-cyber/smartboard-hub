@@ -15,6 +15,7 @@ import { Plus, Trash2, MessageSquare, Calendar } from "lucide-react";
 import { DifferentPerCountryToggle } from "./DifferentPerCountryToggle";
 import { CountryBillingForm } from "./CountryBillingForm";
 import { InvoiceSlipCard, InvoiceSlip } from "./InvoiceSlipCard";
+import { EntityInvoicingTabs, EntityBillingPanel, getDefaultEntityBillingData, getDefaultEntityInvoicingData } from "./entities";
 import {
   CountryDifferentiate,
   BillingData,
@@ -74,6 +75,12 @@ interface CompanyInvoicingPanelProps {
   // Legacy - számla sablonok kezelése (backward compatibility)
   invoiceTemplates?: InvoiceTemplate[];
   setInvoiceTemplates?: (templates: InvoiceTemplate[]) => void;
+  // Entitás-specifikus adatok (többországos módhoz)
+  entities?: Array<{ id: string; name: string; country_id: string }>;
+  billingDataPerEntity?: Record<string, BillingData>;
+  setBillingDataPerEntity?: (data: Record<string, BillingData>) => void;
+  invoicingDataPerEntity?: Record<string, InvoicingData>;
+  setInvoicingDataPerEntity?: (data: Record<string, InvoicingData>) => void;
 }
 
 // Alapértelmezett BillingData
@@ -165,6 +172,12 @@ export const CompanyInvoicingPanel = ({
   setInvoiceSlipsPerCountry,
   invoiceTemplates = [],
   setInvoiceTemplates,
+  // Entitás propok
+  entities = [],
+  billingDataPerEntity = {},
+  setBillingDataPerEntity,
+  invoicingDataPerEntity = {},
+  setInvoicingDataPerEntity,
 }: CompanyInvoicingPanelProps) => {
   const [emails, setEmails] = useState<string[]>(invoicingData?.invoice_emails || [""]);
   
@@ -1122,21 +1135,68 @@ export const CompanyInvoicingPanel = ({
                     </TabsTrigger>
                   ))}
                 </TabsList>
-                {selectedCountries.map((country) => (
-                  <TabsContent key={country.id} value={country.id} className="mt-4">
-                    <CountryBillingForm
-                      countryName={country.name}
-                      billingData={getCountryBillingData(country.id)}
-                      setBillingData={(data) => setCountryBillingData(country.id, data)}
-                      invoicingData={getCountryInvoicingData(country.id)}
-                      setInvoicingData={(data) => setCountryInvoicingData(country.id, data)}
-                      invoiceItems={getCountryInvoiceItems(country.id)}
-                      setInvoiceItems={(items) => setCountryInvoiceItems(country.id, items)}
-                      invoiceComments={getCountryInvoiceComments(country.id)}
-                      setInvoiceComments={(comments) => setCountryInvoiceComments(country.id, comments)}
-                    />
-                  </TabsContent>
-                ))}
+                {selectedCountries.map((country) => {
+                  // Ellenőrizzük, hogy az adott országban több entitás mód aktív-e
+                  const entityCountryIds = countryDifferentiates.entity_country_ids || [];
+                  const hasEntitiesInCountry = entityCountryIds.includes(country.id);
+                  const countryEntities = entities.filter(e => e.country_id === country.id);
+                  
+                  return (
+                    <TabsContent key={country.id} value={country.id} className="mt-4">
+                      {hasEntitiesInCountry && countryEntities.length > 0 ? (
+                        // Entitás fülek az adott országhoz
+                        <EntityInvoicingTabs
+                          entities={countryEntities.map(e => ({ ...e, dispatch_name: null, is_active: true, company_id: companyId, org_id: null, contract_date: null, contract_end_date: null, contract_reminder_email: null, reporting_data: {}, contract_holder_type: null, contract_price: null, price_type: null, contract_currency: null, pillars: null, occasions: null, industry: null, consultation_rows: [], price_history: [], workshop_data: {}, crisis_data: {}, headcount: null, inactive_headcount: null, client_dashboard_users: [], created_at: '', updated_at: '' }))}
+                          hasMultipleEntities={hasEntitiesInCountry}
+                          activeEntityId={countryEntities[0]?.id || ""}
+                          onActiveEntityChange={() => {}}
+                        >
+                          {(entityId, entity) => {
+                            const entityBillingData = billingDataPerEntity[entityId] || getDefaultEntityBillingData(entityId);
+                            const entityInvoicingData = invoicingDataPerEntity[entityId] || getDefaultEntityInvoicingData(entityId);
+                            
+                            return (
+                              <EntityBillingPanel
+                                entity={entity}
+                                billingData={entityBillingData}
+                                setBillingData={(data) => {
+                                  if (setBillingDataPerEntity) {
+                                    setBillingDataPerEntity({
+                                      ...billingDataPerEntity,
+                                      [entityId]: data
+                                    });
+                                  }
+                                }}
+                                invoicingData={entityInvoicingData}
+                                setInvoicingData={(data) => {
+                                  if (setInvoicingDataPerEntity) {
+                                    setInvoicingDataPerEntity({
+                                      ...invoicingDataPerEntity,
+                                      [entityId]: data
+                                    });
+                                  }
+                                }}
+                              />
+                            );
+                          }}
+                        </EntityInvoicingTabs>
+                      ) : (
+                        // Normál ország-szintű számlázás
+                        <CountryBillingForm
+                          countryName={country.name}
+                          billingData={getCountryBillingData(country.id)}
+                          setBillingData={(data) => setCountryBillingData(country.id, data)}
+                          invoicingData={getCountryInvoicingData(country.id)}
+                          setInvoicingData={(data) => setCountryInvoicingData(country.id, data)}
+                          invoiceItems={getCountryInvoiceItems(country.id)}
+                          setInvoiceItems={(items) => setCountryInvoiceItems(country.id, items)}
+                          invoiceComments={getCountryInvoiceComments(country.id)}
+                          setInvoiceComments={(comments) => setCountryInvoiceComments(country.id, comments)}
+                        />
+                      )}
+                    </TabsContent>
+                  );
+                })}
               </Tabs>
 
               {/* Számlacsíkok az aktív országhoz */}
