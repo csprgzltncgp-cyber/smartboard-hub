@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ChevronDown, ChevronUp, Plus, Calendar } from "lucide-react";
+import React, { useState } from "react";
+import { ChevronDown, ChevronUp, Plus, Calendar, Building2 } from "lucide-react";
 import { format } from "date-fns";
 import { hu } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
@@ -17,9 +17,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CompanyCountrySettings, CountryDifferentiate, ContractHolder, AccountAdmin, Workshop, CrisisIntervention, ConsultationRow, PriceHistoryEntry, INDUSTRIES, CURRENCIES } from "@/types/company";
 import { DifferentPerCountryToggle } from "./DifferentPerCountryToggle";
 import { ContractDataPanel } from "./panels/ContractDataPanel";
+import { ContractedEntity, createDefaultEntity, EntityClientDashboardUser } from "@/types/contracted-entity";
+import { cn } from "@/lib/utils";
 
 interface Country {
   id: string;
@@ -42,6 +45,13 @@ interface CompanyCountrySettingsPanelProps {
   setWorkshops: (workshops: Workshop[]) => void;
   crisisInterventions: CrisisIntervention[];
   setCrisisInterventions: (interventions: CrisisIntervention[]) => void;
+  // Contracted entities
+  companyId?: string;
+  entities: ContractedEntity[];
+  onAddEntity: (entity: Omit<ContractedEntity, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  onUpdateEntity: (id: string, updates: Partial<ContractedEntity>) => Promise<void>;
+  onDeleteEntity: (id: string) => Promise<void>;
+  isEntitiesLoading?: boolean;
 }
 
 export const CompanyCountrySettingsPanel = ({
@@ -58,6 +68,12 @@ export const CompanyCountrySettingsPanel = ({
   setWorkshops,
   crisisInterventions,
   setCrisisInterventions,
+  companyId,
+  entities,
+  onAddEntity,
+  onUpdateEntity,
+  onDeleteEntity,
+  isEntitiesLoading = false,
 }: CompanyCountrySettingsPanelProps) => {
   const selectedCountries = countries.filter((c) => countryIds.includes(c.id));
 
@@ -150,6 +166,10 @@ export const CompanyCountrySettingsPanel = ({
     setCrisisInterventions([...crisisInterventions, newCrisis]);
   };
 
+  // Get entities for a specific country
+  const getCountryEntities = (countryId: string) => 
+    entities.filter(e => e.country_id === countryId);
+
   return (
     <div className="space-y-6">
       {/* Ország csíkok */}
@@ -158,6 +178,7 @@ export const CompanyCountrySettingsPanel = ({
           const settings = getCountrySettings(country.id);
           const countryWorkshops = getCountryWorkshops(country.id);
           const countryCrisis = getCountryCrisis(country.id);
+          const countryEntities = getCountryEntities(country.id);
           const effectiveContractHolder = countryDifferentiates.basic_data
             ? settings.contract_holder_id
             : countryDifferentiates.contract_holder
@@ -181,6 +202,13 @@ export const CompanyCountrySettingsPanel = ({
               onAddWorkshop={() => addWorkshop(country.id)}
               crisisInterventions={countryCrisis}
               onAddCrisis={() => addCrisis(country.id)}
+              hasMultipleEntities={countryDifferentiates.has_multiple_entities || false}
+              entities={countryEntities}
+              companyId={companyId}
+              onAddEntity={onAddEntity}
+              onUpdateEntity={onUpdateEntity}
+              onDeleteEntity={onDeleteEntity}
+              isEntitiesLoading={isEntitiesLoading}
             />
           );
         })}
@@ -203,6 +231,14 @@ interface CountrySettingsCardProps {
   onAddWorkshop: () => void;
   crisisInterventions: CrisisIntervention[];
   onAddCrisis: () => void;
+  // Entity support
+  hasMultipleEntities: boolean;
+  entities: ContractedEntity[];
+  companyId?: string;
+  onAddEntity: (entity: Omit<ContractedEntity, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  onUpdateEntity: (id: string, updates: Partial<ContractedEntity>) => Promise<void>;
+  onDeleteEntity: (id: string) => Promise<void>;
+  isEntitiesLoading?: boolean;
 }
 
 const CountrySettingsCard = ({
@@ -218,10 +254,18 @@ const CountrySettingsCard = ({
   onAddWorkshop,
   crisisInterventions,
   onAddCrisis,
+  hasMultipleEntities,
+  entities,
+  companyId,
+  onAddEntity,
+  onUpdateEntity,
+  onDeleteEntity,
+  isEntitiesLoading = false,
 }: CountrySettingsCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isWorkshopsOpen, setIsWorkshopsOpen] = useState(false);
   const [isCrisisOpen, setIsCrisisOpen] = useState(false);
+  const [activeEntityId, setActiveEntityId] = useState<string>(entities[0]?.id || "");
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -252,8 +296,26 @@ const CountrySettingsCard = ({
 
       <CollapsibleContent className="space-y-4 p-4 border border-t-0 rounded-b-lg bg-background">
 
-        {/* Ha basic_data aktív, megjelenítjük az összes szerződési adatot */}
-        {countryDifferentiates.basic_data && (
+        {/* Ha hasMultipleEntities aktív, entitás fülek megjelenítése */}
+        {hasMultipleEntities && (
+          <EntitySection
+            country={country}
+            entities={entities}
+            activeEntityId={activeEntityId}
+            setActiveEntityId={setActiveEntityId}
+            companyId={companyId}
+            contractHolders={contractHolders}
+            isCGP={isCGP}
+            isLifeworks={isLifeworks}
+            onAddEntity={onAddEntity}
+            onUpdateEntity={onUpdateEntity}
+            onDeleteEntity={onDeleteEntity}
+            isEntitiesLoading={isEntitiesLoading}
+          />
+        )}
+
+        {/* Ha basic_data aktív és nincs entitás mód, megjelenítjük az összes szerződési adatot */}
+        {countryDifferentiates.basic_data && !hasMultipleEntities && (
           <div className="space-y-6">
             {/* Szerződéshordozó */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -680,5 +742,356 @@ const CountrySettingsCard = ({
         </div>
       </CollapsibleContent>
     </Collapsible>
+  );
+};
+
+// === EntitySection komponens - Entitás kezelés országon belül ===
+interface EntitySectionProps {
+  country: Country;
+  entities: ContractedEntity[];
+  activeEntityId: string;
+  setActiveEntityId: (id: string) => void;
+  companyId?: string;
+  contractHolders: ContractHolder[];
+  isCGP: boolean;
+  isLifeworks: boolean;
+  onAddEntity: (entity: Omit<ContractedEntity, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  onUpdateEntity: (id: string, updates: Partial<ContractedEntity>) => Promise<void>;
+  onDeleteEntity: (id: string) => Promise<void>;
+  isEntitiesLoading?: boolean;
+}
+
+const EntitySection = ({
+  country,
+  entities,
+  activeEntityId,
+  setActiveEntityId,
+  companyId,
+  contractHolders,
+  isCGP,
+  isLifeworks,
+  onAddEntity,
+  onUpdateEntity,
+  onDeleteEntity,
+  isEntitiesLoading = false,
+}: EntitySectionProps) => {
+  const [isCreating, setIsCreating] = useState(false);
+
+  // Update active tab when entities change
+  React.useEffect(() => {
+    if (entities.length > 0 && !entities.find(e => e.id === activeEntityId)) {
+      setActiveEntityId(entities[0].id);
+    }
+  }, [entities, activeEntityId, setActiveEntityId]);
+
+  const handleAddEntity = async () => {
+    if (!companyId) return;
+    setIsCreating(true);
+    try {
+      const newEntity = createDefaultEntity(companyId, country.id, "Új entitás");
+      await onAddEntity(newEntity);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const getEntityTabLabel = (entity: ContractedEntity, index: number): string => {
+    const isDefaultName = !entity.name || 
+      entity.name.startsWith("Entitás ") || 
+      entity.name.startsWith("Új entitás");
+    
+    if (!isDefaultName) {
+      return entity.name;
+    }
+    return `Entitás ${index + 1}`;
+  };
+
+  if (entities.length === 0) {
+    return (
+      <div className="text-center py-6 border rounded-lg bg-muted/30">
+        <Building2 className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+        <p className="text-sm text-muted-foreground mb-3">
+          Még nincs entitás ebben az országban
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleAddEntity}
+          disabled={isEntitiesLoading || isCreating || !companyId}
+        >
+          <Plus className="h-4 w-4 mr-1" />
+          Entitás létrehozása
+        </Button>
+      </div>
+    );
+  }
+
+  const activeEntity = entities.find(e => e.id === activeEntityId);
+
+  return (
+    <div className="space-y-4">
+      <Tabs 
+        value={activeEntityId} 
+        onValueChange={setActiveEntityId}
+        className="w-full"
+      >
+        <div className="flex items-center gap-2 flex-wrap mb-4">
+          <TabsList className="h-auto p-1 bg-muted/50 flex-wrap gap-1">
+            {entities.map((entity, index) => (
+              <TabsTrigger
+                key={entity.id}
+                value={entity.id}
+                className={cn(
+                  "rounded-lg px-4 py-2 text-sm",
+                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                )}
+              >
+                {getEntityTabLabel(entity, index)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddEntity}
+            disabled={isEntitiesLoading || isCreating || !companyId}
+            className="h-9"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Új entitás
+          </Button>
+        </div>
+
+        {entities.map((entity) => (
+          <TabsContent
+            key={entity.id}
+            value={entity.id}
+            className="mt-0"
+          >
+            <EntityDataForm
+              entity={entity}
+              contractHolders={contractHolders}
+              isCGP={isCGP}
+              isLifeworks={isLifeworks}
+              onUpdate={(updates) => onUpdateEntity(entity.id, updates)}
+              onDelete={() => onDeleteEntity(entity.id)}
+              canDelete={entities.length > 1}
+            />
+          </TabsContent>
+        ))}
+      </Tabs>
+    </div>
+  );
+};
+
+// === EntityDataForm - Entitás űrlap ===
+interface EntityDataFormProps {
+  entity: ContractedEntity;
+  contractHolders: ContractHolder[];
+  isCGP: boolean;
+  isLifeworks: boolean;
+  onUpdate: (updates: Partial<ContractedEntity>) => void;
+  onDelete: () => void;
+  canDelete: boolean;
+}
+
+const EntityDataForm = ({
+  entity,
+  contractHolders,
+  isCGP,
+  isLifeworks,
+  onUpdate,
+  onDelete,
+  canDelete,
+}: EntityDataFormProps) => {
+  return (
+    <div className="space-y-4 p-4 border rounded-lg bg-muted/10">
+      {/* Entitás név */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Entitás neve (Cégnév)</Label>
+          <Input
+            value={entity.name}
+            onChange={(e) => onUpdate({ name: e.target.value })}
+            placeholder="Entitás neve"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Cég elnevezése kiközvetítéshez</Label>
+          <Input
+            value={entity.dispatch_name || ""}
+            onChange={(e) => onUpdate({ dispatch_name: e.target.value || null })}
+            placeholder="Ahogy az operátorok listájában megjelenik"
+          />
+        </div>
+      </div>
+
+      {/* Aktív státusz */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Aktív</Label>
+          <Select
+            value={entity.is_active ? "true" : "false"}
+            onValueChange={(val) => onUpdate({ is_active: val === "true" })}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="true">Igen</SelectItem>
+              <SelectItem value="false">Nem</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Szerződéshordozó</Label>
+          <Select
+            value={entity.contract_holder_type || ""}
+            onValueChange={(val) => onUpdate({ contract_holder_type: val || null })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Válasszon..." />
+            </SelectTrigger>
+            <SelectContent>
+              {contractHolders.map((ch) => (
+                <SelectItem key={ch.id} value={ch.id}>
+                  {ch.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Szerződés adatok */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label>Szerződéses ár</Label>
+          <Input
+            type="number"
+            value={entity.contract_price || ""}
+            onChange={(e) => onUpdate({ contract_price: e.target.value ? parseFloat(e.target.value) : null })}
+            placeholder="0"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Ár típusa</Label>
+          <Select
+            value={entity.price_type || ""}
+            onValueChange={(val) => onUpdate({ price_type: val || null })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Válasszon..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pepm">PEPM</SelectItem>
+              <SelectItem value="package">Csomagár</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Devizanem</Label>
+          <Select
+            value={entity.contract_currency || ""}
+            onValueChange={(val) => onUpdate({ contract_currency: val || null })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Válasszon..." />
+            </SelectTrigger>
+            <SelectContent>
+              {CURRENCIES.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Szerződés dátumok */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label>Szerződés kezdete</Label>
+          <Input
+            type="date"
+            value={entity.contract_date || ""}
+            onChange={(e) => onUpdate({ contract_date: e.target.value || null })}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Szerződés lejárta</Label>
+          <Input
+            type="date"
+            value={entity.contract_end_date || ""}
+            onChange={(e) => onUpdate({ contract_end_date: e.target.value || null })}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Emlékeztető e-mail</Label>
+          <Input
+            type="email"
+            value={entity.contract_reminder_email || ""}
+            onChange={(e) => onUpdate({ contract_reminder_email: e.target.value || null })}
+            placeholder="email@ceg.hu"
+          />
+        </div>
+      </div>
+
+      {/* ORG ID, Létszám */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label>ORG ID</Label>
+          <Input
+            value={entity.org_id || ""}
+            onChange={(e) => onUpdate({ org_id: e.target.value || null })}
+            placeholder="ORG ID"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Létszám</Label>
+          <Input
+            type="number"
+            value={entity.headcount || ""}
+            onChange={(e) => onUpdate({ headcount: e.target.value ? parseInt(e.target.value) : null })}
+            placeholder="0"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Iparág</Label>
+          <Select
+            value={entity.industry || ""}
+            onValueChange={(val) => onUpdate({ industry: val || null })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Válasszon..." />
+            </SelectTrigger>
+            <SelectContent>
+              {INDUSTRIES.map((ind) => (
+                <SelectItem key={ind.id} value={ind.id}>
+                  {ind.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Entitás törlés */}
+      {canDelete && (
+        <div className="pt-4 border-t">
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            onClick={onDelete}
+          >
+            Entitás törlése
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };

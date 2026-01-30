@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CountryDifferentiate, ContractHolder, ConsultationRow, PriceHistoryEntry, CompanyCountrySettings, InvoiceTemplate } from "@/types/company";
 import { ContractDataPanel } from "./ContractDataPanel";
 import { MigrateBasicDataDialog } from "../dialogs/MigrateBasicDataDialog";
+import { Globe, Building2 } from "lucide-react";
 
 interface Country {
   id: string;
@@ -266,11 +267,15 @@ export const MultiCountryBasicDataPanel = ({
         </div>
       </div>
 
-      {/* Országok - ez a második mező, korán kell megadni */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-        <div className="space-y-2">
+      {/* ORSZÁG KIVÁLASZTÓ - KIEMELT PANEL */}
+      <div className="bg-primary/5 border-2 border-primary/20 rounded-lg p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <Globe className="h-5 w-5 text-primary" />
+          <h4 className="text-sm font-medium text-primary">Országok</h4>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <MultiSelectField
-            label="Országok"
+            label=""
             options={countryOptions}
             selectedIds={countryIds}
             onChange={setCountryIds}
@@ -278,6 +283,26 @@ export const MultiCountryBasicDataPanel = ({
           />
         </div>
       </div>
+
+      {/* Több entitás toggle - országok után, basic_data előtt */}
+      {countryIds.length > 0 && (
+        <div className="flex items-center justify-between bg-muted/30 border rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <Building2 className="h-5 w-5 text-primary" />
+            <div>
+              <h4 className="text-sm font-medium text-primary">Szerződött entitások</h4>
+              <p className="text-xs text-muted-foreground">
+                Ha egy országban több jogi személlyel is szerződést kötnek
+              </p>
+            </div>
+          </div>
+          <DifferentPerCountryToggle
+            label="Több entitás"
+            checked={countryDifferentiates.has_multiple_entities || false}
+            onChange={(checked) => setCountryDifferentiates({ ...countryDifferentiates, has_multiple_entities: checked })}
+          />
+        </div>
+      )}
 
       {/* "Alapadatok országonként különbözőek" checkbox - csak ha több ország van */}
       {countryIds.length > 1 && (
@@ -405,6 +430,15 @@ export const MultiCountryBasicDataPanel = ({
         <div className="p-4 bg-muted border border-border rounded-lg">
           <p className="text-sm text-muted-foreground">
             Az Alapadatok országonként különbözőek opció aktív. A szerződési adatokat az <strong>Országok</strong> fülön, az egyes országok alatt lehet megadni.
+          </p>
+        </div>
+      )}
+
+      {/* Ha has_multiple_entities aktív, megjelenítjük az üzenetet */}
+      {countryDifferentiates.has_multiple_entities && !countryDifferentiates.basic_data && (
+        <div className="p-4 bg-muted border border-border rounded-lg">
+          <p className="text-sm text-muted-foreground">
+            A Több entitás opció aktív. Az entitásokat az <strong>Országok</strong> fülön, az egyes országok alatt lehet kezelni.
           </p>
         </div>
       )}
