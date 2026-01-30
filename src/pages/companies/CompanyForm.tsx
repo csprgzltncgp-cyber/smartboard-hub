@@ -346,6 +346,12 @@ const CompanyForm = () => {
       return;
     }
 
+    // Ha az alapadatok országonként különbözőek, a Cégcsoport neve kötelező
+    if (countryDifferentiates.basic_data && !groupName?.trim()) {
+      toast.error("A Cégcsoport neve megadása kötelező, ha az alapadatok országonként különbözőek");
+      return;
+    }
+
     try {
       if (isEditMode && companyId) {
         const success = await updateCompany(companyId, {

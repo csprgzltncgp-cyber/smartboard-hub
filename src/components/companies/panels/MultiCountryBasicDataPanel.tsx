@@ -358,14 +358,17 @@ export const MultiCountryBasicDataPanel = ({
       {countryDifferentiates.basic_data && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
           <div className="space-y-2">
-            <Label>Cégcsoport neve</Label>
+            <Label>
+              Cégcsoport neve <span className="text-destructive">*</span>
+            </Label>
             <Input
               value={groupName || ""}
               onChange={(e) => setGroupName(e.target.value || null)}
               placeholder="A cég ezzel a névvel jelenik meg a Cégek menüben"
+              required
             />
             <p className="text-xs text-muted-foreground">
-              Ha az alapadatok országonként eltérőek, ez a név jelenik meg a céglistában.
+              Kötelező mező. Ha az alapadatok országonként eltérőek, ez a név jelenik meg a céglistában.
             </p>
           </div>
         </div>
