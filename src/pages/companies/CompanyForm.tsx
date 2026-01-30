@@ -36,7 +36,7 @@ import { useCompaniesDb } from "@/hooks/useCompaniesDb";
 import { useAppUsersDb } from "@/hooks/useAppUsersDb";
 import { useContractedEntities } from "@/hooks/useContractedEntities";
 import { ContractedEntity } from "@/types/contracted-entity";
-import { EntityInvoicingTabs, EntityContentTabs, EntityBillingPanel, getDefaultEntityBillingData, getDefaultEntityInvoicingData } from "@/components/companies/entities";
+import { EntityInvoicingTabs, EntityContentTabs, CountryEntityContentTabs, EntityBillingPanel, getDefaultEntityBillingData, getDefaultEntityInvoicingData } from "@/components/companies/entities";
 
 // Mock contract holders (until we have a proper table)
 const mockContractHolders: ContractHolder[] = [
@@ -1043,24 +1043,21 @@ const CompanyForm = () => {
         visible: true,
         content: (
           <div className="space-y-6">
-            {entities.length > 0 ? (
-              <EntityContentTabs
-                entities={entities}
-                hasMultipleEntities={true}
-                title="Inputok entitásonként"
-              >
-                {(entityId, entity) => (
-                  <InputsTabContent 
-                    companyId={companyId || "new"} 
-                    entityId={entityId}
-                    entityName={entity.name}
-                    onAddInputRef={handleAddInputRef} 
-                  />
-                )}
-              </EntityContentTabs>
-            ) : (
-              <InputsTabContent companyId={companyId || "new"} onAddInputRef={handleAddInputRef} />
-            )}
+            <CountryEntityContentTabs
+              entities={entities}
+              countryIds={countryIds}
+              countries={countries}
+              title="Inputok országonként"
+            >
+              {(entityId, entity, countryId, countryName) => (
+                <InputsTabContent 
+                  companyId={companyId || "new"} 
+                  entityId={entityId || undefined}
+                  entityName={entity?.name || countryName}
+                  onAddInputRef={handleAddInputRef} 
+                />
+              )}
+            </CountryEntityContentTabs>
             <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">
                 <Save className="h-4 w-4 mr-2" />
@@ -1085,24 +1082,21 @@ const CompanyForm = () => {
         visible: true,
         content: (
           <div className="space-y-6">
-            {entities.length > 0 ? (
-              <EntityContentTabs
-                entities={entities}
-                hasMultipleEntities={true}
-                title="Feljegyzések entitásonként"
-              >
-                {(entityId, entity) => (
-                  <NotesTabContent 
-                    companyId={companyId || "new"} 
-                    entityId={entityId}
-                    entityName={entity.name}
-                    onAddNoteRef={handleAddNoteRef} 
-                  />
-                )}
-              </EntityContentTabs>
-            ) : (
-              <NotesTabContent companyId={companyId || "new"} onAddNoteRef={handleAddNoteRef} />
-            )}
+            <CountryEntityContentTabs
+              entities={entities}
+              countryIds={countryIds}
+              countries={countries}
+              title="Feljegyzések országonként"
+            >
+              {(entityId, entity, countryId, countryName) => (
+                <NotesTabContent 
+                  companyId={companyId || "new"} 
+                  entityId={entityId || undefined}
+                  entityName={entity?.name || countryName}
+                  onAddNoteRef={handleAddNoteRef} 
+                />
+              )}
+            </CountryEntityContentTabs>
             <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">
                 <Save className="h-4 w-4 mr-2" />
@@ -1127,23 +1121,20 @@ const CompanyForm = () => {
         visible: true,
         content: (
           <div className="space-y-6">
-            {entities.length > 0 ? (
-              <EntityContentTabs
-                entities={entities}
-                hasMultipleEntities={true}
-                title="Statisztikák entitásonként"
-              >
-                {(entityId, entity) => (
-                  <StatisticsTabContent 
-                    companyId={companyId || "new"} 
-                    entityId={entityId}
-                    entityName={entity.name}
-                  />
-                )}
-              </EntityContentTabs>
-            ) : (
-              <StatisticsTabContent companyId={companyId || "new"} />
-            )}
+            <CountryEntityContentTabs
+              entities={entities}
+              countryIds={countryIds}
+              countries={countries}
+              title="Statisztikák országonként"
+            >
+              {(entityId, entity, countryId, countryName) => (
+                <StatisticsTabContent 
+                  companyId={companyId || "new"} 
+                  entityId={entityId || undefined}
+                  entityName={entity?.name || countryName}
+                />
+              )}
+            </CountryEntityContentTabs>
             <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">
                 <Save className="h-4 w-4 mr-2" />
