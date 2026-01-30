@@ -53,4 +53,7 @@ Amikor a "Több entitás" toggle bekapcsol egy országnál:
 3. A második entitás üres, alapértelmezett értékekkel
 
 ### Kikapcsolás korlátozása
-A "Több entitás" toggle kikapcsolása csak akkor lehetséges, ha az adott országban legfeljebb 1 entitás maradt. Ha több entitás van, a toggle disabled állapotban van és egy figyelmeztetés jelenik meg: "Entitások törlése szükséges a kikapcsoláshoz". Ez biztosítja, hogy a felhasználó ne veszítse el az entitás-adatokat véletlenül.
+- **Több entitás toggle**: A "Több entitás" toggle kikapcsolása csak akkor lehetséges, ha az adott országban legfeljebb 1 entitás maradt. Ha több entitás van, a toggle disabled állapotban van és egy figyelmeztetés jelenik meg: "Entitások törlése szükséges a kikapcsoláshoz".
+- **Országonkénti alapadatok toggle**: Az "Országonként különböző" toggle (basic_data) kikapcsolása szintén nem engedélyezett, ha bármelyik országban több mint 1 entitás van. Ez azért fontos, mert a basic_data mód a feltétele a több entitás funkciónak többországos cégeknél.
+
+Ez biztosítja, hogy a felhasználó ne veszítse el az entitás-adatokat véletlenül.

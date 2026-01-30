@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -76,6 +76,15 @@ const CompanyForm = () => {
   // Kombinált entitás lista: edit módban DB-ből, új módban pendingből
   const entities = isEditMode ? dbEntities : pendingEntities;
 
+  // Check if any country has more than 1 entity (for toggle disable logic)
+  const hasMultipleEntitiesInAnyCountry = useMemo(() => {
+    const countryEntityCounts = new Map<string, number>();
+    entities.forEach(e => {
+      const count = countryEntityCounts.get(e.country_id) || 0;
+      countryEntityCounts.set(e.country_id, count + 1);
+    });
+    return Array.from(countryEntityCounts.values()).some(count => count > 1);
+  }, [entities]);
   const [formLoading, setFormLoading] = useState(isEditMode);
 
   // Alapadatok
@@ -887,6 +896,7 @@ const CompanyForm = () => {
               setCountrySettings={setCountrySettings}
               invoiceTemplates={invoiceTemplates}
               setInvoiceTemplates={setInvoiceTemplates}
+              hasMultipleEntitiesInAnyCountry={hasMultipleEntitiesInAnyCountry}
             />
             
             {/* Archived onboarding panel - only shown after onboarding completion */}

@@ -70,6 +70,8 @@ interface MultiCountryBasicDataPanelProps {
   setCountrySettings: (settings: CompanyCountrySettings[]) => void;
   invoiceTemplates: InvoiceTemplate[];
   setInvoiceTemplates: (templates: InvoiceTemplate[]) => void;
+  // Entity count check - to prevent disabling basic_data when entities exist
+  hasMultipleEntitiesInAnyCountry?: boolean;
 }
 
 export const MultiCountryBasicDataPanel = ({
@@ -119,6 +121,8 @@ export const MultiCountryBasicDataPanel = ({
   setCountrySettings,
   invoiceTemplates,
   setInvoiceTemplates,
+  // Entity check
+  hasMultipleEntitiesInAnyCountry = false,
 }: MultiCountryBasicDataPanelProps) => {
   const [showMigrateDialog, setShowMigrateDialog] = useState(false);
   const [showEntityCountriesDialog, setShowEntityCountriesDialog] = useState(false);
@@ -149,8 +153,17 @@ export const MultiCountryBasicDataPanel = ({
   // Check if there's existing invoicing data to migrate
   const hasInvoicingData = invoiceTemplates.length > 0;
 
+  // Check if basic_data toggle can be disabled
+  const canDisableBasicData = !hasMultipleEntitiesInAnyCountry;
+  const basicDataToggleDisabled = countryDifferentiates.basic_data && !canDisableBasicData;
+
   // Handle basic_data toggle change
   const handleBasicDataToggleChange = (checked: boolean) => {
+    // Prevent disabling if there are entities in any country
+    if (!checked && hasMultipleEntitiesInAnyCountry) {
+      return; // Cannot disable - entities must be deleted first
+    }
+
     if (checked && (hasBasicData || hasInvoicingData) && countryIds.length > 1) {
       // Show migration dialog to ask which country the data should go to
       setShowMigrateDialog(true);
@@ -321,11 +334,19 @@ export const MultiCountryBasicDataPanel = ({
               </p>
             </div>
           </div>
-          <DifferentPerCountryToggle
-            label="Országonként különböző"
-            checked={countryDifferentiates.basic_data || false}
-            onChange={(checked) => handleBasicDataToggleChange(checked)}
-          />
+          <div className="flex items-center gap-2">
+            <DifferentPerCountryToggle
+              label="Országonként különböző"
+              checked={countryDifferentiates.basic_data || false}
+              onChange={(checked) => handleBasicDataToggleChange(checked)}
+              disabled={basicDataToggleDisabled}
+            />
+            {countryDifferentiates.basic_data && !canDisableBasicData && (
+              <span className="text-xs text-muted-foreground">
+                (Entitások törlése szükséges a kikapcsoláshoz)
+              </span>
+            )}
+          </div>
         </div>
       )}
 
