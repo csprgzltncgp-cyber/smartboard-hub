@@ -1585,6 +1585,16 @@ const EntityDataForm = ({
     notes: null,
   });
 
+  // Local state for immediate input response
+  const [localName, setLocalName] = useState(entity.name);
+  const [localDispatchName, setLocalDispatchName] = useState(entity.dispatch_name || "");
+
+  // Sync local state when entity changes (e.g., tab switch)
+  React.useEffect(() => {
+    setLocalName(entity.name);
+    setLocalDispatchName(entity.dispatch_name || "");
+  }, [entity.id, entity.name, entity.dispatch_name]);
+
   const consultationRows = entity.consultation_rows || [];
   const priceHistory = entity.price_history || [];
   const cdUsers = entityCDUsersToComponentFormat(entity.client_dashboard_users || []);
@@ -1731,8 +1741,11 @@ const EntityDataForm = ({
         <div className="space-y-2">
           <Label>Entitás neve (Cégnév) *</Label>
           <Input
-            value={entity.name}
-            onChange={(e) => onUpdate({ name: e.target.value })}
+            value={localName}
+            onChange={(e) => {
+              setLocalName(e.target.value);
+              onUpdate({ name: e.target.value });
+            }}
             placeholder="pl. Henkel Hungary Kft."
           />
           <p className="text-xs text-muted-foreground">
@@ -1742,8 +1755,11 @@ const EntityDataForm = ({
         <div className="space-y-2">
           <Label>Cég elnevezése kiközvetítéshez</Label>
           <Input
-            value={entity.dispatch_name || ""}
-            onChange={(e) => onUpdate({ dispatch_name: e.target.value || null })}
+            value={localDispatchName}
+            onChange={(e) => {
+              setLocalDispatchName(e.target.value);
+              onUpdate({ dispatch_name: e.target.value || null });
+            }}
             placeholder="Ahogy az operátorok listájában megjelenik"
           />
         </div>
