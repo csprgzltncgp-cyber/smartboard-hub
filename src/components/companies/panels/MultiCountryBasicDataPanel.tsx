@@ -239,6 +239,43 @@ export const MultiCountryBasicDataPanel = ({
         onCancel={handleMigrationCancel}
       />
     <div className="space-y-6">
+      {/* ORSZÁG KIVÁLASZTÓ - KIEMELT PANEL */}
+      <div className="bg-primary/5 border-2 border-primary/20 rounded-lg p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <Globe className="h-5 w-5 text-primary" />
+          <h4 className="text-sm font-medium text-primary">Országok</h4>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <MultiSelectField
+            label=""
+            options={countryOptions}
+            selectedIds={countryIds}
+            onChange={setCountryIds}
+            placeholder="Válasszon országokat..."
+          />
+        </div>
+      </div>
+
+      {/* Több entitás toggle - országok után, cégnév előtt */}
+      {countryIds.length > 0 && (
+        <div className="flex items-center justify-between bg-muted/30 border rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <Building2 className="h-5 w-5 text-primary" />
+            <div>
+              <h4 className="text-sm font-medium text-primary">Szerződött entitások</h4>
+              <p className="text-xs text-muted-foreground">
+                Ha egy országban több jogi személlyel is szerződést kötnek
+              </p>
+            </div>
+          </div>
+          <DifferentPerCountryToggle
+            label="Több entitás"
+            checked={countryDifferentiates.has_multiple_entities || false}
+            onChange={(checked) => setCountryDifferentiates({ ...countryDifferentiates, has_multiple_entities: checked })}
+          />
+        </div>
+      )}
+
       {/* Cégnév */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
         <div className="space-y-2">
@@ -266,43 +303,6 @@ export const MultiCountryBasicDataPanel = ({
           </p>
         </div>
       </div>
-
-      {/* ORSZÁG KIVÁLASZTÓ - KIEMELT PANEL */}
-      <div className="bg-primary/5 border-2 border-primary/20 rounded-lg p-4">
-        <div className="flex items-center gap-3 mb-3">
-          <Globe className="h-5 w-5 text-primary" />
-          <h4 className="text-sm font-medium text-primary">Országok</h4>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <MultiSelectField
-            label=""
-            options={countryOptions}
-            selectedIds={countryIds}
-            onChange={setCountryIds}
-            placeholder="Válasszon országokat..."
-          />
-        </div>
-      </div>
-
-      {/* Több entitás toggle - országok után, basic_data előtt */}
-      {countryIds.length > 0 && (
-        <div className="flex items-center justify-between bg-muted/30 border rounded-lg p-4">
-          <div className="flex items-center gap-3">
-            <Building2 className="h-5 w-5 text-primary" />
-            <div>
-              <h4 className="text-sm font-medium text-primary">Szerződött entitások</h4>
-              <p className="text-xs text-muted-foreground">
-                Ha egy országban több jogi személlyel is szerződést kötnek
-              </p>
-            </div>
-          </div>
-          <DifferentPerCountryToggle
-            label="Több entitás"
-            checked={countryDifferentiates.has_multiple_entities || false}
-            onChange={(checked) => setCountryDifferentiates({ ...countryDifferentiates, has_multiple_entities: checked })}
-          />
-        </div>
-      )}
 
       {/* "Alapadatok országonként különbözőek" checkbox - csak ha több ország van */}
       {countryIds.length > 1 && (
