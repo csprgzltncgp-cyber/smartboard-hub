@@ -466,24 +466,26 @@ export const MultiCountryBasicDataPanel = ({
         </div>
       )}
 
-      {/* Aktív státusz */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-        <div className="space-y-2">
-          <Label>Aktív</Label>
-          <Select
-            value={active ? "true" : "false"}
-            onValueChange={(val) => setActive(val === "true")}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="true">Igen</SelectItem>
-              <SelectItem value="false">Nem</SelectItem>
-            </SelectContent>
-          </Select>
+      {/* Aktív státusz - csak ha NEM országonként különböző */}
+      {!countryDifferentiates.basic_data && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+          <div className="space-y-2">
+            <Label>Aktív</Label>
+            <Select
+              value={active ? "true" : "false"}
+              onValueChange={(val) => setActive(val === "true")}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="true">Igen</SelectItem>
+                <SelectItem value="false">Nem</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </div>
+      )}
       </div>
     </>
   );
