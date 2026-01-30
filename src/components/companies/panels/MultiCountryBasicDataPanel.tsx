@@ -185,6 +185,11 @@ export const MultiCountryBasicDataPanel = ({
     } else {
       // No data to migrate, just toggle
       setCountryDifferentiates({ ...countryDifferentiates, basic_data: checked });
+      
+      // Clear groupName when disabling basic_data differentiation
+      if (!checked) {
+        setGroupName(null);
+      }
     }
   };
 
