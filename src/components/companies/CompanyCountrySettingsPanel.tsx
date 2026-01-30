@@ -217,13 +217,17 @@ export const CompanyCountrySettingsPanel = ({
   const getCountryEntities = (countryId: string) => 
     entities.filter(e => e.country_id === countryId);
 
-  // Check if entity mode is enabled for a specific country (derived from actual entity count)
+  // Check if entity mode is enabled for a specific country
+  // Enabled if: country is in entity_country_ids OR has more than 1 entity
   const isEntityModeEnabled = (countryId: string) => {
     const countryEntities = entities.filter(e => e.country_id === countryId);
-    return countryEntities.length > 1;
+    const isInEntityList = (countryDifferentiates.entity_country_ids || []).includes(countryId);
+    // Entity mode is active if explicitly enabled OR if there are multiple entities
+    return isInEntityList || countryEntities.length > 1;
   };
 
   // Check if entity mode can be disabled for a specific country
+  // Can only disable if there's 0 or 1 entity
   const canDisableEntityMode = (countryId: string) => {
     const countryEntities = entities.filter(e => e.country_id === countryId);
     return countryEntities.length <= 1;
@@ -252,10 +256,12 @@ export const CompanyCountrySettingsPanel = ({
       entity_country_ids: newIds,
     });
 
-    // Ha bekapcsoljuk és nincs még entitás az országban, létrehozzuk a 2 entitást
-    if (enabled) {
+    // Ha bekapcsoljuk, ellenőrizzük, hogy szükséges-e entitásokat létrehozni
+    if (enabled && !isCreatingInitialEntities[countryId]) {
       const countryEntities = entities.filter(e => e.country_id === countryId);
-      if (countryEntities.length === 0 && !isCreatingInitialEntities[countryId]) {
+      
+      // Ha 0 entitás van, 2-t hozunk létre
+      if (countryEntities.length === 0) {
         setIsCreatingInitialEntities(prev => ({ ...prev, [countryId]: true }));
         try {
           const settings = getCountrySettings(countryId);
@@ -297,6 +303,18 @@ export const CompanyCountrySettingsPanel = ({
           setIsCreatingInitialEntities(prev => ({ ...prev, [countryId]: false }));
         }
       }
+      // Ha 1 entitás van, csak 1-et hozunk létre
+      else if (countryEntities.length === 1) {
+        setIsCreatingInitialEntities(prev => ({ ...prev, [countryId]: true }));
+        try {
+          const entityCompanyId = companyId || "pending";
+          const entity2 = createDefaultEntity(entityCompanyId, countryId, "Új entitás");
+          await onAddEntity(entity2);
+        } finally {
+          setIsCreatingInitialEntities(prev => ({ ...prev, [countryId]: false }));
+        }
+      }
+      // Ha már 2+ entitás van, nem csinálunk semmit
     }
   };
 
