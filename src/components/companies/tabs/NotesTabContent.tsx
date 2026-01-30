@@ -67,10 +67,12 @@ const noteColors: Record<NoteColor, { bg: string; border: string; shadow: string
 
 interface NotesTabContentProps {
   companyId: string;
+  entityId?: string;
+  entityName?: string;
   onAddNoteRef?: (fn: () => void) => void;
 }
 
-export const NotesTabContent = ({ companyId, onAddNoteRef }: NotesTabContentProps) => {
+export const NotesTabContent = ({ companyId, entityId, entityName, onAddNoteRef }: NotesTabContentProps) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
