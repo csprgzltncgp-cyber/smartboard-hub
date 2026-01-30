@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CountryDifferentiate, ContractHolder, ConsultationRow, PriceHistoryEntry, CompanyCountrySettings, InvoiceTemplate, Workshop, CrisisIntervention } from "@/types/company";
 import { ContractDataPanel } from "./ContractDataPanel";
 import { MigrateBasicDataDialog } from "../dialogs/MigrateBasicDataDialog";
+import { RequireGroupNameDialog } from "../dialogs/RequireGroupNameDialog";
 import { SelectEntityCountriesDialog } from "../dialogs/SelectEntityCountriesDialog";
 import { Globe, Building2, Plus, ChevronDown, ChevronUp } from "lucide-react";
 
@@ -140,6 +141,8 @@ export const MultiCountryBasicDataPanel = ({
   hasMultipleEntitiesInAnyCountry = false,
 }: MultiCountryBasicDataPanelProps) => {
   const [showMigrateDialog, setShowMigrateDialog] = useState(false);
+  const [showGroupNameDialog, setShowGroupNameDialog] = useState(false);
+  const [pendingBasicDataToggle, setPendingBasicDataToggle] = useState(false);
   const [showEntityCountriesDialog, setShowEntityCountriesDialog] = useState(false);
   
   const isCGP = contractHolderId === "2";
@@ -179,18 +182,40 @@ export const MultiCountryBasicDataPanel = ({
       return; // Cannot disable - entities must be deleted first
     }
 
-    if (checked && (hasBasicData || hasInvoicingData) && countryIds.length > 1) {
-      // Show migration dialog to ask which country the data should go to
+    if (checked) {
+      // Always require group name when enabling basic_data differentiation
+      setPendingBasicDataToggle(true);
+      setShowGroupNameDialog(true);
+    } else {
+      // Disabling - just toggle off
+      setCountryDifferentiates({ ...countryDifferentiates, basic_data: checked });
+      setGroupName(null);
+    }
+  };
+
+  // Handle group name confirmation
+  const handleGroupNameConfirm = (newGroupName: string) => {
+    setGroupName(newGroupName);
+    setShowGroupNameDialog(false);
+    
+    // Now check if we need migration dialog
+    if (pendingBasicDataToggle && (hasBasicData || hasInvoicingData) && countryIds.length > 1) {
       setShowMigrateDialog(true);
     } else {
-      // No data to migrate, just toggle
-      setCountryDifferentiates({ ...countryDifferentiates, basic_data: checked });
-      
-      // Clear groupName when disabling basic_data differentiation
-      if (!checked) {
-        setGroupName(null);
-      }
+      // No data to migrate, just enable
+      setCountryDifferentiates({ 
+        ...countryDifferentiates, 
+        basic_data: true,
+        invoicing: true,
+      });
     }
+    setPendingBasicDataToggle(false);
+  };
+
+  // Handle group name cancel
+  const handleGroupNameCancel = () => {
+    setPendingBasicDataToggle(false);
+    setShowGroupNameDialog(false);
   };
 
   // Handle migration confirmation
@@ -307,6 +332,12 @@ export const MultiCountryBasicDataPanel = ({
 
   return (
     <>
+      <RequireGroupNameDialog
+        open={showGroupNameDialog}
+        onOpenChange={setShowGroupNameDialog}
+        onConfirm={handleGroupNameConfirm}
+        onCancel={handleGroupNameCancel}
+      />
       <MigrateBasicDataDialog
         open={showMigrateDialog}
         onOpenChange={setShowMigrateDialog}
@@ -374,17 +405,14 @@ export const MultiCountryBasicDataPanel = ({
       {countryDifferentiates.basic_data && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
           <div className="space-y-2">
-            <Label>
-              Cégcsoport neve <span className="text-destructive">*</span>
-            </Label>
+            <Label>Cégcsoport neve</Label>
             <Input
               value={groupName || ""}
               onChange={(e) => setGroupName(e.target.value || null)}
               placeholder="A cég ezzel a névvel jelenik meg a Cégek menüben"
-              required
             />
             <p className="text-xs text-muted-foreground">
-              Kötelező mező. Ha az alapadatok országonként eltérőek, ez a név jelenik meg a céglistában.
+              Ez a név jelenik meg a céglistában.
             </p>
           </div>
         </div>
