@@ -351,6 +351,7 @@ const CompanyForm = () => {
         const success = await updateCompany(companyId, {
           name,
           dispatchName,
+          groupName,
           countryIds,
           contractHolderType: contractHolderId === "2" ? "cgp" : contractHolderId === "1" ? "telus" : null,
           connectedCompanyId: null, // eltávolítva

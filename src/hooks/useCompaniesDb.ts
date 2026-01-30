@@ -692,6 +692,7 @@ export const useCompaniesDb = () => {
     data: Partial<{
       name: string;
       dispatchName: string | null;
+      groupName: string | null;
       countryIds: string[];
       contractHolderType: 'telus' | 'cgp' | null;
       connectedCompanyId: string | null;
@@ -708,6 +709,7 @@ export const useCompaniesDb = () => {
       const updateData: any = {};
       if (data.name !== undefined) updateData.name = data.name;
       if (data.dispatchName !== undefined) updateData.dispatch_name = data.dispatchName;
+      if (data.groupName !== undefined) updateData.group_name = data.groupName;
       if (data.contractHolderType !== undefined) updateData.contract_holder_type = data.contractHolderType;
       if (data.connectedCompanyId !== undefined) updateData.connected_company_id = data.connectedCompanyId;
       if (data.leadAccountUserId !== undefined) updateData.lead_account_user_id = data.leadAccountUserId;
