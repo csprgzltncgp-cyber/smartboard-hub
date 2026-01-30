@@ -276,23 +276,23 @@ export const MultiCountryBasicDataPanel = ({
         </div>
       )}
 
-      {/* "Alapadatok országonként különbözőek" checkbox - csak ha több ország van, a Szerződött entitások után */}
+      {/* "Alapadatok országonként különbözőek" - csak ha több ország van, a Szerződött entitások után */}
       {countryIds.length > 1 && (
-        <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg border">
-          <Checkbox
-            id="basic-data-per-country"
-            checked={countryDifferentiates.basic_data}
-            onCheckedChange={(checked) => handleBasicDataToggleChange(checked === true)}
-            className="mt-0.5"
-          />
-          <div className="space-y-1">
-            <Label htmlFor="basic-data-per-country" className="font-medium cursor-pointer">
-              Alapadatok országonként különbözőek
-            </Label>
-            <p className="text-sm text-muted-foreground">
-              Ha bekapcsolod, minden országhoz egyedi szerződési adatokat (szerződő fél, ár, dokumentum stb.) adhatsz meg.
-            </p>
+        <div className="flex items-center justify-between bg-muted/30 border rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <Globe className="h-5 w-5 text-primary" />
+            <div>
+              <h4 className="text-sm font-medium text-primary">Országonkénti alapadatok</h4>
+              <p className="text-xs text-muted-foreground">
+                Ha bekapcsolod, minden országhoz egyedi szerződési adatokat adhatsz meg
+              </p>
+            </div>
           </div>
+          <DifferentPerCountryToggle
+            label="Országonként különböző"
+            checked={countryDifferentiates.basic_data || false}
+            onChange={(checked) => handleBasicDataToggleChange(checked)}
+          />
         </div>
       )}
 
