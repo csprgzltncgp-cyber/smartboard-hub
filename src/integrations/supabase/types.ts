@@ -633,6 +633,7 @@ export type Database = {
           contract_date: boolean
           contract_holder: boolean
           created_at: string
+          entity_country_ids: string[] | null
           has_multiple_entities: boolean
           id: string
           invoicing: boolean
@@ -645,6 +646,7 @@ export type Database = {
           contract_date?: boolean
           contract_holder?: boolean
           created_at?: string
+          entity_country_ids?: string[] | null
           has_multiple_entities?: boolean
           id?: string
           invoicing?: boolean
@@ -657,6 +659,7 @@ export type Database = {
           contract_date?: boolean
           contract_holder?: boolean
           created_at?: string
+          entity_country_ids?: string[] | null
           has_multiple_entities?: boolean
           id?: string
           invoicing?: boolean
