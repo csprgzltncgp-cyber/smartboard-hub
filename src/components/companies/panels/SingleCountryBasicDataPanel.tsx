@@ -202,14 +202,18 @@ export const SingleCountryBasicDataPanel = ({
     onToggleMultipleEntities(enabled);
     
     // Ha bekapcsoljuk és nincs még entitás, automatikusan létrehozunk 2-t
-    if (enabled && entities.length === 0 && companyId && countryId && !isCreatingInitialEntities) {
+    // Működik companyId nélkül is (új cég esetén) - placeholder ID-t használunk
+    if (enabled && entities.length === 0 && countryId && !isCreatingInitialEntities) {
       setIsCreatingInitialEntities(true);
       try {
+        // Placeholder company_id új cég esetén - a tényleges ID mentéskor kerül be
+        const entityCompanyId = companyId || "pending";
+        
         // Első entitás: a meglévő cégadatokkal (minden adat!)
         const entity1Name =
           companyNameInputRef.current?.value?.trim() || name?.trim() || "Entitás 1";
         const entity1: Omit<ContractedEntity, 'id' | 'created_at' | 'updated_at'> = {
-          company_id: companyId,
+          company_id: entityCompanyId,
           country_id: countryId,
           name: entity1Name,
           dispatch_name: dispatchName,
@@ -242,7 +246,7 @@ export const SingleCountryBasicDataPanel = ({
         await onAddEntity(entity1);
         
         // Második entitás: üres, alapértelmezett értékekkel
-        const entity2 = createDefaultEntity(companyId, countryId, "Új entitás");
+        const entity2 = createDefaultEntity(entityCompanyId, countryId, "Új entitás");
         await onAddEntity(entity2);
       } finally {
         setIsCreatingInitialEntities(false);
@@ -832,8 +836,8 @@ export const SingleCountryBasicDataPanel = ({
         )}
       </div>
 
-      {/* Több entitás toggle */}
-      {countryId && companyId && (
+      {/* Több entitás toggle - látható új cégnél is (companyId nélkül) */}
+      {countryId && (
         <div className="flex items-center justify-between bg-muted/30 border rounded-lg p-4">
           <div className="flex items-center gap-3">
             <Building2 className="h-5 w-5 text-primary" />
