@@ -76,15 +76,20 @@ const CompanyForm = () => {
   // Kombinált entitás lista: edit módban DB-ből, új módban pendingből
   const entities = isEditMode ? dbEntities : pendingEntities;
 
+  // Count entities per country for toggle state calculation
+  const countryEntityCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    entities.forEach(e => {
+      const count = counts.get(e.country_id) || 0;
+      counts.set(e.country_id, count + 1);
+    });
+    return counts;
+  }, [entities]);
+
   // Check if any country has more than 1 entity (for toggle disable logic)
   const hasMultipleEntitiesInAnyCountry = useMemo(() => {
-    const countryEntityCounts = new Map<string, number>();
-    entities.forEach(e => {
-      const count = countryEntityCounts.get(e.country_id) || 0;
-      countryEntityCounts.set(e.country_id, count + 1);
-    });
     return Array.from(countryEntityCounts.values()).some(count => count > 1);
-  }, [entities]);
+  }, [countryEntityCounts]);
   const [formLoading, setFormLoading] = useState(isEditMode);
 
   // Alapadatok
@@ -92,6 +97,13 @@ const CompanyForm = () => {
   const [dispatchName, setDispatchName] = useState<string | null>(null);
   const [active, setActive] = useState(true);
   const [countryIds, setCountryIds] = useState<string[]>([]);
+
+  // Single country mode: derive hasMultipleEntities from actual entity count
+  const singleCountryHasMultipleEntities = useMemo(() => {
+    if (countryIds.length !== 1) return false;
+    const count = countryEntityCounts.get(countryIds[0]) || 0;
+    return count > 1;
+  }, [countryIds, countryEntityCounts]);
   const [contractHolderId, setContractHolderId] = useState<string | null>(null);
   const [orgId, setOrgId] = useState<string | null>(null);
   const [contractStart, setContractStart] = useState<string | null>(null);
@@ -610,7 +622,7 @@ const CompanyForm = () => {
           setPriceHistory={setPriceHistory}
           // Contracted entities
           entities={entities.filter(e => e.country_id === countryIds[0])}
-          hasMultipleEntities={countryDifferentiates.has_multiple_entities}
+          hasMultipleEntities={singleCountryHasMultipleEntities}
           onToggleMultipleEntities={(enabled) => setCountryDifferentiates(prev => ({ ...prev, has_multiple_entities: enabled }))}
           onAddEntity={handleAddEntity}
           onUpdateEntity={handleUpdateEntity}
@@ -636,10 +648,10 @@ const CompanyForm = () => {
       {(isCGP || !contractHolderId) && (
         <CollapsiblePanel title="Számlázás">
           {/* Entitás fülek ha több entitás van */}
-          {countryDifferentiates.has_multiple_entities && entities.filter(e => e.country_id === countryIds[0]).length > 0 && (
+          {singleCountryHasMultipleEntities && entities.filter(e => e.country_id === countryIds[0]).length > 0 && (
             <EntityInvoicingTabs
               entities={entities.filter(e => e.country_id === countryIds[0])}
-              hasMultipleEntities={countryDifferentiates.has_multiple_entities}
+              hasMultipleEntities={singleCountryHasMultipleEntities}
               activeEntityId={activeInvoicingEntityId || entities.filter(e => e.country_id === countryIds[0])[0]?.id || ""}
               onActiveEntityChange={setActiveInvoicingEntityId}
             >
@@ -672,7 +684,7 @@ const CompanyForm = () => {
           )}
           
           {/* Normál számlázás panel ha nincs több entitás */}
-          {!countryDifferentiates.has_multiple_entities && (
+          {!singleCountryHasMultipleEntities && (
             <CompanyInvoicingPanel
               countryDifferentiates={countryDifferentiates}
               setCountryDifferentiates={setCountryDifferentiates}

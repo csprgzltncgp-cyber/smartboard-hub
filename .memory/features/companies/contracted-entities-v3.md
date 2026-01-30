@@ -5,16 +5,23 @@ Updated: 2026-01-30
 
 A rendszer támogatja a Szerződött entitások kezelését a Company -> Country -> Entity hierarchiában, lehetővé téve több önálló jogi egység rögzítését egy országon belül.
 
+### Toggle állapot számítása (KRITIKUS)
+
+A "Több entitás" toggle állapota NEM külön tárolt, hanem az **entitások számából van származtatva**:
+- `hasMultipleEntities = entities.filter(e => e.country_id === countryId).length > 1`
+- Ez biztosítja, hogy a toggle mindig szinkronban legyen az adatokkal, még fülváltás után is
+
 ### Logika többországos módban
 
 1. **"Több entitás" opció előfeltétele**: A "Több entitás" funkció CSAK akkor érhető el, ha az **"Alapadatok országonként különbözőek"** opció be van kapcsolva.
 2. **Ország-szintű beállítás**: A "Több entitás" toggle az egyes országok beállítási paneljén (Országok fül -> ország csík kinyitása) jelenik meg.
-3. **entity_country_ids**: Nyilvántartja, mely országokban van több entitás mód aktiválva.
+3. **entity_country_ids**: Nyilvántartja, mely országokban volt aktiválva (de a toggle állapot az entitásokból jön).
 4. **Automatikus migráció**: Bekapcsoláskor 2 entitás jön létre - az első örökli az ország beállításainak minden adatát (név, ár, dátumok, stb.)
 
 ### Egyországos mód (SingleCountryBasicDataPanel)
 - Ország kiválasztó kiemelt panelben (teal színű keret)
 - Alatta "Több entitás" toggle a szerződött entitások aktiválásához
+- A toggle állapota a `singleCountryHasMultipleEntities` useMemo-ból jön (entitások száma > 1)
 - Aktiváláskor 2 entitás jön létre automatikusan (első örökli a meglévő adatokat)
 - Füles navigáció az entitások között
 - Minden entitás teljes értékű adatokkal (név, dispatch_name, ár, dátumok, stb.)
@@ -23,7 +30,7 @@ A rendszer támogatja a Szerződött entitások kezelését a Company -> Country
 - Országok kiválasztó kiemelt panelben (Globe ikon, teal keret)
 - "Alapadatok országonként különbözőek" toggle (Globe ikon) - ez a feltétele a több entitás funkciónak
 - Ha basic_data aktív: az Országok fülön, az egyes ország csíkokon belül megjelenik a "Több entitás" toggle
-- Ha egy országnál a "Több entitás" be van kapcsolva, entitás fülek jelennek meg
+- Az `isEntityModeEnabled(countryId)` az entitások számából számolja az állapotot
 - CountrySettingsCard komponens tartalmazza az EntitySection-t
 
 ### Komponensek
