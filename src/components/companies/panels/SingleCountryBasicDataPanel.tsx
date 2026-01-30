@@ -221,7 +221,16 @@ export const SingleCountryBasicDataPanel = ({
     clientDashboardUsers,
   });
 
+  // Check if toggle can be disabled (only if 1 or fewer entities exist)
+  const canDisableMultipleEntities = entities.length <= 1;
+  const multipleEntitiesToggleDisabled = isEntitiesLoading || isCreatingInitialEntities || (hasMultipleEntities && !canDisableMultipleEntities);
+
   const handleToggleMultipleEntities = async (enabled: boolean) => {
+    // Prevent disabling if there are more than 1 entity
+    if (!enabled && entities.length > 1) {
+      return; // Cannot disable - entities must be deleted first
+    }
+
     // Capture current form values BEFORE toggle (important for migration)
     const currentValues = getCurrentFormValues();
     
@@ -873,12 +882,19 @@ export const SingleCountryBasicDataPanel = ({
               </p>
             </div>
           </div>
-          <DifferentPerCountryToggle
-            label="Több entitás"
-            checked={hasMultipleEntities}
-            onChange={handleToggleMultipleEntities}
-            disabled={isEntitiesLoading || isCreatingInitialEntities}
-          />
+          <div className="flex items-center gap-2">
+            <DifferentPerCountryToggle
+              label="Több entitás"
+              checked={hasMultipleEntities}
+              onChange={handleToggleMultipleEntities}
+              disabled={multipleEntitiesToggleDisabled}
+            />
+            {hasMultipleEntities && !canDisableMultipleEntities && (
+              <span className="text-xs text-muted-foreground">
+                (Entitások törlése szükséges a kikapcsoláshoz)
+              </span>
+            )}
+          </div>
         </div>
       )}
 

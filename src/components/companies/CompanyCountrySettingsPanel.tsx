@@ -212,8 +212,20 @@ export const CompanyCountrySettingsPanel = ({
     return entityCountryIds.includes(countryId);
   };
 
+  // Check if entity mode can be disabled for a specific country
+  const canDisableEntityMode = (countryId: string) => {
+    const countryEntities = entities.filter(e => e.country_id === countryId);
+    return countryEntities.length <= 1;
+  };
+
   // Toggle entity mode for a specific country
   const handleToggleEntityMode = async (countryId: string, enabled: boolean) => {
+    // Prevent disabling if there are more than 1 entity in this country
+    const countryEntities = entities.filter(e => e.country_id === countryId);
+    if (!enabled && countryEntities.length > 1) {
+      return; // Cannot disable - entities must be deleted first
+    }
+
     const currentIds = countryDifferentiates.entity_country_ids || [];
     let newIds: string[];
     
@@ -310,6 +322,7 @@ export const CompanyCountrySettingsPanel = ({
               crisisInterventions={countryCrisis}
               onAddCrisis={() => addCrisis(country.id)}
               hasMultipleEntities={isEntityModeEnabled(country.id)}
+              canDisableEntityMode={canDisableEntityMode(country.id)}
               entities={countryEntities}
               companyId={companyId}
               onAddEntity={onAddEntity}
@@ -935,6 +948,7 @@ interface CountrySettingsCardProps {
   onAddCrisis: () => void;
   // Entity support
   hasMultipleEntities: boolean;
+  canDisableEntityMode: boolean;
   entities: ContractedEntity[];
   companyId?: string;
   onAddEntity: (entity: Omit<ContractedEntity, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
@@ -960,6 +974,7 @@ const CountrySettingsCard = ({
   crisisInterventions,
   onAddCrisis,
   hasMultipleEntities,
+  canDisableEntityMode,
   entities,
   companyId,
   onAddEntity,
@@ -1017,11 +1032,19 @@ const CountrySettingsCard = ({
                   </p>
                 </div>
               </div>
-              <DifferentPerCountryToggle
-                label="Több entitás"
-                checked={hasMultipleEntities}
-                onChange={(checked) => onToggleEntityMode(country.id, checked)}
-              />
+              <div className="flex items-center gap-2">
+                <DifferentPerCountryToggle
+                  label="Több entitás"
+                  checked={hasMultipleEntities}
+                  onChange={(checked) => onToggleEntityMode(country.id, checked)}
+                  disabled={isEntitiesLoading || isCreatingInitialEntities || (hasMultipleEntities && !canDisableEntityMode)}
+                />
+                {hasMultipleEntities && !canDisableEntityMode && (
+                  <span className="text-xs text-muted-foreground">
+                    (Entitások törlése szükséges a kikapcsoláshoz)
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Ha hasMultipleEntities aktív, entitás fülek megjelenítése */}
