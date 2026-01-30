@@ -295,27 +295,7 @@ export const MultiCountryBasicDataPanel = ({
         </div>
       </div>
 
-      {/* Több entitás toggle - országok után, cégnév előtt */}
-      {countryIds.length > 0 && (
-        <div className="flex items-center justify-between bg-muted/30 border rounded-lg p-4">
-          <div className="flex items-center gap-3">
-            <Building2 className="h-5 w-5 text-primary" />
-            <div>
-              <h4 className="text-sm font-medium text-primary">Szerződött entitások</h4>
-              <p className="text-xs text-muted-foreground">
-                Ha egy országban több jogi személlyel is szerződést kötnek. Válassz országot!
-              </p>
-            </div>
-          </div>
-          <DifferentPerCountryToggle
-            label={getEntityCountriesLabel()}
-            checked={countryDifferentiates.has_multiple_entities || false}
-            onChange={handleEntityToggleClick}
-          />
-        </div>
-      )}
-
-      {/* "Alapadatok országonként különbözőek" - csak ha több ország van, a Szerződött entitások után */}
+      {/* "Alapadatok országonként különbözőek" - csak ha több ország van */}
       {countryIds.length > 1 && (
         <div className="flex items-center justify-between bg-muted/30 border rounded-lg p-4">
           <div className="flex items-center gap-3">

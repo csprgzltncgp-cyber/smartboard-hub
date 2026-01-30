@@ -170,6 +170,30 @@ export const CompanyCountrySettingsPanel = ({
   const getCountryEntities = (countryId: string) => 
     entities.filter(e => e.country_id === countryId);
 
+  // Check if entity mode is enabled for a specific country
+  const isEntityModeEnabled = (countryId: string) => {
+    const entityCountryIds = countryDifferentiates.entity_country_ids || [];
+    return entityCountryIds.includes(countryId);
+  };
+
+  // Toggle entity mode for a specific country
+  const handleToggleEntityMode = (countryId: string, enabled: boolean) => {
+    const currentIds = countryDifferentiates.entity_country_ids || [];
+    let newIds: string[];
+    
+    if (enabled) {
+      newIds = [...currentIds, countryId];
+    } else {
+      newIds = currentIds.filter(id => id !== countryId);
+    }
+    
+    setCountryDifferentiates({
+      ...countryDifferentiates,
+      has_multiple_entities: newIds.length > 0,
+      entity_country_ids: newIds,
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Ország csíkok */}
@@ -202,13 +226,14 @@ export const CompanyCountrySettingsPanel = ({
               onAddWorkshop={() => addWorkshop(country.id)}
               crisisInterventions={countryCrisis}
               onAddCrisis={() => addCrisis(country.id)}
-              hasMultipleEntities={countryDifferentiates.has_multiple_entities || false}
+              hasMultipleEntities={isEntityModeEnabled(country.id)}
               entities={countryEntities}
               companyId={companyId}
               onAddEntity={onAddEntity}
               onUpdateEntity={onUpdateEntity}
               onDeleteEntity={onDeleteEntity}
               isEntitiesLoading={isEntitiesLoading}
+              onToggleEntityMode={handleToggleEntityMode}
             />
           );
         })}
@@ -239,6 +264,8 @@ interface CountrySettingsCardProps {
   onUpdateEntity: (id: string, updates: Partial<ContractedEntity>) => Promise<void>;
   onDeleteEntity: (id: string) => Promise<void>;
   isEntitiesLoading?: boolean;
+  // Callback to toggle entity mode for this country
+  onToggleEntityMode: (countryId: string, enabled: boolean) => void;
 }
 
 const CountrySettingsCard = ({
@@ -261,6 +288,7 @@ const CountrySettingsCard = ({
   onUpdateEntity,
   onDeleteEntity,
   isEntitiesLoading = false,
+  onToggleEntityMode,
 }: CountrySettingsCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isWorkshopsOpen, setIsWorkshopsOpen] = useState(false);
@@ -296,48 +324,69 @@ const CountrySettingsCard = ({
 
       <CollapsibleContent className="space-y-4 p-4 border border-t-0 rounded-b-lg bg-background">
 
-        {/* Ha hasMultipleEntities aktív, entitás fülek megjelenítése */}
-        {hasMultipleEntities && (
-          <EntitySection
-            country={country}
-            entities={entities}
-            activeEntityId={activeEntityId}
-            setActiveEntityId={setActiveEntityId}
-            companyId={companyId}
-            contractHolders={contractHolders}
-            isCGP={isCGP}
-            isLifeworks={isLifeworks}
-            onAddEntity={onAddEntity}
-            onUpdateEntity={onUpdateEntity}
-            onDeleteEntity={onDeleteEntity}
-            isEntitiesLoading={isEntitiesLoading}
-          />
-        )}
-
-        {/* Ha basic_data aktív és nincs entitás mód, megjelenítjük az összes szerződési adatot */}
-        {countryDifferentiates.basic_data && !hasMultipleEntities && (
+        {/* Ha basic_data aktív, megjelenítjük a Több entitás toggle-t és az összes szerződési adatot */}
+        {countryDifferentiates.basic_data && (
           <div className="space-y-6">
-            {/* Szerződéshordozó */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Szerződéshordozó</Label>
-                <Select
-                  value={settings.contract_holder_id || ""}
-                  onValueChange={(val) => onUpdate({ contract_holder_id: val || null })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Válasszon..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {contractHolders.map((ch) => (
-                      <SelectItem key={ch.id} value={ch.id}>
-                        {ch.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {/* Több entitás toggle - csak basic_data módban érhető el */}
+            <div className="flex items-center justify-between bg-muted/30 border rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <Building2 className="h-5 w-5 text-primary" />
+                <div>
+                  <h4 className="text-sm font-medium text-primary">Szerződött entitások</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Ha ebben az országban több jogi személlyel is szerződést kötnek
+                  </p>
+                </div>
               </div>
+              <DifferentPerCountryToggle
+                label="Több entitás"
+                checked={hasMultipleEntities}
+                onChange={(checked) => onToggleEntityMode(country.id, checked)}
+              />
             </div>
+
+            {/* Ha hasMultipleEntities aktív, entitás fülek megjelenítése */}
+            {hasMultipleEntities && (
+              <EntitySection
+                country={country}
+                entities={entities}
+                activeEntityId={activeEntityId}
+                setActiveEntityId={setActiveEntityId}
+                companyId={companyId}
+                contractHolders={contractHolders}
+                isCGP={isCGP}
+                isLifeworks={isLifeworks}
+                onAddEntity={onAddEntity}
+                onUpdateEntity={onUpdateEntity}
+                onDeleteEntity={onDeleteEntity}
+                isEntitiesLoading={isEntitiesLoading}
+              />
+            )}
+
+            {/* Ha nincs entitás mód, az ország-szintű szerződési adatok */}
+            {!hasMultipleEntities && (
+              <>
+                {/* Szerződéshordozó */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Szerződéshordozó</Label>
+                    <Select
+                      value={settings.contract_holder_id || ""}
+                      onValueChange={(val) => onUpdate({ contract_holder_id: val || null })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Válasszon..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {contractHolders.map((ch) => (
+                          <SelectItem key={ch.id} value={ch.id}>
+                            {ch.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
             {/* Szerződés adatai */}
             <div className="space-y-4 border-l-2 border-primary/20 pl-4">
@@ -465,6 +514,8 @@ const CountrySettingsCard = ({
                 </div>
               )}
             </div>
+              </>
+            )}
           </div>
         )}
 
