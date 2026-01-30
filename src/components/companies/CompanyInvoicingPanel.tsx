@@ -1137,9 +1137,9 @@ export const CompanyInvoicingPanel = ({
                 </TabsList>
                 {selectedCountries.map((country) => {
                   // Ellenőrizzük, hogy az adott országban több entitás mód aktív-e
-                  const entityCountryIds = countryDifferentiates.entity_country_ids || [];
-                  const hasEntitiesInCountry = entityCountryIds.includes(country.id);
+                  // Az entitások számából származtatjuk, nem az entity_country_ids-ből
                   const countryEntities = entities.filter(e => e.country_id === country.id);
+                  const hasEntitiesInCountry = countryEntities.length > 1;
                   
                   return (
                     <TabsContent key={country.id} value={country.id} className="mt-4">

@@ -647,8 +647,8 @@ const CompanyForm = () => {
       {/* Számlázás panel (csak CGP) */}
       {(isCGP || !contractHolderId) && (
         <CollapsiblePanel title="Számlázás">
-          {/* Entitás fülek ha több entitás van */}
-          {singleCountryHasMultipleEntities && entities.filter(e => e.country_id === countryIds[0]).length > 0 && (
+          {/* Egyországos mód: Entitás fülek ha több entitás van */}
+          {countryIds.length === 1 && singleCountryHasMultipleEntities && entities.filter(e => e.country_id === countryIds[0]).length > 0 && (
             <EntityInvoicingTabs
               entities={entities.filter(e => e.country_id === countryIds[0])}
               hasMultipleEntities={singleCountryHasMultipleEntities}
@@ -683,8 +683,8 @@ const CompanyForm = () => {
             </EntityInvoicingTabs>
           )}
           
-          {/* Normál számlázás panel ha nincs több entitás */}
-          {!singleCountryHasMultipleEntities && (
+          {/* Egyországos mód: Normál számlázás panel ha nincs több entitás */}
+          {countryIds.length === 1 && !singleCountryHasMultipleEntities && (
             <CompanyInvoicingPanel
               countryDifferentiates={countryDifferentiates}
               setCountryDifferentiates={setCountryDifferentiates}
@@ -715,6 +715,46 @@ const CompanyForm = () => {
               setInvoiceSlipsPerCountry={setInvoiceSlipsPerCountry}
               invoiceTemplates={invoiceTemplates}
               setInvoiceTemplates={setInvoiceTemplates}
+            />
+          )}
+
+          {/* Többországos mód: CompanyInvoicingPanel kezeli az ország/entitás füleket */}
+          {countryIds.length > 1 && (
+            <CompanyInvoicingPanel
+              countryDifferentiates={countryDifferentiates}
+              setCountryDifferentiates={setCountryDifferentiates}
+              billingData={billingData}
+              setBillingData={setBillingData}
+              invoicingData={invoicingData}
+              setInvoicingData={setInvoicingData}
+              invoiceItems={invoiceItems}
+              setInvoiceItems={setInvoiceItems}
+              invoiceComments={invoiceComments}
+              setInvoiceComments={setInvoiceComments}
+              countryIds={countryIds}
+              countries={countries}
+              companyId={companyId || "new"}
+              billingDataPerCountry={billingDataPerCountry}
+              setBillingDataPerCountry={setBillingDataPerCountry}
+              invoicingDataPerCountry={invoicingDataPerCountry}
+              setInvoicingDataPerCountry={setInvoicingDataPerCountry}
+              invoiceItemsPerCountry={invoiceItemsPerCountry}
+              setInvoiceItemsPerCountry={setInvoiceItemsPerCountry}
+              invoiceCommentsPerCountry={invoiceCommentsPerCountry}
+              setInvoiceCommentsPerCountry={setInvoiceCommentsPerCountry}
+              invoiceSlips={invoiceSlips}
+              setInvoiceSlips={setInvoiceSlips}
+              activeInvoicingCountryId={activeInvoicingCountryId}
+              setActiveInvoicingCountryId={setActiveInvoicingCountryId}
+              invoiceSlipsPerCountry={invoiceSlipsPerCountry}
+              setInvoiceSlipsPerCountry={setInvoiceSlipsPerCountry}
+              invoiceTemplates={invoiceTemplates}
+              setInvoiceTemplates={setInvoiceTemplates}
+              entities={entities}
+              billingDataPerEntity={billingDataPerEntity}
+              setBillingDataPerEntity={setBillingDataPerEntity}
+              invoicingDataPerEntity={invoicingDataPerEntity}
+              setInvoicingDataPerEntity={setInvoicingDataPerEntity}
             />
           )}
           
