@@ -61,14 +61,20 @@ const CompanyForm = () => {
   
   const { users } = useAppUsersDb();
   
-  // Contracted entities hook
+  // Contracted entities hook (csak edit módban használjuk a DB-t)
   const {
-    entities,
+    entities: dbEntities,
     loading: entitiesLoading,
     createEntity,
     updateEntity,
     deleteEntity,
   } = useContractedEntities(companyId || undefined);
+
+  // Helyi entitások új cég létrehozásánál (még nincs companyId)
+  const [pendingEntities, setPendingEntities] = useState<ContractedEntity[]>([]);
+  
+  // Kombinált entitás lista: edit módban DB-ből, új módban pendingből
+  const entities = isEditMode ? dbEntities : pendingEntities;
 
   const [formLoading, setFormLoading] = useState(isEditMode);
 
@@ -341,6 +347,16 @@ const CompanyForm = () => {
         });
         
         if (newCompany) {
+          // Ha vannak pending entitások, létrehozzuk őket a frissen létrehozott céghez
+          if (pendingEntities.length > 0 && countryDifferentiates.has_multiple_entities) {
+            for (const pendingEntity of pendingEntities) {
+              await createEntity({
+                ...pendingEntity,
+                company_id: newCompany.id,
+              });
+            }
+          }
+          
           toast.success("Cég létrehozva");
           navigate("/dashboard/settings/companies");
         } else {
@@ -543,15 +559,38 @@ const CompanyForm = () => {
           hasMultipleEntities={countryDifferentiates.has_multiple_entities}
           onToggleMultipleEntities={(enabled) => setCountryDifferentiates(prev => ({ ...prev, has_multiple_entities: enabled }))}
           onAddEntity={async (entity) => {
-            await createEntity(entity);
+            if (isEditMode) {
+              await createEntity(entity);
+            } else {
+              // Új cég: helyi state-be mentjük ideiglenes ID-val
+              const tempEntity: ContractedEntity = {
+                ...entity,
+                id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              };
+              setPendingEntities(prev => [...prev, tempEntity]);
+            }
           }}
           onUpdateEntity={async (id, updates) => {
-            await updateEntity(id, updates);
+            if (isEditMode) {
+              await updateEntity(id, updates);
+            } else {
+              // Új cég: helyi state frissítése
+              setPendingEntities(prev => prev.map(e => 
+                e.id === id ? { ...e, ...updates } : e
+              ));
+            }
           }}
           onDeleteEntity={async (id) => {
-            await deleteEntity(id);
+            if (isEditMode) {
+              await deleteEntity(id);
+            } else {
+              // Új cég: helyi state-ből törlés
+              setPendingEntities(prev => prev.filter(e => e.id !== id));
+            }
           }}
-          isEntitiesLoading={entitiesLoading}
+          isEntitiesLoading={isEditMode ? entitiesLoading : false}
         />
         
         {/* Archived onboarding panel - only shown after onboarding completion */}
