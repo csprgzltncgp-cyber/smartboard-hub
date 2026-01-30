@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,16 @@ export const EntityDataPanel = ({
   const consultationRows: ConsultationRow[] = entity.consultation_rows || [];
   const priceHistory: PriceHistoryEntry[] = entity.price_history || [];
 
+  // Local state for immediate input response
+  const [localName, setLocalName] = useState(entity.name);
+  const [localOrgId, setLocalOrgId] = useState(entity.org_id || "");
+
+  // Sync local state when entity changes (e.g., tab switch)
+  useEffect(() => {
+    setLocalName(entity.name);
+    setLocalOrgId(entity.org_id || "");
+  }, [entity.id, entity.name, entity.org_id]);
+
   const handleConsultationRowsChange = (rows: ConsultationRow[]) => {
     onUpdate({ consultation_rows: rows });
   };
@@ -58,8 +69,11 @@ export const EntityDataPanel = ({
         <div className="space-y-2">
           <Label>Entitás neve *</Label>
           <Input
-            value={entity.name}
-            onChange={(e) => onUpdate({ name: e.target.value })}
+            value={localName}
+            onChange={(e) => {
+              setLocalName(e.target.value);
+              onUpdate({ name: e.target.value });
+            }}
             placeholder="pl. Henkel Hungary Kft."
           />
           <p className="text-xs text-muted-foreground">
@@ -69,8 +83,11 @@ export const EntityDataPanel = ({
         <div className="space-y-2">
           <Label>ORG ID</Label>
           <Input
-            value={entity.org_id || ""}
-            onChange={(e) => onUpdate({ org_id: e.target.value || null })}
+            value={localOrgId}
+            onChange={(e) => {
+              setLocalOrgId(e.target.value);
+              onUpdate({ org_id: e.target.value || null });
+            }}
             placeholder="ORG ID"
           />
         </div>
