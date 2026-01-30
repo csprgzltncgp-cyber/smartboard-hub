@@ -1242,7 +1242,7 @@ const CompanyForm = () => {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-2xl font-semibold">
-          {isEditMode ? name || "Cég szerkesztése" : "Új cég hozzáadása"}
+          {isEditMode ? (groupName?.trim() || name || "Cég szerkesztése") : "Új cég hozzáadása"}
         </h1>
       </div>
 
