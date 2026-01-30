@@ -252,9 +252,10 @@ export const SingleCountryBasicDataPanel = ({
   };
 
   const getEntityTabLabel = (entity: ContractedEntity, index: number): string => {
-    // Az első entitás esetén, ha a neve üres vagy "Entitás 1", használjuk a cégnevet
-    if (index === 0 && name && (!entity.name || entity.name === "Entitás 1")) {
-      return name;
+    // Minden entitás a saját nevét (cégnév) mutatja, ha ki van töltve
+    // Ha üres vagy alapértelmezett "Entitás X", akkor fallback
+    if (entity.name && !entity.name.startsWith("Entitás ")) {
+      return entity.name;
     }
     return entity.name || `Entitás ${index + 1}`;
   };
