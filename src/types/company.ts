@@ -58,6 +58,7 @@ export interface CountryDifferentiate {
   invoicing: boolean;
   contract_date_reminder_email: boolean;
   basic_data: boolean; // Ha true, minden alapadat (szerződés, ár, stb.) országonként különböző
+  workshop_crisis: boolean; // Ha true, a workshop és krízis adatok országonként különbözőek
   has_multiple_entities: boolean; // Ha true, egy vagy több országban több szerződött entitás van
   entity_country_ids: string[]; // Mely országokban van több entitás
 }

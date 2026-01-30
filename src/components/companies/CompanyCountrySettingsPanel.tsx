@@ -1322,110 +1322,112 @@ const CountrySettingsCard = ({
           </div>
         )}
 
-        {/* Workshop és Krízisintervenció beállítások */}
-        <div className="space-y-4 pt-4 border-t">
-          <h4 className="text-sm font-medium text-primary">Workshop és Krízisintervenció beállítások</h4>
+        {/* Workshop és Krízisintervenció beállítások - csak ha workshop_crisis országonként különböző */}
+        {(countryDifferentiates.workshop_crisis || countryDifferentiates.basic_data) && (
+          <div className="space-y-4 pt-4 border-t">
+            <h4 className="text-sm font-medium text-primary">Workshop és Krízisintervenció beállítások</h4>
 
-          {/* Workshops */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-primary">Workshopok</span>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={onAddWorkshop}
-                className="h-8"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Hozzáadás
-              </Button>
-              {workshops.length > 0 && (
+            {/* Workshops */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-primary">Workshopok</span>
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  onClick={() => setIsWorkshopsOpen(!isWorkshopsOpen)}
+                  onClick={onAddWorkshop}
                   className="h-8"
                 >
-                  {isWorkshopsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  <Plus className="h-4 w-4 mr-1" />
+                  Hozzáadás
                 </Button>
+                {workshops.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsWorkshopsOpen(!isWorkshopsOpen)}
+                    className="h-8"
+                  >
+                    {isWorkshopsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </Button>
+                )}
+              </div>
+              {isWorkshopsOpen && workshops.length > 0 && (
+                <div className="space-y-2 pl-4">
+                  {workshops.map((ws, idx) => (
+                    <div key={ws.id} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{idx + 1}.</span>
+                      <Input
+                        value={ws.name}
+                        onChange={() => {}}
+                        placeholder="Workshop neve"
+                        className="h-8 flex-1"
+                      />
+                      <Input
+                        type="number"
+                        value={ws.sessions_available}
+                        onChange={() => {}}
+                        placeholder="Alkalmak"
+                        className="h-8 w-24"
+                      />
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-            {isWorkshopsOpen && workshops.length > 0 && (
-              <div className="space-y-2 pl-4">
-                {workshops.map((ws, idx) => (
-                  <div key={ws.id} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>{idx + 1}.</span>
-                    <Input
-                      value={ws.name}
-                      onChange={() => {}}
-                      placeholder="Workshop neve"
-                      className="h-8 flex-1"
-                    />
-                    <Input
-                      type="number"
-                      value={ws.sessions_available}
-                      onChange={() => {}}
-                      placeholder="Alkalmak"
-                      className="h-8 w-24"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
-          {/* Krízisintervenciók */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-primary">Krízisintervenciók</span>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={onAddCrisis}
-                className="h-8"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Hozzáadás
-              </Button>
-              {crisisInterventions.length > 0 && (
+            {/* Krízisintervenciók */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-primary">Krízisintervenciók</span>
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  onClick={() => setIsCrisisOpen(!isCrisisOpen)}
+                  onClick={onAddCrisis}
                   className="h-8"
                 >
-                  {isCrisisOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  <Plus className="h-4 w-4 mr-1" />
+                  Hozzáadás
                 </Button>
+                {crisisInterventions.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsCrisisOpen(!isCrisisOpen)}
+                    className="h-8"
+                  >
+                    {isCrisisOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </Button>
+                )}
+              </div>
+              {isCrisisOpen && crisisInterventions.length > 0 && (
+                <div className="space-y-2 pl-4">
+                  {crisisInterventions.map((ci, idx) => (
+                    <div key={ci.id} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{idx + 1}.</span>
+                      <Input
+                        value={ci.name}
+                        onChange={() => {}}
+                        placeholder="Krízisintervenció neve"
+                        className="h-8 flex-1"
+                      />
+                      <Input
+                        type="number"
+                        value={ci.sessions_available}
+                        onChange={() => {}}
+                        placeholder="Alkalmak"
+                        className="h-8 w-24"
+                      />
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-            {isCrisisOpen && crisisInterventions.length > 0 && (
-              <div className="space-y-2 pl-4">
-                {crisisInterventions.map((ci, idx) => (
-                  <div key={ci.id} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>{idx + 1}.</span>
-                    <Input
-                      value={ci.name}
-                      onChange={() => {}}
-                      placeholder="Krízisintervenció neve"
-                      className="h-8 flex-1"
-                    />
-                    <Input
-                      type="number"
-                      value={ci.sessions_available}
-                      onChange={() => {}}
-                      placeholder="Alkalmak"
-                      className="h-8 w-24"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
-        </div>
+        )}
       </CollapsibleContent>
     </Collapsible>
   );

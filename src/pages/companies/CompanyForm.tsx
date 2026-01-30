@@ -129,6 +129,7 @@ const CompanyForm = () => {
     invoicing: false,
     contract_date_reminder_email: false,
     basic_data: false,
+    workshop_crisis: false,
     has_multiple_entities: false,
     entity_country_ids: [],
   });
@@ -960,6 +961,10 @@ const CompanyForm = () => {
               setCountrySettings={setCountrySettings}
               invoiceTemplates={invoiceTemplates}
               setInvoiceTemplates={setInvoiceTemplates}
+              workshops={workshops}
+              setWorkshops={setWorkshops}
+              crisisInterventions={crisisInterventions}
+              setCrisisInterventions={setCrisisInterventions}
               hasMultipleEntitiesInAnyCountry={hasMultipleEntitiesInAnyCountry}
             />
             

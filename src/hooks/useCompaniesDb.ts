@@ -344,6 +344,7 @@ export const useCompaniesDb = () => {
             invoicing: false,
             contract_date_reminder_email: false,
             basic_data: false,
+            workshop_crisis: false,
             has_multiple_entities: false,
             entity_country_ids: [],
           },
@@ -480,6 +481,7 @@ export const useCompaniesDb = () => {
           invoicing: diffData.invoicing,
           contract_date_reminder_email: false,
           basic_data: diffData.invoicing, // basic_data mirrors invoicing for backwards compatibility
+          workshop_crisis: false, // Will be loaded from DB when column exists
           has_multiple_entities: diffData.has_multiple_entities || false,
           entity_country_ids: diffData.entity_country_ids || [],
         } : {
@@ -490,6 +492,7 @@ export const useCompaniesDb = () => {
           invoicing: false,
           contract_date_reminder_email: false,
           basic_data: false,
+          workshop_crisis: false,
           has_multiple_entities: false,
           entity_country_ids: [],
         },

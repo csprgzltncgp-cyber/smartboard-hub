@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -11,11 +12,11 @@ import { useState } from "react";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import { DifferentPerCountryToggle } from "../DifferentPerCountryToggle";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CountryDifferentiate, ContractHolder, ConsultationRow, PriceHistoryEntry, CompanyCountrySettings, InvoiceTemplate } from "@/types/company";
+import { CountryDifferentiate, ContractHolder, ConsultationRow, PriceHistoryEntry, CompanyCountrySettings, InvoiceTemplate, Workshop, CrisisIntervention } from "@/types/company";
 import { ContractDataPanel } from "./ContractDataPanel";
 import { MigrateBasicDataDialog } from "../dialogs/MigrateBasicDataDialog";
 import { SelectEntityCountriesDialog } from "../dialogs/SelectEntityCountriesDialog";
-import { Globe, Building2 } from "lucide-react";
+import { Globe, Building2, Plus, ChevronDown, ChevronUp } from "lucide-react";
 
 interface Country {
   id: string;
@@ -72,6 +73,11 @@ interface MultiCountryBasicDataPanelProps {
   setCountrySettings: (settings: CompanyCountrySettings[]) => void;
   invoiceTemplates: InvoiceTemplate[];
   setInvoiceTemplates: (templates: InvoiceTemplate[]) => void;
+  // Workshop & Crisis data
+  workshops: Workshop[];
+  setWorkshops: (workshops: Workshop[]) => void;
+  crisisInterventions: CrisisIntervention[];
+  setCrisisInterventions: (interventions: CrisisIntervention[]) => void;
   // Entity count check - to prevent disabling basic_data when entities exist
   hasMultipleEntitiesInAnyCountry?: boolean;
 }
@@ -125,6 +131,11 @@ export const MultiCountryBasicDataPanel = ({
   setCountrySettings,
   invoiceTemplates,
   setInvoiceTemplates,
+  // Workshop & Crisis
+  workshops,
+  setWorkshops,
+  crisisInterventions,
+  setCrisisInterventions,
   // Entity check
   hasMultipleEntitiesInAnyCountry = false,
 }: MultiCountryBasicDataPanelProps) => {
@@ -525,6 +536,21 @@ export const MultiCountryBasicDataPanel = ({
         </div>
       )}
 
+      {/* ============================================== */}
+      {/* Workshop és Krízisintervenció beállítások */}
+      {/* ============================================== */}
+      {!countryDifferentiates.basic_data && (
+        <WorkshopCrisisSection
+          countryIds={countryIds}
+          workshops={workshops}
+          setWorkshops={setWorkshops}
+          crisisInterventions={crisisInterventions}
+          setCrisisInterventions={setCrisisInterventions}
+          countryDifferentiates={countryDifferentiates}
+          onUpdateDifferentiate={(key, value) => updateDifferentiate(key, value)}
+        />
+      )}
+
       {/* Aktív státusz - csak ha NEM országonként különböző */}
       {!countryDifferentiates.basic_data && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
@@ -547,5 +573,211 @@ export const MultiCountryBasicDataPanel = ({
       )}
       </div>
     </>
+  );
+};
+
+// Workshop és Krízisintervenció szekció komponens
+interface WorkshopCrisisSectionProps {
+  countryIds: string[];
+  workshops: Workshop[];
+  setWorkshops: (workshops: Workshop[]) => void;
+  crisisInterventions: CrisisIntervention[];
+  setCrisisInterventions: (interventions: CrisisIntervention[]) => void;
+  countryDifferentiates: CountryDifferentiate;
+  onUpdateDifferentiate: (key: keyof CountryDifferentiate, value: boolean) => void;
+}
+
+const WorkshopCrisisSection = ({
+  countryIds,
+  workshops,
+  setWorkshops,
+  crisisInterventions,
+  setCrisisInterventions,
+  countryDifferentiates,
+  onUpdateDifferentiate,
+}: WorkshopCrisisSectionProps) => {
+  const [isWorkshopsOpen, setIsWorkshopsOpen] = useState(false);
+  const [isCrisisOpen, setIsCrisisOpen] = useState(false);
+
+  // Ha workshop_crisis aktív, ne jelenítsük meg a szekciót itt
+  if (countryDifferentiates.workshop_crisis) {
+    return (
+      <div className="bg-muted/30 border rounded-lg p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <h4 className="text-sm font-medium text-primary">Workshop és Krízisintervenció beállítások</h4>
+          {countryIds.length > 1 && (
+            <DifferentPerCountryToggle
+              label="Országonként különböző"
+              checked={countryDifferentiates.workshop_crisis}
+              onChange={(checked) => onUpdateDifferentiate("workshop_crisis", checked)}
+            />
+          )}
+        </div>
+        <p className="text-sm text-muted-foreground">
+          A Workshop és Krízisintervenció adatok országonként különbözőek. Az adatokat az <strong>Országok</strong> fülön, az egyes országok alatt lehet megadni.
+        </p>
+      </div>
+    );
+  }
+
+  const addWorkshop = () => {
+    const countryId = countryIds[0] || "";
+    setWorkshops([
+      ...workshops,
+      {
+        id: crypto.randomUUID(),
+        company_id: "",
+        country_id: countryId,
+        name: "",
+        sessions_available: 0,
+        price: null,
+        currency: null,
+      },
+    ]);
+    setIsWorkshopsOpen(true);
+  };
+
+  const updateWorkshop = (id: string, updates: Partial<Workshop>) => {
+    setWorkshops(
+      workshops.map((ws) => (ws.id === id ? { ...ws, ...updates } : ws))
+    );
+  };
+
+  const addCrisis = () => {
+    const countryId = countryIds[0] || "";
+    setCrisisInterventions([
+      ...crisisInterventions,
+      {
+        id: crypto.randomUUID(),
+        company_id: "",
+        country_id: countryId,
+        name: "",
+        sessions_available: 0,
+        price: null,
+        currency: null,
+      },
+    ]);
+    setIsCrisisOpen(true);
+  };
+
+  const updateCrisis = (id: string, updates: Partial<CrisisIntervention>) => {
+    setCrisisInterventions(
+      crisisInterventions.map((ci) => (ci.id === id ? { ...ci, ...updates } : ci))
+    );
+  };
+
+  return (
+    <div className="bg-muted/30 border rounded-lg p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-medium text-primary">Workshop és Krízisintervenció beállítások</h4>
+        {countryIds.length > 1 && (
+          <DifferentPerCountryToggle
+            label="Országonként különböző"
+            checked={countryDifferentiates.workshop_crisis}
+            onChange={(checked) => onUpdateDifferentiate("workshop_crisis", checked)}
+          />
+        )}
+      </div>
+
+      {/* Workshops */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Workshopok</span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addWorkshop}
+            className="h-8"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Hozzáadás
+          </Button>
+          {workshops.length > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsWorkshopsOpen(!isWorkshopsOpen)}
+              className="h-8"
+            >
+              {isWorkshopsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
+          )}
+        </div>
+        {isWorkshopsOpen && workshops.length > 0 && (
+          <div className="space-y-2 pl-4">
+            {workshops.map((ws, idx) => (
+              <div key={ws.id} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>{idx + 1}.</span>
+                <Input
+                  value={ws.name}
+                  onChange={(e) => updateWorkshop(ws.id, { name: e.target.value })}
+                  placeholder="Workshop neve"
+                  className="h-8 flex-1"
+                />
+                <Input
+                  type="number"
+                  value={ws.sessions_available}
+                  onChange={(e) => updateWorkshop(ws.id, { sessions_available: parseInt(e.target.value) || 0 })}
+                  placeholder="Alkalmak"
+                  className="h-8 w-24"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Krízisintervenciók */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Krízisintervenciók</span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addCrisis}
+            className="h-8"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Hozzáadás
+          </Button>
+          {crisisInterventions.length > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsCrisisOpen(!isCrisisOpen)}
+              className="h-8"
+            >
+              {isCrisisOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
+          )}
+        </div>
+        {isCrisisOpen && crisisInterventions.length > 0 && (
+          <div className="space-y-2 pl-4">
+            {crisisInterventions.map((ci, idx) => (
+              <div key={ci.id} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>{idx + 1}.</span>
+                <Input
+                  value={ci.name}
+                  onChange={(e) => updateCrisis(ci.id, { name: e.target.value })}
+                  placeholder="Krízisintervenció neve"
+                  className="h-8 flex-1"
+                />
+                <Input
+                  type="number"
+                  value={ci.sessions_available}
+                  onChange={(e) => updateCrisis(ci.id, { sessions_available: parseInt(e.target.value) || 0 })}
+                  placeholder="Alkalmak"
+                  className="h-8 w-24"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
