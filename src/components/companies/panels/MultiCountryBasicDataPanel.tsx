@@ -28,6 +28,8 @@ interface MultiCountryBasicDataPanelProps {
   setName: (name: string) => void;
   dispatchName: string | null;
   setDispatchName: (name: string | null) => void;
+  groupName: string | null;
+  setGroupName: (name: string | null) => void;
   active: boolean;
   setActive: (active: boolean) => void;
   countryIds: string[];
@@ -79,6 +81,8 @@ export const MultiCountryBasicDataPanel = ({
   setName,
   dispatchName,
   setDispatchName,
+  groupName,
+  setGroupName,
   active,
   setActive,
   countryIds,
@@ -346,6 +350,23 @@ export const MultiCountryBasicDataPanel = ({
                 (Entitások törlése szükséges a kikapcsoláshoz)
               </span>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Cégcsoport mező - csak ha országonként különböző */}
+      {countryDifferentiates.basic_data && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+          <div className="space-y-2">
+            <Label>Cégcsoport neve</Label>
+            <Input
+              value={groupName || ""}
+              onChange={(e) => setGroupName(e.target.value || null)}
+              placeholder="A cég ezzel a névvel jelenik meg a Cégek menüben"
+            />
+            <p className="text-xs text-muted-foreground">
+              Ha az alapadatok országonként eltérőek, ez a név jelenik meg a céglistában.
+            </p>
           </div>
         </div>
       )}

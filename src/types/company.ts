@@ -22,6 +22,7 @@ export interface Company {
   id: string;
   name: string;
   dispatch_name: string | null; // Cég elnevezése kiközvetítéshez
+  group_name: string | null; // Cégcsoport név - a Cégek menüben ezzel jelenik meg (ha országonként különböző)
   active: boolean;
   country_ids: string[];
   contract_holder_id: string | null;
