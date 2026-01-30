@@ -126,6 +126,7 @@ export const EntityDataPanel = ({
           invoicing: false,
           contract_date_reminder_email: false,
           basic_data: false,
+          workshop_crisis: false,
           has_multiple_entities: false,
           entity_country_ids: [],
         }}
