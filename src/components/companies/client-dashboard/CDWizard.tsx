@@ -60,8 +60,12 @@ export const CDWizard = ({
       setState(prev => ({ ...prev, currentStep: STEPS[nextIndex].key }));
     } else {
       // Utolsó lépés - befejezés
-      setState(prev => ({ ...prev, isComplete: true }));
-      onComplete(state);
+      setState(prev => {
+        const finalState = { ...prev, isComplete: true };
+        // Mindig a legfrissebb state menjen ki
+        onComplete(finalState);
+        return finalState;
+      });
     }
   };
 
