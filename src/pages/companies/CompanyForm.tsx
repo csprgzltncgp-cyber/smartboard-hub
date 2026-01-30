@@ -108,6 +108,7 @@ const CompanyForm = () => {
     contract_date_reminder_email: false,
     basic_data: false,
     has_multiple_entities: false,
+    entity_country_ids: [],
   });
 
   // Ország-specifikus beállítások
