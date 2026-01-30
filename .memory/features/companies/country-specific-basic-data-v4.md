@@ -1,0 +1,39 @@
+# Memory: features/companies/country-specific-basic-data-v4
+Updated: 2026-01-30
+
+Több országos cégek esetén az Alapadatok (Basic Data) panelen az 'Országonkénti alapadatok' (Globe ikonnal jelölt) kapcsoló teszi lehetővé az országonkénti eltérést. 
+
+## Működés
+
+### Bekapcsoláskor
+1. **Ha van kitöltött adat** (Cégnév, Dispatch name, szerződési adatok, stb.) az Alapadatok panelen:
+   - Megjelenik a **MigrateBasicDataDialog** → „Melyik országba kerüljenek az adatok?"
+   - A felhasználó kiválasztja a célországot
+   - **MINDEN** meglévő adat (name, dispatch_name, active, contract adatok, stb.) átmásolódik a kiválasztott ország CompanyCountrySettings-ébe
+   
+2. **Ha nincs kitöltött adat** (új cég, üres mezők):
+   - Nincs dialógus, egyszerűen bekapcsol az opció
+
+### Kritikus üzleti szabály
+Ha az alapadatok országonként különböznek (`basic_data = true`), a számlázás is kötelezően országonkénti lesz (`invoicing = true`).
+
+### Aktív állapotban (`basic_data = true`)
+- Az **Alapadatok fülön**:
+  - Minden mező el van rejtve (Cégnév, Dispatch name, Aktív, Szerződés panel, stb.)
+  - Csak az „Országonként különböző" toggle és egy infószöveg látható
+  - A Mentés gomb is el van rejtve
+  
+- Az **Országok fülön** (minden ország-kártyán belül):
+  - Megjelenik a **„Több entitás" toggle** (Building2 ikon)
+  - Megjelenik a **teljes Alapadatok form**: Cégnév, Dispatch name, Aktív státusz, Szerződéshordozó, Szerződés adatai, stb.
+  - Minden ország saját, független adatokat kezelhet
+
+## Technikai részletek
+- `CompanyCountrySettings` interfész tartalmazza: `name`, `dispatch_name`, `is_active` mezőket
+- `hasBasicData` ellenőrzés tartalmazza a `name` és `dispatchName` mezőket is
+- Migráció során minden mező (beleértve name, dispatch_name, is_active) átkerül a kiválasztott országba
+
+## Komponensek
+- `MultiCountryBasicDataPanel.tsx` - Tartalmazza a toggle-t és a migrációs dialógust
+- `MigrateBasicDataDialog.tsx` - Országválasztó dialógus
+- `CompanyCountrySettingsPanel.tsx` / `CountrySettingsCard` - Ország-specifikus mezők megjelenítése

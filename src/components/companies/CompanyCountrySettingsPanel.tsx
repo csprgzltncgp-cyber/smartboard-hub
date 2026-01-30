@@ -105,6 +105,9 @@ export const CompanyCountrySettingsPanel = ({
       client_language_id: null,
       all_country_access: false,
       added_at: null,
+      name: null,
+      dispatch_name: null,
+      is_active: true,
       contract_file_url: null,
       contract_price: null,
       contract_price_type: null,
@@ -366,6 +369,45 @@ const CountrySettingsCard = ({
             {/* Ha nincs entitás mód, az ország-szintű szerződési adatok */}
             {!hasMultipleEntities && (
               <>
+                {/* Cégnév és Dispatch name - országonként */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Cégnév</Label>
+                    <Input
+                      value={settings.name || ""}
+                      onChange={(e) => onUpdate({ name: e.target.value || null })}
+                      placeholder="Cégnév ebben az országban"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Cég elnevezése kiközvetítéshez</Label>
+                    <Input
+                      value={settings.dispatch_name || ""}
+                      onChange={(e) => onUpdate({ dispatch_name: e.target.value || null })}
+                      placeholder="Ahogy az operátorok listájában megjelenik"
+                    />
+                  </div>
+                </div>
+
+                {/* Aktív státusz */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Aktív</Label>
+                    <Select
+                      value={settings.is_active ? "true" : "false"}
+                      onValueChange={(val) => onUpdate({ is_active: val === "true" })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Igen</SelectItem>
+                        <SelectItem value="false">Nem</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 {/* Szerződéshordozó */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
