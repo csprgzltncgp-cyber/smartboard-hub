@@ -95,6 +95,7 @@ const CompanyForm = () => {
   // Alapadatok
   const [name, setName] = useState("");
   const [dispatchName, setDispatchName] = useState<string | null>(null);
+  const [groupName, setGroupName] = useState<string | null>(null); // Cégcsoport név (ha országonként különböző)
   const [active, setActive] = useState(true);
   const [countryIds, setCountryIds] = useState<string[]>([]);
 
@@ -240,6 +241,7 @@ const CompanyForm = () => {
       if (company) {
         setName(company.name);
         setDispatchName(company.dispatch_name);
+        setGroupName(company.group_name);
         setActive(company.active);
         setCountryIds(company.country_ids);
         setContractHolderId(company.contract_holder_id);
@@ -907,6 +909,8 @@ const CompanyForm = () => {
               setName={setName}
               dispatchName={dispatchName}
               setDispatchName={setDispatchName}
+              groupName={groupName}
+              setGroupName={setGroupName}
               active={active}
               setActive={setActive}
               countryIds={countryIds}

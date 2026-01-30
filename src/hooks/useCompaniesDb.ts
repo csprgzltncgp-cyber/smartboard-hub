@@ -184,6 +184,7 @@ export const useCompaniesDb = () => {
           id: c.id,
           name: c.name,
           dispatch_name: (c as any).dispatch_name || null,
+          group_name: (c as any).group_name || null,
           active: true, // TODO: add active column to companies table
           country_ids: countryIds.length > 0 ? countryIds : [c.country_id],
           contract_holder_id: c.contract_holder_type === 'cgp' ? '2' : c.contract_holder_type === 'telus' ? '1' : null,
@@ -215,6 +216,7 @@ export const useCompaniesDb = () => {
           id: 'mock-newcomer-mediagroup',
           name: 'MediaGroup Hungary',
           dispatch_name: null,
+          group_name: null,
           active: true,
           country_ids: [hungaryId],
           contract_holder_id: '2', // CGP
@@ -294,6 +296,7 @@ export const useCompaniesDb = () => {
           id: 'mock-newcomer-mediagroup',
           name: 'MediaGroup Hungary',
           dispatch_name: null,
+          group_name: null,
           active: true,
           country_ids: hungaryId ? [hungaryId] : [],
           contract_holder_id: '2', // CGP
@@ -430,6 +433,7 @@ export const useCompaniesDb = () => {
         id: companyData.id,
         name: companyData.name,
         dispatch_name: (companyData as any).dispatch_name || null,
+        group_name: (companyData as any).group_name || null,
         active: true,
         country_ids: countryIds.length > 0 ? countryIds : [companyData.country_id],
         contract_holder_id: companyData.contract_holder_type === 'cgp' ? '2' : companyData.contract_holder_type === 'telus' ? '1' : null,
@@ -650,6 +654,7 @@ export const useCompaniesDb = () => {
         id: newCompany.id,
         name: newCompany.name,
         dispatch_name: null,
+        group_name: null,
         active: true,
         country_ids: data.countryIds,
         contract_holder_id: data.contractHolderType === 'cgp' ? '2' : data.contractHolderType === 'telus' ? '1' : null,
