@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, ChevronDown, ChevronUp, X, Building2, Globe } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import { ContractHolder, Workshop, CrisisIntervention, CountryDifferentiate, ConsultationRow, PriceHistoryEntry } from "@/types/company";
 import { ContractDataPanel } from "./ContractDataPanel";
@@ -163,6 +163,10 @@ export const SingleCountryBasicDataPanel = ({
   const [activeEntityId, setActiveEntityId] = useState<string>(entities[0]?.id || "");
   const [isCreatingInitialEntities, setIsCreatingInitialEntities] = useState(false);
 
+  // NOTE: A "Cégnév" (nem entitás mód) input aktuális értékének biztos olvasásához.
+  // Így a toggle pillanatában akkor is át tudjuk migrálni az értéket, ha a state még nem frissült.
+  const companyNameInputRef = useRef<HTMLInputElement | null>(null);
+
   // Dummy countryDifferentiates for single country (no different per country needed)
   const countryDifferentiates: CountryDifferentiate = {
     contract_holder: false,
@@ -202,7 +206,8 @@ export const SingleCountryBasicDataPanel = ({
       setIsCreatingInitialEntities(true);
       try {
         // Első entitás: a meglévő cégadatokkal (minden adat!)
-        const entity1Name = name?.trim() || "Entitás 1";
+        const entity1Name =
+          companyNameInputRef.current?.value?.trim() || name?.trim() || "Entitás 1";
         const entity1: Omit<ContractedEntity, 'id' | 'created_at' | 'updated_at'> = {
           company_id: companyId,
           country_id: countryId,
@@ -444,6 +449,7 @@ export const SingleCountryBasicDataPanel = ({
           <div className="space-y-2">
             <Label>{isEntityMode ? "Entitás neve *" : "Cégnév"}</Label>
             <Input
+              ref={isEntityMode ? undefined : companyNameInputRef}
               value={entityName}
               onChange={(e) => setEntityName(e.target.value)}
               placeholder={isEntityMode ? "pl. Henkel Hungary Kft." : "Cégnév"}
