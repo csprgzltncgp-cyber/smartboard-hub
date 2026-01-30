@@ -1024,24 +1024,7 @@ const CompanyForm = () => {
         label: "Client Dashboard",
         visible: isCGP || !contractHolderId,
         content: (
-          <div className="space-y-6">
-            <ClientDashboardTabContent companyId={companyId || "new"} countryIds={countryIds} />
-            <div className="flex items-center gap-4 pt-4 border-t">
-              <Button type="submit" className="rounded-xl">
-                <Save className="h-4 w-4 mr-2" />
-                Mentés
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => toast.info("Új felhasználó hozzáadása - fejlesztés alatt")}
-                className="rounded-xl"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Új felhasználó hozzáadása
-              </Button>
-            </div>
-          </div>
+          <ClientDashboardTabContent companyId={companyId || "new"} countryIds={countryIds} />
         ),
       },
       {
