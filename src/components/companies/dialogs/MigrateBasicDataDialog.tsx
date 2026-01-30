@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
 
 interface Country {
@@ -43,11 +43,20 @@ export const MigrateBasicDataDialog = ({
   onConfirm,
   onCancel,
 }: MigrateBasicDataDialogProps) => {
-  const [selectedCountryId, setSelectedCountryId] = useState<string>(
-    countries[0]?.id || ""
-  );
+  const [selectedCountryId, setSelectedCountryId] = useState<string>("");
+
+  // Reset selection when dialog opens or countries change
+  useEffect(() => {
+    if (open && countries.length > 0) {
+      setSelectedCountryId(countries[0].id);
+    }
+  }, [open, countries]);
 
   const handleConfirm = () => {
+    if (!selectedCountryId) {
+      console.error("No country selected for migration");
+      return;
+    }
     // Mindkét adat (alapadatok és számlázás) ugyanabba az országba kerül
     onConfirm(
       hasBasicData ? selectedCountryId : null,
@@ -62,6 +71,11 @@ export const MigrateBasicDataDialog = ({
 
   // Neither has data - shouldn't show dialog but handle gracefully
   if (!hasBasicData && !hasInvoicingData) {
+    return null;
+  }
+
+  // No countries available
+  if (countries.length === 0) {
     return null;
   }
 
@@ -97,7 +111,7 @@ export const MigrateBasicDataDialog = ({
             </Select>
             <div className="text-xs text-muted-foreground space-y-1">
               {hasBasicData && (
-                <p>• A szerződési adatok (ár, szerződéshordozó, stb.) ehhez az országhoz lesznek rendelve.</p>
+                <p>• A cégnév, szerződési adatok és minden alapadat ehhez az országhoz lesz rendelve.</p>
               )}
               {hasInvoicingData && (
                 <p>• A számlázási sablonok és beállítások szintén ehhez az országhoz lesznek rendelve.</p>
@@ -110,7 +124,7 @@ export const MigrateBasicDataDialog = ({
           <Button variant="outline" onClick={handleCancel}>
             Mégse
           </Button>
-          <Button onClick={handleConfirm}>
+          <Button onClick={handleConfirm} disabled={!selectedCountryId}>
             Megerősítés és folytatás
           </Button>
         </DialogFooter>
