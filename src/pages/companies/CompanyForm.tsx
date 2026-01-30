@@ -962,15 +962,13 @@ const CompanyForm = () => {
               <ArchivedOnboardingPanel data={archivedOnboarding} />
             )}
             
-            {/* Mentés gomb - csak ha NEM országonként különböző, mert akkor nincs mit menteni itt */}
-            {!countryDifferentiates.basic_data && (
-              <div className="flex items-center gap-4 pt-4 border-t">
-                <Button type="submit" className="rounded-xl">
-                  <Save className="h-4 w-4 mr-2" />
-                  Mentés
-                </Button>
-              </div>
-            )}
+            {/* Mentés gomb - mindig látható, mert a groupName mező itt szerkeszthető */}
+            <div className="flex items-center gap-4 pt-4 border-t">
+              <Button type="submit" className="rounded-xl">
+                <Save className="h-4 w-4 mr-2" />
+                Mentés
+              </Button>
+            </div>
           </div>
         ),
       },
