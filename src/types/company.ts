@@ -58,6 +58,7 @@ export interface CountryDifferentiate {
   contract_date_reminder_email: boolean;
   basic_data: boolean; // Ha true, minden alapadat (szerződés, ár, stb.) országonként különböző
   has_multiple_entities: boolean; // Ha true, egy vagy több országban több szerződött entitás van
+  entity_country_ids: string[]; // Mely országokban van több entitás
 }
 
 export interface ContractHolder {

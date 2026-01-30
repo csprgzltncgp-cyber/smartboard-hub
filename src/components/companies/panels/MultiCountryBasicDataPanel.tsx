@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CountryDifferentiate, ContractHolder, ConsultationRow, PriceHistoryEntry, CompanyCountrySettings, InvoiceTemplate } from "@/types/company";
 import { ContractDataPanel } from "./ContractDataPanel";
 import { MigrateBasicDataDialog } from "../dialogs/MigrateBasicDataDialog";
+import { SelectEntityCountriesDialog } from "../dialogs/SelectEntityCountriesDialog";
 import { Globe, Building2 } from "lucide-react";
 
 interface Country {
@@ -120,6 +121,7 @@ export const MultiCountryBasicDataPanel = ({
   setInvoiceTemplates,
 }: MultiCountryBasicDataPanelProps) => {
   const [showMigrateDialog, setShowMigrateDialog] = useState(false);
+  const [showEntityCountriesDialog, setShowEntityCountriesDialog] = useState(false);
   
   const isCGP = contractHolderId === "2";
   const isLifeworks = contractHolderId === "1";
@@ -227,6 +229,35 @@ export const MultiCountryBasicDataPanel = ({
     setShowMigrateDialog(false);
   };
 
+  // Handle entity toggle - open dialog
+  const handleEntityToggleClick = () => {
+    setShowEntityCountriesDialog(true);
+  };
+
+  // Handle entity countries selection
+  const handleEntityCountriesConfirm = (selectedIds: string[]) => {
+    setCountryDifferentiates({
+      ...countryDifferentiates,
+      has_multiple_entities: selectedIds.length > 0,
+      entity_country_ids: selectedIds,
+    });
+  };
+
+  // Get display text for entity countries
+  const getEntityCountriesLabel = () => {
+    const entityCountryIds = countryDifferentiates.entity_country_ids || [];
+    if (entityCountryIds.length === 0) return "Több entitás";
+    
+    const names = entityCountryIds
+      .map((id) => countries.find((c) => c.id === id)?.name)
+      .filter(Boolean);
+    
+    if (names.length <= 2) {
+      return names.join(", ");
+    }
+    return `${names.length} ország`;
+  };
+
   return (
     <>
       <MigrateBasicDataDialog
@@ -237,6 +268,14 @@ export const MultiCountryBasicDataPanel = ({
         hasInvoicingData={hasInvoicingData}
         onConfirm={handleMigrationConfirm}
         onCancel={handleMigrationCancel}
+      />
+      <SelectEntityCountriesDialog
+        open={showEntityCountriesDialog}
+        onOpenChange={setShowEntityCountriesDialog}
+        countries={countries}
+        selectedCountryIds={countryIds}
+        entityCountryIds={countryDifferentiates.entity_country_ids || []}
+        onConfirm={handleEntityCountriesConfirm}
       />
     <div className="space-y-6">
       {/* ORSZÁG KIVÁLASZTÓ - KIEMELT PANEL */}
@@ -264,14 +303,14 @@ export const MultiCountryBasicDataPanel = ({
             <div>
               <h4 className="text-sm font-medium text-primary">Szerződött entitások</h4>
               <p className="text-xs text-muted-foreground">
-                Ha egy országban több jogi személlyel is szerződést kötnek
+                Ha egy országban több jogi személlyel is szerződést kötnek. Válassz országot!
               </p>
             </div>
           </div>
           <DifferentPerCountryToggle
-            label="Több entitás"
+            label={getEntityCountriesLabel()}
             checked={countryDifferentiates.has_multiple_entities || false}
-            onChange={(checked) => setCountryDifferentiates({ ...countryDifferentiates, has_multiple_entities: checked })}
+            onChange={handleEntityToggleClick}
           />
         </div>
       )}

@@ -323,6 +323,7 @@ export const useCompaniesDb = () => {
             contract_date_reminder_email: false,
             basic_data: false,
             has_multiple_entities: false,
+            entity_country_ids: [],
           },
           countrySettings: hungaryId ? [{
             id: 'mock-setting-hu',
@@ -454,6 +455,7 @@ export const useCompaniesDb = () => {
           contract_date_reminder_email: false,
           basic_data: false,
           has_multiple_entities: (diffData as any).has_multiple_entities || false,
+          entity_country_ids: [],
         } : {
           contract_holder: false,
           org_id: false,
@@ -463,6 +465,7 @@ export const useCompaniesDb = () => {
           contract_date_reminder_email: false,
           basic_data: false,
           has_multiple_entities: false,
+          entity_country_ids: [],
         },
         // Build countrySettings from countryAssocs, merging with settingsData where available
         countrySettings: (countryAssocs || []).map((ca: { country_id: string; created_at: string }) => {
