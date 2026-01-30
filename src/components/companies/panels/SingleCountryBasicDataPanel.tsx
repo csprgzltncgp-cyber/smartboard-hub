@@ -198,7 +198,32 @@ export const SingleCountryBasicDataPanel = ({
     }
   }, [entities, activeEntityId]);
 
+  // Collect current form values for migration - using a function to get latest values
+  const getCurrentFormValues = () => ({
+    name: companyNameInputRef.current?.value?.trim() || name?.trim() || "",
+    dispatchName,
+    active,
+    orgId,
+    contractStart,
+    contractEnd,
+    contractReminderEmail,
+    contractHolderId,
+    contractPrice,
+    contractPriceType,
+    contractCurrency,
+    pillarCount,
+    sessionCount,
+    industry,
+    consultationRows,
+    priceHistory,
+    headCount,
+    clientDashboardUsers,
+  });
+
   const handleToggleMultipleEntities = async (enabled: boolean) => {
+    // Capture current form values BEFORE toggle (important for migration)
+    const currentValues = getCurrentFormValues();
+    
     onToggleMultipleEntities(enabled);
     
     // Ha bekapcsoljuk és nincs még entitás, automatikusan létrehozunk 2-t
@@ -209,34 +234,33 @@ export const SingleCountryBasicDataPanel = ({
         // Placeholder company_id új cég esetén - a tényleges ID mentéskor kerül be
         const entityCompanyId = companyId || "pending";
         
-        // Első entitás: a meglévő cégadatokkal (minden adat!)
-        const entity1Name =
-          companyNameInputRef.current?.value?.trim() || name?.trim() || "Entitás 1";
+        // Első entitás: a meglévő cégadatokkal (minden adat a captured values-ból!)
+        const entity1Name = currentValues.name || "Entitás 1";
         const entity1: Omit<ContractedEntity, 'id' | 'created_at' | 'updated_at'> = {
           company_id: entityCompanyId,
           country_id: countryId,
           name: entity1Name,
-          dispatch_name: dispatchName,
-          is_active: active,
-          org_id: orgId,
-          contract_date: contractStart,
-          contract_end_date: contractEnd,
-          contract_reminder_email: contractReminderEmail,
+          dispatch_name: currentValues.dispatchName,
+          is_active: currentValues.active,
+          org_id: currentValues.orgId,
+          contract_date: currentValues.contractStart,
+          contract_end_date: currentValues.contractEnd,
+          contract_reminder_email: currentValues.contractReminderEmail,
           reporting_data: {},
-          contract_holder_type: contractHolderId,
-          contract_price: contractPrice,
-          price_type: contractPriceType,
-          contract_currency: contractCurrency,
-          pillars: pillarCount,
-          occasions: sessionCount,
-          industry: industry,
-          consultation_rows: consultationRows,
-          price_history: priceHistory,
+          contract_holder_type: currentValues.contractHolderId,
+          contract_price: currentValues.contractPrice,
+          price_type: currentValues.contractPriceType,
+          contract_currency: currentValues.contractCurrency,
+          pillars: currentValues.pillarCount,
+          occasions: currentValues.sessionCount,
+          industry: currentValues.industry,
+          consultation_rows: currentValues.consultationRows,
+          price_history: currentValues.priceHistory,
           workshop_data: {},
           crisis_data: {},
-          headcount: headCount,
+          headcount: currentValues.headCount,
           inactive_headcount: null,
-          client_dashboard_users: clientDashboardUsers.map(u => ({
+          client_dashboard_users: currentValues.clientDashboardUsers.map(u => ({
             id: u.id,
             username: u.username,
             password: u.password,
