@@ -8,12 +8,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ChevronDown, ChevronUp, X, Building2 } from "lucide-react";
+import { Plus, ChevronDown, ChevronUp, X, Building2, Globe } from "lucide-react";
 import { useState, useEffect } from "react";
 import { MultiSelectField } from "@/components/experts/MultiSelectField";
 import { ContractHolder, Workshop, CrisisIntervention, CountryDifferentiate, ConsultationRow, PriceHistoryEntry } from "@/types/company";
 import { ContractDataPanel } from "./ContractDataPanel";
-import { ContractedEntity, createDefaultEntity } from "@/types/contracted-entity";
+import { ContractedEntity, EntityClientDashboardUser, createDefaultEntity } from "@/types/contracted-entity";
 import { DifferentPerCountryToggle } from "../DifferentPerCountryToggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -201,16 +201,18 @@ export const SingleCountryBasicDataPanel = ({
     if (enabled && entities.length === 0 && companyId && countryId && !isCreatingInitialEntities) {
       setIsCreatingInitialEntities(true);
       try {
-        // Első entitás: a meglévő cégadatokkal (cégnév, szerződés, stb.)
-        // Ez az entitás örökli az összes jelenleg kitöltött adatot
+        // Első entitás: a meglévő cégadatokkal (minden adat!)
         const entity1Name = name?.trim() || "Entitás 1";
         const entity1: Omit<ContractedEntity, 'id' | 'created_at' | 'updated_at'> = {
           company_id: companyId,
           country_id: countryId,
           name: entity1Name,
+          dispatch_name: dispatchName,
+          is_active: active,
           org_id: orgId,
           contract_date: contractStart,
           contract_end_date: contractEnd,
+          contract_reminder_email: contractReminderEmail,
           reporting_data: {},
           contract_holder_type: contractHolderId,
           contract_price: contractPrice,
@@ -225,6 +227,12 @@ export const SingleCountryBasicDataPanel = ({
           crisis_data: {},
           headcount: headCount,
           inactive_headcount: null,
+          client_dashboard_users: clientDashboardUsers.map(u => ({
+            id: u.id,
+            username: u.username,
+            password: u.password,
+            language_id: u.languageId,
+          })),
         };
         await onAddEntity(entity1);
         
@@ -285,36 +293,33 @@ export const SingleCountryBasicDataPanel = ({
     setCrisisInterventions(crisisInterventions.map((c) => (c.id === id ? { ...c, ...updates } : c)));
   };
 
-  const addClientDashboardUser = () => {
-    const newUser: ClientDashboardUser = {
-      id: `new-user-${Date.now()}`,
-      username: "",
-      password: "",
-      languageId: null,
-    };
-    setClientDashboardUsers([...clientDashboardUsers, newUser]);
+  // ==== Helper: convert entity CD users to component format ====
+  const entityCDUsersToComponentFormat = (users: EntityClientDashboardUser[]): ClientDashboardUser[] => {
+    return users.map(u => ({
+      id: u.id,
+      username: u.username,
+      password: u.password,
+      languageId: u.language_id,
+    }));
   };
 
-  const updateClientDashboardUser = (id: string, updates: Partial<ClientDashboardUser>) => {
-    setClientDashboardUsers(
-      clientDashboardUsers.map((u) => (u.id === id ? { ...u, ...updates } : u))
-    );
-  };
-
-  const removeClientDashboardUser = (id: string) => {
-    setClientDashboardUsers(clientDashboardUsers.filter((u) => u.id !== id));
-  };
-
-  // ==== Render entity content (used for tabs or single view) ====
+  // ==== Render entity content - MINDEN mező itt van! ====
   const renderEntityContent = (entity?: ContractedEntity) => {
-    // Ha van entity, akkor az entitás adatait jelenítjük meg
-    // Ha nincs entity (single mode), akkor a component props-ból jönnek az adatok
     const isEntityMode = !!entity;
     
+    // Entitás-specifikus adatok
     const entityName = isEntityMode ? entity.name : name;
     const setEntityName = isEntityMode 
       ? (val: string) => onUpdateEntity(entity.id, { name: val })
       : setName;
+    const entityDispatchName = isEntityMode ? entity.dispatch_name : dispatchName;
+    const setEntityDispatchName = isEntityMode 
+      ? (val: string | null) => onUpdateEntity(entity.id, { dispatch_name: val })
+      : setDispatchName;
+    const entityActive = isEntityMode ? entity.is_active : active;
+    const setEntityActive = isEntityMode 
+      ? (val: boolean) => onUpdateEntity(entity.id, { is_active: val })
+      : setActive;
     const entityOrgId = isEntityMode ? entity.org_id : orgId;
     const setEntityOrgId = isEntityMode 
       ? (val: string | null) => onUpdateEntity(entity.id, { org_id: val })
@@ -327,6 +332,10 @@ export const SingleCountryBasicDataPanel = ({
     const setEntityContractEnd = isEntityMode 
       ? (val: string | null) => onUpdateEntity(entity.id, { contract_end_date: val })
       : setContractEnd;
+    const entityContractReminderEmail = isEntityMode ? entity.contract_reminder_email : contractReminderEmail;
+    const setEntityContractReminderEmail = isEntityMode 
+      ? (val: string | null) => onUpdateEntity(entity.id, { contract_reminder_email: val })
+      : setContractReminderEmail;
     const entityContractHolderId = isEntityMode ? entity.contract_holder_type : contractHolderId;
     const setEntityContractHolderId = isEntityMode 
       ? (val: string | null) => onUpdateEntity(entity.id, { contract_holder_type: val })
@@ -368,12 +377,64 @@ export const SingleCountryBasicDataPanel = ({
       ? (val: number | null) => onUpdateEntity(entity.id, { headcount: val })
       : setHeadCount;
     
+    // Client Dashboard users - entity módban az entitásból jön
+    const entityCDUsers = isEntityMode 
+      ? entityCDUsersToComponentFormat(entity.client_dashboard_users || [])
+      : clientDashboardUsers;
+    
+    const addEntityCDUser = () => {
+      const newUser: ClientDashboardUser = {
+        id: `new-user-${Date.now()}`,
+        username: "",
+        password: "",
+        languageId: null,
+      };
+      if (isEntityMode) {
+        const newEntityUsers: EntityClientDashboardUser[] = [
+          ...(entity.client_dashboard_users || []),
+          { id: newUser.id, username: "", password: "", language_id: null },
+        ];
+        onUpdateEntity(entity.id, { client_dashboard_users: newEntityUsers });
+      } else {
+        setClientDashboardUsers([...clientDashboardUsers, newUser]);
+      }
+    };
+
+    const updateEntityCDUser = (userId: string, updates: Partial<ClientDashboardUser>) => {
+      if (isEntityMode) {
+        const newUsers = (entity.client_dashboard_users || []).map(u => 
+          u.id === userId 
+            ? { 
+                ...u, 
+                username: updates.username ?? u.username,
+                password: updates.password ?? u.password,
+                language_id: updates.languageId !== undefined ? updates.languageId : u.language_id,
+              } 
+            : u
+        );
+        onUpdateEntity(entity.id, { client_dashboard_users: newUsers });
+      } else {
+        setClientDashboardUsers(
+          clientDashboardUsers.map((u) => (u.id === userId ? { ...u, ...updates } : u))
+        );
+      }
+    };
+
+    const removeEntityCDUser = (userId: string) => {
+      if (isEntityMode) {
+        const newUsers = (entity.client_dashboard_users || []).filter(u => u.id !== userId);
+        onUpdateEntity(entity.id, { client_dashboard_users: newUsers });
+      } else {
+        setClientDashboardUsers(clientDashboardUsers.filter((u) => u.id !== userId));
+      }
+    };
+    
     const entityIsCGP = entityContractHolderId === "2";
     const entityIsLifeworks = entityContractHolderId === "1";
 
     return (
       <div className="space-y-6">
-        {/* Cégnév / Entitás név */}
+        {/* Entitás/Cégnév */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
           <div className="space-y-2">
             <Label>{isEntityMode ? "Entitás neve *" : "Cégnév"}</Label>
@@ -391,37 +452,39 @@ export const SingleCountryBasicDataPanel = ({
           </div>
         </div>
 
-        {/* Cég elnevezése kiközvetítéshez - csak nem entity módban */}
-        {!isEntityMode && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-            <div className="space-y-2">
-              <Label>Cég elnevezése kiközvetítéshez</Label>
-              <Input
-                value={dispatchName || ""}
-                onChange={(e) => setDispatchName(e.target.value || null)}
-                placeholder="Ahogy az operátorok listájában megjelenik"
-              />
-              <p className="text-xs text-muted-foreground">
-                Ha üres, a cégnév jelenik meg az operátorok listájában.
-              </p>
-            </div>
+        {/* Cég elnevezése kiközvetítéshez */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+          <div className="space-y-2">
+            <Label>{isEntityMode ? "Entitás elnevezése kiközvetítéshez" : "Cég elnevezése kiközvetítéshez"}</Label>
+            <Input
+              value={entityDispatchName || ""}
+              onChange={(e) => setEntityDispatchName(e.target.value || null)}
+              placeholder="Ahogy az operátorok listájában megjelenik"
+            />
+            <p className="text-xs text-muted-foreground">
+              Ha üres, a {isEntityMode ? "entitás" : "cég"} neve jelenik meg az operátorok listájában.
+            </p>
           </div>
-        )}
+        </div>
 
-        {/* Országok - csak nem entity módban */}
-        {!isEntityMode && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-            <div className="space-y-2">
-              <MultiSelectField
-                label="Országok"
-                options={countryOptions}
-                selectedIds={countryIds}
-                onChange={setCountryIds}
-                placeholder="Válasszon országokat..."
-              />
-            </div>
+        {/* Aktív státusz */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+          <div className="space-y-2">
+            <Label>Aktív</Label>
+            <Select
+              value={entityActive ? "true" : "false"}
+              onValueChange={(val) => setEntityActive(val === "true")}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="true">Igen</SelectItem>
+                <SelectItem value="false">Nem</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        )}
+        </div>
 
         {/* Szerződés adatai */}
         <ContractDataPanel
@@ -487,15 +550,15 @@ export const SingleCountryBasicDataPanel = ({
           </div>
         )}
 
-        {/* Emlékeztető email (csak CGP esetén) - csak nem entity módban */}
-        {!isEntityMode && (entityIsCGP || !entityContractHolderId) && (
+        {/* Emlékeztető email (csak CGP esetén) */}
+        {(entityIsCGP || !entityContractHolderId) && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
             <div className="space-y-2">
               <Label>Emlékeztető e-mail</Label>
               <Input
                 type="email"
-                value={contractReminderEmail || ""}
-                onChange={(e) => setContractReminderEmail(e.target.value || null)}
+                value={entityContractReminderEmail || ""}
+                onChange={(e) => setEntityContractReminderEmail(e.target.value || null)}
                 placeholder="email@ceg.hu"
               />
             </div>
@@ -514,27 +577,6 @@ export const SingleCountryBasicDataPanel = ({
             />
           </div>
         </div>
-
-        {/* Aktív státusz - csak nem entity módban */}
-        {!isEntityMode && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-            <div className="space-y-2">
-              <Label>Aktív</Label>
-              <Select
-                value={active ? "true" : "false"}
-                onValueChange={(val) => setActive(val === "true")}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="true">Igen</SelectItem>
-                  <SelectItem value="false">Nem</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        )}
 
         {/* Workshop és Krízisintervenció */}
         <div className="bg-muted/30 border rounded-lg p-4 space-y-4">
@@ -641,8 +683,8 @@ export const SingleCountryBasicDataPanel = ({
           </div>
         </div>
 
-        {/* Client Dashboard felhasználók - csak nem entity módban */}
-        {!isEntityMode && (entityIsCGP || !entityContractHolderId) && (
+        {/* Client Dashboard felhasználók */}
+        {(entityIsCGP || !entityContractHolderId) && (
           <div className="bg-muted/30 border rounded-lg p-4 space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium text-primary">Client Dashboard felhasználók</h4>
@@ -650,7 +692,7 @@ export const SingleCountryBasicDataPanel = ({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={addClientDashboardUser}
+                onClick={addEntityCDUser}
                 className="h-8"
               >
                 <Plus className="h-4 w-4 mr-1" />
@@ -658,13 +700,13 @@ export const SingleCountryBasicDataPanel = ({
               </Button>
             </div>
 
-            {clientDashboardUsers.length === 0 && (
+            {entityCDUsers.length === 0 && (
               <p className="text-sm text-muted-foreground">
                 Nincs még felhasználó hozzáadva a Client Dashboard-hoz.
               </p>
             )}
 
-            {clientDashboardUsers.map((user, idx) => (
+            {entityCDUsers.map((user, idx) => (
               <div key={user.id} className="border rounded-lg p-3 space-y-3 bg-background">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Felhasználó #{idx + 1}</span>
@@ -672,7 +714,7 @@ export const SingleCountryBasicDataPanel = ({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => removeClientDashboardUser(user.id)}
+                    onClick={() => removeEntityCDUser(user.id)}
                     className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                   >
                     <X className="h-4 w-4" />
@@ -684,7 +726,7 @@ export const SingleCountryBasicDataPanel = ({
                     <Label className="text-xs">Felhasználónév</Label>
                     <Input
                       value={user.username}
-                      onChange={(e) => updateClientDashboardUser(user.id, { username: e.target.value })}
+                      onChange={(e) => updateEntityCDUser(user.id, { username: e.target.value })}
                       placeholder="Felhasználónév"
                       className="h-9"
                     />
@@ -695,7 +737,7 @@ export const SingleCountryBasicDataPanel = ({
                       <Input
                         type="password"
                         value={user.password || ""}
-                        onChange={(e) => updateClientDashboardUser(user.id, { password: e.target.value })}
+                        onChange={(e) => updateEntityCDUser(user.id, { password: e.target.value })}
                         placeholder="Jelszó"
                         className="h-9"
                       />
@@ -715,7 +757,7 @@ export const SingleCountryBasicDataPanel = ({
                     <Label className="text-xs">Nyelv</Label>
                     <Select
                       value={user.languageId || ""}
-                      onValueChange={(val) => updateClientDashboardUser(user.id, { languageId: val || null })}
+                      onValueChange={(val) => updateEntityCDUser(user.id, { languageId: val || null })}
                     >
                       <SelectTrigger className="h-9">
                         <SelectValue placeholder="Válasszon..." />
@@ -756,7 +798,30 @@ export const SingleCountryBasicDataPanel = ({
 
   return (
     <div className="space-y-6">
-      {/* Több entitás toggle - A PANEL TETEJÉN */}
+      {/* ORSZÁG KIVÁLASZTÓ - KIEMELT PANEL (mindig látható, entity módban readonly) */}
+      <div className="bg-primary/5 border-2 border-primary/20 rounded-lg p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <Globe className="h-5 w-5 text-primary" />
+          <h4 className="text-sm font-medium text-primary">Ország</h4>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <MultiSelectField
+            label=""
+            options={countryOptions}
+            selectedIds={countryIds}
+            onChange={hasMultipleEntities ? () => {} : setCountryIds}
+            placeholder="Válasszon országokat..."
+            disabled={hasMultipleEntities}
+          />
+        </div>
+        {hasMultipleEntities && (
+          <p className="text-xs text-muted-foreground mt-2">
+            Több entitás módban az ország nem módosítható. Először kapcsolja ki a több entitás opciót.
+          </p>
+        )}
+      </div>
+
+      {/* Több entitás toggle */}
       {countryId && companyId && (
         <div className="flex items-center justify-between bg-muted/30 border rounded-lg p-4">
           <div className="flex items-center gap-3">

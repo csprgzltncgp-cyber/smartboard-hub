@@ -488,6 +488,7 @@ export type Database = {
       }
       company_contracted_entities: {
         Row: {
+          client_dashboard_users: Json | null
           company_id: string
           consultation_rows: Json | null
           contract_currency: string | null
@@ -495,13 +496,16 @@ export type Database = {
           contract_end_date: string | null
           contract_holder_type: string | null
           contract_price: number | null
+          contract_reminder_email: string | null
           country_id: string
           created_at: string
           crisis_data: Json | null
+          dispatch_name: string | null
           headcount: number | null
           id: string
           inactive_headcount: number | null
           industry: string | null
+          is_active: boolean
           name: string
           occasions: number | null
           org_id: string | null
@@ -513,6 +517,7 @@ export type Database = {
           workshop_data: Json | null
         }
         Insert: {
+          client_dashboard_users?: Json | null
           company_id: string
           consultation_rows?: Json | null
           contract_currency?: string | null
@@ -520,13 +525,16 @@ export type Database = {
           contract_end_date?: string | null
           contract_holder_type?: string | null
           contract_price?: number | null
+          contract_reminder_email?: string | null
           country_id: string
           created_at?: string
           crisis_data?: Json | null
+          dispatch_name?: string | null
           headcount?: number | null
           id?: string
           inactive_headcount?: number | null
           industry?: string | null
+          is_active?: boolean
           name: string
           occasions?: number | null
           org_id?: string | null
@@ -538,6 +546,7 @@ export type Database = {
           workshop_data?: Json | null
         }
         Update: {
+          client_dashboard_users?: Json | null
           company_id?: string
           consultation_rows?: Json | null
           contract_currency?: string | null
@@ -545,13 +554,16 @@ export type Database = {
           contract_end_date?: string | null
           contract_holder_type?: string | null
           contract_price?: number | null
+          contract_reminder_email?: string | null
           country_id?: string
           created_at?: string
           crisis_data?: Json | null
+          dispatch_name?: string | null
           headcount?: number | null
           id?: string
           inactive_headcount?: number | null
           industry?: string | null
+          is_active?: boolean
           name?: string
           occasions?: number | null
           org_id?: string | null

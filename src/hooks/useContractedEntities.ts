@@ -89,9 +89,12 @@ export const useContractedEntities = (companyId?: string) => {
         company_id: entity.company_id,
         country_id: entity.country_id,
         name: entity.name,
+        dispatch_name: entity.dispatch_name,
+        is_active: entity.is_active,
         org_id: entity.org_id,
         contract_date: entity.contract_date,
         contract_end_date: entity.contract_end_date,
+        contract_reminder_email: entity.contract_reminder_email,
         reporting_data: entity.reporting_data,
         contract_holder_type: entity.contract_holder_type,
         contract_price: entity.contract_price,
@@ -106,6 +109,7 @@ export const useContractedEntities = (companyId?: string) => {
         crisis_data: entity.crisis_data as any,
         headcount: entity.headcount,
         inactive_headcount: entity.inactive_headcount,
+        client_dashboard_users: entity.client_dashboard_users as any,
       };
       
       const { data, error } = await supabase
@@ -141,9 +145,12 @@ export const useContractedEntities = (companyId?: string) => {
       
       const updateData: any = {};
       if (updates.name !== undefined) updateData.name = updates.name;
+      if (updates.dispatch_name !== undefined) updateData.dispatch_name = updates.dispatch_name;
+      if (updates.is_active !== undefined) updateData.is_active = updates.is_active;
       if (updates.org_id !== undefined) updateData.org_id = updates.org_id;
       if (updates.contract_date !== undefined) updateData.contract_date = updates.contract_date;
       if (updates.contract_end_date !== undefined) updateData.contract_end_date = updates.contract_end_date;
+      if (updates.contract_reminder_email !== undefined) updateData.contract_reminder_email = updates.contract_reminder_email;
       if (updates.reporting_data !== undefined) updateData.reporting_data = updates.reporting_data;
       if (updates.contract_holder_type !== undefined) updateData.contract_holder_type = updates.contract_holder_type;
       if (updates.contract_price !== undefined) updateData.contract_price = updates.contract_price;
@@ -158,6 +165,7 @@ export const useContractedEntities = (companyId?: string) => {
       if (updates.crisis_data !== undefined) updateData.crisis_data = updates.crisis_data;
       if (updates.headcount !== undefined) updateData.headcount = updates.headcount;
       if (updates.inactive_headcount !== undefined) updateData.inactive_headcount = updates.inactive_headcount;
+      if (updates.client_dashboard_users !== undefined) updateData.client_dashboard_users = updates.client_dashboard_users;
       
       const { error } = await supabase
         .from('company_contracted_entities')
@@ -281,9 +289,12 @@ function mapDbToEntity(row: any): ContractedEntity {
     company_id: row.company_id,
     country_id: row.country_id,
     name: row.name,
+    dispatch_name: row.dispatch_name,
+    is_active: row.is_active ?? true,
     org_id: row.org_id,
     contract_date: row.contract_date,
     contract_end_date: row.contract_end_date,
+    contract_reminder_email: row.contract_reminder_email,
     reporting_data: row.reporting_data || {},
     contract_holder_type: row.contract_holder_type,
     contract_price: row.contract_price,
@@ -298,6 +309,7 @@ function mapDbToEntity(row: any): ContractedEntity {
     crisis_data: row.crisis_data || {},
     headcount: row.headcount,
     inactive_headcount: row.inactive_headcount,
+    client_dashboard_users: parseJsonArray(row.client_dashboard_users),
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
