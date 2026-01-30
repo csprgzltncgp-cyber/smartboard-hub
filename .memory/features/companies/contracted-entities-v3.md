@@ -51,3 +51,6 @@ Amikor a "Több entitás" toggle bekapcsol egy országnál:
 1. Ha még nincs entitás, 2 entitás jön létre automatikusan
 2. Az első entitás örökli az ország CompanyCountrySettings adatait (név, ár, dátumok, stb.)
 3. A második entitás üres, alapértelmezett értékekkel
+
+### Kikapcsolás korlátozása
+A "Több entitás" toggle kikapcsolása csak akkor lehetséges, ha az adott országban legfeljebb 1 entitás maradt. Ha több entitás van, a toggle disabled állapotban van és egy figyelmeztetés jelenik meg: "Entitások törlése szükséges a kikapcsoláshoz". Ez biztosítja, hogy a felhasználó ne veszítse el az entitás-adatokat véletlenül.
