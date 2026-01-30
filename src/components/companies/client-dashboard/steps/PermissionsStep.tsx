@@ -90,6 +90,16 @@ export const PermissionsStep = ({
     return Object.values(perms).filter(Boolean).length;
   };
 
+  // Ha nincsenek felhasználók, ne rendereljünk semmit
+  if (!state.users || state.users.length === 0) {
+    return (
+      <div className="p-8 text-center text-muted-foreground">
+        <p>Nincsenek felhasználók a jogosultságok beállításához.</p>
+        <p className="text-sm mt-2">Kérjük, lépjen vissza és adjon hozzá legalább egy felhasználót.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -101,6 +111,8 @@ export const PermissionsStep = ({
 
       <Accordion type="multiple" className="space-y-2" defaultValue={state.users.map((_, i) => `user-${i}`)}>
         {state.users.map((user, userIndex) => {
+          if (!user) return null;
+          
           const permissions = getUserPermissions(userIndex);
           const enabledCount = getEnabledCount(userIndex);
 
@@ -117,9 +129,9 @@ export const PermissionsStep = ({
                 <div className="flex items-center gap-3">
                   {getUserIcon(userIndex)}
                   <span className="font-medium">{getUserLabel(userIndex)}</span>
-                  <Badge variant="outline" className="ml-2">
+                  <span className="ml-2 text-xs text-muted-foreground border rounded px-2 py-0.5">
                     {enabledCount}/{CD_MENU_ITEMS.length} menüpont
-                  </Badge>
+                  </span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="pt-4 pb-2">
@@ -174,15 +186,18 @@ export const PermissionsStep = ({
       <div className="p-4 bg-muted/30 rounded-lg">
         <h5 className="font-medium mb-2">Jogosultságok összefoglalója</h5>
         <div className="text-sm text-muted-foreground space-y-1">
-          {state.users.map((user, index) => (
-            <div key={index} className="flex items-center gap-2">
-              {getUserIcon(index)}
-              <span>{getUserLabel(index)}:</span>
-              <span className="font-medium">
-                {getEnabledCount(index)}/{CD_MENU_ITEMS.length} menüpont engedélyezve
-              </span>
-            </div>
-          ))}
+          {state.users.map((user, index) => {
+            if (!user) return null;
+            return (
+              <div key={index} className="flex items-center gap-2">
+                {getUserIcon(index)}
+                <span>{getUserLabel(index)}:</span>
+                <span className="font-medium">
+                  {getEnabledCount(index)}/{CD_MENU_ITEMS.length} menüpont engedélyezve
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
