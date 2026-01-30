@@ -850,12 +850,15 @@ const CompanyForm = () => {
               <ArchivedOnboardingPanel data={archivedOnboarding} />
             )}
             
-            <div className="flex items-center gap-4 pt-4 border-t">
-              <Button type="submit" className="rounded-xl">
-                <Save className="h-4 w-4 mr-2" />
-                Mentés
-              </Button>
-            </div>
+            {/* Mentés gomb - csak ha NEM országonként különböző, mert akkor nincs mit menteni itt */}
+            {!countryDifferentiates.basic_data && (
+              <div className="flex items-center gap-4 pt-4 border-t">
+                <Button type="submit" className="rounded-xl">
+                  <Save className="h-4 w-4 mr-2" />
+                  Mentés
+                </Button>
+              </div>
+            )}
           </div>
         ),
       },
