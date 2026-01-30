@@ -373,6 +373,42 @@ const CompanyForm = () => {
     toast.info("Jelszó beállítás dialógus - fejlesztés alatt");
   };
 
+  // === Entity handlers (shared between single and multi country modes) ===
+  const handleAddEntity = async (entity: Omit<ContractedEntity, 'id' | 'created_at' | 'updated_at'>) => {
+    if (isEditMode) {
+      await createEntity(entity);
+    } else {
+      // Új cég: helyi state-be mentjük ideiglenes ID-val
+      const tempEntity: ContractedEntity = {
+        ...entity,
+        id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      setPendingEntities(prev => [...prev, tempEntity]);
+    }
+  };
+
+  const handleUpdateEntity = async (id: string, updates: Partial<ContractedEntity>) => {
+    if (isEditMode) {
+      await updateEntity(id, updates);
+    } else {
+      // Új cég: helyi state frissítése
+      setPendingEntities(prev => prev.map(e => 
+        e.id === id ? { ...e, ...updates } : e
+      ));
+    }
+  };
+
+  const handleDeleteEntity = async (id: string) => {
+    if (isEditMode) {
+      await deleteEntity(id);
+    } else {
+      // Új cég: helyi state-ből törlés
+      setPendingEntities(prev => prev.filter(e => e.id !== id));
+    }
+  };
+
   const handleAddInvoiceList = () => {
     const now = Date.now();
 
@@ -558,38 +594,9 @@ const CompanyForm = () => {
           entities={entities.filter(e => e.country_id === countryIds[0])}
           hasMultipleEntities={countryDifferentiates.has_multiple_entities}
           onToggleMultipleEntities={(enabled) => setCountryDifferentiates(prev => ({ ...prev, has_multiple_entities: enabled }))}
-          onAddEntity={async (entity) => {
-            if (isEditMode) {
-              await createEntity(entity);
-            } else {
-              // Új cég: helyi state-be mentjük ideiglenes ID-val
-              const tempEntity: ContractedEntity = {
-                ...entity,
-                id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              };
-              setPendingEntities(prev => [...prev, tempEntity]);
-            }
-          }}
-          onUpdateEntity={async (id, updates) => {
-            if (isEditMode) {
-              await updateEntity(id, updates);
-            } else {
-              // Új cég: helyi state frissítése
-              setPendingEntities(prev => prev.map(e => 
-                e.id === id ? { ...e, ...updates } : e
-              ));
-            }
-          }}
-          onDeleteEntity={async (id) => {
-            if (isEditMode) {
-              await deleteEntity(id);
-            } else {
-              // Új cég: helyi state-ből törlés
-              setPendingEntities(prev => prev.filter(e => e.id !== id));
-            }
-          }}
+          onAddEntity={handleAddEntity}
+          onUpdateEntity={handleUpdateEntity}
+          onDeleteEntity={handleDeleteEntity}
           isEntitiesLoading={isEditMode ? entitiesLoading : false}
         />
         
@@ -871,6 +878,12 @@ const CompanyForm = () => {
               setWorkshops={setWorkshops}
               crisisInterventions={crisisInterventions}
               setCrisisInterventions={setCrisisInterventions}
+              companyId={companyId}
+              entities={entities}
+              onAddEntity={handleAddEntity}
+              onUpdateEntity={handleUpdateEntity}
+              onDeleteEntity={handleDeleteEntity}
+              isEntitiesLoading={entitiesLoading}
             />
             <div className="flex items-center gap-4 pt-4 border-t">
               <Button type="submit" className="rounded-xl">
