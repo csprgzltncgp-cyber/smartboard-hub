@@ -16,6 +16,7 @@ interface MultiSelectFieldProps {
   onChange: (ids: string[]) => void;
   placeholder?: string;
   badgeColor?: "teal" | "red" | "orange";
+  disabled?: boolean;
 }
 
 export const MultiSelectField = ({
@@ -25,6 +26,7 @@ export const MultiSelectField = ({
   onChange,
   placeholder = "Válassz...",
   badgeColor = "teal",
+  disabled = false,
 }: MultiSelectFieldProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,11 +51,13 @@ export const MultiSelectField = ({
   const availableOptions = filteredOptions.filter((opt) => !selectedIds.includes(opt.id));
 
   const handleSelect = (id: string) => {
+    if (disabled) return;
     onChange([...selectedIds, id]);
     setSearchQuery("");
   };
 
   const handleRemove = (id: string) => {
+    if (disabled) return;
     onChange(selectedIds.filter((sid) => sid !== id));
   };
 
@@ -74,8 +78,8 @@ export const MultiSelectField = ({
       <div className="relative">
         {/* Selected items display + dropdown trigger */}
         <div
-          className="min-h-[42px] p-2 border rounded-lg cursor-pointer flex flex-wrap gap-1 items-center bg-white"
-          onClick={() => setIsOpen(!isOpen)}
+          className={`min-h-[42px] p-2 border rounded-lg flex flex-wrap gap-1 items-center bg-white ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+          onClick={() => !disabled && setIsOpen(!isOpen)}
         >
           {selectedOptions.length > 0 ? (
             <>

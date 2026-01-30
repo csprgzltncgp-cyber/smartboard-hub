@@ -14,11 +14,14 @@ export interface ContractedEntity {
   
   // Entitás azonosítás
   name: string; // Szabadon megadható név (pl. "Henkel Hungary Kft.")
+  dispatch_name: string | null; // Cég elnevezése kiközvetítéshez
+  is_active: boolean; // Az entitás aktív-e
   
   // Ország-specifikus beállítások (korábban CompanyCountrySettings-ben voltak)
   org_id: string | null;
   contract_date: string | null; // Szerződés kezdete
   contract_end_date: string | null; // Szerződés vége
+  contract_reminder_email: string | null; // Emlékeztető e-mail
   reporting_data: any; // JSON - reporting adatok
   
   // Szerződés adatai
@@ -40,8 +43,21 @@ export interface ContractedEntity {
   headcount: number | null;
   inactive_headcount: number | null;
   
+  // Client Dashboard felhasználók
+  client_dashboard_users: EntityClientDashboardUser[];
+  
   created_at: string;
   updated_at: string;
+}
+
+/**
+ * Entitás-specifikus Client Dashboard felhasználó
+ */
+export interface EntityClientDashboardUser {
+  id: string;
+  username: string;
+  password?: string;
+  language_id: string | null;
 }
 
 /**
@@ -130,9 +146,12 @@ export const createDefaultEntity = (
   company_id: companyId,
   country_id: countryId,
   name,
+  dispatch_name: null,
+  is_active: true,
   org_id: null,
   contract_date: null,
   contract_end_date: null,
+  contract_reminder_email: null,
   reporting_data: {},
   contract_holder_type: null,
   contract_price: null,
@@ -147,4 +166,5 @@ export const createDefaultEntity = (
   crisis_data: {},
   headcount: null,
   inactive_headcount: null,
+  client_dashboard_users: [],
 });
