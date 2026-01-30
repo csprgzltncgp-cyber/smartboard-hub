@@ -206,10 +206,10 @@ export const CompanyCountrySettingsPanel = ({
   const getCountryEntities = (countryId: string) => 
     entities.filter(e => e.country_id === countryId);
 
-  // Check if entity mode is enabled for a specific country
+  // Check if entity mode is enabled for a specific country (derived from actual entity count)
   const isEntityModeEnabled = (countryId: string) => {
-    const entityCountryIds = countryDifferentiates.entity_country_ids || [];
-    return entityCountryIds.includes(countryId);
+    const countryEntities = entities.filter(e => e.country_id === countryId);
+    return countryEntities.length > 1;
   };
 
   // Check if entity mode can be disabled for a specific country
