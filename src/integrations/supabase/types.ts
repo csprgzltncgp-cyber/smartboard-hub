@@ -268,6 +268,7 @@ export type Database = {
           country_id: string
           created_at: string
           dispatch_name: string | null
+          group_name: string | null
           id: string
           lead_account_user_id: string | null
           name: string
@@ -282,6 +283,7 @@ export type Database = {
           country_id: string
           created_at?: string
           dispatch_name?: string | null
+          group_name?: string | null
           id?: string
           lead_account_user_id?: string | null
           name: string
@@ -296,6 +298,7 @@ export type Database = {
           country_id?: string
           created_at?: string
           dispatch_name?: string | null
+          group_name?: string | null
           id?: string
           lead_account_user_id?: string | null
           name?: string
