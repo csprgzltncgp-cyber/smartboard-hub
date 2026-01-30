@@ -270,6 +270,10 @@ interface CompanyRowProps {
 }
 
 const CompanyRow = ({ company, onEdit, onDelete }: CompanyRowProps) => {
+  // Ha a cégcsoport név ki van töltve (több országos / országonkénti alapadatok eset),
+  // akkor a listában ezzel jelenjen meg.
+  const displayName = company.group_name?.trim() ? company.group_name : company.name;
+
   return (
     <div className={`flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors ${
       company.isNewcomer 
@@ -284,7 +288,7 @@ const CompanyRow = ({ company, onEdit, onDelete }: CompanyRowProps) => {
           </div>
         )}
         <span className={company.active ? "" : "text-muted-foreground"}>
-          {company.name}
+          {displayName}
         </span>
         {company.isNewcomer && (
           <Badge className="bg-[#91b752] text-white hover:bg-[#91b752]/90 text-xs font-semibold">
