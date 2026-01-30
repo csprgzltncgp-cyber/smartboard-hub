@@ -1,10 +1,7 @@
-import { useState } from 'react';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { CDWizardState, CD_MENU_ITEMS, ClientDashboardUserPermission } from '@/types/client-dashboard';
-import { User, Crown, Globe, Building2, Check, X } from 'lucide-react';
+import { User, Crown, Check, X } from 'lucide-react';
 
 interface PermissionsStepProps {
   state: CDWizardState;
@@ -18,24 +15,31 @@ export const PermissionsStep = ({
   // Inicializáljuk a jogosultságokat ha még nincsenek
   const getUserPermissions = (userIndex: number): Record<string, boolean> => {
     const user = state.users[userIndex];
-    if (!user?.permissions) {
-      // Alapértelmezetten minden engedélyezve
-      const defaults: Record<string, boolean> = {};
-      CD_MENU_ITEMS.forEach(item => {
-        defaults[item.id] = true;
-      });
+
+    // Default: minden engedélyezve
+    const defaults: Record<string, boolean> = {};
+    CD_MENU_ITEMS.forEach(item => {
+      defaults[item.id] = true;
+    });
+
+    // Ha nincs user, vagy a permissions nem tömb (rossz initialState / részlegesen feltöltött adat)
+    const maybePerms = (user as any)?.permissions;
+    if (!user || !Array.isArray(maybePerms) || maybePerms.length === 0) {
       return defaults;
     }
-    const perms: Record<string, boolean> = {};
-    user.permissions.forEach(p => {
-      perms[p.menu_item] = p.is_enabled;
+
+    const perms: Record<string, boolean> = { ...defaults };
+    (maybePerms as Array<{ menu_item?: string; is_enabled?: boolean }>).forEach(p => {
+      if (!p?.menu_item) return;
+      perms[p.menu_item] = !!p.is_enabled;
     });
     return perms;
   };
 
   const togglePermission = (userIndex: number, menuItem: string) => {
-    const newUsers = [...state.users];
+    const newUsers = [...(state.users || [])];
     const user = newUsers[userIndex];
+    if (!user) return;
     
     // Jelenlegi jogosultságok
     const currentPerms = getUserPermissions(userIndex);
@@ -56,8 +60,9 @@ export const PermissionsStep = ({
   };
 
   const toggleAllForUser = (userIndex: number, enabled: boolean) => {
-    const newUsers = [...state.users];
+    const newUsers = [...(state.users || [])];
     const user = newUsers[userIndex];
+    if (!user) return;
     
     const updatedPermissions: Partial<ClientDashboardUserPermission>[] = CD_MENU_ITEMS.map(item => ({
       menu_item: item.id,
