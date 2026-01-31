@@ -5,8 +5,18 @@ import { CDWizard } from '../client-dashboard/CDWizard';
 import { CDWizardState, ReportConfiguration, ClientDashboardUser } from '@/types/client-dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Settings2, Users, Plus, RefreshCw } from 'lucide-react';
-
+import { Settings2, Users, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 interface ClientDashboardTabContentProps {
   companyId: string;
   countryIds: string[];
@@ -178,6 +188,46 @@ export const ClientDashboardTabContent = ({ companyId, countryIds }: ClientDashb
     }
   };
 
+  // Egyedi felhasználó törlése
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      await supabase
+        .from('client_dashboard_users')
+        .delete()
+        .eq('id', userId);
+      
+      toast.success('Felhasználó törölve');
+      setExistingUsers(prev => prev.filter(u => u.id !== userId));
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Hiba a felhasználó törlésekor');
+    }
+  };
+
+  // Teljes konfiguráció törlése
+  const handleDeleteConfiguration = async () => {
+    try {
+      // Felhasználók törlése (cascade törli a scope-okat és permission-öket)
+      await supabase
+        .from('client_dashboard_users')
+        .delete()
+        .eq('company_id', companyId);
+      
+      // Konfiguráció törlése
+      await supabase
+        .from('company_report_configuration')
+        .delete()
+        .eq('company_id', companyId);
+      
+      toast.success('Konfiguráció törölve');
+      setExistingConfig(null);
+      setExistingUsers([]);
+    } catch (error) {
+      console.error('Error deleting configuration:', error);
+      toast.error('Hiba a konfiguráció törlésekor');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -256,10 +306,37 @@ export const ClientDashboardTabContent = ({ companyId, countryIds }: ClientDashb
         <p className="text-muted-foreground">
           Client Dashboard hozzáférések kezelése
         </p>
-        <Button variant="outline" onClick={() => setShowWizard(true)}>
-          <Settings2 className="h-4 w-4 mr-2" />
-          Konfiguráció szerkesztése
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setShowWizard(true)}>
+            <Settings2 className="h-4 w-4 mr-2" />
+            Konfiguráció szerkesztése
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="icon">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Konfiguráció törlése</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Biztosan törölni szeretné a teljes Client Dashboard konfigurációt? 
+                  Ez minden felhasználót és beállítást véglegesen töröl.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Mégse</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteConfiguration}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Törlés
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
 
       {/* Összefoglaló kártyák */}
@@ -316,7 +393,7 @@ export const ClientDashboardTabContent = ({ companyId, countryIds }: ClientDashb
               <div>
                 <p className="font-medium">{user.username || 'Névtelen'}</p>
                 <p className="text-xs text-muted-foreground">
-                  {user.is_superuser ? 'Szuperuser' : `${user.scopes?.length || 0} scope`}
+                  {user.is_superuser ? 'Superuser' : `${user.scopes?.length || 0} scope`}
                 </p>
               </div>
             </div>
@@ -327,6 +404,30 @@ export const ClientDashboardTabContent = ({ companyId, countryIds }: ClientDashb
               {user.is_superuser && (
                 <Badge className="bg-amber-500">Superuser</Badge>
               )}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Felhasználó törlése</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Biztosan törölni szeretné a "{user.username || 'Névtelen'}" felhasználót?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Mégse</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleDeleteUser(user.id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Törlés
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         ))}
