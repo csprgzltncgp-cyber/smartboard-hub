@@ -32,7 +32,7 @@ const REPORT_TYPE_OPTIONS: { value: ReportType; label: string; description: stri
   {
     value: 'single',
     label: 'Egyetlen riport',
-    description: 'Minden adat egy riportban, egy felhasználó látja az összeset',
+    description: 'Minden adat egy riportban',
     icon: <FileText className="h-5 w-5" />,
   },
   {
