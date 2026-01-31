@@ -204,6 +204,41 @@ export const PermissionsStep = ({
     return user?.scopes?.length || 0;
   };
 
+  // Felhasználó scope-jainak olvasható listája
+  const getUserScopeLabels = (userIndex: number): { type: 'country' | 'entity' | 'all'; label: string }[] => {
+    const user = state.users[userIndex];
+    if (!user?.scopes || user.scopes.length === 0) {
+      // Ha nincs scope, de nem superuser, akkor minden riporthoz hozzáfér (single_user mód)
+      if (!user?.is_superuser && state.accessType === 'single_user') {
+        return [{ type: 'all', label: 'Minden riport' }];
+      }
+      return [];
+    }
+
+    const labels: { type: 'country' | 'entity' | 'all'; label: string }[] = [];
+    
+    user.scopes.forEach(scope => {
+      if (scope.contracted_entity_id && entities[scope.contracted_entity_id]) {
+        labels.push({
+          type: 'entity',
+          label: entities[scope.contracted_entity_id].name,
+        });
+      } else if (scope.country_id && countries[scope.country_id]) {
+        labels.push({
+          type: 'country',
+          label: countries[scope.country_id],
+        });
+      }
+    });
+
+    // Ha minden scope-hoz hozzáfér és single mód
+    if (state.accessType === 'single_user' && labels.length === 0) {
+      return [{ type: 'all', label: 'Minden riport' }];
+    }
+
+    return labels;
+  };
+
   // Ha nincsenek felhasználók, ne rendereljünk semmit
   if (!state.users || state.users.length === 0) {
     return (
@@ -264,7 +299,39 @@ export const PermissionsStep = ({
               </AccordionTrigger>
               <AccordionContent className="pt-4 pb-2">
                 <div className="space-y-6">
-                  {/* Szuperuser scope választás */}
+                  {/* Riport hozzáférések megjelenítése (nem-superuser esetén) */}
+                  {!user.is_superuser && (
+                    <div className="p-4 border rounded-lg bg-muted/30">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Globe className="h-4 w-4 text-primary" />
+                        <h5 className="font-medium text-sm">Riport hozzáférés</h5>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {getUserScopeLabels(userIndex).length > 0 ? (
+                          getUserScopeLabels(userIndex).map((scope, idx) => (
+                            <span
+                              key={idx}
+                              className={`
+                                inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium
+                                ${scope.type === 'country' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : ''}
+                                ${scope.type === 'entity' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : ''}
+                                ${scope.type === 'all' ? 'bg-primary/10 text-primary' : ''}
+                              `}
+                            >
+                              {scope.type === 'country' && <Globe className="h-3 w-3" />}
+                              {scope.type === 'entity' && <Building2 className="h-3 w-3" />}
+                              {scope.type === 'all' && <Layers className="h-3 w-3" />}
+                              {scope.label}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-xs text-muted-foreground">
+                            Nincs hozzárendelt riport
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   {user.is_superuser && (
                     <div className="space-y-3 p-4 border rounded-lg bg-amber-500/5">
                       <div className="flex items-center gap-2">
