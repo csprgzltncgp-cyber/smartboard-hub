@@ -183,7 +183,7 @@ export const PermissionsStep = ({
 
   const getUserLabel = (index: number): string => {
     const user = state.users[index];
-    if (user?.is_superuser) return 'Szuperuser';
+    if (user?.is_superuser) return 'Superuser';
     if (user?.username) return user.username;
     return `Felhasználó ${index + 1}`;
   };
@@ -272,7 +272,7 @@ export const PermissionsStep = ({
                         <h5 className="font-medium text-sm">Látható országok és entitások</h5>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Válassza ki, mely országok és entitások adatait láthatja a szuperuser
+                        Válassza ki, mely országok és entitások adatait láthatja a Superuser
                       </p>
                       
                       {/* Országok */}
@@ -324,14 +324,14 @@ export const PermissionsStep = ({
 
                       {getScopeCount(userIndex) === 0 && (
                         <p className="text-xs text-amber-600">
-                          ⚠️ Nincs scope kiválasztva - a szuperuser nem fog adatokat látni
+                          ⚠️ Nincs scope kiválasztva - a Superuser nem fog adatokat látni
                         </p>
                       )}
                     </div>
                   )}
 
-                  {/* Összesített nézet opció (nem szuperusernek, több riportnál) */}
-                  {!user.is_superuser && hasMultipleReports && (
+                  {/* Összesített nézet opció (több riportnál, Superuser-nek is) */}
+                  {hasMultipleReports && (
                     <div className="p-4 border rounded-lg bg-muted/30">
                       <Label className="flex items-center gap-3 cursor-pointer">
                         <Checkbox
