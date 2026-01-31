@@ -114,8 +114,14 @@ export const PermissionsStep = ({
         </p>
       </div>
 
-      <Accordion type="multiple" className="space-y-2" defaultValue={state.users.map((_, i) => `user-${i}`)}>
-        {state.users.map((user, userIndex) => {
+      <Accordion
+        type="multiple"
+        className="space-y-2"
+        defaultValue={(state.users || [])
+          .map((u, i) => (u ? `user-${i}` : null))
+          .filter(Boolean) as string[]}
+      >
+        {(state.users || []).map((user, userIndex) => {
           if (!user) return null;
           
           const permissions = getUserPermissions(userIndex);
