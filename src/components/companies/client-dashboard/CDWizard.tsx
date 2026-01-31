@@ -154,6 +154,9 @@ export const CDWizard = ({
             <PermissionsStep
               state={state}
               onUpdate={updateState}
+              countryIds={countryIds}
+              entityIds={entityIds}
+              companyId={companyId}
             />
           )}
         </CardContent>

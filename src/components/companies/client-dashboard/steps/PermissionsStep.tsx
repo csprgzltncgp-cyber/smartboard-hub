@@ -1,17 +1,62 @@
+import { useState, useEffect } from 'react';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { CDWizardState, CD_MENU_ITEMS, ClientDashboardUserPermission } from '@/types/client-dashboard';
-import { User, Crown, Check, X } from 'lucide-react';
+import { CDWizardState, CD_MENU_ITEMS, ClientDashboardUserPermission, ClientDashboardUserScope } from '@/types/client-dashboard';
+import { supabase } from '@/integrations/supabase/client';
+import { User, Crown, Check, X, Globe, Building2, Layers } from 'lucide-react';
 
 interface PermissionsStepProps {
   state: CDWizardState;
   onUpdate: (updates: Partial<CDWizardState>) => void;
+  countryIds: string[];
+  entityIds: string[];
+  companyId: string;
 }
 
 export const PermissionsStep = ({
   state,
   onUpdate,
+  countryIds,
+  entityIds,
+  companyId,
 }: PermissionsStepProps) => {
+  const [countries, setCountries] = useState<Record<string, string>>({});
+  const [entities, setEntities] = useState<Record<string, { name: string; countryId: string }>>({});
+
+  // Referencia adatok betöltése
+  useEffect(() => {
+    const fetchData = async () => {
+      // Országok
+      if (countryIds.length > 0) {
+        const { data } = await supabase
+          .from('countries')
+          .select('id, name')
+          .in('id', countryIds);
+        
+        const map: Record<string, string> = {};
+        data?.forEach(c => { map[c.id] = c.name; });
+        setCountries(map);
+      }
+
+      // Entitások
+      const { data: entitiesData } = await supabase
+        .from('company_contracted_entities')
+        .select('id, name, country_id')
+        .eq('company_id', companyId)
+        .eq('is_active', true);
+      
+      const entityMap: Record<string, { name: string; countryId: string }> = {};
+      entitiesData?.forEach(e => { 
+        entityMap[e.id] = { name: e.name, countryId: e.country_id }; 
+      });
+      setEntities(entityMap);
+    };
+
+    fetchData();
+  }, [countryIds, companyId]);
+
   // Inicializáljuk a jogosultságokat ha még nincsenek
   const getUserPermissions = (userIndex: number): Record<string, boolean> => {
     const user = state.users[userIndex];
@@ -77,6 +122,65 @@ export const PermissionsStep = ({
     onUpdate({ users: newUsers });
   };
 
+  const toggleAggregatedView = (userIndex: number) => {
+    const newUsers = [...(state.users || [])];
+    const user = newUsers[userIndex];
+    if (!user) return;
+
+    newUsers[userIndex] = {
+      ...user,
+      can_view_aggregated: !user.can_view_aggregated,
+    };
+
+    onUpdate({ users: newUsers });
+  };
+
+  const toggleSuperuserScope = (userIndex: number, scopeType: 'country' | 'entity', scopeId: string) => {
+    const newUsers = [...(state.users || [])];
+    const user = newUsers[userIndex];
+    if (!user) return;
+
+    const currentScopes = user.scopes || [];
+    
+    // Ellenőrizzük, hogy már van-e ilyen scope
+    const existingIndex = currentScopes.findIndex(s => 
+      scopeType === 'country' ? s.country_id === scopeId : s.contracted_entity_id === scopeId
+    );
+
+    let updatedScopes: Partial<ClientDashboardUserScope>[];
+    
+    if (existingIndex >= 0) {
+      // Töröljük
+      updatedScopes = currentScopes.filter((_, i) => i !== existingIndex);
+    } else {
+      // Hozzáadjuk
+      const newScope: Partial<ClientDashboardUserScope> = {
+        id: crypto.randomUUID(),
+        user_id: '',
+        country_id: scopeType === 'country' ? scopeId : null,
+        contracted_entity_id: scopeType === 'entity' ? scopeId : null,
+        created_at: new Date().toISOString(),
+      };
+      updatedScopes = [...currentScopes, newScope];
+    }
+
+    newUsers[userIndex] = {
+      ...user,
+      scopes: updatedScopes as any,
+    };
+
+    onUpdate({ users: newUsers });
+  };
+
+  const isScopeSelected = (userIndex: number, scopeType: 'country' | 'entity', scopeId: string): boolean => {
+    const user = state.users[userIndex];
+    if (!user?.scopes) return false;
+    
+    return user.scopes.some(s => 
+      scopeType === 'country' ? s.country_id === scopeId : s.contracted_entity_id === scopeId
+    );
+  };
+
   const getUserLabel = (index: number): string => {
     const user = state.users[index];
     if (user?.is_superuser) return 'Szuperuser';
@@ -95,6 +199,11 @@ export const PermissionsStep = ({
     return Object.values(perms).filter(Boolean).length;
   };
 
+  const getScopeCount = (userIndex: number): number => {
+    const user = state.users[userIndex];
+    return user?.scopes?.length || 0;
+  };
+
   // Ha nincsenek felhasználók, ne rendereljünk semmit
   if (!state.users || state.users.length === 0) {
     return (
@@ -105,12 +214,15 @@ export const PermissionsStep = ({
     );
   }
 
+  // Több riport van-e (összesített nézet releváns)
+  const hasMultipleReports = state.reportType !== 'single';
+
   return (
     <div className="space-y-6">
       <div>
-        <h4 className="font-medium mb-2">Menüpont jogosultságok</h4>
+        <h4 className="font-medium mb-2">Jogosultságok és hozzáférések</h4>
         <p className="text-sm text-muted-foreground mb-4">
-          Állítsa be, hogy az egyes felhasználók mely menüpontokat láthatják a Client Dashboardon
+          Állítsa be, hogy az egyes felhasználók mely menüpontokat és adatokat láthatják
         </p>
       </div>
 
@@ -143,48 +255,145 @@ export const PermissionsStep = ({
                   <span className="ml-2 text-xs text-muted-foreground border rounded px-2 py-0.5">
                     {enabledCount}/{CD_MENU_ITEMS.length} menüpont
                   </span>
+                  {user.is_superuser && (
+                    <span className="text-xs text-muted-foreground border rounded px-2 py-0.5">
+                      {getScopeCount(userIndex)} scope
+                    </span>
+                  )}
                 </div>
               </AccordionTrigger>
               <AccordionContent className="pt-4 pb-2">
-                <div className="space-y-4">
-                  {/* Gyors műveletek */}
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => toggleAllForUser(userIndex, true)}
-                      className="text-xs text-primary hover:underline flex items-center gap-1"
-                    >
-                      <Check className="h-3 w-3" />
-                      Mind engedélyezése
-                    </button>
-                    <span className="text-muted-foreground">|</span>
-                    <button
-                      type="button"
-                      onClick={() => toggleAllForUser(userIndex, false)}
-                      className="text-xs text-destructive hover:underline flex items-center gap-1"
-                    >
-                      <X className="h-3 w-3" />
-                      Mind tiltása
-                    </button>
-                  </div>
-
-                  {/* Menüpontok */}
-                  <div className="grid gap-3">
-                    {CD_MENU_ITEMS.map(item => (
-                      <div
-                        key={item.id}
-                        className="flex items-center justify-between p-3 border rounded-lg"
-                      >
-                        <div>
-                          <div className="font-medium text-sm">{item.name}</div>
-                          <div className="text-xs text-muted-foreground">{item.description}</div>
-                        </div>
-                        <Switch
-                          checked={permissions[item.id] ?? true}
-                          onCheckedChange={() => togglePermission(userIndex, item.id)}
-                        />
+                <div className="space-y-6">
+                  {/* Szuperuser scope választás */}
+                  {user.is_superuser && (
+                    <div className="space-y-3 p-4 border rounded-lg bg-amber-500/5">
+                      <div className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-amber-600" />
+                        <h5 className="font-medium text-sm">Látható országok és entitások</h5>
                       </div>
-                    ))}
+                      <p className="text-xs text-muted-foreground">
+                        Válassza ki, mely országok és entitások adatait láthatja a szuperuser
+                      </p>
+                      
+                      {/* Országok */}
+                      {countryIds.length > 0 && (
+                        <div className="space-y-2">
+                          <Label className="text-xs text-muted-foreground">Országok</Label>
+                          <div className="grid gap-2">
+                            {countryIds.map(countryId => (
+                              <Label
+                                key={countryId}
+                                className="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-muted/50"
+                              >
+                                <Checkbox
+                                  checked={isScopeSelected(userIndex, 'country', countryId)}
+                                  onCheckedChange={() => toggleSuperuserScope(userIndex, 'country', countryId)}
+                                />
+                                <Globe className="h-3 w-3 text-blue-500" />
+                                <span className="text-sm">{countries[countryId] || countryId}</span>
+                              </Label>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Entitások */}
+                      {Object.keys(entities).length > 0 && (
+                        <div className="space-y-2">
+                          <Label className="text-xs text-muted-foreground">Entitások</Label>
+                          <div className="grid gap-2">
+                            {Object.entries(entities).map(([entityId, entity]) => (
+                              <Label
+                                key={entityId}
+                                className="flex items-center gap-2 p-2 border rounded cursor-pointer hover:bg-muted/50"
+                              >
+                                <Checkbox
+                                  checked={isScopeSelected(userIndex, 'entity', entityId)}
+                                  onCheckedChange={() => toggleSuperuserScope(userIndex, 'entity', entityId)}
+                                />
+                                <Building2 className="h-3 w-3 text-green-500" />
+                                <span className="text-sm">{entity.name}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  ({countries[entity.countryId] || entity.countryId})
+                                </span>
+                              </Label>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {getScopeCount(userIndex) === 0 && (
+                        <p className="text-xs text-amber-600">
+                          ⚠️ Nincs scope kiválasztva - a szuperuser nem fog adatokat látni
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Összesített nézet opció (nem szuperusernek, több riportnál) */}
+                  {!user.is_superuser && hasMultipleReports && (
+                    <div className="p-4 border rounded-lg bg-muted/30">
+                      <Label className="flex items-center gap-3 cursor-pointer">
+                        <Checkbox
+                          checked={user.can_view_aggregated || false}
+                          onCheckedChange={() => toggleAggregatedView(userIndex)}
+                        />
+                        <div className="flex items-center gap-2">
+                          <Layers className="h-4 w-4 text-primary" />
+                          <div>
+                            <span className="text-sm font-medium">Összesített nézet engedélyezése</span>
+                            <p className="text-xs text-muted-foreground">
+                              Az összes hozzáférésű riport adatai egyben láthatók
+                            </p>
+                          </div>
+                        </div>
+                      </Label>
+                    </div>
+                  )}
+
+                  {/* Menüpont jogosultságok */}
+                  <div className="space-y-3">
+                    <h5 className="font-medium text-sm">Menüpont jogosultságok</h5>
+                    
+                    {/* Gyors műveletek */}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleAllForUser(userIndex, true)}
+                        className="text-xs text-primary hover:underline flex items-center gap-1"
+                      >
+                        <Check className="h-3 w-3" />
+                        Mind engedélyezése
+                      </button>
+                      <span className="text-muted-foreground">|</span>
+                      <button
+                        type="button"
+                        onClick={() => toggleAllForUser(userIndex, false)}
+                        className="text-xs text-destructive hover:underline flex items-center gap-1"
+                      >
+                        <X className="h-3 w-3" />
+                        Mind tiltása
+                      </button>
+                    </div>
+
+                    {/* Menüpontok */}
+                    <div className="grid gap-3">
+                      {CD_MENU_ITEMS.map(item => (
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between p-3 border rounded-lg"
+                        >
+                          <div>
+                            <div className="font-medium text-sm">{item.name}</div>
+                            <div className="text-xs text-muted-foreground">{item.description}</div>
+                          </div>
+                          <Switch
+                            checked={permissions[item.id] ?? true}
+                            onCheckedChange={() => togglePermission(userIndex, item.id)}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </AccordionContent>
@@ -204,8 +413,14 @@ export const PermissionsStep = ({
                 {getUserIcon(index)}
                 <span>{getUserLabel(index)}:</span>
                 <span className="font-medium">
-                  {getEnabledCount(index)}/{CD_MENU_ITEMS.length} menüpont engedélyezve
+                  {getEnabledCount(index)}/{CD_MENU_ITEMS.length} menüpont
                 </span>
+                {user.is_superuser && (
+                  <span className="text-amber-600">• {getScopeCount(index)} scope</span>
+                )}
+                {user.can_view_aggregated && (
+                  <span className="text-primary">• Összesített nézet</span>
+                )}
               </div>
             );
           })}
