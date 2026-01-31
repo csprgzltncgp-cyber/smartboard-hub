@@ -357,9 +357,9 @@ export const ClientDashboardTabContent = ({ companyId, countryIds }: ClientDashb
             </p>
             <p>
               Hozzáférés: <Badge variant="outline">
-                {existingConfig.access_type === 'single_user' && 'Egy felhasználó'}
+                {existingConfig.access_type === 'single_user' && 'Közös hozzáférés'}
                 {existingConfig.access_type === 'per_report' && 'Riportonként'}
-                {existingConfig.access_type === 'with_superuser' && 'Szuperuserrel'}
+                {existingConfig.access_type === 'with_superuser' && 'Superuserrel'}
               </Badge>
             </p>
           </div>
@@ -372,8 +372,8 @@ export const ClientDashboardTabContent = ({ companyId, countryIds }: ClientDashb
           </div>
           <div className="space-y-1 text-sm">
             <p>{existingUsers.length} felhasználó létrehozva</p>
-            {existingUsers.some(u => u.is_superuser) && (
-              <p className="text-amber-600">• 1 szuperuser</p>
+            {existingUsers.filter(u => u.is_superuser).length > 0 && (
+              <p className="text-amber-600">• {existingUsers.filter(u => u.is_superuser).length} Superuser</p>
             )}
           </div>
         </div>
