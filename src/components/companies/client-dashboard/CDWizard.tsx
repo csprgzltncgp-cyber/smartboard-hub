@@ -156,6 +156,7 @@ export const CDWizard = ({
       {/* Navigation buttons */}
       <div className="flex justify-between">
         <Button
+          type="button"
           variant="outline"
           onClick={currentStepIndex === 0 ? onCancel : handleBack}
         >
@@ -164,6 +165,7 @@ export const CDWizard = ({
         </Button>
 
         <Button
+          type="button"
           onClick={handleNext}
           disabled={!canGoNext()}
         >
