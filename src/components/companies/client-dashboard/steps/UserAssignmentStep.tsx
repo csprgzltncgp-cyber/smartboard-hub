@@ -132,8 +132,12 @@ export const UserAssignmentStep = ({
   }, [state.reportType, state.selectedCountryIds, state.selectedEntityIds, countries, entities, countryIds]);
 
   // Felhasználók automatikus generálása az access type változásakor
+  // CSAK ha nincs meglévő user (új konfiguráció)
   useEffect(() => {
     if (!state.accessType || reportSlots.length === 0) return;
+    
+    // Ha már vannak userek (pl. szerkesztés), NE generáljunk újakat
+    if (state.users.length > 0) return;
 
     const generateUsers = (): Partial<ClientDashboardUser>[] => {
       if (state.accessType === 'single_user') {
@@ -183,19 +187,13 @@ export const UserAssignmentStep = ({
           }],
         }));
 
-        // Szuperuser hozzáadása
+        // Szuperuser hozzáadása (scope-ok nélkül - majd a permissions lépésnél állítható)
         users.push({
           username: '',
           password: '',
           is_superuser: true,
           can_view_aggregated: true,
-          scopes: reportSlots.map(slot => ({
-            id: crypto.randomUUID(),
-            user_id: '',
-            country_id: slot.countryId || null,
-            contracted_entity_id: slot.entityId || null,
-            created_at: new Date().toISOString(),
-          })),
+          scopes: [],
         });
 
         return users;
@@ -204,14 +202,13 @@ export const UserAssignmentStep = ({
       return [];
     };
 
-    // Csak akkor generálunk újra, ha nincs még user vagy access type változott
-    if (state.users.length === 0) {
-      onUpdate({ users: generateUsers() });
-    }
+    onUpdate({ users: generateUsers() });
   }, [state.accessType, reportSlots]);
 
+  // Ha access type változik ÉS a user törli a meglévőket, újragenerálás
   const handleAccessTypeChange = (value: AccessType) => {
-    onUpdate({ accessType: value, users: [] }); // Reset users when changing type
+    // Reset users when changing type - így újragenerálódnak a megfelelő slotok szerint
+    onUpdate({ accessType: value, users: [] });
   };
 
   const updateUser = (index: number, updates: Partial<ClientDashboardUser>) => {

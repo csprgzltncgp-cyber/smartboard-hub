@@ -187,6 +187,31 @@ export const ClientDashboardTabContent = ({ companyId, countryIds }: ClientDashb
   }
 
   if (showWizard) {
+    // Build initialState including users when editing
+    const buildInitialState = (): Partial<CDWizardState> | undefined => {
+      if (!existingConfig) return undefined;
+      
+      return {
+        reportType: existingConfig.report_type as CDWizardState['reportType'],
+        accessType: existingConfig.access_type as CDWizardState['accessType'],
+        selectedCountryIds: existingConfig.configuration?.country_ids || [],
+        selectedEntityIds: existingConfig.configuration?.entity_ids || [],
+        users: existingUsers.map(user => ({
+          id: user.id,
+          company_id: user.company_id,
+          username: user.username,
+          password: user.password || '',
+          language_id: user.language_id,
+          is_superuser: user.is_superuser,
+          can_view_aggregated: user.can_view_aggregated,
+          created_at: user.created_at,
+          updated_at: user.updated_at,
+          scopes: user.scopes || [],
+          permissions: user.permissions || [],
+        })),
+      };
+    };
+
     return (
       <CDWizard
         companyId={companyId}
@@ -194,12 +219,7 @@ export const ClientDashboardTabContent = ({ companyId, countryIds }: ClientDashb
         entityIds={entityIds}
         onComplete={handleWizardComplete}
         onCancel={() => setShowWizard(false)}
-        initialState={existingConfig ? {
-          reportType: existingConfig.report_type as CDWizardState['reportType'],
-          accessType: existingConfig.access_type as CDWizardState['accessType'],
-          selectedCountryIds: existingConfig.configuration?.country_ids || [],
-          selectedEntityIds: existingConfig.configuration?.entity_ids || [],
-        } : undefined}
+        initialState={buildInitialState()}
       />
     );
   }
