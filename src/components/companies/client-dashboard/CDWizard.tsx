@@ -32,12 +32,34 @@ export const CDWizard = ({
   initialState,
 }: CDWizardProps) => {
   const wizardRef = useRef<HTMLDivElement>(null);
-  const [state, setState] = useState<CDWizardState>(() => ({
-    ...createDefaultWizardState(),
-    ...initialState,
-    selectedCountryIds: countryIds,
-    selectedEntityIds: entityIds,
-  }));
+  const [state, setState] = useState<CDWizardState>(() => {
+    const defaultState = createDefaultWizardState();
+    
+    // Ha van initialState (szerkesztés), akkor használjuk azt
+    if (initialState) {
+      return {
+        ...defaultState,
+        ...initialState,
+        // Ha nincs selectedCountryIds vagy selectedEntityIds az initialState-ben,
+        // használjuk a propsból jövőket (custom típusnál mentett értékek)
+        selectedCountryIds: initialState.selectedCountryIds?.length 
+          ? initialState.selectedCountryIds 
+          : countryIds,
+        selectedEntityIds: initialState.selectedEntityIds?.length 
+          ? initialState.selectedEntityIds 
+          : entityIds,
+        // Ha vannak users, azokat is betöltjük
+        users: initialState.users || [],
+      };
+    }
+    
+    // Új konfiguráció esetén default értékek
+    return {
+      ...defaultState,
+      selectedCountryIds: countryIds,
+      selectedEntityIds: entityIds,
+    };
+  });
 
   const currentStepIndex = STEPS.findIndex(s => s.key === state.currentStep);
   const progress = ((currentStepIndex + 1) / STEPS.length) * 100;
