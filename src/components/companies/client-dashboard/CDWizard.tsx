@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -31,6 +31,7 @@ export const CDWizard = ({
   onCancel,
   initialState,
 }: CDWizardProps) => {
+  const wizardRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<CDWizardState>(() => ({
     ...createDefaultWizardState(),
     ...initialState,
@@ -40,6 +41,11 @@ export const CDWizard = ({
 
   const currentStepIndex = STEPS.findIndex(s => s.key === state.currentStep);
   const progress = ((currentStepIndex + 1) / STEPS.length) * 100;
+
+  // Lépésváltáskor görgetés a wizard tetejére
+  useEffect(() => {
+    wizardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [state.currentStep]);
 
   const canGoNext = () => {
     switch (state.currentStep) {
@@ -81,7 +87,7 @@ export const CDWizard = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div ref={wizardRef} className="space-y-6">
       {/* Progress header */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
