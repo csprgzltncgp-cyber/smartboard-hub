@@ -183,8 +183,10 @@ export const PermissionsStep = ({
 
   const getUserLabel = (index: number): string => {
     const user = state.users[index];
-    if (user?.is_superuser) return 'Superuser';
-    if (user?.username) return user.username;
+    if (user?.is_superuser) {
+      return user.username ? `${user.username} (Superuser)` : 'Superuser';
+    }
+    if (user?.username && user.username.trim()) return user.username;
     return `Felhasználó ${index + 1}`;
   };
 
