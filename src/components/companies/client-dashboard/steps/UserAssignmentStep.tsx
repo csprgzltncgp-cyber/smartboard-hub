@@ -220,11 +220,6 @@ export const UserAssignmentStep = ({
     onUpdate({ users: newUsers });
   };
 
-  const toggleAggregatedView = (index: number) => {
-    const user = state.users[index];
-    updateUser(index, { can_view_aggregated: !user?.can_view_aggregated });
-  };
-
   const getSlotLabel = (index: number): string => {
     if (state.accessType === 'single_user') return 'Felhasználó';
     if (state.users[index]?.is_superuser) return 'Szuperuser';
@@ -342,20 +337,6 @@ export const UserAssignmentStep = ({
                     </div>
                   </div>
                 </div>
-
-                {/* Aggregált nézet opció */}
-                {!user.is_superuser && reportSlots.length > 1 && (
-                  <Label className="flex items-center gap-2 cursor-pointer">
-                    <Checkbox
-                      checked={user.can_view_aggregated || false}
-                      onCheckedChange={() => toggleAggregatedView(index)}
-                    />
-                    <span className="text-sm">Összesített nézet engedélyezése</span>
-                    <span className="text-xs text-muted-foreground">
-                      (Az összes hozzáférésű riport adatai egyben)
-                    </span>
-                  </Label>
-                )}
               </div>
             ))}
           </div>
