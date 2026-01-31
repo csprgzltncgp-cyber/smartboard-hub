@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Case, CountryGroup, calculateCasePercentage, getCaseWarnings, CASE_STATUS_LABELS } from "@/types/case";
@@ -88,6 +89,7 @@ function generateMockCases(countryId: string, count: number): Case[] {
 }
 
 export default function CasesInProgressPage() {
+  const navigate = useNavigate();
   const [countryGroups, setCountryGroups] = useState<CountryGroup[]>(
     MOCK_COUNTRIES.map(country => ({
       countryId: country.id,
@@ -148,8 +150,8 @@ export default function CasesInProgressPage() {
   };
 
   const handleCaseSelect = (caseData: Case) => {
-    console.log('Selected case:', caseData);
-    // Navigate to case view
+    // Navigate to case view page
+    navigate(`/dashboard/cases/${caseData.id}`);
   };
 
   const handleCaseDelete = (caseData: Case) => {
