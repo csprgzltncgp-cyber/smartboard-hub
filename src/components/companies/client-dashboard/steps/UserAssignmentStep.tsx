@@ -107,14 +107,29 @@ export const UserAssignmentStep = ({
         });
       });
     } else if (state.reportType === 'custom') {
-      state.selectedCountryIds?.forEach(countryId => {
-        slots.push({
-          id: `country-${countryId}`,
-          type: 'country',
-          name: countries[countryId] || countryId,
-          countryId,
-        });
+      // Először kiszámoljuk, mely országoknak van kiválasztott entitásuk
+      const countriesWithSelectedEntities = new Set<string>();
+      state.selectedEntityIds?.forEach(entityId => {
+        const entity = entities[entityId];
+        if (entity) {
+          countriesWithSelectedEntities.add(entity.countryId);
+        }
       });
+
+      // Országokat csak akkor adjuk hozzá, ha NINCS alattuk kiválasztott entitás
+      // (mert ha van, akkor az entitások lefedik az országot)
+      state.selectedCountryIds?.forEach(countryId => {
+        if (!countriesWithSelectedEntities.has(countryId)) {
+          slots.push({
+            id: `country-${countryId}`,
+            type: 'country',
+            name: countries[countryId] || countryId,
+            countryId,
+          });
+        }
+      });
+
+      // Entitásokat mindig hozzáadjuk
       state.selectedEntityIds?.forEach(entityId => {
         const entity = entities[entityId];
         if (entity) {
