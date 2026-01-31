@@ -18,6 +18,7 @@ import InputsPage from "./pages/inputs/InputsPage";
 import CrmPage from "./pages/crm/CrmPage";
 import CaseDispatchPage from "./pages/cases/CaseDispatchPage";
 import CasesInProgressPage from "./pages/cases/CasesInProgressPage";
+import CaseViewPage from "./pages/cases/CaseViewPage";
 import SalesSmartboard from "./pages/smartboard/SalesSmartboard";
 import AccountSmartboard from "./pages/smartboard/AccountSmartboard";
 import SmartboardRouter from "./pages/smartboard/SmartboardRouter";
@@ -64,6 +65,7 @@ const App = () => (
               <Route path="case-dispatch" element={<CaseDispatchPage />} />
               <Route path="cases-in-progress" element={<CasesInProgressPage />} />
               <Route path="cases/in-progress" element={<CasesInProgressPage />} />
+              <Route path="cases/:caseId" element={<CaseViewPage />} />
               <Route path="my-clients" element={<MyClientsPage />} />
               <Route path="my-clients/:companyId" element={<ClientActivityPage />} />
               <Route path="data" element={<DataPage />} />
