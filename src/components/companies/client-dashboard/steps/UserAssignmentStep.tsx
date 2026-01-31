@@ -420,7 +420,7 @@ export const UserAssignmentStep = ({
                     setShowPasswords={setShowPasswords}
                     updateUser={updateUser}
                     removeUser={removeUser}
-                    canRemove={getSharedUsers().length > 1}
+                    canRemove={true}
                   />
                 ))}
               </div>
@@ -466,7 +466,7 @@ export const UserAssignmentStep = ({
                           setShowPasswords={setShowPasswords}
                           updateUser={updateUser}
                           removeUser={removeUser}
-                          canRemove={slotUsers.length > 1}
+                          canRemove={true}
                         />
                       ))}
                       {slotUsers.length === 0 && (
@@ -514,7 +514,7 @@ export const UserAssignmentStep = ({
                         setShowPasswords={setShowPasswords}
                         updateUser={updateUser}
                         removeUser={removeUser}
-                        canRemove={getSuperusers().length > 1}
+                        canRemove={true}
                       />
                     ))}
                   </div>
