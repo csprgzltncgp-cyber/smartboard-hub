@@ -291,6 +291,10 @@ export const UserAssignmentStep = ({
   const getUsersForSlot = (slot: ReportSlot) => {
     return state.users.map((user, index) => ({ user, index })).filter(({ user }) => {
       if (user.is_superuser) return false;
+      
+      // Közös hozzáférés módban minden user minden slot-hoz tartozik
+      if (state.accessType === 'single_user') return false; // ezeket a getSharedUsers kezeli
+      
       return user.scopes?.some(scope => {
         if (slot.type === 'country') return scope.country_id === slot.countryId && !scope.contracted_entity_id;
         if (slot.type === 'entity') return scope.contracted_entity_id === slot.entityId;
@@ -305,11 +309,30 @@ export const UserAssignmentStep = ({
   };
 
   const getSharedUsers = () => {
-    // Közös hozzáférés: userek akik minden scope-ot látnak
-    return state.users.map((user, index) => ({ user, index })).filter(({ user }) => {
-      if (user.is_superuser) return false;
-      return (user.scopes?.length || 0) >= reportSlots.length;
+    // Közös hozzáférés módban: minden nem-superuser
+    if (state.accessType === 'single_user') {
+      return state.users.map((user, index) => ({ user, index })).filter(({ user }) => !user.is_superuser);
+    }
+    return [];
+  };
+
+  // Ellenőrzi, hogy minden user megjelenik-e valahol
+  const getUnassignedUsers = () => {
+    const assignedIndices = new Set<number>();
+    
+    // Superuserek
+    getSuperusers().forEach(({ index }) => assignedIndices.add(index));
+    
+    // Shared userek
+    getSharedUsers().forEach(({ index }) => assignedIndices.add(index));
+    
+    // Slot userek
+    reportSlots.forEach(slot => {
+      getUsersForSlot(slot).forEach(({ index }) => assignedIndices.add(index));
     });
+    
+    // Hozzárendeletlen userek
+    return state.users.map((user, index) => ({ user, index })).filter(({ index }) => !assignedIndices.has(index));
   };
 
   const getSlotIcon = (slot: ReportSlot) => {
